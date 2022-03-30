@@ -1,0 +1,17 @@
+*.sw?
+compile_commands.json
+
+build/
+install/
+cmake-build-*
+.clangd/
+.idea/
+.vscode/
+*.ipynb_checkpoints
+__pycache__/
+CMakeSettings.json
+.vs/
+.virtual_documents
+.hypothesis
+.pytest_cache
+.mypy_cache
