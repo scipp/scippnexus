@@ -1,9 +1,11 @@
+build
+dist
+.tox
+src/scippnexus.egg-info
+
 *.sw?
 compile_commands.json
 
-build/
-install/
-cmake-build-*
 .clangd/
 .idea/
 .vscode/
