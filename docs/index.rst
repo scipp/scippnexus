@@ -1,46 +1,34 @@
-scipp - Multi-dimensional data arrays with labeled dimensions
-=============================================================
+scippnexus - h5py-like utility for NeXus files based with seamless scipp integration
+====================================================================================
 
-.. raw:: html
+**scippnexus** provides a link between the HDF5-based `NeXus Data Format <https://www.nexusformat.org/>`_ and `scipp <https://scipp.github.io/>`_.
+This is possible since NeXus classes (a specification of an HDF5 group and the contained dataset) such as `NXdata <https://manual.nexusformat.org/classes/base_classes/NXdata.html>`_ partially resemble scipp's `DataArray <https://scipp.github.io/user-guide/data-structures.html#DataArray>`_.
 
-   <span style="font-size:1.2em;font-style:italic;color:#5a5a5a">
-      A Python library enabling a modern and intuitive way of working with scientific data in Jupyter notebooks
-   </span>
+`h5py <https://docs.h5py.org/en/stable/>`_ is a convenient and powerful tool for accessing groups, datasets, and attributes in an HDF5 file.
+However, it operates on a lower level than the NeXus class definitions, which typically treat an entire group as a distinct entity.
 
-**scipp** is heavily inspired by `xarray <https://xarray.pydata.org>`_.
-It enriches raw NumPy-like multi-dimensional arrays of data by adding named dimensions and associated coordinates.
-Multiple arrays can be combined into datasets.
-While for many applications xarray is certainly more suitable (and definitely much more matured) than scipp, there is a number of features missing in other situations.
-If your use case requires one or several of the items on the following list, using scipp may be worth considering:
+Scippnexus can obviate the need for lengthy low-level code.
+It provides an h5py-like API, but applies the paradigm at the NeXus-class level.
+This is especially powerful since a number of concepts of scipp map well to concepts of NeXus:
 
-- **Physical units** are stored with each data or coord array and are handled in arithmetic operations.
-- **Propagation of uncertainties**.
-- Support for **histograms**, i.e., **bin-edge axes**, which are by 1 longer than the data extent.
-- Support for scattered data and **non-destructive binning**.
-  This includes first and foremost **event data**, a particular form of sparse data with arrays of random-length lists, with very small list entries.
-- Support for **masks stored with data**.
-- Internals written in C++ for better performance (for certain applications), in combination with Python bindings.
+- NeXus classes such as NXdata define *dimension scales*, which correspond to *coordinates* in the scipp terminology.
+  From a user's point of view we can thus treat an NXdata group in a file as an entity that can be loaded directly into a :class:`scipp.DataArray`.
+- **Labeled dimension** can be used to selectively load slices of an entire NeXus class.
+  This is modelled after h5py's support for loading slices of datasets but provides the same convenience and safety as `scipp's slicing <https://scipp.github.io/user-guide/slicing.html>`_ by requiring specification of the dimension to slice by its name, rather than plain axis order.
+- **Physical units** are stored with most datasets in a NeXus class and a loaded as unit of the :class:`scipp.DataArray` values or coordinates.
 
-Generic functionality of scipp is provided in the **scipp** Python package.
-In addition, more specific functionality is made available in other packages.
-Examples for this are `scippneutron <https://scipp.github.io/scippneutron>`_ for handling data from neutron-scattering experiments,
-and `ess <https://scipp.github.io/ess>`_ for dealing with the specifics of neutron instruments at ESS.
 
 News
 ----
 
 - [|SCIPP_RELEASE_MONTH|] scippnexus-|SCIPP_VERSION| `has been released <about/release-notes.rst>`_.
 
-Where can I get help?
----------------------
+Get in touch
+------------
 
-We strive to keep our documentation complete and up-to-date.
-However, we cannot cover all use-cases and questions users may have.
-
-We use GitHub's `discussions <https://github.com/scipp/scipp/discussions>`_ forum for questions
-that are not answered by these documentation pages.
-This space can be used to both search through problems already met/solved in the community
-and open new discussions if none of the existing ones provide a satisfactory answer.
+- If you have questions that are not answered by these documentation pages, ask on `GitHub discussions <https://github.com/scipp/scippnexus/discussions>`_.
+  Please include a self-contained reproducible example if possible.
+- Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code `on GitHub <https://github.com/scipp/scippnexus>`_.
 
 Documentation
 =============
