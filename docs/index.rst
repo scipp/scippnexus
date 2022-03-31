@@ -21,7 +21,7 @@ This is especially powerful since a number of concepts of scipp map well to conc
 News
 ----
 
-- [|SCIPP_RELEASE_MONTH|] scippnexus-|SCIPP_VERSION| `has been released <about/release-notes.rst>`_.
+- [|SCIPP_RELEASE_MONTH|] scippnexus-|SCIPP_VERSION| has been released.
 
 Get in touch
 ------------

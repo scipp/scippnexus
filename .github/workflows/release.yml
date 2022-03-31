@@ -41,59 +41,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0  # history required so setuptools_scm can determine version
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # history required so setuptools_scm can determine version
 
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - run: python -m pip install --upgrade pip
-    - run: python -m pip install build
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install build
 
-    - name: Build wheels
-      run: |
-        python -m build
+      - name: Build wheels
+        run: |
+          python -m build
 
-    - name: Upload wheels
-      uses: actions/upload-artifact@v2
-      with:
-        name: dist
-        path: dist
+      - name: Upload wheels
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
 
-        #docs:
-        #  name: Build documentation
-        #  needs: build_conda
-        #  runs-on: ubuntu-latest
-        #  steps:
-        #    - uses: actions/checkout@v2
-        #    - name: Setup Mambaforge and dev env
-        #      uses: conda-incubator/setup-miniconda@v2
-        #      with:
-        #        miniforge-version: latest
-        #        miniforge-variant: Mambaforge
-        #        python-version: "3.8"
-        #        environment-file: developer-extra.yml
-        #        activate-environment: developer-extra
-        #        auto-activate-base: false
-        #    - uses: actions/download-artifact@v2
-        #      with:
-        #        name: conda-package-ubuntu-latest-py3.8
-        #    - run: mamba install linux-64/scipp-*.tar.bz2
-        #    - name: Run Sphinx
-        #      run: |
-        #        python -m sphinx -j2 -v -b html -d doctrees docs html
-        #        python -m sphinx -j2 -v -b doctest -d doctrees docs html
-        #        python -m sphinx -j2 -v -b linkcheck -d doctrees docs html
-        #        find html -type f -name "*.ipynb" -not -path "html/_sources/*" -delete
-        #    - uses: actions/upload-artifact@v2
-        #      with:
-        #        name: html
-        #        path: html/
+  docs:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install tox
+      - run: tox -e docs
+      - uses: actions/upload-artifact@v2
+        with:
+          name: html
+          path: html/
 
   upload_packages:
     name: Deploy packages
-    needs: [build_wheels]
+    needs: [docs, build_wheels]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
@@ -125,8 +111,7 @@ jobs:
       - name: Deploy to release docs
         uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
-          repository-name: scipp/scipp.github.io
-          branch: master
+          branch: gh-pages
           folder: html
           target-folder: ${{ matrix.docs-folder == 'latest' && format('release/{0}', github.ref_name) || '' }}
           single-commit: true
