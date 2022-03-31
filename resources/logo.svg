@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
+   sodipodi:docname="logo.svg"
+   inkscape:export-filename="/home/simon/code/scippnexus/docs/_static/logo.png"
+   inkscape:export-xdpi="100.29"
+   inkscape:export-ydpi="100.29">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="101.17861"
+     inkscape:cy="512.68954"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="2307"
+     inkscape:window-height="1349"
+     inkscape:window-x="2560"
+     inkscape:window-y="30"
+     inkscape:window-maximized="0"
+     inkscape:snap-global="true"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="false"
+     inkscape:document-rotation="0">
+    <inkscape:grid
+       type="axonomgrid"
+       id="grid815"
+       units="mm"
+       empspacing="12"
+       spacingy="1" />
+    <sodipodi:guide
+       position="1108.5125,-1295.7443"
+       orientation="0,1"
+       id="guide37689"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="1108.5125,-1343.7443"
+       orientation="0,1"
+       id="guide37691"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="1108.5125,-1307.7443"
+       orientation="0,1"
+       id="guide37693"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="1108.5125,-1331.7443"
+       orientation="0,1"
+       id="guide37695"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="132.02708,159.6099"
+       orientation="1,0"
+       id="guide5268"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="82.682292,154.25208"
+       orientation="1,0"
+       id="guide5270"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="137.58333,148.23281"
+       orientation="0,1"
+       id="guide5272"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:#0065ac;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 41.569645,104.9997 -1.7322,0.9999 2.5978,1.5002 -9.526,5.5 -2.5983,-1.5002 -3.4639,1.9998 v 2.9999 l -3.4644,2.0004 v 21.9997 l -2.5977,-1.4997 v 1.9999 l 2.5977,1.5002 1.7322,0.9999 2.5983,1.5002 v -2.0004 l -2.5983,-1.5002 v -21.9997 l 2.5983,-1.5002 2.5978,1.5002 3.4639,-2.0004 v -2.9993 l 10.3926,-6.0002 2.5983,1.5002 1.7317,-1.0004 z m 8.66,5.0002 -1.7322,1 2.5983,1.5001 -19.0526,10.9999 v 8.9999 l -2.5978,1.4997 v 3.9998 l 2.5978,1.5001 v 8 l 1.7322,1.0005 7.7943,4.5 v 0 l 0.8656,-0.4997 V 129.5 l 6.9283,-3.9997 v 9.0005 l -2.5978,1.4996 v 3.9998 l 2.5978,1.5002 v 5.0002 l -2.5978,1.4996 v 1.9999 l 2.8794,-1.6624 1.4506,-0.8377 2.5982,-1.4997 v -1.9998 l -2.5982,1.5001 v -4.0002 l 2.5977,-1.5002 v -3.9998 l -2.5977,-1.4996 v -11.0004 l -0.8661,-0.5002 -9.5261,5.4999 v 21.9997 l -6.9282,-3.9998 v -7.0001 l 2.5977,-1.5001 V 134 l -2.5977,-1.4996 v -8.0001 l 19.052,-11.0003 2.5983,1.5002 1.7322,-1 z m -21.6509,6.4995 v -2 l 1.7322,-1 1.7319,1 3e-4,1.9999 -1.7322,1.0009 z m 33.7752,0.5001 -3.4639,2.0004 -0.8661,0.4997 -2.5983,1.5002 v 1.9999 l 2.5983,-1.5002 v 6.0006 l -2.5978,1.4997 v 3.9998 l 2.5978,1.5001 v 6.9996 l -2.5983,1.5002 v 2.0004 l 6.9283,-4.0003 v -1.9999 l -2.5978,1.4997 v -5.9997 l 2.5978,-1.5001 v -3.9998 l -2.5978,-1.4997 v -7.0005 l 2.5978,-1.4997 z m -3.4643,15.9999 -1.7318,-0.9998 v -1.9999 l 1.7318,-1.0003 1.7326,1.0003 v 1.9999 z m -25.9807,5 -1.7319,-1.0001 v -1.9999 l 1.7319,-1 1.7324,1 v 1.9999 m 17.3204,0 v 1.9999 l -1.7323,0.9997 -1.732,-0.9997 v -1.9999 l 1.732,-1.0004 z"
+       id="path37650"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+       inkscape:export-filename="/home/simon/code/scipp/docs/_static/logo-large-v4.png"
+       inkscape:export-xdpi="100.29"
+       inkscape:export-ydpi="100.29" />
+    <text
+       id="text37687"
+       y="140.72911"
+       x="81.518272"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:45.5545px;line-height:21.3537px;font-family:Lato;-inkscape-font-specification:Lato;letter-spacing:0px;word-spacing:0px;fill:#0065ac;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"
+       inkscape:export-filename="/home/simon/code/scipp/docs/_static/logo-large-v4.png"
+       inkscape:export-xdpi="100.29"
+       inkscape:export-ydpi="100.29"><tspan
+         style="fill:#0065ac;fill-opacity:1;stroke-width:0.264583px"
+         y="140.72911"
+         x="81.518272"
+         id="tspan37685"
+         sodipodi:role="line"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Lato;-inkscape-font-specification:'Lato Bold';fill:#0065ac;fill-opacity:1;stroke-width:0.264583px"
+           id="tspan37681">sci</tspan><tspan
+           id="tspan37683"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:Lato;-inkscape-font-specification:'Lato Light';fill:#0065ac;fill-opacity:1;stroke-width:0.264583px">pp</tspan></tspan></text>
+    <text
+       inkscape:export-ydpi="100.29"
+       inkscape:export-xdpi="100.29"
+       inkscape:export-filename="/home/simon/code/scipp/docs/_static/logo-large-v4.png"
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.8401px;line-height:14.3357px;font-family:Lato;-inkscape-font-specification:Lato;letter-spacing:0px;word-spacing:0px;fill:#0065ac;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="81.552109"
+       y="158.56808"
+       id="text5266"><tspan
+         sodipodi:role="line"
+         id="tspan5264"
+         x="81.552109"
+         y="158.56808"
+         style="fill:#0065ac;fill-opacity:1;stroke-width:0.264583px">NeXus</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="shadows" />
+</svg>
