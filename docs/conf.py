@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import doctest
-import os
 
 html_show_sourcelink = True
 
