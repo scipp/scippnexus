@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import doctest
+from datetime import date
+import scippnexus
 
 html_show_sourcelink = True
 
@@ -22,8 +24,6 @@ autodoc_type_aliases = {
     'array_like': 'array_like',
 }
 
-from datetime import date
-import scippnexus
 rst_epilog = f"""
 .. |SCIPP_RELEASE_MONTH| replace:: {date.today().strftime("%B %Y")}
 .. |SCIPP_VERSION| replace:: {scippnexus.__version__}
