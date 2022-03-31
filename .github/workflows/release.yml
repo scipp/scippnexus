@@ -1,6 +1,9 @@
 name: Release
 
 on:
+  push:  # TODO consider removing psu htrigger
+    branches:
+      - main
   release:
     types: [published]
   workflow_dispatch:
