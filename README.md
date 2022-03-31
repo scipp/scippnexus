@@ -11,7 +11,7 @@ See the [documentation](https://scipp.github.io/scippnexus) for more details.
 ## Installation
 
 ```sh
-python -m pip scippnexus
+python -m pip install scippnexus
 ```
 
 ## Contributing Organizations
