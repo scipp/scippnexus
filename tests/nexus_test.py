@@ -39,12 +39,11 @@ def test_nxobject_items(nxroot):
     assert name == 'entry'
     entry.create_class('monitor', NX_class.NXmonitor)
     entry.create_class('log', NX_class.NXlog)
-    for k, v in entry.items():
-        if k == 'log':
-            assert v.nx_class == NX_class.NXlog
-        else:
-            assert k == 'monitor'
-            assert v.nx_class == NX_class.NXmonitor
+    assert {k: v.nx_class
+            for k, v in entry.items()} == {
+                'log': NX_class.NXlog,
+                'monitor': NX_class.NXmonitor
+            }
 
 
 def test_nxobject_entry(nxroot):
