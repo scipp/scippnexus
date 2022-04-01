@@ -78,7 +78,7 @@ jobs:
 
   upload_packages:
     name: Deploy packages
-    needs: [docs, build_wheels]
+    needs: [docs, build_conda, build_wheels]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
