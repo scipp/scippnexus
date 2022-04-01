@@ -1,0 +1,36 @@
+package:
+  name: scippnexus
+  version: {{ GIT_DESCRIBE_TAG }}
+source:
+  path: ..
+
+requirements:
+  build:
+    - setuptools
+  run:
+    - python>=3.8
+    - scipp
+    - h5py
+
+test:
+  imports:
+    - scippnexus
+  requires:
+    - pytest
+  source_files:
+    - tests/
+  commands:
+    - python -m pytest tests
+
+build:
+  noarch: python
+  script:
+    - pip install .
+
+about:
+  home: https://github.com/scipp/scippnexus
+  license: BSD-3-Clause
+  summary: An h5py-like utility for NeXus files based with seamless scipp integration
+  description: An h5py-like utility for NeXus files based with seamless scipp integration
+  dev_url: https://github.com/scipp/scippnexus
+  doc_url: https://scipp.github.io/scippnexus
