@@ -119,7 +119,7 @@ html_theme = 'sphinx_book_theme'
 #
 html_theme_options = {
     "logo_only": True,
-    "repository_url": "https://github.com/scipp/scipp",
+    "repository_url": "https://github.com/scipp/scippnexus",
     "repository_branch": "main",
     "path_to_docs": "docs",
     "use_repository_button": True,
