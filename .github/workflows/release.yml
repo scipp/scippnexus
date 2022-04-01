@@ -16,9 +16,6 @@ jobs:
   build_conda:
     name: Conda build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8"]
 
     steps:
       - uses: actions/checkout@v2
@@ -28,12 +25,12 @@ jobs:
 
       - uses: conda-incubator/setup-miniconda@v2
       - run: conda install --yes conda-build
-      - run: conda build --channel conda-forge --python=${{ matrix.python-version }} --no-anaconda-upload --override-channels --output-folder conda/package conda
+      - run: conda build --channel conda-forge --python=3.8 --no-anaconda-upload --override-channels --output-folder conda/package conda
 
       - uses: actions/upload-artifact@v2
         with:
           name: conda-package-noarch
-          path: conda/package/*/scipp*.tar.bz2
+          path: conda/package/*/scippnexus*.tar.bz2
 
   build_wheels:
     name: Wheels
