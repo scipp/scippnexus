@@ -140,12 +140,25 @@ class NXdata(NXobject):
         skip += [self._signal_name, self._errors_name]
         skip += list(self.attrs.get('auxiliary_signals', []))
 
+        error_suffixes = ['_error', '_errors']  # _error is the deprecated suffix
+
         for name, field in self.items():
             if (not isinstance(field, Field)) or (name in skip):
                 continue
+            for suffix in error_suffixes:
+                if name.endswith(suffix):
+                    if name[:-len(suffix)] in self:
+                        continue  # these are errors for another field
             try:
                 sel = to_child_select(self.dims, field.dims, select)
                 coord = self[name][sel]
+                for suffix in error_suffixes:
+                    if f'{name}{suffix}' in self:
+                        if coord.variances is not None:
+                            warn(f"Found {name}_errors as well as the deprecated "
+                                 f"{name}_error. The latter will be ignored.")
+                        stddevs = self[f'{name}{suffix}'][sel]
+                        coord.variances = sc.pow(stddevs, 2).values
                 # NeXus treats [] and [1] interchangeably, in general this is
                 # ill-defined, but this is the best we can do.
                 if coord.shape == [1] and da.sizes.get(coord.dim) != 1:
