@@ -33,6 +33,6 @@ Typing
    :template: scipp-class-template.rst
    :recursive:
 
-   typing.Dataset
-   typing.Group
+   typing.H5Dataset
+   typing.H5Group
    typing.ScippIndex
