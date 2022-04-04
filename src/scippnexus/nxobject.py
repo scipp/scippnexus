@@ -286,7 +286,7 @@ class NXobject:
         """The value of the NX_class attribute of the group.
 
         In case of the subclass NXroot this returns 'NXroot' even if the attribute
-        is not actually set. This is support the majority of all legacy files, which
+        is not actually set. This is to support the majority of all legacy files, which
         do not have this attribute.
         """
         return NX_class[self.attrs['NX_class']]
