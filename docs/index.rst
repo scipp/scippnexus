@@ -42,4 +42,12 @@ Get in touch
    :hidden:
    :maxdepth: 3
 
+   getting-started/installation
    getting-started/quick-start-guide
+
+.. toctree::
+   :caption: User Guide
+   :hidden:
+   :maxdepth: 3
+
+   user-guide/classes
