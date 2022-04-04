@@ -33,6 +33,7 @@ class NXdata(NXobject):
         self._signal_override = signal_override
         self._axes_default = axes
         self._skip = skip if skip is not None else []
+        self._error_suffixes = ['_error', '_errors']  # _error is the deprecated suffix
 
     @property
     def shape(self) -> List[int]:
@@ -128,11 +129,18 @@ class NXdata(NXobject):
         except NexusStructureError:
             return None
 
+    def _is_errors(self, name):
+        for suffix in self._error_suffixes:
+            if name.endswith(suffix):
+                if name[:-len(suffix)] in self:
+                    return True
+        return False
+
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         signal = self._signal[select]
         if self._errors_name in self:
             stddevs = self[self._errors_name][select]
-            signal.variances = sc.pow(stddevs, 2).values
+            signal.variances = sc.pow(stddevs, sc.scalar(2)).values
 
         da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
 
@@ -141,11 +149,19 @@ class NXdata(NXobject):
         skip += list(self.attrs.get('auxiliary_signals', []))
 
         for name, field in self.items():
-            if (not isinstance(field, Field)) or (name in skip):
+            if (not isinstance(field, Field)) or (name
+                                                  in skip) or self._is_errors(name):
                 continue
             try:
                 sel = to_child_select(self.dims, field.dims, select)
                 coord = self[name][sel]
+                for suffix in self._error_suffixes:
+                    if f'{name}{suffix}' in self:
+                        if coord.variances is not None:
+                            warn(f"Found {name}_errors as well as the deprecated "
+                                 f"{name}_error. The latter will be ignored.")
+                        stddevs = self[f'{name}{suffix}'][sel]
+                        coord.variances = sc.pow(stddevs, sc.scalar(2)).values
                 # NeXus treats [] and [1] interchangeably, in general this is
                 # ill-defined, but this is the best we can do.
                 if coord.shape == [1] and da.sizes.get(coord.dim) != 1:

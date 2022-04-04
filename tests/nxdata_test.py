@@ -217,3 +217,46 @@ def test_create_field_from_variable(nxroot, unit):
 def test_create_class(nxroot, nx_class):
     group = nxroot.create_class('group', nx_class)
     assert group.nx_class == nx_class
+
+
+@pytest.mark.parametrize("errors_suffix", ['_error', '_errors'])
+def test_field_matching_errors_regex_is_loaded_if_no_corresponding_value_field(
+        nxroot, errors_suffix):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+    da.coords[f'xx{errors_suffix}'] = da.data['yy', 0]
+    data = nxroot.create_class('data1', NX_class.NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data.create_field('signal', da.data)
+    data.create_field(f'xx{errors_suffix}', da.coords[f'xx{errors_suffix}'])
+    assert sc.identical(data[...], da)
+
+
+@pytest.mark.parametrize("errors_suffix", ['_error', '_errors'])
+def test_uncertainties_of_coords_are_loaded(nxroot, errors_suffix):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+    da.coords['xx'] = sc.array(dims=['xx'],
+                               unit='m',
+                               values=[1, 2, 3],
+                               variances=[1, 4, 9],
+                               dtype='float64')
+    da.coords['xx2'] = sc.array(dims=['xx'],
+                                unit='m',
+                                values=[2, 3],
+                                variances=[4, 9],
+                                dtype='float64')
+    da.coords['scalar'] = sc.scalar(value=1.2, variance=4.0, unit='K')
+    data = nxroot.create_class('data1', NX_class.NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data.attrs['xx2_indices'] = 0
+    data.create_field('signal', da.data)
+    data.create_field('xx', sc.values(da.coords['xx']))
+    data.create_field(f'xx{errors_suffix}', sc.stddevs(da.coords['xx']))
+    data.create_field('xx2', sc.values(da.coords['xx2']))
+    data.create_field(f'xx2{errors_suffix}', sc.stddevs(da.coords['xx2']))
+    data.create_field('scalar', sc.values(da.coords['scalar']))
+    data.create_field(f'scalar{errors_suffix}', sc.stddevs(da.coords['scalar']))
+    assert sc.identical(data[...], da)
