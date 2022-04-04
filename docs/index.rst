@@ -38,5 +38,16 @@ Get in touch
 - Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code `on GitHub <https://github.com/scipp/scippnexus>`_.
 
 .. toctree::
+   :caption: Getting Started
    :hidden:
    :maxdepth: 3
+
+   getting-started/installation
+   getting-started/quick-start-guide
+
+.. toctree::
+   :caption: User Guide
+   :hidden:
+   :maxdepth: 3
+
+   user-guide/classes

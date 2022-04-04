@@ -12,7 +12,7 @@ import h5py
 
 from ._hdf5_nexus import _cset_to_encoding, _ensure_str
 from ._hdf5_nexus import _ensure_supported_int_type, _warn_latin1_decode
-from .typing import Group, Dataset, ScippIndex
+from .typing import H5Group, H5Dataset, ScippIndex
 from ._common import to_plain_index
 
 NXobjectIndex = Union[str, ScippIndex]
@@ -96,7 +96,7 @@ class Field:
 
     In HDF5 fields are represented as dataset.
     """
-    def __init__(self, dataset: Dataset, dims=None):
+    def __init__(self, dataset: H5Dataset, dims=None):
         self._dataset = dataset
         if dims is not None:
             self._dims = dims
@@ -191,7 +191,7 @@ class Field:
 class NXobject:
     """Base class for all NeXus groups.
     """
-    def __init__(self, group: Group):
+    def __init__(self, group: H5Group):
         self._group = group
 
     def _get_child(
@@ -286,7 +286,7 @@ class NXobject:
         """The value of the NX_class attribute of the group.
 
         In case of the subclass NXroot this returns 'NXroot' even if the attribute
-        is not actually set. This is support the majority of all legacy files, which
+        is not actually set. This is to support the majority of all legacy files, which
         do not have this attribute.
         """
         return NX_class[self.attrs['NX_class']]

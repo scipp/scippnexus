@@ -5,13 +5,14 @@ from typing import Protocol, Union, Tuple, Dict, List, Callable
 
 
 # TODO Define more required methods
-class Dataset(Protocol):
+class H5Dataset(Protocol):
     """h5py.Dataset-like"""
+    @property
     def shape(self) -> List[int]:
         """Shape of a dataset"""
 
 
-class Group(Protocol):
+class H5Group(Protocol):
     """h5py.Group-like"""
     def visititems(self, func: Callable) -> None:
         """"""

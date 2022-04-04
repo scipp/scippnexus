@@ -7,14 +7,14 @@ from warnings import warn
 import scipp as sc
 import numpy as np
 from ._common import to_child_select
-from .typing import Group
+from .typing import H5Group
 from .nxobject import Field, NXobject, ScippIndex, NexusStructureError
 
 
 class NXdata(NXobject):
     def __init__(
             self,
-            group: Group,
+            group: H5Group,
             signal_name_default: str = None,
             signal_override: Union[Field, _EventField] = None,  # noqa: F821
             axes: List[str] = None,
