@@ -140,7 +140,7 @@ class NXdata(NXobject):
         signal = self._signal[select]
         if self._errors_name in self:
             stddevs = self[self._errors_name][select]
-            signal.variances = sc.pow(stddevs, 2).values
+            signal.variances = sc.pow(stddevs, sc.scalar(2)).values
 
         da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
 
@@ -161,7 +161,7 @@ class NXdata(NXobject):
                             warn(f"Found {name}_errors as well as the deprecated "
                                  f"{name}_error. The latter will be ignored.")
                         stddevs = self[f'{name}{suffix}'][sel]
-                        coord.variances = sc.pow(stddevs, 2).values
+                        coord.variances = sc.pow(stddevs, sc.scalar(2)).values
                 # NeXus treats [] and [1] interchangeably, in general this is
                 # ill-defined, but this is the best we can do.
                 if coord.shape == [1] and da.sizes.get(coord.dim) != 1:
