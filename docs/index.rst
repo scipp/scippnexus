@@ -40,3 +40,5 @@ Get in touch
 .. toctree::
    :hidden:
    :maxdepth: 3
+
+   getting-started/quick-start-guide
