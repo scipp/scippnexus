@@ -67,6 +67,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install --upgrade pip
       - run: python -m pip install tox
+      - run: sudo apt install --yes pandoc
       - run: tox -e docs
       - uses: actions/upload-artifact@v2
         with:
