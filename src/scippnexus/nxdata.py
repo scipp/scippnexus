@@ -33,6 +33,7 @@ class NXdata(NXobject):
         self._signal_override = signal_override
         self._axes_default = axes
         self._skip = skip if skip is not None else []
+        self._error_suffixes = ['_error', '_errors']  # _error is the deprecated suffix
 
     @property
     def shape(self) -> List[int]:
@@ -128,6 +129,13 @@ class NXdata(NXobject):
         except NexusStructureError:
             return None
 
+    def _is_errors(self, name):
+        for suffix in self._error_suffixes:
+            if name.endswith(suffix):
+                if name[:-len(suffix)] in self:
+                    return True
+        return False
+
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         signal = self._signal[select]
         if self._errors_name in self:
@@ -140,19 +148,14 @@ class NXdata(NXobject):
         skip += [self._signal_name, self._errors_name]
         skip += list(self.attrs.get('auxiliary_signals', []))
 
-        error_suffixes = ['_error', '_errors']  # _error is the deprecated suffix
-
         for name, field in self.items():
-            if (not isinstance(field, Field)) or (name in skip):
+            if (not isinstance(field, Field)) or (name
+                                                  in skip) or self._is_errors(name):
                 continue
-            for suffix in error_suffixes:
-                if name.endswith(suffix):
-                    if name[:-len(suffix)] in self:
-                        continue  # these are errors for another field
             try:
                 sel = to_child_select(self.dims, field.dims, select)
                 coord = self[name][sel]
-                for suffix in error_suffixes:
+                for suffix in self._error_suffixes:
                     if f'{name}{suffix}' in self:
                         if coord.variances is not None:
                             warn(f"Found {name}_errors as well as the deprecated "
