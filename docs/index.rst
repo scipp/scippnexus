@@ -50,4 +50,5 @@ Get in touch
    :hidden:
    :maxdepth: 3
 
+   user-guide/nexus-classes
    user-guide/classes
