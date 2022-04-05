@@ -47,6 +47,16 @@ More concretely this means that, e.g., for loading an `NXdetector` from a NH, th
 
 If the above yields no more than one item, the group can be loaded.
 
+## Datetime fields
+
+HDF5 does not support storing date and time information such as `np.datetime64`.
+`NXlog` and `NXevent_data` specify specific attributes for fields that have to be interpreted as date and time, in particular [NXlog/time@start](https://manual.nexusformat.org/classes/base_classes/NXlog.html#nxlog-time-start-attribute) and [NXevent_data/event_time_offset@offset](https://manual.nexusformat.org/classes/base_classes/NXevent_data.html#nxevent-data-event-time-offset-field).
+No *general* definition or intention is documented in the NF, but according to TR this is nevertheless standard.
+Due to the attribute naming mismatch in the two cases where it *is* specified we need to assume that naming is arbitrary.
+Therefore, we search *all* attributes of a field for a date and time offset, provided that the field's unit is a time unit.
+It is unclear what should be done in the case of multiple matches.
+As of April 2022 we ignore the offset in this case, since guessing which one to use based on the attribute name does not seem desirable.
+
 ## Bin edges
 
 For [NXdetector](https://manual.nexusformat.org/classes/base_classes/NXdetector.html) the NF defines a [time_of_flight](https://manual.nexusformat.org/classes/base_classes/NXdetector.html#nxdetector-time-of-flight-field) field, exceeding the data shape by one, i.e., it is meant as bin-edges.
