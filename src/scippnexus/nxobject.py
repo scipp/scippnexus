@@ -126,9 +126,10 @@ class Field:
 
     In HDF5 fields are represented as dataset.
     """
-    def __init__(self, dataset: H5Dataset, dims=None):
+    def __init__(self, dataset: H5Dataset, dims=None, is_time=None):
         self._dataset = dataset
         self._shape = list(self._dataset.shape)
+        self._is_time = is_time
         # NeXus treats [] and [1] interchangeably. In general this is ill-defined, but
         # the best we can do appears to be squeezing unless the file provides names for
         # dimensions. The shape property of this class does thus not necessarily return
@@ -167,11 +168,13 @@ class Field:
             self._dataset.read_direct(variable.values, source_sel=index)
         else:
             variable.values = self._dataset[index]
-        if _is_time(variable):
+        if self._is_time or _is_time(variable):
             starts = []
             for name in self.attrs:
                 if (dt := _as_datetime(self.attrs[name])) is not None:
                     starts.append(dt)
+            if self._is_time and len(starts) == 0:
+                starts.append(sc.epoch(unit='ns'))
             if len(starts) == 1:
                 variable = convert_time_to_datetime64(
                     variable,
@@ -248,6 +251,7 @@ class NXobject:
     """
     def __init__(self, group: H5Group):
         self._group = group
+        self.child_params = {}
 
     def _get_child(
             self,
@@ -260,7 +264,7 @@ class NXobject:
             item = self._group[name]
             if hasattr(item, 'shape'):
                 dims = self._get_field_dims(name) if use_field_dims else None
-                return Field(item, dims=dims)
+                return Field(item, dims=dims, **self.child_params.get(name, {}))
             else:
                 return _make(item)
         da = self._getitem(name)
