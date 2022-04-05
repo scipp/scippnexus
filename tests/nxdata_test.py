@@ -1,4 +1,5 @@
 import h5py
+import numpy as np
 import scipp as sc
 from scippnexus import NXroot, NX_class
 import pytest
@@ -211,6 +212,15 @@ def test_create_field_from_variable(nxroot, unit):
     loaded = nxroot['field'][...]
     # Nexus does not support storing dim labels
     assert sc.identical(loaded, var.rename(xx=loaded.dim))
+
+
+def test_create_datetime_field_from_variable(nxroot):
+    var = sc.datetime(np.datetime64('now'), unit='ns') + sc.arange(
+        'time', 1, 4, dtype='int64', unit='ns')
+    nxroot.create_field('field', var)
+    loaded = nxroot['field'][...]
+    # Nexus does not support storing dim labels
+    assert sc.identical(loaded, var.rename(time=loaded.dim))
 
 
 @pytest.mark.parametrize("nx_class", [NX_class.NXdata, NX_class.NXlog])

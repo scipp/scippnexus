@@ -365,9 +365,14 @@ class NXobject:
         values = data.values
         if data.dtype == sc.DType.string:
             values = np.array(data.values, dtype=object)
+        elif data.dtype == sc.DType.datetime64:
+            start = sc.epoch(unit=data.unit)
+            values = (data - start).values
         dataset = self._group.create_dataset(name, data=values, **kwargs)
         if data.unit is not None:
             dataset.attrs['units'] = str(data.unit)
+        if data.dtype == sc.DType.datetime64:
+            dataset.attrs['start'] = str(start.value)
         return Field(dataset, data.dims)
 
     def create_class(self, name: str, nx_class: NX_class) -> NXobject:
