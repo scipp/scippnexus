@@ -169,10 +169,22 @@ class Field:
 
     @property
     def ndim(self) -> int:
+        """Total number of dimensions in the dataset.
+
+        See the shape property for potential differences to the value returned by the
+        underlying h5py.Dataset.ndim.
+        """
         return len(self.shape)
 
     @property
     def shape(self) -> List[int]:
+        """Shape of the field.
+
+        NeXus may use extra dimensions of length one to store data, such as shape=[1]
+        instead of shape=[]. This property returns the *squeezed* shape, dropping all
+        length-1 dimensions that are not explicitly named. The returned shape may thus
+        be different from the shape of the underlying h5py.Dataset.
+        """
         return self._shape
 
     @property
@@ -265,7 +277,7 @@ class NXobject:
     def by_nx_class(self) -> Dict[NX_class, Dict[str, '__class__']]:
         classes = {name: [] for name in _nx_class_registry()}
 
-        # TODO implement visititems for NXobject and merge the the blocks
+        # TODO implement visititems for NXobject and merge the two blocks
         def _match_nx_class(_, node):
             if not hasattr(node, 'shape'):
                 if (nx_class := node.attrs.get('NX_class')) is not None:
