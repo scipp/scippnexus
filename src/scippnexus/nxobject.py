@@ -342,6 +342,7 @@ class NXobject:
 
 
 class NXroot(NXobject):
+    """Root of a NeXus file."""
     @property
     def nx_class(self) -> NX_class:
         # As an oversight in the NeXus standard and the reference implementation,
@@ -352,15 +353,15 @@ class NXroot(NXobject):
 
 
 class NXentry(NXobject):
-    pass
+    """Entry in a NeXus file."""
 
 
 class NXinstrument(NXobject):
-    pass
+    """Group of instrument-related information."""
 
 
 class NXtransformations(NXobject):
-    pass
+    """Group of transformations."""
 
 
 def _make(group) -> NXobject:
