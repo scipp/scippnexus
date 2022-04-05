@@ -4,7 +4,6 @@
 
 from typing import List, Union
 import scipp as sc
-from ._common import convert_time_to_datetime64
 from .nxobject import NXobject, ScippIndex
 from .nxdata import NXdata
 
