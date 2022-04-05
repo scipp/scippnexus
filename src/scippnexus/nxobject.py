@@ -98,12 +98,20 @@ class Field:
     """
     def __init__(self, dataset: H5Dataset, dims=None):
         self._dataset = dataset
+        self._shape = list(self._dataset.shape)
+        # NeXus treats [] and [1] interchangeably. In general this is ill-defined, but
+        # the best we can do appears to be squeezing unless the file provides names for
+        # dimensions. The shape property of this class does thus not necessarily return
+        # the same as the shape of the underlying dataset.
         if dims is not None:
             self._dims = dims
+            if len(self._dims) < len(self._shape):
+                self._shape = [size for size in self._shape if size != 1]
         elif (axes := self.attrs.get('axes')) is not None:
             self._dims = axes.split(',')
         else:
-            self._dims = [f'dim_{i}' for i in range(self._dataset.ndim)]
+            self._shape = [size for size in self._shape if size != 1]
+            self._dims = [f'dim_{i}' for i in range(self.ndim)]
 
     def __getitem__(self, select) -> sc.Variable:
         index = to_plain_index(self.dims, select)
@@ -165,12 +173,7 @@ class Field:
 
     @property
     def shape(self) -> List[int]:
-        shape = self._dataset.shape
-        if self.dims == [] and shape == [1]:
-            # NeXus treats [] and [1] interchangeably, in general this is ill-defined,
-            # but this is the best we can do.
-            return []
-        return shape
+        return self._shape
 
     @property
     def dims(self) -> List[str]:

@@ -90,7 +90,7 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NX_class.NXevent_data))
     assert detector.dims == ['dim_0']
-    assert detector.shape == (4, )
+    assert detector.shape == [4, ]
     loaded = detector[...]
     assert sc.identical(
         loaded.bins.size().data,
@@ -104,7 +104,7 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', NX_class.NXevent_data))
     assert detector.dims == ['dim_0', 'dim_1']
-    assert detector.shape == (2, 2)
+    assert detector.shape == [2, 2]
     loaded = detector[...]
     assert sc.identical(
         loaded.bins.size().data,

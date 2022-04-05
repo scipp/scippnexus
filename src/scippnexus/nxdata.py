@@ -162,10 +162,6 @@ class NXdata(NXobject):
                                  f"{name}_error. The latter will be ignored.")
                         stddevs = self[f'{name}{suffix}'][sel]
                         coord.variances = sc.pow(stddevs, sc.scalar(2)).values
-                # NeXus treats [] and [1] interchangeably, in general this is
-                # ill-defined, but this is the best we can do.
-                if coord.shape == [1] and da.sizes.get(coord.dim) != 1:
-                    coord = coord.squeeze()
                 da.coords[name] = coord
             except sc.DimensionError as e:
                 warn(f"Skipped load of axis {field.name} due to:\n{e}")
