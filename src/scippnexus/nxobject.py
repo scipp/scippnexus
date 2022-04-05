@@ -6,6 +6,7 @@ import warnings
 from enum import Enum, auto
 import functools
 from typing import List, Union, NoReturn, Any, Dict, Tuple, Protocol
+import dateutil
 import numpy as np
 import scipp as sc
 import h5py
@@ -14,6 +15,7 @@ from ._hdf5_nexus import _cset_to_encoding, _ensure_str
 from ._hdf5_nexus import _ensure_supported_int_type, _warn_latin1_decode
 from .typing import H5Group, H5Dataset, ScippIndex
 from ._common import to_plain_index
+from ._common import convert_time_to_datetime64
 
 NXobjectIndex = Union[str, ScippIndex]
 
@@ -84,11 +86,39 @@ class Attrs:
     def __setitem__(self, name: str, val: Any):
         self._attrs[name] = val
 
+    def __iter__(self):
+        yield from self._attrs
+
     def get(self, name: str, default=None) -> Any:
         return self[name] if name in self else default
 
     def keys(self):
         return self._attrs.keys()
+
+
+def _is_time(obj):
+    dummy = sc.empty(dims=[], shape=[], unit=obj.unit)
+    try:
+        dummy.to(unit='s')
+        return True
+    except sc.UnitError:
+        return False
+
+
+def _as_datetime(obj: Any):
+    if isinstance(obj, str):
+        try:
+            # datetime.fromisoformat cannot parse time zones and recommends dateutil
+            dt = dateutil.parser.isoparse(obj)
+            # NumPy and scipp cannot handle timezone information. We therefore strip it,
+            # i.e., interpret time as local time. If time is given in UTC this will lead
+            # to misleading results since we have no information about the actual time
+            # zone.
+            dt = dt.replace(tzinfo=None)
+            return sc.datetime(np.datetime64(dt), unit='ns')
+        except ValueError:
+            pass
+    return None
 
 
 class Field:
@@ -137,6 +167,16 @@ class Field:
             self._dataset.read_direct(variable.values, source_sel=index)
         else:
             variable.values = self._dataset[index]
+        if _is_time(variable):
+            starts = []
+            for name in self.attrs:
+                if (dt := _as_datetime(self.attrs[name])) is not None:
+                    starts.append(dt)
+            if len(starts) == 1:
+                variable = convert_time_to_datetime64(
+                    variable,
+                    start=starts[0],
+                    scaling_factor=self.attrs.get('scaling_factor'))
         return variable
 
     def __repr__(self) -> str:

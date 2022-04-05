@@ -39,15 +39,15 @@ class NXlog(NXobject):
         # The 'time' field in NXlog contains extra properties 'start' and
         # 'scaling_factor' that are not handled by NXdata. These are used
         # to transform to a datetime-coord.
-        if 'time' in self:
-            if 'time' not in data.coords:
-                raise sc.DimensionError(
-                    "NXlog is time-dependent, but failed to load `time` dataset")
-            data.coords['time'] = convert_time_to_datetime64(
-                raw_times=data.coords.pop('time'),
-                start=self['time'].attrs.get('start'),
-                scaling_factor=self['time'].attrs.get('scaling_factor'),
-                group_path=self['time'].name)
+        #if 'time' in self:
+        #    if 'time' not in data.coords:
+        #        raise sc.DimensionError(
+        #            "NXlog is time-dependent, but failed to load `time` dataset")
+        #    data.coords['time'] = convert_time_to_datetime64(
+        #        raw_times=data.coords.pop('time'),
+        #        start=self['time'].attrs.get('start'),
+        #        scaling_factor=self['time'].attrs.get('scaling_factor'),
+        #        group_path=self['time'].name)
         return data
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
