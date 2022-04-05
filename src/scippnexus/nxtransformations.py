@@ -58,7 +58,7 @@ class Transformation:
         # According to private communication with Tobias Richter, NeXus allows 0-D or
         # shape=[1] for single values. It is unclear how and if this could be
         # distinguished from a scan of length 1.
-        t = self._obj[select].squeeze() * self.vector
+        t = self._obj[select] * self.vector
         v = t if isinstance(t, sc.Variable) else t.data
         if transformation_type == 'translation':
             v = v.to(unit='m', copy=False)

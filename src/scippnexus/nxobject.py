@@ -98,12 +98,20 @@ class Field:
     """
     def __init__(self, dataset: H5Dataset, dims=None):
         self._dataset = dataset
+        self._shape = list(self._dataset.shape)
+        # NeXus treats [] and [1] interchangeably. In general this is ill-defined, but
+        # the best we can do appears to be squeezing unless the file provides names for
+        # dimensions. The shape property of this class does thus not necessarily return
+        # the same as the shape of the underlying dataset.
         if dims is not None:
             self._dims = dims
+            if len(self._dims) < len(self._shape):
+                self._shape = [size for size in self._shape if size != 1]
         elif (axes := self.attrs.get('axes')) is not None:
             self._dims = axes.split(',')
         else:
-            self._dims = [f'dim_{i}' for i in range(self._dataset.ndim)]
+            self._shape = [size for size in self._shape if size != 1]
+            self._dims = [f'dim_{i}' for i in range(self.ndim)]
 
     def __getitem__(self, select) -> sc.Variable:
         index = to_plain_index(self.dims, select)
@@ -161,16 +169,23 @@ class Field:
 
     @property
     def ndim(self) -> int:
+        """Total number of dimensions in the dataset.
+
+        See the shape property for potential differences to the value returned by the
+        underlying h5py.Dataset.ndim.
+        """
         return len(self.shape)
 
     @property
     def shape(self) -> List[int]:
-        shape = self._dataset.shape
-        if self.dims == [] and shape == [1]:
-            # NeXus treats [] and [1] interchangeably, in general this is ill-defined,
-            # but this is the best we can do.
-            return []
-        return shape
+        """Shape of the field.
+
+        NeXus may use extra dimensions of length one to store data, such as shape=[1]
+        instead of shape=[]. This property returns the *squeezed* shape, dropping all
+        length-1 dimensions that are not explicitly named. The returned shape may thus
+        be different from the shape of the underlying h5py.Dataset.
+        """
+        return self._shape
 
     @property
     def dims(self) -> List[str]:
@@ -262,7 +277,7 @@ class NXobject:
     def by_nx_class(self) -> Dict[NX_class, Dict[str, '__class__']]:
         classes = {name: [] for name in _nx_class_registry()}
 
-        # TODO implement visititems for NXobject and merge the the blocks
+        # TODO implement visititems for NXobject and merge the two blocks
         def _match_nx_class(_, node):
             if not hasattr(node, 'shape'):
                 if (nx_class := node.attrs.get('NX_class')) is not None:

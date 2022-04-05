@@ -146,7 +146,7 @@ def test_field_properties(nxroot):
     field = nxroot['entry/events_0/event_time_offset']
     assert field.dtype == 'int64'
     assert field.name == '/entry/events_0/event_time_offset'
-    assert field.shape == (6, )
+    assert field.shape == [6]
     assert field.unit == sc.Unit('ns')
 
 

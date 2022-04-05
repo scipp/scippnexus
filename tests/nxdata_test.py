@@ -260,3 +260,34 @@ def test_uncertainties_of_coords_are_loaded(nxroot, errors_suffix):
     data.create_field('scalar', sc.values(da.coords['scalar']))
     data.create_field(f'scalar{errors_suffix}', sc.stddevs(da.coords['scalar']))
     assert sc.identical(data[...], da)
+
+
+def test_unnamed_extra_dims_of_coords_are_squeezed(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
+    data = nxroot.create_class('data1', NX_class.NXdata)
+    data.create_field('signal', signal)
+    data.attrs['axes'] = signal.dims
+    data.attrs['signal'] = 'signal'
+    # shape=[1]
+    data.create_field('scalar', sc.array(dims=['ignored'], values=[1.2]))
+    loaded = data[...]
+    assert sc.identical(loaded.coords['scalar'], sc.scalar(1.2))
+    assert data['scalar'].ndim == 0
+    assert data['scalar'].shape == []
+    assert sc.identical(data['scalar'][...], sc.scalar(1.2))
+
+
+def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
+    signal = sc.array(dims=['xx'], unit='m', values=[1.1, 2.2])
+    data = nxroot.create_class('data1', NX_class.NXdata)
+    data.create_field('signal', signal)
+    data.attrs['axes'] = signal.dims
+    data.attrs['signal'] = 'signal'
+    # shape=[1,2]
+    xx = sc.array(dims=['ignored', 'xx'], values=[[1.1, 2.2]])
+    data.create_field('xx', xx)
+    loaded = data[...]
+    assert sc.identical(loaded.coords['xx'], xx['ignored', 0])
+    assert data['xx'].ndim == 1
+    assert data['xx'].shape == [2]
+    assert sc.identical(data['xx'][...], xx['ignored', 0])
