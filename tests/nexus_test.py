@@ -255,6 +255,14 @@ def test_timezone_information_in_datetime_attribute_is_dropped(nxroot, timezone)
                      values=['1970-01-01T00:00:00', '1970-01-01T00:00:01']))
 
 
+def test_loads_bare_timestamps_if_multiple_candidate_datetime_offsets_found(nxroot):
+    offsets = sc.arange('ignored', 2, unit='ms')
+    nxroot['mytime'] = offsets
+    nxroot['mytime'].attrs['offset'] = '2022-12-12T12:13:14'
+    nxroot['mytime'].attrs['start_time'] = '2022-12-12T12:13:15'
+    assert sc.identical(nxroot['mytime'][...], offsets.rename(ignored='dim_0'))
+
+
 def create_event_data_ids_1234(group):
     group['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2])
     group['event_time_offset'] = sc.array(dims=[''],
