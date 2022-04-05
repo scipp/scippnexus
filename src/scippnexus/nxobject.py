@@ -6,7 +6,6 @@ import warnings
 from enum import Enum, auto
 import functools
 from typing import List, Union, NoReturn, Any, Dict, Tuple, Protocol
-import dateutil
 import numpy as np
 import scipp as sc
 import h5py
@@ -108,14 +107,11 @@ def _is_time(obj):
 def _as_datetime(obj: Any):
     if isinstance(obj, str):
         try:
-            # datetime.fromisoformat cannot parse time zones and recommends dateutil
-            dt = dateutil.parser.isoparse(obj)
             # NumPy and scipp cannot handle timezone information. We therefore strip it,
             # i.e., interpret time as local time. If time is given in UTC this will lead
             # to misleading results since we have no information about the actual time
             # zone.
-            dt = dt.replace(tzinfo=None)
-            return sc.datetime(np.datetime64(dt), unit='ns')
+            return sc.datetime(np.datetime64(obj))
         except ValueError:
             pass
     return None

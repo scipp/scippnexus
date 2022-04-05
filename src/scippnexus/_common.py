@@ -31,13 +31,22 @@ def convert_time_to_datetime64(
             time series data and the unit of the raw_times Variable. If
             not provided, defaults to 1 (a no-op scaling factor).
     """
-    raw_times_ns = sc.to_unit(raw_times, sc.units.ns, copy=False)
+    if (raw_times.dtype
+            in (sc.DType.float64, sc.DType.float32)) or scaling_factor is not None:
+        unit = sc.units.ns
+    else:
+        # determine more precise unit
+        ratio = sc.scalar(1.0, unit=start.unit) / sc.scalar(
+            1.0, unit=raw_times.unit).to(unit=start.unit)
+        unit = start.unit if ratio.value < 1.0 else raw_times.unit
+
+    raw_times = raw_times.to(unit=unit, copy=False)
 
     if scaling_factor is None:
-        times = raw_times_ns.astype(sc.DType.int64, copy=False)
+        times = raw_times.astype(sc.DType.int64, copy=False)
     else:
         _scale = sc.scalar(value=scaling_factor)
-        times = (raw_times_ns * _scale).astype(sc.DType.int64, copy=False)
+        times = (raw_times * _scale).astype(sc.DType.int64, copy=False)
     return start + times
 
 
