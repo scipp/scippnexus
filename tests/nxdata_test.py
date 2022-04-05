@@ -284,7 +284,7 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
     # shape=[1,2]
-    xx = sc.array(dims=['ignored', 'xx'], values=[[1.1,2.2]])
+    xx = sc.array(dims=['ignored', 'xx'], values=[[1.1, 2.2]])
     data.create_field('xx', xx)
     loaded = data[...]
     assert sc.identical(loaded.coords['xx'], xx['ignored', 0])
