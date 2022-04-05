@@ -9,7 +9,16 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
-from .file import File
-from .nxobject import NX_class, Field, NXroot
-from .nxobject import NexusStructureError
 from . import typing
+from .file import File
+from .nxdata import NXdata
+from .nxdetector import NXdetector
+from .nxdisk_chopper import NXdisk_chopper
+from .nxevent_data import NXevent_data
+from .nxlog import NXlog
+from .nxmonitor import NXmonitor
+from .nxobject import NX_class, NXobject, Field
+from .nxobject import NXentry, NXinstrument, NXroot, NXtransformations
+from .nxobject import NexusStructureError
+from .nxsample import NXsample
+from .nxsource import NXsource

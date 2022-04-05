@@ -11,9 +11,21 @@ Data Structures
    :template: scipp-class-template.rst
    :recursive:
 
-   File
    Field
+   File
+   NXdata
+   NXdetector
+   NXdisk_chopper
+   NXentry
+   NXevent_data
+   NXinstrument
+   NXlog
+   NXmonitor
+   NXobject
    NXroot
+   NXsample
+   NXsource
+   NXtransformations
 
 Exceptions
 ----------
