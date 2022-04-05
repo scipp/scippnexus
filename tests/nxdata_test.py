@@ -302,6 +302,7 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
     assert data['xx'].shape == [2]
     assert sc.identical(data['xx'][...], xx['ignored', 0])
 
+
 def test_fields_with_datetime_attribute_are_loaded_as_datetime(nxroot):
     da = sc.DataArray(
         sc.epoch(unit='s') +
