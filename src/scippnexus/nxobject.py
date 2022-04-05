@@ -2,6 +2,7 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
+import re
 import warnings
 from enum import Enum, auto
 import functools
@@ -111,6 +112,12 @@ def _as_datetime(obj: Any):
             # i.e., interpret time as local time. If time is given in UTC this will lead
             # to misleading results since we have no information about the actual time
             # zone.
+            # Would like to use dateutil, but with Python's datetime we do not get
+            # nanosecond precision.
+            if 'T' in obj:
+                date, time = obj.split('T')
+                time = re.split('Z|\+|-', time)[0]
+                obj = f'{date}T{time}'
             return sc.datetime(np.datetime64(obj))
         except ValueError:
             pass

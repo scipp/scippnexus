@@ -316,5 +316,4 @@ def test_fields_with_datetime_attribute_are_loaded_as_datetime(nxroot):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
-    print(data[...], da)
     assert sc.identical(data[...], da)

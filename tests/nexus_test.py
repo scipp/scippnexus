@@ -212,6 +212,57 @@ def test_field_of_extended_ascii_in_ascii_encoded_dataset_is_loaded_correctly():
             sc.array(dims=['dim_0'], values=["run at rot=90°", "run at rot=90°x"]))
 
 
+def test_ms_field_with_second_datetime_attribute_loaded_as_ms_datetime(nxroot):
+    nxroot['mytime'] = sc.arange('ignored', 2, unit='ms')
+    nxroot['mytime'].attrs['start_time'] = '2022-12-12T12:13:14'
+    assert sc.identical(
+        nxroot['mytime'][...],
+        sc.datetimes(dims=['dim_0'],
+                     unit='ms',
+                     values=['2022-12-12T12:13:14.000', '2022-12-12T12:13:14.001']))
+
+
+
+def test_ns_field_with_second_datetime_attribute_loaded_as_ns_datetime(nxroot):
+    nxroot['mytime'] = sc.arange('ignored', 2, unit='ns')
+    nxroot['mytime'].attrs['start_time'] = '1970-01-01T00:00:00'
+    assert sc.identical(
+        nxroot['mytime'][...],
+        sc.datetimes(
+            dims=['dim_0'],
+            unit='ns',
+            values=['1970-01-01T00:00:00.000000000', '1970-01-01T00:00:00.000000001']))
+
+
+
+def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot):
+    nxroot['mytime'] = sc.arange('ignored', 2, unit='s')
+    nxroot['mytime'].attrs['start_time'] = '1970-01-01T00:00:00.000000000'
+    assert sc.identical(
+        nxroot['mytime'][...],
+        sc.datetimes(dims=['dim_0'],
+                     unit='ns',
+                     values=['1970-01-01T00:00:00', '1970-01-01T00:00:01']))
+
+
+
+@pytest.mark.parametrize('timezone', ['Z', '+04', '+00', '-02', '+1130', '-0930', '+11:30', '-09:30'])
+def test_timezone_information_in_datetime_attribute_is_dropped(nxroot, timezone):
+    nxroot['mytime'] = sc.arange('ignored', 2, unit='s')
+    nxroot['mytime'].attrs['start_time'] = f'1970-01-01T00:00:00{timezone}'
+    print(
+        nxroot['mytime'][...],
+        sc.datetimes(dims=['dim_0'],
+                     unit='s',
+                     values=['1970-01-01T00:00:00', '1970-01-01T00:00:01']))
+    assert sc.identical(
+        nxroot['mytime'][...],
+        sc.datetimes(dims=['dim_0'],
+                     unit='s',
+                     values=['1970-01-01T00:00:00', '1970-01-01T00:00:01']))
+
+
+
 def create_event_data_ids_1234(group):
     group['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2])
     group['event_time_offset'] = sc.array(dims=[''],

@@ -47,7 +47,7 @@ def convert_time_to_datetime64(
     else:
         _scale = sc.scalar(value=scaling_factor)
         times = (raw_times * _scale).astype(sc.DType.int64, copy=False)
-    return start + times
+    return start.to(unit=unit, copy=False) + times
 
 
 def _to_canonical_select(dims: List[str], select: ScippIndex) -> ScippIndex:
