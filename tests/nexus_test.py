@@ -248,11 +248,6 @@ def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot):
 def test_timezone_information_in_datetime_attribute_is_dropped(nxroot, timezone):
     nxroot['mytime'] = sc.arange('ignored', 2, unit='s')
     nxroot['mytime'].attrs['start_time'] = f'1970-01-01T00:00:00{timezone}'
-    print(
-        nxroot['mytime'][...],
-        sc.datetimes(dims=['dim_0'],
-                     unit='s',
-                     values=['1970-01-01T00:00:00', '1970-01-01T00:00:01']))
     assert sc.identical(
         nxroot['mytime'][...],
         sc.datetimes(dims=['dim_0'],
