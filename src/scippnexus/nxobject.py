@@ -116,7 +116,7 @@ def _as_datetime(obj: Any):
             # nanosecond precision.
             if 'T' in obj:
                 date, time = obj.split('T')
-                time = re.split('Z|\+|-', time)[0]
+                time = re.split(f'Z|{re.escape("+")}|-', time)[0]
                 obj = f'{date}T{time}'
             return sc.datetime(np.datetime64(obj))
         except ValueError:
