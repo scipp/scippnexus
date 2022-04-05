@@ -10,7 +10,8 @@ from .nxobject import NXobject, ScippIndex
 class NXsample(NXobject):
     """Sample information, can be read as a dataset.
 
-    Currently only the 'distance', 'orientation_matrix', and 'ub_matrix' fields are loaded.
+    Currently only the 'distance', 'orientation_matrix', and 'ub_matrix' fields are
+    loaded.
     """
     @property
     def shape(self):
