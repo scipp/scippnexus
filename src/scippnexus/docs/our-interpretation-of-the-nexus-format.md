@@ -55,7 +55,7 @@ No *general* definition or intention is documented in the NF, but according to T
 Due to the attribute naming mismatch in the two cases where it *is* specified we need to assume that naming is arbitrary.
 Therefore, we search *all* attributes of a field for a date and time offset, provided that the field's unit is a time unit.
 It is unclear what should be done in the case of multiple matches.
-As of April 2022 we ignore the offset in this case, since guessing which one to use based on the attribute name does not seem desirable.
+As of April 2022 we ignore the date and time offsets in this case, since guessing which one to use based on the attribute name does not seem desirable.
 
 ## Bin edges
 
