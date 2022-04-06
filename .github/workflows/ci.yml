@@ -55,11 +55,3 @@ jobs:
         with:
           name: html
           path: html/
-      # TODO Remove deploy step once we publish docs only with releases
-      - uses: JamesIves/github-pages-deploy-action@v4.2.5
-        with:
-          branch: gh-pages
-          folder: html
-          single-commit: true
-          clean-exclude: release
-          ssh-key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
