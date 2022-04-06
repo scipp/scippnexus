@@ -40,14 +40,12 @@ def convert_time_to_datetime64(
             1.0, unit=raw_times.unit).to(unit=start.unit)
         unit = start.unit if ratio.value < 1.0 else raw_times.unit
 
-    raw_times = raw_times.to(unit=unit, copy=False)
-
     if scaling_factor is None:
-        times = raw_times.astype(sc.DType.int64, copy=False)
+        times = raw_times
     else:
-        _scale = sc.scalar(value=scaling_factor)
-        times = (raw_times * _scale).astype(sc.DType.int64, copy=False)
-    return start.to(unit=unit, copy=False) + times
+        times = raw_times * sc.scalar(value=scaling_factor)
+    return start.to(unit=unit, copy=False) + times.to(
+        dtype=sc.DType.int64, unit=unit, copy=False)
 
 
 def _to_canonical_select(dims: List[str], select: ScippIndex) -> ScippIndex:
