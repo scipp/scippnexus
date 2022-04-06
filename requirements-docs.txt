@@ -33,6 +33,8 @@ cffi==1.15.0
     # via argon2-cffi-bindings
 charset-normalizer==2.0.12
     # via requests
+confuse==1.7.0
+    # via scipp
 cycler==0.11.0
     # via matplotlib
 debugpy==1.6.0
@@ -57,6 +59,8 @@ fastjsonschema==2.15.3
     # via nbformat
 fonttools==4.31.2
     # via matplotlib
+graphlib-backport==1.0.3
+    # via scipp
 idna==3.3
     # via requests
 imagesize==1.3.0
@@ -143,7 +147,9 @@ nest-asyncio==1.5.5
 notebook==6.4.10
     # via widgetsnbextension
 numpy==1.22.3
-    # via matplotlib
+    # via
+    #   matplotlib
+    #   scipp
 packaging==21.3
     # via
     #   bleach
@@ -198,7 +204,9 @@ python-dateutil==2.8.2
 pytz==2022.1
     # via babel
 pyyaml==6.0
-    # via sphinx-book-theme
+    # via
+    #   confuse
+    #   sphinx-book-theme
 pyzmq==22.3.0
     # via
     #   jupyter-client
@@ -207,6 +215,8 @@ requests==2.27.1
     # via
     #   pooch
     #   sphinx
+scipp==0.13.0
+    # via -r requirements-docs.in
 send2trash==1.8.0
     # via notebook
 six==1.16.0
