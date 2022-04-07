@@ -4,6 +4,7 @@
 from __future__ import annotations
 import re
 import warnings
+import dateutil
 from enum import Enum, auto
 import functools
 from typing import List, Union, NoReturn, Any, Dict, Tuple, Protocol
@@ -116,9 +117,18 @@ def _as_datetime(obj: Any):
             # nanosecond precision.
             if 'T' in obj:
                 date, time = obj.split('T')
-                time = re.split(r'Z|\+|-', time)[0]
-                obj = f'{date}T{time}'
-            return sc.datetime(np.datetime64(obj))
+                time_and_timezone_offset = re.split(r'Z|\+|-', time)
+                time = time_and_timezone_offset[0]
+                if len(time_and_timezone_offset) == 1:
+                    dt = np.datetime64(f'{date}T{time}')
+                else:
+                    timezone_aware = dateutil.parser.isoparse(obj)
+                    offset = timezone_aware.replace(tzinfo=dateutil.tz.tzutc())
+                    delta = timezone_aware - offset
+                    dt = np.datetime64(f'{date}T{time}') + delta
+            else:
+                dt = np.datetime64(obj)
+            return sc.datetime(dt)
         except ValueError:
             pass
     return None
