@@ -119,15 +119,16 @@ def _as_datetime(obj: Any):
                 date, time = obj.split('T')
                 time_and_timezone_offset = re.split(r'Z|\+|-', time)
                 time = time_and_timezone_offset[0]
-                if len(time_and_timezone_offset) == 1:
-                    dt = np.datetime64(f'{date}T{time}')
-                else:
-                    timezone_aware = dateutil.parser.isoparse(obj)
-                    offset = timezone_aware.replace(tzinfo=dateutil.tz.tzutc())
-                    delta = timezone_aware - offset
-                    dt = np.datetime64(f'{date}T{time}') + delta
+                dt = sc.datetime(np.datetime64(f'{date}T{time}'))
+                if len(time_and_timezone_offset) > 1:
+                    utcoffset = dateutil.parser.isoparse(obj).utcoffset()
+                    seconds = sc.scalar(value=utcoffset.total_seconds(),
+                                        unit='s',
+                                        dtype='int64')
+                    dt -= seconds.to(unit=dt.unit)
+                return dt
             else:
-                dt = np.datetime64(obj)
+                return sc.datetime(np.datetime64(obj))
             return sc.datetime(dt)
         except ValueError:
             pass
