@@ -109,27 +109,25 @@ def _is_time(obj):
 def _as_datetime(obj: Any):
     if isinstance(obj, str):
         try:
-            # NumPy and scipp cannot handle timezone information. We therefore strip it,
-            # i.e., interpret time as local time. If time is given in UTC this will lead
-            # to misleading results since we have no information about the actual time
-            # zone.
-            # Would like to use dateutil, but with Python's datetime we do not get
-            # nanosecond precision.
-            if 'T' in obj:
+            # NumPy and scipp cannot handle timezone information. We therefore apply it,
+            # i.e., convert to UTC.
+            # Would like to use dateutil directly, but with Python's datetime we do not
+            # get nanosecond precision. Therefore we combine numpy and dateutil parsing.
+            date_only = 'T' in obj
+            if date_only:
+                return sc.datetime(np.datetime64(obj))
+            else:
                 date, time = obj.split('T')
                 time_and_timezone_offset = re.split(r'Z|\+|-', time)
                 time = time_and_timezone_offset[0]
+                # Strip timezone and parse with numpy
                 dt = sc.datetime(np.datetime64(f'{date}T{time}'))
                 if len(time_and_timezone_offset) > 1:
+                    # There is timezone info. Parse with dateutil.
                     utcoffset = dateutil.parser.isoparse(obj).utcoffset()
-                    seconds = sc.scalar(value=utcoffset.total_seconds(),
-                                        unit='s',
-                                        dtype='int64')
-                    dt -= seconds.to(unit=dt.unit)
+                    seconds = sc.scalar(value=utcoffset.total_seconds(), unit='s')
+                    dt -= seconds.to(unit=dt.unit, dtype='int64')
                 return dt
-            else:
-                return sc.datetime(np.datetime64(obj))
-            return sc.datetime(dt)
         except ValueError:
             pass
     return None
