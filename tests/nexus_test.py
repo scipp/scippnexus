@@ -256,9 +256,9 @@ def test_timezone_information_in_datetime_attribute_is_applied(nxroot, timezone,
 
 def test_timezone_information_in_datetime_attribute_preserves_ns_precision(nxroot):
     nxroot['mytime'] = sc.scalar(value=3, unit='s')
-    nxroot['mytime'].attrs['start_time'] = f'1970-01-01T12:00:00.123456789+0200'
+    nxroot['mytime'].attrs['start_time'] = '1970-01-01T12:00:00.123456789+0200'
     assert sc.identical(nxroot['mytime'][...],
-                        sc.datetime(unit='ns', value=f'1970-01-01T10:00:03.123456789'))
+                        sc.datetime(unit='ns', value='1970-01-01T10:00:03.123456789'))
 
 
 def test_loads_bare_timestamps_if_multiple_candidate_datetime_offsets_found(nxroot):
