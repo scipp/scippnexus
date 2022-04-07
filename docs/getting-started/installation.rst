@@ -12,7 +12,7 @@ Packages from `Anaconda Cloud <https://conda.anaconda.org/scipp>`_ are available
 
 .. code-block:: sh
 
-   conda install -c scipp scippnexus
+   conda install -c conda-forge -c scipp scippnexus
 
 Pip
 ---
