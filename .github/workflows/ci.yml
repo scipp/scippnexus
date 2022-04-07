@@ -8,6 +8,7 @@ on:
 
 jobs:
   formatting:
+    name: Formatting and static analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -24,6 +25,7 @@ jobs:
           commit_message: Apply automatic formatting
 
   tests:
+    name: Tests ${{ matrix.name }}
     needs: formatting
     runs-on: ubuntu-latest
     strategy:
