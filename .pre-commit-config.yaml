@@ -7,8 +7,6 @@ repos:
   rev: v0.30.0
   hooks:
     - id: yapf
-      args: ["-i", "-r"]
-      files: "python"
 - repo: https://github.com/kynan/nbstripout
   rev: 0.5.0
   hooks:
