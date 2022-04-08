@@ -113,7 +113,7 @@ def _as_datetime(obj: Any):
             # i.e., convert to UTC.
             # Would like to use dateutil directly, but with Python's datetime we do not
             # get nanosecond precision. Therefore we combine numpy and dateutil parsing.
-            date_only = 'T' in obj
+            date_only = 'T' not in obj
             if date_only:
                 return sc.datetime(np.datetime64(obj))
             else:
