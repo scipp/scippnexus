@@ -7,6 +7,10 @@ from .nxobject import NXobject, ScippIndex
 
 
 class NXsource(NXobject):
+    """Source information, can be read as a dataset.
+
+    Currently only the 'distance' field is loaded.
+    """
     @property
     def shape(self):
         return []
