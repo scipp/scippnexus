@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 import warnings
 import datetime
-import dateutil
+import dateutil.parser
 from enum import Enum, auto
 import functools
 from typing import List, Union, NoReturn, Any, Dict, Tuple, Protocol
