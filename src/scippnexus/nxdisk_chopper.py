@@ -6,6 +6,10 @@ from .nxobject import NXobject, ScippIndex
 
 
 class NXdisk_chopper(NXobject):
+    """Disk chopper information, can be read as a dataset.
+
+    Currently only the 'distance' and 'rotation_speed' fields are loaded.
+    """
     @property
     def shape(self):
         return []
