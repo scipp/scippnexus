@@ -4,6 +4,7 @@
 from __future__ import annotations
 import re
 import warnings
+import datetime
 import dateutil
 from enum import Enum, auto
 import functools
@@ -115,19 +116,25 @@ def _as_datetime(obj: Any):
             # get nanosecond precision. Therefore we combine numpy and dateutil parsing.
             date_only = 'T' not in obj
             if date_only:
-                return sc.datetime(np.datetime64(obj))
+                return sc.datetime(obj)
+            date, time = obj.split('T')
+            time_and_timezone_offset = re.split(r'Z|\+|-', time)
+            time = time_and_timezone_offset[0]
+            if len(time_and_timezone_offset) == 1:
+                # No timezone, parse directly (scipp based on numpy)
+                return sc.datetime(f'{date}T{time}')
             else:
-                date, time = obj.split('T')
-                time_and_timezone_offset = re.split(r'Z|\+|-', time)
-                time = time_and_timezone_offset[0]
-                # Strip timezone and parse with numpy
-                dt = sc.datetime(np.datetime64(f'{date}T{time}'))
-                if len(time_and_timezone_offset) > 1:
-                    # There is timezone info. Parse with dateutil.
-                    utcoffset = dateutil.parser.isoparse(obj).utcoffset()
-                    seconds = sc.scalar(value=utcoffset.total_seconds(), unit='s')
-                    dt -= seconds.to(unit=dt.unit, dtype='int64')
-                return dt
+                # There is timezone info. Parse with dateutil.
+                dt = dateutil.parser.isoparse(obj)
+                dt = dt.replace(microsecond=0)  # handled by numpy
+                dt = dt.astimezone(datetime.timezone.utc)
+                dt = dt.replace(tzinfo=None).isoformat()
+                # We operate with string operations here and thus end up parsing date
+                # and time twice. The reason is the the timezone-offset arithmetic must
+                # cannot be done, e.g., in nanoseconds without causing rounding errors.
+                if '.' in time:
+                    dt += f".{time.split('.')[1]}"
+                return sc.datetime(dt)
         except ValueError:
             pass
     return None
