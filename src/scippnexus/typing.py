@@ -3,6 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 from typing import Any, Protocol, Union, Tuple, Dict, List, Callable
+from typing import TYPE_CHECKING
 
 
 class H5Base(Protocol):
@@ -56,7 +57,17 @@ class H5Group(H5Base, Protocol):
         """Apply callable to all items, recursively"""
 
 
+if TYPE_CHECKING:
+    from enum import Enum
+
+    class ellipsis(Enum):
+        Ellipsis = "..."
+
+    Ellipsis = ellipsis.Ellipsis
+else:
+    ellipsis = type(Ellipsis)
+
 # Note that scipp does not support dicts yet, but this HDF5 code does, to
 # allow for loading blocks of 2d (or higher) data efficiently.
-ScippIndex = Union[Ellipsis, int, slice, Tuple[str, Union[int, slice]],
+ScippIndex = Union[ellipsis, int, slice, Tuple[str, Union[int, slice]],
                    Dict[str, Union[int, slice]]]
