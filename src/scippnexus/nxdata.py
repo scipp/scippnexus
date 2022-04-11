@@ -120,7 +120,7 @@ class NXdata(NXobject):
         # standard recommends that readers should also make "best effort" guess
         # since legacy files do not set this attribute.
         if (indices := self.attrs.get(f'{name}_indices')) is not None:
-            return np.array(self.dims)[np.array(indices).flatten()]
+            return list(np.array(self.dims)[np.array(indices).flatten()])
         signals = [self._signal_name, self._errors_name]
         signals += list(self.attrs.get('auxiliary_signals', []))
         if name in signals:
