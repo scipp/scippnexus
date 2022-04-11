@@ -28,7 +28,10 @@ class NXlog(NXobject):
         # The outermost axis in NXlog is pre-defined to 'time' (if present). Note
         # that this may be overriden by an `axes` attribute, if defined for the group.
         if 'time' in self:
-            axes[0] = 'time'
+            if len(axes) == 0:  # shape=(1,) was squeezed, log has only a single value
+                axes = ['time']
+            else:
+                axes[0] = 'time'
         # NXdata uses the 'signal' attribute to define the field name of the signal.
         # NXlog uses a "hard-coded" signal name 'value', without specifying the
         # attribute in the file, so we pass this explicitly to NXdata.
