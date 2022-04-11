@@ -10,3 +10,7 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 addopts = "-ra -v"
 testpaths = "tests"
+
+[tool.mypy]
+mypy_path = "src"
+ignore_missing_imports = true
