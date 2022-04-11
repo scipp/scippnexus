@@ -130,7 +130,7 @@ def _as_datetime(obj: Any):
                 dt = dt.astimezone(datetime.timezone.utc)
                 dt = dt.replace(tzinfo=None).isoformat()
                 # We operate with string operations here and thus end up parsing date
-                # and time twice. The reason is the the timezone-offset arithmetic must
+                # and time twice. The reason is that the timezone-offset arithmetic
                 # cannot be done, e.g., in nanoseconds without causing rounding errors.
                 if '.' in time:
                     dt += f".{time.split('.')[1]}"
