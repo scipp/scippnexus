@@ -37,7 +37,7 @@ class NXevent_data(NXobject):
         self._check_for_missing_fields()
         index = to_plain_index([_pulse_dimension], select)
 
-        max_index = self["event_index"].shape[0]
+        max_index = self.shape[0]
         single = False
         if index is Ellipsis or index == tuple():
             last_loaded = False

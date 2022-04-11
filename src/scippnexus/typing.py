@@ -69,5 +69,5 @@ else:
 
 # Note that scipp does not support dicts yet, but this HDF5 code does, to
 # allow for loading blocks of 2d (or higher) data efficiently.
-ScippIndex = Union[ellipsis, int, slice, Tuple[str, Union[int, slice]],
+ScippIndex = Union[ellipsis, int, tuple, slice, Tuple[str, Union[int, slice]],
                    Dict[str, Union[int, slice]]]

@@ -233,7 +233,7 @@ class NXobject:
             name: NXobjectIndex) -> Union['NXobject', Field, sc.DataArray, sc.Dataset]:
         return self._get_child(name, use_field_dims=True)
 
-    def _getitem(self, index: ScippIndex) -> sc.DataArray:
+    def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.Dataset]:
         raise NotImplementedError(f'Loading {self.nx_class} is not supported.')
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:

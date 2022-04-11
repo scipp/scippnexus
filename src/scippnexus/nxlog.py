@@ -38,7 +38,7 @@ class NXlog(NXobject):
         return NXdata(self._group, signal_name_default='value', axes=axes)
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
-        data = self._nxbase[select]
+        data: sc.DataArray = self._nxbase[select]
         # The 'time' field in NXlog contains extra properties 'start' and
         # 'scaling_factor' that are not handled by NXdata. These are used
         # to transform to a datetime-coord.
