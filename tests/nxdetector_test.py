@@ -106,8 +106,7 @@ def test_loads_event_data_with_0d_detector_numbers(nxroot):
     assert detector.dims == []
     assert detector.shape == []
     loaded = detector[...]
-    assert sc.identical(loaded.bins.size().data,
-                        sc.array(dims=[], unit=None, dtype='int64', values=2))
+    assert sc.identical(loaded.bins.size().data, sc.index(2, dtype='int64'))
 
 
 def test_loads_event_data_with_2d_detector_numbers(nxroot):
