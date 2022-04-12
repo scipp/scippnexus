@@ -32,6 +32,8 @@ def _load_selected(group: H5Group, selector: Selector) -> List[sc.DataArray]:
     return {name: g[...] for name, g in groups.items()}
 
 
+# TODO rename ScalarProvider?
+# should the callable be hard-coded to sc.scalar, or accept user provided?
 class ScalarLoader:
     def __init__(self, node: Union[NXobject, Field]):
         self._node = node[...]  # TODO consider delay load until first use
@@ -45,7 +47,7 @@ class ScalarLoader:
         return ()
 
     def __getitem__(self, select: ScippIndex) -> sc.Variable:
-        # TODO Either ignore irrelevant indices, or require called to filter indices
+        # TODO Either ignore irrelevant indices, or require callee to filter indices
         if select:
             raise sc.DimensionError(f"Cannot select slice {select} from scalar")
         return sc.scalar(self._node)
