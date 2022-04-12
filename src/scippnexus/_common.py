@@ -9,7 +9,6 @@ from .typing import ScippIndex
 
 def convert_time_to_datetime64(
         raw_times: sc.Variable,
-        group_path: str,
         start: str = None,
         scaling_factor: Union[float, np.float_] = None) -> sc.Variable:
     """
@@ -25,8 +24,6 @@ def convert_time_to_datetime64(
 
     Args:
         raw_times: The raw time data from a nexus file.
-        group_path: The path within the nexus file to the log being read.
-            Used to generate warnings if loading the log fails.
         start: Optional, the start time of the log in an ISO8601
             string. If not provided, defaults to the beginning of the
             unix epoch (1970-01-01T00:00:00).
@@ -34,31 +31,21 @@ def convert_time_to_datetime64(
             time series data and the unit of the raw_times Variable. If
             not provided, defaults to 1 (a no-op scaling factor).
     """
-    try:
-        raw_times_ns = sc.to_unit(raw_times, sc.units.ns, copy=False)
-    except sc.UnitError:
-        raise sc.UnitError(
-            f"The units of time in the entry at "
-            f"'{group_path}/time{{units}}' must be convertible to seconds, "
-            f"but this cannot be done for '{raw_times.unit}'. Skipping "
-            f"loading group at '{group_path}'.")
-
-    try:
-        _start_ts = sc.scalar(value=np.datetime64(start or "1970-01-01T00:00:00"),
-                              unit=sc.units.ns,
-                              dtype=sc.DType.datetime64)
-    except ValueError:
-        raise ValueError(
-            f"The date string '{start}' in the entry at "
-            f"'{group_path}/time@start' failed to parse as an ISO8601 date. "
-            f"Skipping loading group at '{group_path}'")
+    if (raw_times.dtype
+            in (sc.DType.float64, sc.DType.float32)) or scaling_factor is not None:
+        unit = sc.units.ns
+    else:
+        # determine more precise unit
+        ratio = sc.scalar(1.0, unit=start.unit) / sc.scalar(
+            1.0, unit=raw_times.unit).to(unit=start.unit)
+        unit = start.unit if ratio.value < 1.0 else raw_times.unit
 
     if scaling_factor is None:
-        times = raw_times_ns.astype(sc.DType.int64, copy=False)
+        times = raw_times
     else:
-        _scale = sc.scalar(value=scaling_factor)
-        times = (raw_times_ns * _scale).astype(sc.DType.int64, copy=False)
-    return _start_ts + times
+        times = raw_times * sc.scalar(value=scaling_factor)
+    return start.to(unit=unit, copy=False) + times.to(
+        dtype=sc.DType.int64, unit=unit, copy=False)
 
 
 def _to_canonical_select(dims: List[str], select: ScippIndex) -> ScippIndex:

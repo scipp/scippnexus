@@ -1,4 +1,5 @@
 import h5py
+import numpy as np
 import scipp as sc
 from scippnexus import NXroot, NX_class
 import pytest
@@ -226,6 +227,15 @@ def test_create_field_from_variable(nxroot, unit):
     assert sc.identical(loaded, var.rename(xx=loaded.dim))
 
 
+def test_create_datetime_field_from_variable(nxroot):
+    var = sc.datetime(np.datetime64('now'), unit='ns') + sc.arange(
+        'time', 1, 4, dtype='int64', unit='ns')
+    nxroot.create_field('field', var)
+    loaded = nxroot['field'][...]
+    # Nexus does not support storing dim labels
+    assert sc.identical(loaded, var.rename(time=loaded.dim))
+
+
 @pytest.mark.parametrize("nx_class", [NX_class.NXdata, NX_class.NXlog])
 def test_create_class(nxroot, nx_class):
     group = nxroot.create_class('group', nx_class)
@@ -304,3 +314,20 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
     assert data['xx'].ndim == 1
     assert data['xx'].shape == [2]
     assert sc.identical(data['xx'][...], xx['ignored', 0])
+
+
+def test_fields_with_datetime_attribute_are_loaded_as_datetime(nxroot):
+    da = sc.DataArray(
+        sc.epoch(unit='s') +
+        sc.array(dims=['xx', 'yy'], unit='s', values=[[1, 2, 3], [4, 5, 6]]))
+    da.coords['xx'] = da.data['yy', 0]
+    da.coords['xx2'] = da.data['yy', 1]
+    da.coords['yy'] = da.data['xx', 0]
+    data = nxroot.create_class('data1', NX_class.NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data.create_field('signal', da.data)
+    data.create_field('xx', da.coords['xx'])
+    data.create_field('xx2', da.coords['xx2'])
+    data.create_field('yy', da.coords['yy'])
+    assert sc.identical(data[...], da)
