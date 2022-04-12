@@ -34,6 +34,7 @@ class DataArrayLoaderFactory:
         self._base = (func, selector)
 
     def add_attrs(self, func: Callable, selector: Selector):
+        # TODO Should also support name transformations
         self._attrs.append((func, selector))
 
     def __call__(self, group: H5Group) -> DataArrayLoader:
@@ -47,6 +48,8 @@ class DataArrayLoader:
 
     def __getitem__(self, index: ScippIndex) -> sc.DataArray:
         # TODO index ignored
+        # Unclear dividing line to factory. How should we pass, e.g., base and attrs
+        # to loader?
         func, selector = self._factory._base
         da = func(_load_selected(self._group, selector))
         for func, selector in self._factory._attrs:
