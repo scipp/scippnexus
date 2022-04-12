@@ -1,7 +1,7 @@
 import h5py
-import numpy as np
 import scipp as sc
 from scippnexus import NXroot, NX_class
+from scippnexus.loader import DataArrayLoaderFactory, Selector
 import pytest
 
 
@@ -27,4 +27,8 @@ def test_multiple_coords(nxroot):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
-    assert sc.identical(data[...], da)
+
+    factory = DataArrayLoaderFactory()
+    factory.set_base(lambda x: x[0], Selector(nxclass=NX_class.NXdata))
+    loader = factory(nxroot)
+    assert sc.identical(loader[()], da)
