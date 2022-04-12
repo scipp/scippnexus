@@ -80,7 +80,8 @@ class _EventField:
                                         dtype=id_min.dtype)
         else:
             detector_number = self._detector_number[select]
-        event_id = detector_number.flatten(to='event_id')
+        # copy since sc.bin cannot deal with a non-contiguous view
+        event_id = detector_number.flatten(to='event_id').copy()
         event_data.bins.coords['event_time_zero'] = sc.bins_like(
             event_data, fill_value=event_data.coords['event_time_zero'])
         # After loading raw NXevent_data it is guaranteed that the event table

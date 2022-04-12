@@ -145,6 +145,19 @@ def test_indices_attribute_for_coord(nxroot, indices):
     assert sc.identical(data[...], da)
 
 
+@pytest.mark.parametrize("indices", [1, [1]], ids=['int', 'list-of-int'])
+def test_indices_attribute_for_coord_with_nontrivial_slice(nxroot, indices):
+    da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
+    da.coords['yy2'] = da.data['xx', 0]
+    data = nxroot.create_class('data1', NX_class.NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data.attrs['yy2_indices'] = indices
+    data.create_field('signal', da.data)
+    data.create_field('yy2', da.coords['yy2'])
+    assert sc.identical(data['yy', :1], da['yy', :1])
+
+
 def test_transpose_indices_attribute_for_coord(nxroot):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     da.coords['xx2'] = sc.transpose(da.data)

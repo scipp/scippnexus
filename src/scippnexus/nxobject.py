@@ -275,7 +275,7 @@ class NXobject:
     def _get_child(
             self,
             name: NXobjectIndex,
-            use_field_dims: bool = False) -> Union['__class__', Field, sc.DataArray]:
+            use_field_dims: bool = False) -> Union['NXobject', Field, sc.DataArray]:
         """Get item, with flag to control whether fields dims should be inferred"""
         if name is None:
             raise KeyError("None is not a valid index")
@@ -292,7 +292,7 @@ class NXobject:
         return da
 
     def __getitem__(self,
-                    name: NXobjectIndex) -> Union['__class__', Field, sc.DataArray]:
+                    name: NXobjectIndex) -> Union['NXobject', Field, sc.DataArray]:
         return self._get_child(name, use_field_dims=True)
 
     def _getitem(self, index: ScippIndex) -> NoReturn:
@@ -305,7 +305,7 @@ class NXobject:
     def __contains__(self, name: str) -> bool:
         return name in self._group
 
-    def get(self, name: str, default=None) -> Union['__class__', Field, sc.DataArray]:
+    def get(self, name: str, default=None) -> Union['NXobject', Field, sc.DataArray]:
         return self[name] if name in self else default
 
     @property
@@ -330,14 +330,14 @@ class NXobject:
     def keys(self) -> List[str]:
         return self._group.keys()
 
-    def values(self) -> List[Union[Field, '__class__']]:
+    def values(self) -> List[Union[Field, 'NXobject']]:
         return [self[name] for name in self.keys()]
 
-    def items(self) -> List[Tuple[str, Union[Field, '__class__']]]:
+    def items(self) -> List[Tuple[str, Union[Field, 'NXobject']]]:
         return list(zip(self.keys(), self.values()))
 
     @functools.lru_cache()
-    def by_nx_class(self) -> Dict[NX_class, Dict[str, '__class__']]:
+    def by_nx_class(self) -> Dict[NX_class, Dict[str, 'NXobject']]:
         classes = {name: [] for name in _nx_class_registry()}
 
         # TODO implement visititems for NXobject and merge the two blocks
@@ -410,6 +410,7 @@ class NXobject:
 
 
 class NXroot(NXobject):
+    """Root of a NeXus file."""
     @property
     def nx_class(self) -> NX_class:
         # As an oversight in the NeXus standard and the reference implementation,
@@ -420,15 +421,15 @@ class NXroot(NXobject):
 
 
 class NXentry(NXobject):
-    pass
+    """Entry in a NeXus file."""
 
 
 class NXinstrument(NXobject):
-    pass
+    """Group of instrument-related information."""
 
 
 class NXtransformations(NXobject):
-    pass
+    """Group of transformations."""
 
 
 def _make(group) -> NXobject:

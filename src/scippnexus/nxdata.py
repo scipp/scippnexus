@@ -20,13 +20,18 @@ class NXdata(NXobject):
             axes: List[str] = None,
             skip: List[str] = None):
         """
-        :param signal_name_default: Default signal name used, if no `signal`
-            attribute found in file.
-        :param signal_override Signal field-like to use instead of trying to read
-            signal from the file. This is used when there is no signal or to provide
-            a signal computed from NXevent_data
-        :param axes: Default axes used, if no `axes` attribute found in file.
-        :param skip: Names of fields to skip when loading coords.
+        Parameters
+        ----------
+        signal_name_default:
+            Default signal name used, if no `signal` attribute found in file.
+        signal_override:
+            Field-like to use instead of trying to read signal from the file. This is
+            used when there is no signal or to provide a signal computed from
+            NXevent_data.
+        axes:
+            Default axes used, if no `axes` attribute found in file.
+        skip:
+            Names of fields to skip when loading coords.
         """
         super().__init__(group)
         self._signal_name_default = signal_name_default
@@ -115,7 +120,7 @@ class NXdata(NXobject):
         # standard recommends that readers should also make "best effort" guess
         # since legacy files do not set this attribute.
         if (indices := self.attrs.get(f'{name}_indices')) is not None:
-            return np.array(self.dims)[np.array(indices).flatten()]
+            return list(np.array(self.dims)[np.array(indices).flatten()])
         signals = [self._signal_name, self._errors_name]
         signals += list(self.attrs.get('auxiliary_signals', []))
         if name in signals:
