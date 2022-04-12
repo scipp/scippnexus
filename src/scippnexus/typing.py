@@ -62,8 +62,6 @@ if TYPE_CHECKING:
 
     class ellipsis(Enum):
         Ellipsis = "..."
-
-    Ellipsis = ellipsis.Ellipsis
 else:
     ellipsis = type(Ellipsis)
 
