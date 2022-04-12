@@ -49,5 +49,8 @@ class DataArrayLoader:
         # TODO index ignored
         func, selector = self._factory._base
         da = func(_load_selected(self._group, selector))
-
+        for func, selector in self._factory._attrs:
+            loaded = _load_selected(self._group, selector)
+            for name, v in loaded.items():
+                da.attrs[name] = func(v)
         return da

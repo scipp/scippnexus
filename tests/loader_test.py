@@ -24,6 +24,17 @@ def data_array_xx_yy() -> sc.DataArray:
     return da
 
 
+def data_array_time() -> sc.DataArray:
+    return sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
+        coords={
+            'time':
+            sc.epoch(unit='ns') +
+            sc.array(dims=['time'], unit='s', values=[4.4, 5.5, 6.6]).to(unit='ns',
+                                                                         dtype='int64')
+        })
+
+
 def add_data(group: H5Group, name: str, da: sc.DataArray):
     data = group.create_class(name, NX_class.NXdata)
     data.attrs['axes'] = da.dims
@@ -32,6 +43,12 @@ def add_data(group: H5Group, name: str, da: sc.DataArray):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
+
+
+def add_log(group: H5Group, name: str, da: sc.DataArray):
+    log = group['entry'].create_class(name, NX_class.NXlog)
+    log['value'] = da.data
+    log['time'] = da.coords['time'] - sc.epoch(unit='ns')
 
 
 def test_get_single_data(nxroot):
@@ -54,5 +71,22 @@ def test_combine_data(nxroot):
         return sc.concat(list(mapping.values()), dim='z')
 
     factory.set_base(concat_values_along_z, Selector(nxclass=NX_class.NXdata))
+    loader = factory(nxroot)
+    assert sc.identical(loader[()], sc.concat([da, da + da], 'z'))
+
+
+def test_combine_data_and_add_attrs(nxroot):
+    da = data_array_xx_yy()
+    da.attrs['log1'] = sc.scalar(data_array_time())
+    add_data(nxroot, 'data1', da)
+    add_data(nxroot, 'data2', da + da)
+    add_log(nxroot, 'log1', da.attrs['log1'].value)
+    factory = DataArrayLoaderFactory()
+
+    def concat_values_along_z(mapping):
+        return sc.concat(list(mapping.values()), dim='z')
+
+    factory.set_base(concat_values_along_z, Selector(nxclass=NX_class.NXdata))
+    factory.add_attrs(sc.scalar, Selector(nxclass=NX_class.NXlog))
     loader = factory(nxroot)
     assert sc.identical(loader[()], sc.concat([da, da + da], 'z'))
