@@ -2,7 +2,6 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
-import functools
 from dataclasses import dataclass, field
 from typing import List, Union, Callable
 import scipp as sc
@@ -44,10 +43,6 @@ class ScalarLoader:
     @property
     def shape(self):
         return ()
-
-    @functools.cached_property
-    def value(self):
-        return self._value  # where does the actual load happend?
 
     def __getitem__(self, select: ScippIndex) -> sc.Variable:
         # TODO Either ignore irrelevant indices, or require called to filter indices
