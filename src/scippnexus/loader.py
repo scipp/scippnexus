@@ -22,7 +22,7 @@ class Selector:
 def _load_selected(group: H5Group, selector: Selector) -> List[NXobject]:
     groups = group.by_nx_class()[selector.nxclass]
     # TODO process includes and excludes
-    return [g[...] for g in groups.values()]
+    return {name: g[...] for name, g in groups.items()}
 
 
 class DataArrayLoaderFactory:
@@ -46,6 +46,8 @@ class DataArrayLoader:
         self._group = group
 
     def __getitem__(self, index: ScippIndex) -> sc.DataArray:
+        # TODO index ignored
         func, selector = self._factory._base
         da = func(_load_selected(self._group, selector))
+
         return da

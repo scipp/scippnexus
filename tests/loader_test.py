@@ -1,4 +1,3 @@
-from functools import partial
 import h5py
 import scipp as sc
 from scippnexus import NXroot, NX_class
@@ -40,9 +39,9 @@ def test_get_single_data(nxroot):
     add_data(nxroot, 'data1', da)
     add_data(nxroot, 'data2', da + da)
     factory = DataArrayLoaderFactory()
-    factory.set_base(lambda x: x[0], Selector(nxclass=NX_class.NXdata))
+    factory.set_base(lambda x: x['data2'], Selector(nxclass=NX_class.NXdata))
     loader = factory(nxroot)
-    assert sc.identical(loader[()], da)
+    assert sc.identical(loader[()], da + da)
 
 
 def test_combine_data(nxroot):
@@ -50,6 +49,10 @@ def test_combine_data(nxroot):
     add_data(nxroot, 'data1', da)
     add_data(nxroot, 'data2', da + da)
     factory = DataArrayLoaderFactory()
-    factory.set_base(partial(sc.concat, dim='z'), Selector(nxclass=NX_class.NXdata))
+
+    def concat_values_along_z(mapping):
+        return sc.concat(list(mapping.values()), dim='z')
+
+    factory.set_base(concat_values_along_z, Selector(nxclass=NX_class.NXdata))
     loader = factory(nxroot)
     assert sc.identical(loader[()], sc.concat([da, da + da], 'z'))
