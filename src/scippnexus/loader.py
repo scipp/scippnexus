@@ -20,6 +20,7 @@ class Selector:
 
 
 def _load_selected(group: H5Group, selector: Selector) -> List[NXobject]:
+    # TODO Better interface to avoid repeated calls to by_nx_class?
     groups = group.by_nx_class()[selector.nxclass]
     # TODO process includes and excludes
     return {name: g[...] for name, g in groups.items()}
