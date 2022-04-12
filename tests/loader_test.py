@@ -1,7 +1,9 @@
+from functools import partial
 import h5py
 import scipp as sc
 from scippnexus import NXroot, NX_class
 from scippnexus.loader import DataArrayLoaderFactory, Selector
+from scippnexus.typing import H5Group
 import pytest
 
 
@@ -14,13 +16,17 @@ def nxroot(request):
         yield root
 
 
-def test_multiple_coords(nxroot):
+def data_array_xx_yy() -> sc.DataArray:
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    return da
+
+
+def add_data(group: H5Group, name: str, da: sc.DataArray):
+    data = group.create_class(name, NX_class.NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -28,7 +34,22 @@ def test_multiple_coords(nxroot):
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
 
+
+def test_get_single_data(nxroot):
+    da = data_array_xx_yy()
+    add_data(nxroot, 'data1', da)
+    add_data(nxroot, 'data2', da + da)
     factory = DataArrayLoaderFactory()
     factory.set_base(lambda x: x[0], Selector(nxclass=NX_class.NXdata))
     loader = factory(nxroot)
     assert sc.identical(loader[()], da)
+
+
+def test_combine_data(nxroot):
+    da = data_array_xx_yy()
+    add_data(nxroot, 'data1', da)
+    add_data(nxroot, 'data2', da + da)
+    factory = DataArrayLoaderFactory()
+    factory.set_base(partial(sc.concat, dim='z'), Selector(nxclass=NX_class.NXdata))
+    loader = factory(nxroot)
+    assert sc.identical(loader[()], sc.concat([da, da + da], 'z'))
