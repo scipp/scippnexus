@@ -11,6 +11,10 @@ from .nxobject import NX_class, NXobject, Field
 from ._common import to_child_select
 
 
+# TODO 3 cases:
+# 1. single selector resulting in multiple hits, process item-by-item
+# 2. single selector resulting in multiple hits, process as a whole
+# 3. multiple selector with 1 (or more?) hits, process as a whole
 @dataclass
 class Selector:
     nxclass: NX_class
@@ -84,11 +88,15 @@ class DataArrayLoaderFactory:
     def set_base(self, func: Callable, selector: Selector):
         self._base = (func, selector)
 
+    # TODO mechanism to add single attr?
+
+    # TODO Should this also reference specific files or groups?
     def add_attrs(self, func: Callable, selector: Selector):
         # TODO Should also support name transformations
         self._attrs.append((func, selector))
 
     def __call__(self, group: H5Group) -> DataArrayLoader:
+        # TODO could flatten attr table here, since we can now apply the selector?
         return DataArrayLoader(self, group)
 
 
@@ -104,7 +112,7 @@ class DataArrayLoader:
         pass
 
     def __getitem__(self, select: ScippIndex) -> sc.DataArray:
-        # TODO select ignored
+        # TODO select partially ignored
         # Unclear dividing line to factory. How should we pass, e.g., base and attrs
         # to loader?
         func, selector = self._factory._base
