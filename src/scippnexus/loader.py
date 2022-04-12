@@ -2,12 +2,14 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
+import functools
 from dataclasses import dataclass, field
 from typing import List, Union, Callable
 import scipp as sc
 
 from .typing import H5Group, ScippIndex
-from .nxobject import NX_class, NXobject
+from .nxobject import NX_class, NXobject, Field
+from ._common import to_child_select
 
 
 @dataclass
@@ -19,11 +21,39 @@ class Selector:
     exclude_regexes: List[str] = field(default_factory=list)
 
 
-def _load_selected(group: H5Group, selector: Selector) -> List[NXobject]:
+def _get_selected(group: H5Group, selector: Selector) -> List[NXobject]:
     # TODO Better interface to avoid repeated calls to by_nx_class?
     groups = group.by_nx_class()[selector.nxclass]
     # TODO process includes and excludes
+    return groups
+
+
+def _load_selected(group: H5Group, selector: Selector) -> List[sc.DataArray]:
+    groups = _get_selected(group, selector)
     return {name: g[...] for name, g in groups.items()}
+
+
+class ScalarLoader:
+    def __init__(self, node: Union[NXobject, Field]):
+        self._node = node[...]  # TODO consider delay load until first use
+
+    @property
+    def dims(self):
+        return []
+
+    @property
+    def shape(self):
+        return ()
+
+    @functools.cached_property
+    def value(self):
+        return self._value  # where does the actual load happend?
+
+    def __getitem__(self, select: ScippIndex) -> sc.Variable:
+        # TODO Either ignore irrelevant indices, or require called to filter indices
+        if select:
+            raise sc.DimensionError(f"Cannot select slice {select} from scalar")
+        return sc.scalar(self._node)
 
 
 class DataArrayLoaderFactory:
@@ -47,14 +77,17 @@ class DataArrayLoader:
         self._factory = factory
         self._group = group
 
-    def __getitem__(self, index: ScippIndex) -> sc.DataArray:
-        # TODO index ignored
+    def __getitem__(self, select: ScippIndex) -> sc.DataArray:
+        # TODO select ignored
         # Unclear dividing line to factory. How should we pass, e.g., base and attrs
         # to loader?
         func, selector = self._factory._base
         da = func(_load_selected(self._group, selector))
         for func, selector in self._factory._attrs:
-            loaded = _load_selected(self._group, selector)
-            for name, v in loaded.items():
-                da.attrs[name] = func(v)
+            groups = _get_selected(self._group, selector)
+            for name, v in groups.items():
+                loader = func(v)
+                da.attrs[name] = loader[to_child_select(da.dims,
+                                                        loader.dims,
+                                                        select=select)]
         return da

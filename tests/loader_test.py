@@ -1,7 +1,7 @@
 import h5py
 import scipp as sc
 from scippnexus import NXroot, NX_class
-from scippnexus.loader import DataArrayLoaderFactory, Selector
+from scippnexus.loader import DataArrayLoaderFactory, Selector, ScalarLoader
 from scippnexus.typing import H5Group
 import pytest
 
@@ -87,6 +87,6 @@ def test_combine_data_and_add_attrs(nxroot):
         return sc.concat(list(mapping.values()), dim='z')
 
     factory.set_base(concat_values_along_z, Selector(nxclass=NX_class.NXdata))
-    factory.add_attrs(sc.scalar, Selector(nxclass=NX_class.NXlog))
+    factory.add_attrs(ScalarLoader, Selector(nxclass=NX_class.NXlog))
     loader = factory(nxroot)
     assert sc.identical(loader[()], sc.concat([da, da + da], 'z'))
