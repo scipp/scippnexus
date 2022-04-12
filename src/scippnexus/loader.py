@@ -34,7 +34,7 @@ def _load_selected(group: H5Group, selector: Selector) -> List[sc.DataArray]:
 
 # TODO rename ScalarProvider?
 # should the callable be hard-coded to sc.scalar, or accept user provided?
-class ScalarLoader:
+class ScalarProvider:
     def __init__(self, node: Union[NXobject, Field]):
         self._node = node[...]  # TODO consider delay load until first use
 
@@ -51,6 +51,29 @@ class ScalarLoader:
         if select:
             raise sc.DimensionError(f"Cannot select slice {select} from scalar")
         return sc.scalar(self._node)
+
+
+# TODO mechanism to indicate that we need multiple inputs?
+# can we just use a base class and branch on that?
+class ConcatProvider:
+    def __init__(self, nodes):
+        pass
+
+    @property
+    def dims(self):
+        # TODO dims after concat
+        return ['pixel']
+
+    @property
+    def shape(self):
+        # TODO shape after concat
+        # can be computed from shape of nodes
+        return (4, )
+
+    def __getitem__(self, select: ScippIndex) -> sc.Variable:
+        # Potential smart logic to figure out which chunks need to be loaded
+        # for 1-D this would be based on cumsum of chunk sizes.
+        pass  # example: concat(flatten(nodes))
 
 
 class DataArrayLoaderFactory:
@@ -73,6 +96,12 @@ class DataArrayLoader:
     def __init__(self, factory: DataArrayLoaderFactory, group: H5Group):
         self._factory = factory
         self._group = group
+
+    @property
+    def select_events(self):
+        # return helper with __getitem__. This would return another DataArrayLoader,
+        # with a preprocessor that is applied to all NXdetector groups that are loaded
+        pass
 
     def __getitem__(self, select: ScippIndex) -> sc.DataArray:
         # TODO select ignored
