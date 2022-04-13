@@ -52,6 +52,33 @@ def test_Transformation_with_single_value(nxroot):
     assert sc.identical(t[()], expected)
 
 
+def test_chain_with_single_values_and_different_unit(nxroot):
+    detector = create_detector(nxroot)
+    detector.create_field('depends_on', sc.scalar('/detector_0/transformations/t1'))
+    transformations = detector.create_class('transformations',
+                                            NX_class.NXtransformations)
+    value = sc.scalar(6.5, unit='mm')
+    offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
+    vector = sc.vector(value=[0, 0, 1])
+    t = value.to(unit='m') * vector
+    value1 = transformations.create_field('t1', value)
+    value1.attrs['depends_on'] = 't2'
+    value1.attrs['transformation_type'] = 'translation'
+    value1.attrs['offset'] = offset.values
+    value1.attrs['offset_units'] = str(offset.unit)
+    value1.attrs['vector'] = vector.value
+    value2 = transformations.create_field('t2', value.to(unit='cm'))
+    value2.attrs['depends_on'] = '.'
+    value2.attrs['transformation_type'] = 'translation'
+    value2.attrs['vector'] = vector.value
+
+    expected = sc.spatial.affine_transform(value=np.identity(4), unit=t.unit)
+    expected = expected * sc.spatial.translations(
+        dims=t.dims, values=2 * t.values, unit=t.unit)
+    expected = expected * sc.spatial.translation(value=[0.001, 0.002, 0.003], unit='m')
+    assert sc.identical(detector[...].coords['depends_on'], expected)
+
+
 def test_Transformation_with_multiple_values(nxroot):
     detector = create_detector(nxroot)
     detector.create_field('depends_on', sc.scalar('/detector_0/transformations/t1'))
