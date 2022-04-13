@@ -159,7 +159,7 @@ class NXdata(NXobject):
                 continue
             try:
                 sel = to_child_select(self.dims, field.dims, select)
-                coord = self[name][sel]
+                coord: sc.Variable = self[name][sel]
                 for suffix in self._error_suffixes:
                     if f'{name}{suffix}' in self:
                         if coord.variances is not None:

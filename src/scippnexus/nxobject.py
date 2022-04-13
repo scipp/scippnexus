@@ -8,7 +8,7 @@ import datetime
 import dateutil.parser
 from enum import Enum, auto
 import functools
-from typing import List, Union, NoReturn, Any, Dict, Tuple, Protocol
+from typing import List, Union, Any, Dict, Tuple, Protocol
 import numpy as np
 import scipp as sc
 import h5py
@@ -291,11 +291,12 @@ class NXobject:
             da.coords['depends_on'] = t if isinstance(t, sc.Variable) else sc.scalar(t)
         return da
 
-    def __getitem__(self,
-                    name: NXobjectIndex) -> Union['NXobject', Field, sc.DataArray]:
+    def __getitem__(
+            self,
+            name: NXobjectIndex) -> Union['NXobject', Field, sc.DataArray, sc.Dataset]:
         return self._get_child(name, use_field_dims=True)
 
-    def _getitem(self, index: ScippIndex) -> NoReturn:
+    def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.Dataset]:
         raise NotImplementedError(f'Loading {self.nx_class} is not supported.')
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Union, List
+from typing import Dict, Union, List
 import scipp as sc
 import numpy as np
 from .typing import ScippIndex
@@ -48,7 +48,8 @@ def convert_time_to_datetime64(
         dtype=sc.DType.int64, unit=unit, copy=False)
 
 
-def _to_canonical_select(dims: List[str], select: ScippIndex) -> ScippIndex:
+def _to_canonical_select(dims: List[str],
+                         select: ScippIndex) -> Dict[str, Union[int, slice]]:
     """Return selection as dict with explicit dim labels"""
     def check_1d():
         if len(dims) != 1:
@@ -76,7 +77,7 @@ def _to_canonical_select(dims: List[str], select: ScippIndex) -> ScippIndex:
     return select
 
 
-def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, tuple]:
+def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, slice, tuple]:
     """
     Given a valid "scipp" index 'select', return an equivalent plain numpy-style index.
     """
