@@ -2,7 +2,10 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
+import re
 import warnings
+import datetime
+import dateutil.parser
 from enum import Enum, auto
 import functools
 from typing import List, Union, Any, Dict, Tuple, Protocol
@@ -14,6 +17,7 @@ from ._hdf5_nexus import _cset_to_encoding, _ensure_str
 from ._hdf5_nexus import _ensure_supported_int_type, _warn_latin1_decode
 from .typing import H5Group, H5Dataset, ScippIndex
 from ._common import to_plain_index
+from ._common import convert_time_to_datetime64
 
 NXobjectIndex = Union[str, ScippIndex]
 
@@ -84,6 +88,9 @@ class Attrs:
     def __setitem__(self, name: str, val: Any):
         self._attrs[name] = val
 
+    def __iter__(self):
+        yield from self._attrs
+
     def get(self, name: str, default=None) -> Any:
         return self[name] if name in self else default
 
@@ -91,14 +98,57 @@ class Attrs:
         return self._attrs.keys()
 
 
+def _is_time(obj):
+    dummy = sc.empty(dims=[], shape=[], unit=obj.unit)
+    try:
+        dummy.to(unit='s')
+        return True
+    except sc.UnitError:
+        return False
+
+
+def _as_datetime(obj: Any):
+    if isinstance(obj, str):
+        try:
+            # NumPy and scipp cannot handle timezone information. We therefore apply it,
+            # i.e., convert to UTC.
+            # Would like to use dateutil directly, but with Python's datetime we do not
+            # get nanosecond precision. Therefore we combine numpy and dateutil parsing.
+            date_only = 'T' not in obj
+            if date_only:
+                return sc.datetime(obj)
+            date, time = obj.split('T')
+            time_and_timezone_offset = re.split(r'Z|\+|-', time)
+            time = time_and_timezone_offset[0]
+            if len(time_and_timezone_offset) == 1:
+                # No timezone, parse directly (scipp based on numpy)
+                return sc.datetime(f'{date}T{time}')
+            else:
+                # There is timezone info. Parse with dateutil.
+                dt = dateutil.parser.isoparse(obj)
+                dt = dt.replace(microsecond=0)  # handled by numpy
+                dt = dt.astimezone(datetime.timezone.utc)
+                dt = dt.replace(tzinfo=None).isoformat()
+                # We operate with string operations here and thus end up parsing date
+                # and time twice. The reason is that the timezone-offset arithmetic
+                # cannot be done, e.g., in nanoseconds without causing rounding errors.
+                if '.' in time:
+                    dt += f".{time.split('.')[1]}"
+                return sc.datetime(dt)
+        except ValueError:
+            pass
+    return None
+
+
 class Field:
     """NeXus field.
 
     In HDF5 fields are represented as dataset.
     """
-    def __init__(self, dataset: H5Dataset, dims=None):
+    def __init__(self, dataset: H5Dataset, dims=None, is_time=None):
         self._dataset = dataset
         self._shape = list(self._dataset.shape)
+        self._is_time = is_time
         # NeXus treats [] and [1] interchangeably. In general this is ill-defined, but
         # the best we can do appears to be squeezing unless the file provides names for
         # dimensions. The shape property of this class does thus not necessarily return
@@ -137,6 +187,18 @@ class Field:
             self._dataset.read_direct(variable.values, source_sel=index)
         else:
             variable.values = self._dataset[index]
+        if self._is_time or _is_time(variable):
+            starts = []
+            for name in self.attrs:
+                if (dt := _as_datetime(self.attrs[name])) is not None:
+                    starts.append(dt)
+            if self._is_time and len(starts) == 0:
+                starts.append(sc.epoch(unit='ns'))
+            if len(starts) == 1:
+                variable = convert_time_to_datetime64(
+                    variable,
+                    start=starts[0],
+                    scaling_factor=self.attrs.get('scaling_factor'))
         return variable
 
     def __repr__(self) -> str:
@@ -208,6 +270,7 @@ class NXobject:
     """
     def __init__(self, group: H5Group):
         self._group = group
+        self.child_params = {}
 
     def _get_child(
             self,
@@ -220,7 +283,7 @@ class NXobject:
             item = self._group[name]
             if hasattr(item, 'shape'):
                 dims = self._get_field_dims(name) if use_field_dims else None
-                return Field(item, dims=dims)
+                return Field(item, dims=dims, **self.child_params.get(name, {}))
             else:
                 return _make(item)
         da = self._getitem(name)
@@ -322,9 +385,14 @@ class NXobject:
         values = data.values
         if data.dtype == sc.DType.string:
             values = np.array(data.values, dtype=object)
+        elif data.dtype == sc.DType.datetime64:
+            start = sc.epoch(unit=data.unit)
+            values = (data - start).values
         dataset = self._group.create_dataset(name, data=values, **kwargs)
         if data.unit is not None:
             dataset.attrs['units'] = str(data.unit)
+        if data.dtype == sc.DType.datetime64:
+            dataset.attrs['start'] = str(start.value)
         return Field(dataset, data.dims)
 
     def create_class(self, name: str, nx_class: NX_class) -> NXobject:

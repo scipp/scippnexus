@@ -4,7 +4,6 @@
 
 from typing import List, Union
 import scipp as sc
-from ._common import convert_time_to_datetime64
 from .nxobject import NXobject, ScippIndex
 from .nxdata import NXdata
 
@@ -38,20 +37,11 @@ class NXlog(NXobject):
         return NXdata(self._group, signal_name_default='value', axes=axes)
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
-        data: sc.DataArray = self._nxbase[select]
-        # The 'time' field in NXlog contains extra properties 'start' and
-        # 'scaling_factor' that are not handled by NXdata. These are used
-        # to transform to a datetime-coord.
-        if 'time' in self:
-            if 'time' not in data.coords:
-                raise sc.DimensionError(
-                    "NXlog is time-dependent, but failed to load `time` dataset")
-            data.coords['time'] = convert_time_to_datetime64(
-                raw_times=data.coords.pop('time'),
-                start=self['time'].attrs.get('start'),
-                scaling_factor=self['time'].attrs.get('scaling_factor'),
-                group_path=self['time'].name)
-        return data
+        base = self._nxbase
+        # Field loads datetime offset attributes automatically, but for NXlog this
+        # may apparently be omitted and must then interpreted as relative to epoch.
+        base.child_params['time'] = {'is_time': True}
+        return base[select]
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
         return self._nxbase._get_field_dims(name)

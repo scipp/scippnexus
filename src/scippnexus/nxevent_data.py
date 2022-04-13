@@ -5,7 +5,7 @@ from typing import List, Union
 import numpy as np
 import scipp as sc
 
-from ._common import to_plain_index, convert_time_to_datetime64
+from ._common import to_plain_index
 from .nxobject import NXobject, ScippIndex, NexusStructureError
 
 _event_dimension = "event"
@@ -57,11 +57,7 @@ class NXevent_data(NXobject):
             index = slice(start, stop, stride)
 
         event_index = self['event_index'][index].values
-        event_time_zero = self['event_time_zero']
-        event_time_zero = convert_time_to_datetime64(
-            event_time_zero[index],
-            start=event_time_zero.attrs.get('offset'),
-            group_path=self.name)
+        event_time_zero = self['event_time_zero'][index]
 
         num_event = self["event_time_offset"].shape[0]
         # Some files contain uint64 "max" indices, which turn into negatives during
