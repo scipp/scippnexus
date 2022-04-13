@@ -36,11 +36,12 @@ def _load_selected(group: H5Group, selector: Selector) -> List[sc.DataArray]:
     return {name: g[...] for name, g in groups.items()}
 
 
-# TODO rename ScalarProvider?
+# TODO
 # should the callable be hard-coded to sc.scalar, or accept user provided?
 class ScalarProvider:
-    def __init__(self, node: Union[NXobject, Field]):
+    def __init__(self, node: Union[NXobject, Field], func: Callable = sc.scalar):
         self._node = node[...]  # TODO consider delay load until first use
+        self._func = func
 
     @property
     def dims(self):
@@ -54,7 +55,7 @@ class ScalarProvider:
         # TODO Either ignore irrelevant indices, or require callee to filter indices
         if select:
             raise sc.DimensionError(f"Cannot select slice {select} from scalar")
-        return sc.scalar(self._node)
+        return self._func(self._node)
 
 
 # TODO mechanism to indicate that we need multiple inputs?
@@ -125,3 +126,18 @@ class DataArrayLoader:
                                                         loader.dims,
                                                         select=select)]
         return da
+
+
+# return key-value tuple from tasks
+# task to aggregate into dict
+# task to make final array
+
+# make use of tasks for chunking? data task could provide chunk info
+# data task concatenating chunks is like compute? separate task for each chunk,
+# see __dask_postcompute__
+# for us, finalizing would also including merging meta data, i.e., we do not have meta
+# data on every chunk
+
+# NXobject.by_nx_class is a crude tool. It forces to iterate the entire file which may
+# be slow.
+# => support injecting other indices, e.g., if we know all paths
