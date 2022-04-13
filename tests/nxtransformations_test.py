@@ -141,3 +141,38 @@ def test_chain_with_multiple_values(nxroot):
     expected = sc.spatial.affine_transform(value=np.identity(4), unit=t.unit)
     expected = t * (t * (offset * expected))
     assert sc.identical(detector[...].coords['depends_on'].value, expected)
+
+
+def test_chain_with_multiple_values_and_different_time_unit(nxroot):
+    detector = create_detector(nxroot)
+    detector.create_field('depends_on', sc.scalar('/detector_0/transformations/t1'))
+    transformations = detector.create_class('transformations',
+                                            NX_class.NXtransformations)
+    # Making sure to not use nanoseconds since that is used internally and may thus
+    # mask bugs.
+    log = sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
+        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')})
+    log.coords['time'] = sc.epoch(unit='us') + log.coords['time'].to(unit='us')
+    offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
+    vector = sc.vector(value=[0, 0, 1])
+    t = log * vector
+    t.data = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit)
+    value1 = transformations.create_class('t1', NX_class.NXlog)
+    value1['time'] = log.coords['time'] - sc.epoch(unit='us')
+    value1['value'] = log.data
+    value1.attrs['depends_on'] = 't2'
+    value1.attrs['transformation_type'] = 'translation'
+    value1.attrs['offset'] = offset.values
+    value1.attrs['offset_units'] = str(offset.unit)
+    value1.attrs['vector'] = vector.value
+    value2 = transformations.create_class('t2', NX_class.NXlog)
+    value2['time'] = log.coords['time'].to(unit='ms') - sc.epoch(unit='ms')
+    value2['value'] = log.data
+    value2.attrs['depends_on'] = '.'
+    value2.attrs['transformation_type'] = 'translation'
+    value2.attrs['vector'] = vector.value
+
+    expected = sc.spatial.affine_transform(value=np.identity(4), unit=t.unit)
+    expected = t * (t * (offset * expected))
+    assert sc.identical(detector[...].coords['depends_on'].value, expected)
