@@ -74,6 +74,15 @@ class NXDaskArray(DaskMethodsMixin):
     def __dask_keys__(self):
         return self._dask_array.__dask_keys__()
 
+    def __dask_layers__(self):
+        return self._dask_array.__dask_layers__()
+
+    @staticmethod
+    def __dask_optimize__(dsk, keys, **kwargs):
+        from dask.optimization import cull
+        dsk2, _ = cull(dsk, keys)
+        return dsk2
+
     def __dask_postcompute__(self):
         def finalize(results, *extra_args):
             print(f'{results=} {extra_args=}')
