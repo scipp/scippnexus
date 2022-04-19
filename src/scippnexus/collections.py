@@ -51,14 +51,22 @@ class NXArrayAdapter:
 
     def __getitem__(self, indices):
         print(f'getitem {indices=} {dict(zip(self._nxobject.dims, indices))}')
+        # dask sometimes slices the chunks to save memory, so we need to support
+        # plain slicing syntax
         return SliceWrapper(self._nxobject[dict(zip(self._nxobject.dims, indices))])
 
 
+def from_nxobject(nxobject, chunks='auto'):
+    adapter = NXArrayAdapter(nxobject)
+    from dask.array import from_array
+    da = from_array(adapter, chunks=chunks, asarray=False)
+    return NXDaskArray(dims=nxobject.dims, dask_array=da)
+
+
 class NXDaskArray(DaskMethodsMixin):
-    def __init__(self, nxobject):
-        adapter = NXArrayAdapter(nxobject)
-        from dask.array import from_array
-        self._dask_array = from_array(adapter, chunks=2, asarray=False)
+    def __init__(self, dims, dask_array):
+        self._dims = dims
+        self._dask_array = dask_array
 
     def __dask_graph__(self):
         return self._dask_array.__dask_graph__()
@@ -69,8 +77,10 @@ class NXDaskArray(DaskMethodsMixin):
     def __dask_postcompute__(self):
         def finalize(results, *extra_args):
             print(f'{results=} {extra_args=}')
-            chunks = [sc.concat([x.da for x in inner], 'yy') for inner in results]
-            return sc.concat(chunks, 'xx')
+            chunks = [
+                sc.concat([x.da for x in inner], self._dims[1]) for inner in results
+            ]
+            return sc.concat(chunks, self._dims[0])
 
         return finalize, ()
 
@@ -79,10 +89,10 @@ class NXDaskArray(DaskMethodsMixin):
     def __getitem__(self, select):
         print(f'{select=}')
         dim, ind = select
-        from copy import copy
-        selected = copy(self)
-        selected._dask_array = self._dask_array[ind]
-        return selected
+        dims = list(self._dims)
+        if isinstance(ind, int):
+            del dims[dims.index(dim)]
+        return NXDaskArray(dims=dims, dask_array=self._dask_array[ind])
 
 
 class NXCollection:

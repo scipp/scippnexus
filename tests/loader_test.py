@@ -2,7 +2,7 @@ import h5py
 import scipp as sc
 from scippnexus import NXroot, NX_class
 from scippnexus.loader import DataArrayLoaderFactory, Selector, ScalarProvider
-from scippnexus.collections import NXDaskArray
+from scippnexus import collections
 from scippnexus.collections import NXCollection
 from scippnexus.typing import H5Group
 import pytest
@@ -115,6 +115,6 @@ def test_nxcollection(nxroot):
 def test_nxarrayadapter(nxroot):
     da = data_array_xx_yy()
     add_data(nxroot, 'data1', da)
-    dsk = NXDaskArray(nxroot['data1'])
+    dsk = collections.from_nxobject(nxroot['data1'])
     assert sc.identical(dsk.compute(), da)
     assert sc.identical(dsk['xx', 1:].compute(), da['xx', 1:])
