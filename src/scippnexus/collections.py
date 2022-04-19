@@ -77,9 +77,14 @@ class NXDaskArray(DaskMethodsMixin):
     def __dask_postcompute__(self):
         def finalize(results, *extra_args):
             print(f'{results=} {extra_args=}')
-            chunks = [
-                sc.concat([x.da for x in inner], self._dims[1]) for inner in results
-            ]
+            if len(self._dims) == 0:
+                return results
+            elif len(self._dims) == 1:
+                chunks = [x.da for x in results]
+            else:  # TODO will fail for more than 2
+                chunks = [
+                    sc.concat([x.da for x in inner], self._dims[1]) for inner in results
+                ]
             return sc.concat(chunks, self._dims[0])
 
         return finalize, ()
