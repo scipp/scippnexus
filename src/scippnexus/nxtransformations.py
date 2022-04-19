@@ -93,9 +93,7 @@ def _interpolate_transform(transform, xnew):
 def _smaller_unit(a, b):
     if a.unit == b.unit:
         return a.unit
-    a = sc.scalar(1.0, unit=a.unit)
-    b = sc.scalar(1.0, unit=b.unit)
-    ratio = a / b
+    ratio = sc.scalar(1.0, unit=a.unit).to(unit=b.unit)
     if ratio.value < 1.0:
         return a.unit
     else:
