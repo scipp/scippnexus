@@ -13,4 +13,5 @@ testpaths = "tests"
 filterwarnings = [
   "error",
   "ignore::UserWarning",
+  "ignore::DeprecationWarning", # TODO from dask
 ]

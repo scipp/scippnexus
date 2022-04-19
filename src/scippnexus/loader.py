@@ -141,3 +141,5 @@ class DataArrayLoader:
 # NXobject.by_nx_class is a crude tool. It forces to iterate the entire file which may
 # be slow.
 # => support injecting other indices, e.g., if we know all paths
+
+# Validators! May dead-end a path in the graph.

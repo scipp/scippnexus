@@ -2,6 +2,8 @@ import h5py
 import scipp as sc
 from scippnexus import NXroot, NX_class
 from scippnexus.loader import DataArrayLoaderFactory, Selector, ScalarProvider
+from scippnexus.collections import NXDaskArray
+from scippnexus.collections import NXCollection
 from scippnexus.typing import H5Group
 import pytest
 
@@ -38,6 +40,7 @@ def data_array_time() -> sc.DataArray:
 def add_data(group: H5Group, name: str, da: sc.DataArray):
     data = group.create_class(name, NX_class.NXdata)
     data.attrs['axes'] = da.dims
+    data.attrs['yy_indices'] = 1
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field('xx', da.coords['xx'])
@@ -90,3 +93,28 @@ def test_combine_data_and_add_attrs(nxroot):
     factory.add_attrs(ScalarProvider, Selector(nxclass=NX_class.NXlog))
     loader = factory(nxroot)
     assert sc.identical(loader[()], sc.concat([da, da + da], 'z'))
+
+
+def test_dask(nxroot):
+    from dask.array import from_array
+    da = data_array_xx_yy()
+    add_data(nxroot, 'data1', da)
+    da = from_array(nxroot['data1']['signal'], chunks=(1, -1))
+    print(da.__dask_keys__())
+
+
+def test_nxcollection(nxroot):
+    da = data_array_xx_yy()
+    add_data(nxroot, 'data1', da)
+    c = NXCollection(nxroot['data1'], chunks=2)
+    import dask
+    result = dask.compute(c)
+    assert sc.identical(result[0], da)
+
+
+def test_nxarrayadapter(nxroot):
+    da = data_array_xx_yy()
+    add_data(nxroot, 'data1', da)
+    dsk = NXDaskArray(nxroot['data1'])
+    assert sc.identical(dsk.compute(), da)
+    assert sc.identical(dsk['xx', 1:].compute(), da['xx', 1:])

@@ -214,7 +214,7 @@ class Field:
         if str(dtype).startswith('str') or h5py.check_string_dtype(dtype):
             dtype = sc.DType.string
         else:
-            dtype = sc.DType(_ensure_supported_int_type(str(dtype)))
+            dtype = _ensure_supported_int_type(str(dtype))
         return dtype
 
     @property

@@ -73,7 +73,7 @@ def _to_canonical_select(dims: List[str], select: ScippIndex) -> ScippIndex:
         return {dims[0]: select}
     if not isinstance(select, dict):
         raise ValueError(f"Cannot process index {select}.")
-    return select
+    return dict(select)
 
 
 def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, tuple]:
