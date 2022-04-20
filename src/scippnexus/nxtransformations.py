@@ -90,6 +90,16 @@ def _interpolate_transform(transform, xnew):
                                    fill_value="extrapolate")(xnew=xnew)
 
 
+def _smaller_unit(a, b):
+    if a.unit == b.unit:
+        return a.unit
+    ratio = sc.scalar(1.0, unit=a.unit).to(unit=b.unit)
+    if ratio.value < 1.0:
+        return a.unit
+    else:
+        return b.unit
+
+
 def get_full_transformation(depends_on: Field) -> Union[None, sc.DataArray]:
     """
     Get the 4x4 transformation matrix for a component, resulting
@@ -105,12 +115,15 @@ def get_full_transformation(depends_on: Field) -> Union[None, sc.DataArray]:
     for transform in transformations:
         if isinstance(total_transform, sc.DataArray) and isinstance(
                 transform, sc.DataArray):
-            time = sc.concat([
-                total_transform.coords["time"].to(unit='ns', copy=False),
-                transform.coords["time"].to(unit='ns', copy=False)
-            ],
+            unit = _smaller_unit(transform.coords['time'],
+                                 total_transform.coords['time'])
+            total_transform.coords['time'] = total_transform.coords['time'].to(
+                unit=unit, copy=False)
+            transform.coords['time'] = transform.coords['time'].to(unit=unit,
+                                                                   copy=False)
+            time = sc.concat([total_transform.coords["time"], transform.coords["time"]],
                              dim="time")
-            time = sc.datetimes(values=np.unique(time.values), dims=["time"], unit='ns')
+            time = sc.datetimes(values=np.unique(time.values), dims=["time"], unit=unit)
             total_transform = _interpolate_transform(transform, time) \
                 * _interpolate_transform(total_transform, time)
         else:

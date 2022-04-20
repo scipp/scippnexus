@@ -187,13 +187,13 @@ class Field:
             self._dataset.read_direct(variable.values, source_sel=index)
         else:
             variable.values = self._dataset[index]
-        if self._is_time or _is_time(variable):
+        if _is_time(variable):
             starts = []
             for name in self.attrs:
                 if (dt := _as_datetime(self.attrs[name])) is not None:
                     starts.append(dt)
             if self._is_time and len(starts) == 0:
-                starts.append(sc.epoch(unit='ns'))
+                starts.append(sc.epoch(unit=self.unit))
             if len(starts) == 1:
                 variable = convert_time_to_datetime64(
                     variable,
