@@ -131,9 +131,9 @@ def test_load_multiple():
             if 'Speed' in nxobject.name:
                 raise RuntimeError('xxx')
             print(f'Loading {nxobject.name}')
-            # May want to use from_nxobject instead of this
             from scippnexus import collections
             return collections.from_nxobject(nxobject, chunks=100000)
+            # May want to use from_nxobject instead of this
             return nxobject[...]
         except RuntimeError:
             return None
@@ -151,3 +151,39 @@ def test_load_multiple():
 
     dsk = load_all(f.by_nx_class()[NX_class.NXlog].values())
     dask.compute(dsk, scheduler=dask.get)
+
+
+def test_load_multiple_select_events():
+    filename = scippnexus.data.get_path('PG3_4844_event.nxs')
+    f = File(filename)
+
+    def load_or_none(nxobject):
+        try:
+            print(f'Loading {nxobject.name}')
+            from scippnexus import collections
+            return collections.from_nxobject(nxobject, chunks=100000)
+            # May want to use from_nxobject instead of this
+            return nxobject[...]
+        except RuntimeError:
+            return None
+
+    def load_all(objects, select_events=None):
+        def sel(det):
+            return det if select_events is None else det.select_events['pulse',
+                                                                       select_events]
+
+        dsk = {
+            obj.name: load_or_none(sel(obj))
+            for obj in objects if 'bank2' in obj.name
+        }
+        return dsk
+
+    dsk = load_all(f.by_nx_class()[NX_class.NXdetector].values())
+    assert dask.compute(
+        dsk, scheduler=dask.get)[0]['/entry/instrument/bank22'].sum().value == 1383144.0
+
+    # event selection means we need to make a new graph
+    dsk = load_all(f.by_nx_class()[NX_class.NXdetector].values(),
+                   select_events=slice(0, 1000))
+    assert dask.compute(
+        dsk, scheduler=dask.get)[0]['/entry/instrument/bank22'].sum().value == 4919.0
