@@ -109,6 +109,18 @@ class NXDaskArray(DaskMethodsMixin):
         return NXDaskArray(dims=dims, dask_array=self._dask_array[ind])
 
 
+# graph builder?
+# Can we just prepare layers and call from_collections once we have the file?
+# but we do not know the number of chunks or number of attributes?
+
+#
+# name = 'add-' + tokenize(self, other)
+# layer = {(name, i): (add, input_key, other)
+#          for i, input_key in enumerate(self.__dask_keys__())}
+# graph = HighLevelGraph.from_collections(name, layer, dependencies=[self])
+# return new_collection(name, graph)
+
+
 class NXCollection:
     def __init__(self, nxobject: NXobject, chunks='auto'):
         chunks = normalize_chunks(chunks=chunks, shape=nxobject.shape)

@@ -1,11 +1,13 @@
 import h5py
 import scipp as sc
-from scippnexus import NXroot, NX_class
+from scippnexus import File, NXroot, NX_class
 from scippnexus.loader import DataArrayLoaderFactory, Selector, ScalarProvider
 from scippnexus import collections
 from scippnexus.collections import NXCollection
 from scippnexus.typing import H5Group
+import scippnexus.data
 import pytest
+import dask
 
 
 @pytest.fixture()
@@ -118,3 +120,34 @@ def test_nxarrayadapter(nxroot):
     dsk = collections.from_nxobject(nxroot['data1'])
     assert sc.identical(dsk.compute(), da)
     assert sc.identical(dsk['xx', 1:].compute(), da['xx', 1:])
+
+
+def test_load_multiple():
+    filename = scippnexus.data.get_path('PG3_4844_event.nxs')
+    f = File(filename)
+
+    def load_or_none(nxobject):
+        try:
+            if 'Speed' in nxobject.name:
+                raise RuntimeError('xxx')
+            print(f'Loading {nxobject.name}')
+            # May want to use from_nxobject instead of this
+            from scippnexus import collections
+            return collections.from_nxobject(nxobject, chunks=100000)
+            return nxobject[...]
+        except RuntimeError:
+            return None
+
+    def exclude(dsk, pattern):
+        return {k: v for k, v in dsk.items() if pattern not in k}
+
+    def load_all(objects):
+        dsk = {obj.name: load_or_none(obj) for obj in objects}
+        dsk = exclude(dsk, 'Chopper')
+        dsk.pop('/entry/DASlogs/PhaseRequest3', None)
+        dsk.pop('/entry/DASlogs/PhaseRequest4', None)  # does not exist
+        dsk['xxx'] = dask.delayed(sc.sum)(dsk['/entry/DASlogs/proton_charge'])
+        return dsk
+
+    dsk = load_all(f.by_nx_class()[NX_class.NXlog].values())
+    dask.compute(dsk, scheduler=dask.get)
