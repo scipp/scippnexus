@@ -32,12 +32,12 @@ class _EventField:
     def __init__(self,
                  nxevent_data: NXevent_data,
                  event_select: ScippIndex,
-                 groups_key: Optional[str] = 'detector_number',
-                 groups: Optional[Field] = None):
+                 grouping_key: Optional[str] = 'detector_number',
+                 grouping: Optional[Field] = None):
         self._nxevent_data = nxevent_data
         self._event_select = event_select
-        self._groups_key = groups_key
-        self._groups = groups
+        self._grouping_key = grouping_key
+        self._grouping = grouping
 
     @property
     def attrs(self):
@@ -45,17 +45,17 @@ class _EventField:
 
     @property
     def dims(self):
-        if self._groups is None:
-            return [self._groups_key]
-        return self._groups.dims
+        if self._grouping is None:
+            return [self._grouping_key]
+        return self._grouping.dims
 
     @property
     def shape(self):
-        if self._groups is None:
+        if self._grouping is None:
             raise NexusStructureError(
                 "Cannot get shape of NXdetector since no 'detector_number' "
                 "field found but detector contains event data.")
-        return self._groups.shape
+        return self._grouping.shape
 
     @property
     def unit(self):
@@ -63,7 +63,7 @@ class _EventField:
 
     def __getitem__(self, select: ScippIndex) -> sc.DataArray:
         event_data: sc.DataArray = self._nxevent_data[self._event_select]
-        if self._groups is None:
+        if self._grouping is None:
             if select not in (Ellipsis, tuple(), slice(None)):
                 raise NexusStructureError(
                     "Cannot load slice of NXdetector since it contains event data "
@@ -75,18 +75,18 @@ class _EventField:
             # (NXevent_data).
             id_min = event_data.bins.coords['event_id'].min()
             id_max = event_data.bins.coords['event_id'].max()
-            groups = sc.arange(dim=self._groups_key,
-                               unit=None,
-                               start=id_min.value,
-                               stop=id_max.value + 1,
-                               dtype=id_min.dtype)
+            grouping = sc.arange(dim=self._grouping_key,
+                                 unit=None,
+                                 start=id_min.value,
+                                 stop=id_max.value + 1,
+                                 dtype=id_min.dtype)
         else:
-            groups = self._groups[select]
-            if (self._groups_key in event_data.coords) and sc.identical(
-                    groups, event_data.coords[self._groups_key]):
+            grouping = self._grouping[select]
+            if (self._grouping_key in event_data.coords) and sc.identical(
+                    grouping, event_data.coords[self._grouping_key]):
                 return event_data
         # copy since sc.bin cannot deal with a non-contiguous view
-        event_id = groups.flatten(to='event_id').copy()
+        event_id = grouping.flatten(to='event_id').copy()
         event_data.bins.coords['event_time_zero'] = sc.bins_like(
             event_data, fill_value=event_data.coords['event_time_zero'])
         # After loading raw NXevent_data it is guaranteed that the event table
@@ -94,11 +94,11 @@ class _EventField:
         # more efficient approach of binning from scratch instead of erasing the
         # 'pulse' binning defined by NXevent_data.
         event_data = sc.bin(event_data.bins.constituents['data'], groups=[event_id])
-        if self._groups is None:
-            event_data.coords[self._groups_key] = event_data.coords.pop('event_id')
+        if self._grouping is None:
+            event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
         else:
             del event_data.coords['event_id']
-        return event_data.fold(dim='event_id', sizes=groups.sizes)
+        return event_data.fold(dim='event_id', sizes=grouping.sizes)
 
 
 class NXdetector(NXobject):
@@ -132,7 +132,7 @@ class NXdetector(NXobject):
     def _event_grouping(self) -> Union[None, Field]:
         for key in self._detector_number_fields:
             if key in self:
-                return {'groups_key': key, 'groups': self[key]}
+                return {'grouping_key': key, 'grouping': self[key]}
         return {}
 
     @property

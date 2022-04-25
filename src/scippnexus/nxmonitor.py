@@ -14,6 +14,6 @@ class NXmonitor(NXdetector):
         # such that no addition binning will need to be performed. That is, the by-pulse
         # binning present in the file (in NXevent_data) is preserved.
         return {
-            'groups_key': 'event_time_zero',
-            'groups': self.events['event_time_zero']
+            'grouping_key': 'event_time_zero',
+            'grouping': self.events['event_time_zero']
         }
