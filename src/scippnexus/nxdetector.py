@@ -46,7 +46,7 @@ class _EventField:
     @property
     def dims(self):
         if self._groups is None:
-            return ['detector_number']
+            return [self._groups_key]
         return self._groups.dims
 
     @property
