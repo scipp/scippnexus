@@ -50,6 +50,17 @@ def test_loads_data_without_coords(nxroot):
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 
+@pytest.mark.parametrize('detector_number_key',
+                         ['detector_number', 'pixel_id', 'spectrum_index'])
+def test_detector_number_key_alias(nxroot, detector_number_key):
+    da = sc.DataArray(sc.array(dims=['xx', 'yy'], values=[[1.1, 2.2], [3.3, 4.4]]))
+    da.coords[detector_number_key] = detector_numbers_xx_yy_1234()
+    detector = nxroot.create_class('detector0', NX_class.NXdetector)
+    detector.create_field(detector_number_key, da.coords[detector_number_key])
+    detector.create_field('data', da.data)
+    assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
+
+
 def test_select_events_raises_if_detector_contains_data(nxroot):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], values=[[1.1, 2.2], [3.3, 4.4]]))
     da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()

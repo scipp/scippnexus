@@ -114,7 +114,7 @@ class NXdetector(NXobject):
         self._nxevent_data_fields = [
             'event_time_zero', 'event_index', 'event_time_offset', 'event_id'
         ]
-        self._detector_number_fields = ['detector_number', 'pixel_id']
+        self._detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
     @property
     def shape(self) -> List[int]:
