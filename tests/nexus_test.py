@@ -55,18 +55,6 @@ def test_nxobject_entry(nxroot):
     assert set(entry.keys()) == {'events_0', 'events_1', 'log'}
 
 
-def test_nxobject_monitor(nxroot):
-    monitor = nxroot['entry'].create_class('monitor', NX_class.NXmonitor)
-    assert monitor.nx_class == NX_class.NXmonitor
-    da = sc.DataArray(
-        sc.array(dims=['time_of_flight'], values=[1.0]),
-        coords={'time_of_flight': sc.array(dims=['time_of_flight'], values=[1.0])})
-    monitor['data'] = da.data
-    monitor['data'].attrs['axes'] = 'time_of_flight'
-    monitor['time_of_flight'] = da.coords['time_of_flight']
-    assert sc.identical(monitor[...], da)
-
-
 def test_nxobject_log(nxroot):
     da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
                       coords={
@@ -290,7 +278,7 @@ def create_event_data_ids_1234(group):
                                           unit='s',
                                           values=[456, 7, 3, 345, 632, 23])
     group['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
-    group['event_index'] = sc.array(dims=[''], unit='None', values=[0, 3, 3, -1000])
+    group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, -1000])
 
 
 def test_negative_event_index_converted_to_num_event(nxroot):
@@ -306,7 +294,7 @@ def create_event_data_without_event_id(group):
                                           unit='s',
                                           values=[456, 7, 3, 345, 632, 23])
     group['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
-    group['event_index'] = sc.array(dims=[''], unit='None', values=[0, 3, 3, 5])
+    group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
 
 
 def test_event_data_without_event_id_can_be_loaded(nxroot):
