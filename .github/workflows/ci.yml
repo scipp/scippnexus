@@ -13,10 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      # Run this before any other commands so that git diff does not pick up formatting changes.
-      - run: |
-          find . -type f -not -path '.git/*' -exec sed -ri "s/[0-9]{4} (Scipp contributors)/$(date +%Y) \1/g" {} +
-          git diff --exit-code
       - run: python -m pip install --upgrade pip
       - run: python -m pip install tox
       - run: tox -e static
