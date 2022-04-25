@@ -30,8 +30,9 @@ def create_event_data_no_ids(group):
                        sc.array(dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]))
     group.create_field('event_time_zero',
                        sc.array(dims=[''], unit='s', values=[1, 2, 3, 4]))
-    group.create_field('event_index',
-                       sc.array(dims=[''], unit='None', values=[0, 3, 3, 5]))
+    group.create_field('event_index', sc.array(dims=[''],
+                                               unit=None,
+                                               values=[0, 3, 3, 5]))
 
 
 def test_loads_event_data_in_current_group(nxroot):

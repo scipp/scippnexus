@@ -278,7 +278,7 @@ def create_event_data_ids_1234(group):
                                           unit='s',
                                           values=[456, 7, 3, 345, 632, 23])
     group['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
-    group['event_index'] = sc.array(dims=[''], unit='None', values=[0, 3, 3, -1000])
+    group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, -1000])
 
 
 def test_negative_event_index_converted_to_num_event(nxroot):
@@ -294,7 +294,7 @@ def create_event_data_without_event_id(group):
                                           unit='s',
                                           values=[456, 7, 3, 345, 632, 23])
     group['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
-    group['event_index'] = sc.array(dims=[''], unit='None', values=[0, 3, 3, 5])
+    group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
 
 
 def test_event_data_without_event_id_can_be_loaded(nxroot):
