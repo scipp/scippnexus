@@ -11,6 +11,7 @@ class NXsource(NXobject):
 
     Currently only the 'distance' field is loaded.
     """
+
     @property
     def shape(self):
         return []

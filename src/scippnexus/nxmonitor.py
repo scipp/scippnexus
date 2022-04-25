@@ -7,6 +7,7 @@ from .nxdetector import NXdetector
 
 
 class NXmonitor(NXdetector):
+
     @property
     def _event_grouping(self) -> Dict[str, Union[str, Field]]:
         # Unlike NXdetector, NXmonitor does not group by 'detector_number'. We pass

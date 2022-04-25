@@ -9,6 +9,7 @@ from .nxdata import NXdata
 
 
 class NXlog(NXobject):
+
     @property
     def shape(self):
         return self._nxbase.shape

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 
 class H5Base(Protocol):
+
     @property
     def attrs(self) -> List[int]:
         """Attributes of dataset or group"""
@@ -27,6 +28,7 @@ class H5Base(Protocol):
 # TODO Define more required methods
 class H5Dataset(H5Base, Protocol):
     """h5py.Dataset-like"""
+
     @property
     def shape(self) -> List[int]:
         """Shape of a dataset"""
@@ -41,6 +43,7 @@ class H5Dataset(H5Base, Protocol):
 
 class H5Group(H5Base, Protocol):
     """h5py.Group-like"""
+
     def __getitem__(self, index: Union[str, Any]) -> Union[H5Dataset, H5Group]:
         """Keys in the group"""
 

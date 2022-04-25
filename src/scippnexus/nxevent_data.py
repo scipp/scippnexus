@@ -13,6 +13,7 @@ _pulse_dimension = "pulse"
 
 
 class NXevent_data(NXobject):
+
     @property
     def shape(self) -> List[int]:
         return self['event_index'].shape

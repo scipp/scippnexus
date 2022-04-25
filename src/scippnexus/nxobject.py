@@ -29,6 +29,7 @@ class DimensionedArray(Protocol):
 
     Could be, e.g., a scipp.Variable or a dimple dataclass wrapping a numpy array.
     """
+
     @property
     def values(self):
         """Multi-dimensional array of values"""
@@ -43,6 +44,7 @@ class DimensionedArray(Protocol):
 
 
 class AttributeManager(Protocol):
+
     def __getitem__(self, name: str):
         """Get attribute"""
 
@@ -71,6 +73,7 @@ class NX_class(Enum):
 class Attrs:
     """HDF5 attributes.
     """
+
     def __init__(self, attrs: AttributeManager):
         self._attrs = attrs
 
@@ -145,6 +148,7 @@ class Field:
 
     In HDF5 fields are represented as dataset.
     """
+
     def __init__(self, dataset: H5Dataset, dims=None, is_time=None):
         self._dataset = dataset
         self._shape = list(self._dataset.shape)
@@ -268,6 +272,7 @@ class Field:
 class NXobject:
     """Base class for all NeXus groups.
     """
+
     def __init__(self, group: H5Group):
         self._group = group
         self.child_params = {}
@@ -412,6 +417,7 @@ class NXobject:
 
 class NXroot(NXobject):
     """Root of a NeXus file."""
+
     @property
     def nx_class(self) -> NX_class:
         # As an oversight in the NeXus standard and the reference implementation,

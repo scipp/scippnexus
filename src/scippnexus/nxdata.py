@@ -12,6 +12,7 @@ from .nxobject import Field, NXobject, ScippIndex, NexusStructureError
 
 
 class NXdata(NXobject):
+
     def __init__(
             self,
             group: H5Group,
