@@ -55,18 +55,6 @@ def test_nxobject_entry(nxroot):
     assert set(entry.keys()) == {'events_0', 'events_1', 'log'}
 
 
-def test_nxobject_monitor(nxroot):
-    monitor = nxroot['entry'].create_class('monitor', NX_class.NXmonitor)
-    assert monitor.nx_class == NX_class.NXmonitor
-    da = sc.DataArray(
-        sc.array(dims=['time_of_flight'], values=[1.0]),
-        coords={'time_of_flight': sc.array(dims=['time_of_flight'], values=[1.0])})
-    monitor['data'] = da.data
-    monitor['data'].attrs['axes'] = 'time_of_flight'
-    monitor['time_of_flight'] = da.coords['time_of_flight']
-    assert sc.identical(monitor[...], da)
-
-
 def test_nxobject_log(nxroot):
     da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
                       coords={
