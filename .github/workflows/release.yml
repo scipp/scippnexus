@@ -1,7 +1,7 @@
 name: Release
 
 on:
-  push:  # TODO consider removing psu htrigger
+  push:  # TODO consider removing push trigger
     branches:
       - main
   release:
@@ -44,12 +44,10 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install build
+      - run: python -m pip install -r requirements/wheels.txt
 
       - name: Build wheels
-        run: |
-          python -m build
+        run: python -m build
 
       - name: Upload wheels
         uses: actions/upload-artifact@v2
@@ -65,8 +63,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install tox
+      - run: python -m pip install -r requirements/ci.txt
       - run: sudo apt install --yes pandoc
       - run: tox -e docs
       - uses: actions/upload-artifact@v2
