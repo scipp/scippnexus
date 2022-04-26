@@ -1,4 +1,4 @@
--r base.txt
+-r base.in
 ipykernel
 ipywidgets
 pooch
