@@ -1,0 +1,8 @@
+# Lowest supported version of scipp. Do NOT increase versions and/or re-run pip-compile
+# unless there is good reason!
+
+python-dateutil
+scipp==0.12.4
+scipy
+h5py
+pytest
