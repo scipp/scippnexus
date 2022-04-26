@@ -8,6 +8,7 @@ from .nxobject import NXroot
 
 
 class File(AbstractContextManager, NXroot):
+
     def __init__(self, *args, **kwargs):
         self._file = h5py.File(*args, **kwargs)
         NXroot.__init__(self, self._file)

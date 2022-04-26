@@ -22,6 +22,7 @@ def make_transformation(obj, /, path):
 
 
 class Transformation:
+
     def __init__(self, obj: Union[Field, NXobject]):  # could be an NXlog
         self._obj = obj
 

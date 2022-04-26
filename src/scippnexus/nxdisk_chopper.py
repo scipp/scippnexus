@@ -10,6 +10,7 @@ class NXdisk_chopper(NXobject):
 
     Currently only the 'distance' and 'rotation_speed' fields are loaded.
     """
+
     @property
     def shape(self):
         return []
