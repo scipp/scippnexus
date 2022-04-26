@@ -7,15 +7,20 @@
 attrs==21.4.0
     # via pytest
 confuse==1.7.0
-    # via scipp
+    # via
+    #   -r base.txt
+    #   scipp
 graphlib-backport==1.0.3
-    # via scipp
+    # via
+    #   -r base.txt
+    #   scipp
 h5py==3.6.0
-    # via -r test-latest.in
+    # via -r base.txt
 iniconfig==1.1.1
     # via pytest
 numpy==1.22.3
     # via
+    #   -r base.txt
     #   h5py
     #   scipp
     #   scipy
@@ -30,14 +35,18 @@ pyparsing==3.0.8
 pytest==7.1.2
     # via -r test-latest.in
 python-dateutil==2.8.2
-    # via -r test-latest.in
+    # via -r base.txt
 pyyaml==6.0
-    # via confuse
+    # via
+    #   -r base.txt
+    #   confuse
 scipp==0.13.1
-    # via -r test-latest.in
+    # via -r base.txt
 scipy==1.8.0
-    # via -r test-latest.in
+    # via -r base.txt
 six==1.16.0
-    # via python-dateutil
+    # via
+    #   -r base.txt
+    #   python-dateutil
 tomli==2.0.1
     # via pytest

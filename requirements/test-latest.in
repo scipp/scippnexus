@@ -1,5 +1,2 @@
-python-dateutil
-scipp
-scipy
-h5py
+-r base.txt
 pytest
