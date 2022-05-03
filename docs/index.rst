@@ -27,8 +27,7 @@ This is especially powerful since a number of concepts of scipp map well to conc
 News
 ----
 
-- [March 2022] Initial experimental releases of scippnexus.
-  Documentation is under construction.
+- [May 2022] Scippnexus-0.1.0 has been released.
 
 Get in touch
 ------------
@@ -52,3 +51,11 @@ Get in touch
 
    user-guide/nexus-classes
    user-guide/classes
+
+.. toctree::
+   :caption: About
+   :hidden:
+   :maxdepth: 3
+
+   about/about
+   about/release-notes
