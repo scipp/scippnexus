@@ -22,6 +22,5 @@ Contributing to scippnexus
 --------------------------
 
 Contributions, bug reports, and ideas are always welcome.
-The following section outlines the scope of scippnexus.
-If in doubt whether a feature falls within the scope of scipp please `ask on github <https://github.com/scipp/scippnexus/issues>`_ before implementing functionality, to reduce the risk of rejected pull requests.
+If in doubt whether a feature falls within the scope of scippnexus please `ask on github <https://github.com/scipp/scippnexus/issues>`_ before implementing functionality, to reduce the risk of rejected pull requests.
 Asking and discussing first is generally always a good idea, since our road map is not very mature at this point.
