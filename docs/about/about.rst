@@ -6,7 +6,7 @@ About scippnexus
 Development
 -----------
 
-Scippnexus is a open source project by the `European Spallation Source ERIC <https://europeanspallationsource.se/>`_ (ESS).
+Scippnexus is an open source project by the `European Spallation Source ERIC <https://europeanspallationsource.se/>`_ (ESS).
 
 License
 -------
