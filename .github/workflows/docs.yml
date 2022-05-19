@@ -1,0 +1,52 @@
+name: Docs
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        default: false
+        type: boolean
+      publish-folder:
+        default: ''
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      publish:
+        default: false
+        type: boolean
+      publish-folder:
+        default: ''
+        required: false
+        type: string
+
+jobs:
+  docs:
+    name: Build documentation
+    runs-on: ubuntu-20.04
+    steps:
+      - run: sudo apt install --yes graphviz pandoc
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements/ci.txt
+      - run: tox --skip-pkg-install -e docs2 scippnexus
+        if: ${{ (github.event.inputs || inputs).publish }}
+      - run: tox -e docs2
+        if: ${{ !(github.event.inputs || inputs).publish }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: html
+          path: html/
+
+      - uses: JamesIves/github-pages-deploy-action@v4.3.3
+        if: ${{ (github.event.inputs || inputs).publish }}
+        with:
+          branch: gh-pages
+          folder: html
+          target-folder: ${{ (github.event.inputs || inputs).publish-folder }}
+          single-commit: true
+          clean-exclude: release
+          ssh-key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}

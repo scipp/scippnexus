@@ -44,19 +44,5 @@ jobs:
       - run: tox -e ${{ matrix.tox }}
 
   docs:
-    name: Build documentation
-    needs: [tests]
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-        with:
-          python-version: 3.8
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -r requirements/ci.txt
-      - run: sudo apt install --yes pandoc
-      - run: tox -e docs
-      - uses: actions/upload-artifact@v2
-        with:
-          name: html
-          path: html/
+    needs: tests
+    uses: ./.github/workflows/docs.yml
