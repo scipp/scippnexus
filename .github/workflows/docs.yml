@@ -1,8 +1,18 @@
 name: Docs
 
 on:
-  pull_request:  # TODO remove
   workflow_dispatch:
+    inputs:
+      use-released-wheel:
+        default: true
+        type: boolean
+      publish:
+        default: false
+        type: boolean
+      publish-folder:
+        default: ''
+        required: false
+        type: string
   workflow_call:
     inputs:
       use-released-wheel:
@@ -28,21 +38,21 @@ jobs:
           python-version: 3.8
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements/ci.txt
-      - run: tox --skip-pkg-install -e docs2 ${{ inputs.package}}
-        if: ${{ inputs.use_released_wheel }}
+      - run: tox --skip-pkg-install -e docs2 ${{ (github.event.inputs || inputs).package}}
+        if: ${{ (github.event.inputs || inputs).use_released_wheel }}
       - run: tox -e docs2
-        if: ${{ !inputs.use_released_wheel }}
+        if: ${{ !(github.event.inputs || inputs).use_released_wheel }}
       - uses: actions/upload-artifact@v3
         with:
           name: html
           path: html/
 
       - uses: JamesIves/github-pages-deploy-action@v4.3.3
-        if: ${{ inputs.publish }}
+        if: ${{ (github.event.inputs || inputs).publish }}
         with:
           branch: gh-pages
           folder: html
-          target-folder: ${{ inputs.publish-folder }}
+          target-folder: ${{ (github.event.inputs || inputs).publish-folder }}
           single-commit: true
           clean-exclude: release
           ssh-key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
