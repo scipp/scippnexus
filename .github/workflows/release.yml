@@ -78,7 +78,7 @@ jobs:
     needs: upload_packages
     uses: ./.github/workflows/docs.yml
     with:
-      publish: github.event_name == 'release' && github.event.action == 'published'
+      publish: ${{ github.event_name == 'release' && github.event.action == 'published' }}
       publish-folder: ${{ format('release/{0}', github.ref_name) }}
     secrets: inherit
 
@@ -86,6 +86,6 @@ jobs:
     needs: docs
     uses: ./.github/workflows/docs.yml
     with:
-      publish: github.event_name == 'release' && github.event.action == 'published'
+      publish: ${{ github.event_name == 'release' && github.event.action == 'published' }}
       publish-folder: ''
     secrets: inherit
