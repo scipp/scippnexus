@@ -15,7 +15,7 @@ defaults:
 jobs:
   build_conda:
     name: Conda build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2
@@ -34,7 +34,7 @@ jobs:
 
   build_wheels:
     name: Wheels
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2
@@ -58,7 +58,7 @@ jobs:
 
   docs:
     name: Build documentation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
@@ -76,7 +76,7 @@ jobs:
   upload_packages:
     name: Deploy packages
     needs: [docs, build_conda, build_wheels]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: github.event_name == 'release' && github.event.action == 'published'
 
     steps:
@@ -94,7 +94,7 @@ jobs:
   upload_docs:
     name: Deploy docs
     needs: [upload_packages]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: github.event_name == 'release' && github.event.action == 'published'
     strategy:
       max-parallel: 1  # Avoid potential race condition when pushing to github pages repo
