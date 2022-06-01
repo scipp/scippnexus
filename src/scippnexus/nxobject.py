@@ -161,6 +161,7 @@ class Field:
             self._dims = dims
             if len(self._dims) < len(self._shape):
                 self._shape = [size for size in self._shape if size != 1]
+                self._shape = ([1] * (len(self._dims) - len(self._shape))) + self._shape
         elif (axes := self.attrs.get('axes')) is not None:
             self._dims = axes.split(',')
         else:
