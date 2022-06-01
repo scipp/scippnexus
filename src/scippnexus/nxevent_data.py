@@ -13,7 +13,6 @@ _pulse_dimension = "pulse"
 
 
 class NXevent_data(NXobject):
-
     @property
     def shape(self) -> List[int]:
         return self['event_index'].shape
@@ -120,7 +119,7 @@ class NXevent_data(NXobject):
 
         try:
             binned = sc.bins(data=events, dim=_event_dimension, begin=begins, end=ends)
-        except sc.SliceError as e:
+        except IndexError as e:
             raise IndexError(
                 f"Invalid index in NXevent_data at {self.name}/event_index:\n{e}.")
 
