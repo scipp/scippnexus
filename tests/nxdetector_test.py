@@ -208,8 +208,8 @@ def test_loading_event_data_with_full_selection_and_automatic_detector_numbers_w
     detector = nxroot.create_class('detector0', NX_class.NXdetector)
     create_event_data_ids_1234(detector.create_class('events', NX_class.NXevent_data))
     assert detector.dims == ['detector_number']
-    assert detector[...].shape == [4]
-    assert detector[()].shape == [4]
+    assert tuple(detector[...].shape) == (4, )
+    assert tuple(detector[()].shape) == (4, )
 
 
 def test_event_data_field_dims_labels(nxroot):
@@ -225,7 +225,6 @@ def test_nxevent_data_selection_yields_correct_pulses(nxroot):
     create_event_data_ids_1234(detector.create_class('events', NX_class.NXevent_data))
 
     class Load:
-
         def __getitem__(self, select=...):
             da = detector['events'][select]
             return da.bins.size().values
