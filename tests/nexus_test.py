@@ -88,21 +88,6 @@ def test_nxobject_log_length_1(nxroot):
     assert sc.identical(log[...], da)
 
 
-def test_nxobject_log_length_1_two_dimensions(nxroot):
-    da = sc.DataArray(
-        sc.array(dims=['time'], values=[1.1]),
-        coords={
-            'time':
-            sc.epoch(unit='ns') +
-            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
-        })
-    log = nxroot['entry'].create_class('log', NX_class.NXlog)
-    log['value'] = sc.array(dims=['time', 'x'], values=[[1.1]])
-    log['time'] = da.coords['time'] - sc.epoch(unit='ns')
-    assert log.nx_class == NX_class.NXlog
-    assert sc.identical(log[...], da)
-
-
 def test_nxobject_event_data(nxroot):
     event_data = nxroot['entry'].create_class('events_0', NX_class.NXevent_data)
     assert event_data.nx_class == NX_class.NXevent_data

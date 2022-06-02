@@ -157,16 +157,24 @@ class Field:
         # the best we can do appears to be squeezing unless the file provides names for
         # dimensions. The shape property of this class does thus not necessarily return
         # the same as the shape of the underlying dataset.
+
         if dims is not None:
             self._dims = dims
             if len(self._dims) < len(self._shape):
-                self._shape = [size for size in self._shape if size != 1]
-                # If axes are partially specified, we may have squeezed too many dims
-                self._shape = ([1] * (len(self._dims) - len(self._shape))) + self._shape
+                self._shape = [size for size in self._shape if size > 1]
+            if len(self._dims) != len(self._shape):
+                raise ValueError(
+                    f"Dims: {self._dims} and shape: {self._shape} do not have "
+                    "the same length.")
         elif (axes := self.attrs.get('axes')) is not None:
+            # TODO: This branch doesn't seem to be reached by any test?
+            assert False
+            if len(axes) != len(self._shape):
+                raise ValueError(
+                    "The number of axes is different from the number of sizes.")
             self._dims = axes.split(',')
         else:
-            self._shape = [size for size in self._shape if size != 1]
+            self._shape = [size for size in self._shape if size > 1]
             self._dims = [f'dim_{i}' for i in range(self.ndim)]
 
     def __getitem__(self, select) -> sc.Variable:

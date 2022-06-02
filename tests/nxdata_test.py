@@ -316,6 +316,49 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
     assert sc.identical(data['xx'][...], xx['ignored', 0])
 
 
+def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
+    data = nxroot.create_class('data1', sx.NX_class.NXdata)
+    data.create_field('signal', signal)
+    data.attrs['axes'] = ['xx', 'yy']
+    data.attrs['signal'] = 'signal'
+    loaded = data[...]
+    assert sc.identical(loaded.data, signal)
+    assert data['signal'].ndim == 2
+    assert data['signal'].shape == [1, 1]
+
+
+def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
+    data = nxroot.create_class('data1', sx.NX_class.NXdata)
+    data.create_field('signal', signal)
+    data.attrs['signal'] = 'signal'
+    loaded = data[...]
+    assert data['signal'].ndim == 0
+    assert data['signal'].shape == []
+
+
+def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2]])
+    data = nxroot.create_class('data1', sx.NX_class.NXdata)
+    data.create_field('signal', signal)
+    data.attrs['signal'] = 'signal'
+    loaded = data[...]
+    assert data['signal'].ndim == 1
+    assert data['signal'].shape == [2]
+    assert data['signal'].dims == ['dim_0']
+
+
+def test_raises_when_only_one_axis_specified(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
+    data = nxroot.create_class('data1', sx.NX_class.NXdata)
+    data.create_field('signal', signal)
+    data.attrs['axes'] = ['xx']
+    data.attrs['signal'] = 'signal'
+    with pytest.raises(ValueError):
+        _ = data[...]
+
+
 def test_fields_with_datetime_attribute_are_loaded_as_datetime(nxroot):
     da = sc.DataArray(
         sc.epoch(unit='s') +
