@@ -334,6 +334,7 @@ def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
     data.create_field('signal', signal)
     data.attrs['signal'] = 'signal'
     loaded = data[...]
+    assert sc.identical(loaded.data, sc.scalar(1.1, unit='m'))
     assert data['signal'].ndim == 0
     assert data['signal'].shape == []
 
@@ -344,6 +345,9 @@ def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
     data.create_field('signal', signal)
     data.attrs['signal'] = 'signal'
     loaded = data[...]
+    # Note that dimension gets renamed to `dim_0` since no axes are specified
+    assert sc.identical(loaded.data,
+                        sc.array(dims=['dim_0'], unit='m', values=[1.1, 2.2]))
     assert data['signal'].ndim == 1
     assert data['signal'].shape == [2]
     assert data['signal'].dims == ['dim_0']
