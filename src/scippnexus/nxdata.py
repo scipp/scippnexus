@@ -112,8 +112,9 @@ class NXdata(NXobject):
         try:
             dims = [lut[s] for s in shape]
         except KeyError:
-            raise NexusStructureError(
-                f"Could not determine axis indices for {self.name}/{name}")
+            # raise NexusStructureError(
+            #     f"Could not determine axis indices for {self.name}/{name}")
+            return None
         return dims
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
@@ -122,18 +123,21 @@ class NXdata(NXobject):
         # since legacy files do not set this attribute.
         if (indices := self.attrs.get(f'{name}_indices')) is not None:
             return list(np.array(self.dims)[np.array(indices).flatten()])
-        signals = [self._signal_name, self._errors_name]
-        signals += list(self.attrs.get('auxiliary_signals', []))
-        if name in signals:
+        # signals = [self._signal_name, self._errors_name]
+        # signals += list(self.attrs.get('auxiliary_signals', []))
+        if name in [self._signal_name, self._errors_name]:
             return self._get_group_dims()  # if None, field determines dims itself
+        if name in list(self.attrs.get('auxiliary_signals', [])):
+            return self._guess_dims(name)
         if name in self._get_axes():
             # If there are named axes then items of same name are "dimension
             # coordinates", i.e., have a dim matching their name.
             return [name]
-        try:
-            return self._guess_dims(name)
-        except NexusStructureError:
-            return None
+        return self._guess_dims(name)
+        # try:
+        #     return self._guess_dims(name)
+        # except NexusStructureError:
+        #     return None
 
     def _is_errors(self, name):
         for suffix in self._error_suffixes:

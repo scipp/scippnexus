@@ -318,7 +318,7 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
 
 def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
-    data = nxroot.create_class('data1', sx.NX_class.NXdata)
+    data = nxroot.create_class('data1', NX_class.NXdata)
     data.create_field('signal', signal)
     data.attrs['axes'] = ['xx', 'yy']
     data.attrs['signal'] = 'signal'
@@ -330,7 +330,7 @@ def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
 
 def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
-    data = nxroot.create_class('data1', sx.NX_class.NXdata)
+    data = nxroot.create_class('data1', NX_class.NXdata)
     data.create_field('signal', signal)
     data.attrs['signal'] = 'signal'
     loaded = data[...]
@@ -340,7 +340,7 @@ def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
 
 def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2]])
-    data = nxroot.create_class('data1', sx.NX_class.NXdata)
+    data = nxroot.create_class('data1', NX_class.NXdata)
     data.create_field('signal', signal)
     data.attrs['signal'] = 'signal'
     loaded = data[...]
@@ -351,7 +351,7 @@ def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
 
 def test_raises_when_only_one_axis_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
-    data = nxroot.create_class('data1', sx.NX_class.NXdata)
+    data = nxroot.create_class('data1', NX_class.NXdata)
     data.create_field('signal', signal)
     data.attrs['axes'] = ['xx']
     data.attrs['signal'] = 'signal'

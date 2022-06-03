@@ -157,7 +157,7 @@ class Field:
         # the best we can do appears to be squeezing unless the file provides names for
         # dimensions. The shape property of this class does thus not necessarily return
         # the same as the shape of the underlying dataset.
-
+        print(dataset.name, dims, self._shape)
         if dims is not None:
             self._dims = dims
             if len(self._dims) < len(self._shape):
