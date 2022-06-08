@@ -24,14 +24,22 @@ class NXlog(NXobject):
 
     @property
     def _nxbase(self) -> NXdata:
-        axes = ['.'] * self._get_child('value').ndim
+        # We get the shape from the original dataset, to make sure we do not squeeze
+        # dimensions too early
+        child_dataset = self._get_child('value')._dataset
+        ndim = child_dataset.ndim
+        shape = child_dataset.shape
         # The outermost axis in NXlog is pre-defined to 'time' (if present). Note
         # that this may be overriden by an `axes` attribute, if defined for the group.
         if 'time' in self:
-            if len(axes) == 0:  # shape=(1,) was squeezed, log has only a single value
-                axes = ['time']
-            else:
-                axes[0] = 'time'
+            raw_axes = ['time'] + (['.'] * (ndim - 1))
+        else:
+            raw_axes = ['.'] * ndim
+        axes = []
+        for i, ax in enumerate(raw_axes):
+            # Squeeze dimensions that have size 1 and are not 'time'
+            if (ax == 'time') or (shape[i] != 1):
+                axes.append(ax)
         # NXdata uses the 'signal' attribute to define the field name of the signal.
         # NXlog uses a "hard-coded" signal name 'value', without specifying the
         # attribute in the file, so we pass this explicitly to NXdata.

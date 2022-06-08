@@ -353,14 +353,14 @@ def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
     assert data['signal'].dims == ['dim_0']
 
 
-def test_raises_when_only_one_axis_specified(nxroot):
+def test_only_one_axis_specified_for_2d_field(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
     data = nxroot.create_class('data1', NX_class.NXdata)
     data.create_field('signal', signal)
-    data.attrs['axes'] = ['xx']
+    data.attrs['axes'] = ['zz']
     data.attrs['signal'] = 'signal'
-    with pytest.raises(ValueError):
-        _ = data[...]
+    loaded = data[...]
+    assert sc.identical(loaded.data, sc.array(dims=['zz'], unit='m', values=[1.1]))
 
 
 def test_fields_with_datetime_attribute_are_loaded_as_datetime(nxroot):

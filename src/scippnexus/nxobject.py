@@ -160,18 +160,19 @@ class Field:
         if dims is not None:
             self._dims = dims
             if len(self._dims) < len(self._shape):
-                self._shape = [size for size in self._shape if size > 1]
-            if len(self._dims) != len(self._shape):
-                raise ValueError(
-                    f"Dims: {self._dims} and shape: {self._shape} do not have "
-                    "the same length.")
+                # The convention here is that the given dimensions apply to the shapes
+                # starting from the left. So we only squeeze dimensions that are after
+                # len(dims).
+                self._shape = self._shape[:len(self._dims)] + [
+                    size for size in self._shape[len(self._dims):] if size != 1
+                ]
         elif (axes := self.attrs.get('axes')) is not None:
             self._dims = axes.split(',')
             if len(self._dims) != len(self._shape):
                 raise ValueError(
                     "The number of axes is different from the number of sizes.")
         else:
-            self._shape = [size for size in self._shape if size > 1]
+            self._shape = [size for size in self._shape if size != 1]
             self._dims = [f'dim_{i}' for i in range(self.ndim)]
 
     def __getitem__(self, select) -> sc.Variable:
@@ -187,6 +188,11 @@ class Field:
                             shape=shape,
                             dtype=self.dtype,
                             unit=self.unit)
+
+        # If the variable is empty, return early
+        if np.prod(shape) == 0:
+            return variable
+
         if self.dtype == sc.DType.string:
             try:
                 strings = self._dataset.asstr()[index]
@@ -194,7 +200,7 @@ class Field:
                 strings = self._dataset.asstr(encoding='latin-1')[index]
                 _warn_latin1_decode(self._dataset, strings, str(e))
             variable.values = np.asarray(strings).flatten()
-        elif variable.values.flags["C_CONTIGUOUS"] and variable.values.size > 0:
+        elif variable.values.flags["C_CONTIGUOUS"]:
             self._dataset.read_direct(variable.values, source_sel=index)
         else:
             variable.values = self._dataset[index]
