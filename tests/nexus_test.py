@@ -153,7 +153,7 @@ def test_nxlog_three_dims_with_time_of_length_1(nxroot):
 def test_nxlog_with_shape_0(nxroot):
     da = sc.DataArray(sc.ones(dims=['time', 'ignored'], shape=(0, 1)),
                       coords={'time': sc.ones(dims=['time'], shape=(0, ), unit='s')})
-    log = nxroot['entry'].create_class('log', sx.NX_class.NXlog)
+    log = nxroot['entry'].create_class('log', NX_class.NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time']
     assert sc.identical(log[...], da['ignored', 0])
