@@ -201,7 +201,13 @@ class Field:
                 _warn_latin1_decode(self._dataset, strings, str(e))
             variable.values = np.asarray(strings).flatten()
         elif variable.values.flags["C_CONTIGUOUS"]:
-            self._dataset.read_direct(variable.values, source_sel=index)
+            try:
+                self._dataset.read_direct(variable.values, source_sel=index)
+            except TypeError:
+                # A TypeError occurs in some cases where h5py cannot broadcast data
+                # with e.g. shape (20, 1) to a buffer of shape (20,).
+                # Note that broadcasting (1, 20) -> (20,) does work.
+                variable.values = self._dataset[index].reshape(shape)
         else:
             variable.values = self._dataset[index]
         if _is_time(variable):
