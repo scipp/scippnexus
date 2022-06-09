@@ -168,9 +168,6 @@ class Field:
                 ]
         elif (axes := self.attrs.get('axes')) is not None:
             self._dims = axes.split(',')
-            if len(self._dims) != len(self._shape):
-                raise ValueError(
-                    "The number of axes is different from the number of sizes.")
         else:
             self._shape = [size for size in self._shape if size != 1]
             self._dims = [f'dim_{i}' for i in range(self.ndim)]
