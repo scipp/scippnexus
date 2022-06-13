@@ -200,7 +200,8 @@ class Field:
         elif variable.values.flags["C_CONTIGUOUS"]:
             # On versions of h5py prior to 3.2, a TypeError occurs in some cases
             # where h5py cannot broadcast data with e.g. shape (20, 1) to a buffer
-            # of shape (20,). Note that broadcasting (1, 20) -> (20,) does work.
+            # of shape (20,). Note that broadcasting (1, 20) -> (20,) does work
+            # (see https://github.com/h5py/h5py/pull/1796).
             # Therefore, we manually squeeze here.
             # A pin of h5py<3.2 is currently required by Mantid and hence scippneutron
             # (see https://github.com/h5py/h5py/issues/1880#issuecomment-823223154)
