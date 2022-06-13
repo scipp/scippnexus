@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+
 import h5py
 import numpy as np
 import pytest
@@ -70,7 +73,7 @@ def test_nxobject_log(nxroot):
     assert sc.identical(log[...], da)
 
 
-def test_nxobject_log_length_1(nxroot):
+def test_nxlog_length_1(nxroot):
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1]),
         coords={
@@ -83,6 +86,77 @@ def test_nxobject_log_length_1(nxroot):
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
     assert log.nx_class == NX_class.NXlog
     assert sc.identical(log[...], da)
+
+
+def test_nxlog_length_1_two_dims_no_time_squeezes_all_dims(nxroot):
+    da = sc.DataArray(
+        sc.array(dims=['time', 'ignored'], values=[[1.1]]),
+        coords={
+            'time':
+            sc.epoch(unit='ns') +
+            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
+        })
+    log = nxroot['entry'].create_class('log', NX_class.NXlog)
+    log['value'] = da.data
+    assert sc.identical(log[...], sc.DataArray(sc.scalar(1.1)))
+
+
+def test_nxlog_length_1_two_dims_with_time_squeezes_inner_dim(nxroot):
+    da = sc.DataArray(
+        sc.array(dims=['time', 'ignored'], values=[[1.1]]),
+        coords={
+            'time':
+            sc.epoch(unit='ns') +
+            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
+        })
+    log = nxroot['entry'].create_class('log', NX_class.NXlog)
+    log['value'] = da.data
+    log['time'] = da.coords['time'] - sc.epoch(unit='ns')
+    assert sc.identical(log[...], da['ignored', 0])
+
+
+def test_nxlog_axes_replaces_time_dim(nxroot):
+    da = sc.DataArray(
+        sc.array(dims=['time', 'ignored'], values=[[1.1]]),
+        coords={
+            'time':
+            sc.epoch(unit='ns') +
+            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
+        })
+    log = nxroot['entry'].create_class('log', NX_class.NXlog)
+    log.attrs['axes'] = ['yy', 'xx']
+    log['value'] = da.data
+    log['time'] = da.coords['time'] - sc.epoch(unit='ns')
+    expected = sc.DataArray(sc.array(dims=['yy', 'xx'], values=[[1.1]]),
+                            coords={'time': da.coords['time'].squeeze()})
+    assert sc.identical(log[...], expected)
+
+
+def test_nxlog_three_dims_with_time_of_length_1(nxroot):
+    da = sc.DataArray(
+        sc.array(dims=['time', 'a', 'b'], values=np.arange(9.).reshape(1, 3, 3)),
+        coords={
+            'time':
+            sc.epoch(unit='ns') +
+            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
+        })
+    log = nxroot['entry'].create_class('log', NX_class.NXlog)
+    log['value'] = da.data
+    log['time'] = da.coords['time'] - sc.epoch(unit='ns')
+    loaded = log[...]
+    assert sc.identical(
+        loaded.data,
+        sc.array(dims=['time', 'dim_1', 'dim_2'], values=np.arange(9.).reshape(1, 3,
+                                                                               3)))
+
+
+def test_nxlog_with_shape_0(nxroot):
+    da = sc.DataArray(sc.ones(dims=['time', 'ignored'], shape=(0, 1)),
+                      coords={'time': sc.ones(dims=['time'], shape=(0, ), unit='s')})
+    log = nxroot['entry'].create_class('log', NX_class.NXlog)
+    log['value'] = da.data
+    log['time'] = da.coords['time']
+    assert sc.identical(log[...], da['ignored', 0])
 
 
 def test_nxobject_event_data(nxroot):

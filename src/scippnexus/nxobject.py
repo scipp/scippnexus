@@ -160,7 +160,12 @@ class Field:
         if dims is not None:
             self._dims = dims
             if len(self._dims) < len(self._shape):
-                self._shape = [size for size in self._shape if size != 1]
+                # The convention here is that the given dimensions apply to the shapes
+                # starting from the left. So we only squeeze dimensions that are after
+                # len(dims).
+                self._shape = self._shape[:len(self._dims)] + [
+                    size for size in self._shape[len(self._dims):] if size != 1
+                ]
         elif (axes := self.attrs.get('axes')) is not None:
             self._dims = axes.split(',')
         else:
@@ -180,6 +185,11 @@ class Field:
                             shape=shape,
                             dtype=self.dtype,
                             unit=self.unit)
+
+        # If the variable is empty, return early
+        if np.prod(shape) == 0:
+            return variable
+
         if self.dtype == sc.DType.string:
             try:
                 strings = self._dataset.asstr()[index]
@@ -187,8 +197,20 @@ class Field:
                 strings = self._dataset.asstr(encoding='latin-1')[index]
                 _warn_latin1_decode(self._dataset, strings, str(e))
             variable.values = np.asarray(strings).flatten()
-        elif variable.values.flags["C_CONTIGUOUS"] and variable.values.size > 0:
-            self._dataset.read_direct(variable.values, source_sel=index)
+        elif variable.values.flags["C_CONTIGUOUS"]:
+            # On versions of h5py prior to 3.2, a TypeError occurs in some cases
+            # where h5py cannot broadcast data with e.g. shape (20, 1) to a buffer
+            # of shape (20,). Note that broadcasting (1, 20) -> (20,) does work
+            # (see https://github.com/h5py/h5py/pull/1796).
+            # Therefore, we manually squeeze here.
+            # A pin of h5py<3.2 is currently required by Mantid and hence scippneutron
+            # (see https://github.com/h5py/h5py/issues/1880#issuecomment-823223154)
+            # hence this workaround. Once we can use a more recent h5py with Mantid,
+            # this try/except can be removed.
+            try:
+                self._dataset.read_direct(variable.values, source_sel=index)
+            except TypeError:
+                variable.values = self._dataset[index].squeeze()
         else:
             variable.values = self._dataset[index]
         if _is_time(variable):
