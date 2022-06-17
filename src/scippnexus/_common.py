@@ -51,6 +51,7 @@ def convert_time_to_datetime64(
 def _to_canonical_select(dims: List[str],
                          select: ScippIndex) -> Dict[str, Union[int, slice]]:
     """Return selection as dict with explicit dim labels"""
+
     def check_1d():
         if len(dims) != 1:
             raise ValueError(f"Dataset has multiple dimensions {dims}, "

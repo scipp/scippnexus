@@ -257,6 +257,7 @@ def test_nxevent_data_selection_yields_correct_pulses(nxroot):
     create_event_data_ids_1234(detector.create_class('events', NX_class.NXevent_data))
 
     class Load:
+
         def __getitem__(self, select=...):
             da = detector['events'][select]
             return da.bins.size().values
