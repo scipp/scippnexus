@@ -23,10 +23,10 @@ def test_raises_if_no_data_found(nxroot):
 
 
 def test_loads_events_when_data_and_events_found(nxroot):
-    detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2]))
+    detector_number = sc.array(dims=[''], unit=None, values=np.array([1, 2]))
     data = sc.ones(dims=['xx'], shape=[2])
     detector = nxroot.create_class('detector0', NX_class.NXdetector)
-    detector.create_field('detector_numbers', detector_numbers)
+    detector.create_field('detector_number', detector_number)
     detector.create_field('data', data)
     assert detector[...].bins is None
     detector.create_field('event_id', sc.array(dims=[''], unit=None, values=[1]))
@@ -82,6 +82,38 @@ def test_loads_data_with_coords(nxroot):
     detector.create_field('data', da.data)
     detector.attrs['axes'] = ['xx', '.']
     assert sc.identical(detector[...], da.rename_dims({'yy': 'dim_1'}))
+
+
+def test_slicing_works_as_in_scipp(nxroot):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2, 3.3], [3.3, 4.4,
+                                                                        5.5]]))
+    da.coords['detector_numbers'] = sc.array(dims=['xx', 'yy'],
+                                             unit=None,
+                                             values=np.array([[1, 2, 3], [4, 5, 6]]))
+    da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
+    da.coords['xx2'] = sc.array(dims=['xx'], unit='m', values=[0.3, 0.4])
+    da.coords['yy'] = sc.array(dims=['yy'], unit='m', values=[0.1, 0.2, 0.3])
+    da.coords['2d_edges'] = sc.array(dims=['yy', 'xx'],
+                                     unit='m',
+                                     values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    detector = nxroot.create_class('detector0', NX_class.NXdetector)
+    detector.create_field('detector_numbers', da.coords['detector_numbers'])
+    detector.create_field('xx', da.coords['xx'])
+    detector.create_field('xx2', da.coords['xx2'])
+    detector.create_field('yy', da.coords['yy'])
+    detector.create_field('2d_edges', da.coords['2d_edges'])
+    detector.create_field('data', da.data)
+    detector.attrs['axes'] = ['xx', 'yy']
+    detector.attrs['2d_edges_indices'] = [1, 0]
+    assert sc.identical(detector[...], da)
+    print(detector['xx', 0], da['xx', 0])
+    assert sc.identical(detector['xx', 0], da['xx', 0])
+    assert sc.identical(detector['xx', 1], da['xx', 1])
+    assert sc.identical(detector['xx', 0:1], da['xx', 0:1])
+    assert sc.identical(detector['yy', 0], da['yy', 0])
+    assert sc.identical(detector['yy', 1], da['yy', 1])
+    assert sc.identical(detector['yy', 0:1], da['yy', 0:1])
 
 
 def create_event_data_ids_1234(group):
@@ -225,7 +257,6 @@ def test_nxevent_data_selection_yields_correct_pulses(nxroot):
     create_event_data_ids_1234(detector.create_class('events', NX_class.NXevent_data))
 
     class Load:
-
         def __getitem__(self, select=...):
             da = detector['events'][select]
             return da.bins.size().values

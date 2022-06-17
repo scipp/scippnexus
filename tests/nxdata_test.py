@@ -378,3 +378,22 @@ def test_fields_with_datetime_attribute_are_loaded_as_datetime(nxroot):
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
     assert sc.identical(data[...], da)
+
+
+def test_slicing_with_bin_edge_coord_returns_bin_edges(nxroot):
+    da = sc.DataArray(sc.array(dims=['xx'], unit='K', values=[1.1, 2.2, 3.3]))
+    da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2, 0.3, 0.4])
+    da.coords['xx2'] = sc.array(dims=['xx'], unit='m', values=[0.3, 0.4, 0.5, 0.6])
+    data = nxroot.create_class('data', NX_class.NXdata)
+    data.create_field('xx', da.coords['xx'])
+    data.create_field('xx2', da.coords['xx2'])
+    data.create_field('data', da.data)
+    data.attrs['signal'] = 'data'
+    data.attrs['axes'] = ['xx']
+    data.attrs['xx_indices'] = [0]
+    data.attrs['xx2_indices'] = [0]
+    assert sc.identical(data[...], da)
+    assert sc.identical(data['xx', 0], da['xx', 0])
+    assert sc.identical(data['xx', 1], da['xx', 1])
+    assert sc.identical(data['xx', 0:1], da['xx', 0:1])
+    assert sc.identical(data['xx', 1:3], da['xx', 1:3])

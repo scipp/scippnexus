@@ -12,7 +12,6 @@ from .nxobject import Field, NXobject, ScippIndex, NexusStructureError
 
 
 class NXdata(NXobject):
-
     def __init__(
             self,
             group: H5Group,
@@ -145,6 +144,28 @@ class NXdata(NXobject):
                     return True
         return False
 
+    def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
+        sizes = dict(zip(self.dims, self.shape))
+        for dim, size in zip(coord.dims, coord.shape):
+            if dim in sizes and sizes[dim] + 1 == size:
+                return dim
+        return None
+
+    def _dim_of_coord(self, name: str, coord: Field) -> Union[None, str]:
+        if len(coord.dims) == 1:
+            return coord.dims[0]
+        if name in coord.dims and name in self.dims:
+            return name
+        return self._bin_edge_dim(coord)
+
+    def _coord_to_attr(self, da: sc.DataArray, name: str, coord: Field) -> bool:
+        dim_of_coord = self._dim_of_coord(name, coord)
+        if dim_of_coord is None:
+            return False
+        if dim_of_coord not in da.dims:
+            return True
+        return False
+
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         signal = self._signal[select]
         if self._errors_name in self:
@@ -162,7 +183,10 @@ class NXdata(NXobject):
                                                   in skip) or self._is_errors(name):
                 continue
             try:
-                sel = to_child_select(self.dims, field.dims, select)
+                sel = to_child_select(self.dims,
+                                      field.dims,
+                                      select,
+                                      bin_edge_dim=self._bin_edge_dim(field))
                 coord: sc.Variable = self[name][sel]
                 for suffix in self._error_suffixes:
                     if f'{name}{suffix}' in self:
@@ -171,7 +195,11 @@ class NXdata(NXobject):
                                  f"{name}_error. The latter will be ignored.")
                         stddevs = self[f'{name}{suffix}'][sel]
                         coord.variances = sc.pow(stddevs, sc.scalar(2)).values
-                da.coords[name] = coord
+                if self._coord_to_attr(da, name, field):
+                    # Like scipp, slicing turns dim
+                    da.attrs[name] = coord
+                else:
+                    da.coords[name] = coord
             except sc.DimensionError as e:
                 warn(f"Skipped load of axis {field.name} due to:\n{e}")
 
