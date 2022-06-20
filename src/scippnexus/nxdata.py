@@ -197,7 +197,8 @@ class NXdata(NXobject):
                         stddevs = self[f'{name}{suffix}'][sel]
                         coord.variances = sc.pow(stddevs, sc.scalar(2)).values
                 if self._coord_to_attr(da, name, field):
-                    # Like scipp, slicing turns dim
+                    # Like scipp, slicing turns coord into attr if slicing removes the
+                    # dim corresponding to the coord.
                     da.attrs[name] = coord
                 else:
                     da.coords[name] = coord
