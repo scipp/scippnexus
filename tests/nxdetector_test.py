@@ -107,13 +107,13 @@ def test_slicing_works_as_in_scipp(nxroot):
     detector.attrs['axes'] = ['xx', 'yy']
     detector.attrs['2d_edges_indices'] = [1, 0]
     assert sc.identical(detector[...], da)
-    print(detector['xx', 0], da['xx', 0])
     assert sc.identical(detector['xx', 0], da['xx', 0])
     assert sc.identical(detector['xx', 1], da['xx', 1])
     assert sc.identical(detector['xx', 0:1], da['xx', 0:1])
     assert sc.identical(detector['yy', 0], da['yy', 0])
     assert sc.identical(detector['yy', 1], da['yy', 1])
     assert sc.identical(detector['yy', 0:1], da['yy', 0:1])
+    assert sc.identical(detector['yy', 1:1], da['yy', 1:1])  # empty slice
 
 
 def create_event_data_ids_1234(group):
