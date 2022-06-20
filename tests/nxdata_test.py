@@ -397,3 +397,4 @@ def test_slicing_with_bin_edge_coord_returns_bin_edges(nxroot):
     assert sc.identical(data['xx', 1], da['xx', 1])
     assert sc.identical(data['xx', 0:1], da['xx', 0:1])
     assert sc.identical(data['xx', 1:3], da['xx', 1:3])
+    assert sc.identical(data['xx', 1:1], da['xx', 1:1])  # empty slice

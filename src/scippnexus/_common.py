@@ -113,6 +113,6 @@ def to_child_select(dims: List[str],
             index = select[dim]
             if isinstance(index, int):
                 select[dim] = slice(index, index + 2)
-            else:
+            elif index.stop > index.start:
                 select[dim] = slice(index.start, index.stop + 1)
     return select
