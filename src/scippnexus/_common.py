@@ -105,10 +105,9 @@ def to_child_select(dims: List[str],
     This removes any selections that apply to the parent but not the child.
     """
     select = _to_canonical_select(dims, select)
-    if set(dims) != set(child_dims):
-        for d in dims:
-            if d not in child_dims and d in select:
-                del select[d]
+    for d in dims:
+        if d not in child_dims and d in select:
+            del select[d]
     for dim in select:
         if dim == bin_edge_dim:
             index = select[dim]
