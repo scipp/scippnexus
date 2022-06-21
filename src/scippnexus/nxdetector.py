@@ -10,6 +10,13 @@ from .nxdata import NXdata
 from .nxevent_data import NXevent_data
 
 
+def group(da: sc.DataArray, groups: sc.Variable) -> sc.DataArray:
+    if hasattr(da, 'group'):
+        return da.group(groups)
+    else:
+        return sc.bin(da, groups=[groups])
+
+
 class EventSelector:
     """A proxy object for creating an NXdetector based on a selection of events.
     """
@@ -95,7 +102,7 @@ class _EventField:
         # is contiguous and that there is no masking. We can therefore use the
         # more efficient approach of binning from scratch instead of erasing the
         # 'pulse' binning defined by NXevent_data.
-        event_data = sc.bin(event_data.bins.constituents['data'], groups=[event_id])
+        event_data = group(event_data.bins.constituents['data'], groups=event_id)
         if self._grouping is None:
             event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
         else:
