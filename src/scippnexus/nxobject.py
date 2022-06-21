@@ -174,17 +174,19 @@ class Field:
 
     def __getitem__(self, select) -> sc.Variable:
         index = to_plain_index(self.dims, select)
-        if isinstance(index, slice):
+        if isinstance(index, (int, slice)):
             index = (index, )
 
-        shape = list(self.shape)
+        base_dims = self.dims
+        base_shape = self.shape
+        dims = []
+        shape = []
         for i, ind in enumerate(index):
-            shape[i] = len(range(*ind.indices(shape[i])))
+            if not isinstance(ind, int):
+                dims.append(base_dims[i])
+                shape.append(len(range(*ind.indices(base_shape[i]))))
 
-        variable = sc.empty(dims=self.dims,
-                            shape=shape,
-                            dtype=self.dtype,
-                            unit=self.unit)
+        variable = sc.empty(dims=dims, shape=shape, dtype=self.dtype, unit=self.unit)
 
         # If the variable is empty, return early
         if np.prod(shape) == 0:

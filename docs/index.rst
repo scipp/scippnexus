@@ -27,7 +27,7 @@ This is especially powerful since a number of concepts of scipp map well to conc
 News
 ----
 
-- [May 2022] Scippnexus-0.1.0 has been released.
+- [June 2022] Scippnexus-0.1.3 has been released.
 
 Get in touch
 ------------

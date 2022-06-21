@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Optional
 import scipp as sc
 import numpy as np
 from .typing import ScippIndex
@@ -94,18 +94,25 @@ def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, slice, tup
     return tuple(index)
 
 
-def to_child_select(dims: List[str], child_dims: List[str],
-                    select: ScippIndex) -> ScippIndex:
+def to_child_select(dims: List[str],
+                    child_dims: List[str],
+                    select: ScippIndex,
+                    bin_edge_dim: Optional[str] = None) -> ScippIndex:
     """
     Given a valid "scipp" index 'select' for a Nexus class, return a selection for a
     child field of the class, which may have fewer dimensions.
 
     This removes any selections that apply to the parent but not the child.
     """
-    if set(dims) == set(child_dims):
-        return select
     select = _to_canonical_select(dims, select)
     for d in dims:
         if d not in child_dims and d in select:
             del select[d]
+    for dim in select:
+        if dim == bin_edge_dim:
+            index = select[dim]
+            if isinstance(index, int):
+                select[dim] = slice(index, index + 2)
+            elif index.stop > index.start:
+                select[dim] = slice(index.start, index.stop + 1)
     return select
