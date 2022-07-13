@@ -47,6 +47,7 @@ jobs:
           path: html/
 
       - uses: JamesIves/github-pages-deploy-action@v4.3.4
+        if: ${{ github.event.inputs.publish == 'true' || inputs.publish }}
         with:
           branch: gh-pages
           folder: html
