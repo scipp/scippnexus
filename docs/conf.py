@@ -174,7 +174,9 @@ html_theme_options = {
 if outdated:
     html_theme_options["announcement"] = (
         "⚠️ You are viewing the documentation for an old version of scippnexus. "
-        "Switch to <a href='https://scipp.github.io/scippnexus'>latest version.</a> ⚠️")
+        "Switch to <a href='https://scipp.github.io/scippnexus' "
+        "style='color:white;text-decoration:underline;'"
+        ">latest</a> version. ⚠️")
 
 html_logo = "_static/logo.png"
 html_favicon = "_static/favicon.ico"
