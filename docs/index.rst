@@ -4,7 +4,7 @@ scippnexus
 .. raw:: html
 
    <span style="font-size:1.2em;font-style:italic;color:#5a5a5a">
-      An h5py-like utility for NeXus files based with seamless scipp integration
+      An h5py-like utility for NeXus files with seamless scipp integration
       </br></br>
    </span>
 
