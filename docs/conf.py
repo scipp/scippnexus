@@ -3,6 +3,45 @@
 import doctest
 from datetime import date
 import scippnexus
+import os
+
+from typing import Any, Dict, Optional
+from docutils.nodes import document
+from sphinx.application import Sphinx
+import sphinx_book_theme
+
+
+def add_buttons(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: Dict[str, Any],
+    doctree: Optional[document],
+):
+    base = "https://scipp.github.io"
+    l1 = []
+    l1.append({"type": "link", "text": "scipp", "url": f"{base}"})
+    l1.append({"type": "link", "text": "scippnexus", "url": f"{base}/scippnexus"})
+    l1.append({"type": "link", "text": "scippneutron", "url": f"{base}/scippneutron"})
+    l1.append({"type": "link", "text": "ess", "url": f"{base}/ess"})
+    header_buttons = context["header_buttons"]
+    header_buttons.append({
+        "type": "group",
+        "buttons": l1,
+        "icon": "fa fa-caret-down",
+        "text": "Related projects"
+    })
+    l2 = []
+    l2.append({"type": "link", "text": "v0.1 (latest)", "url": f"{base}/scippnexus"})
+    header_buttons.append({
+        "type": "group",
+        "buttons": l2,
+        "icon": "fa fa-caret-down",
+        "text": "Version"
+    })
+
+
+sphinx_book_theme.add_launch_buttons = add_buttons
 
 html_show_sourcelink = True
 
@@ -127,6 +166,13 @@ html_theme_options = {
     "use_edit_page_button": True,
     "show_toc_level": 2,  # Show subheadings in secondary sidebar
 }
+
+if 'OUTDATED_VERSION' in os.environ:
+    html_theme_options["announcement"] = (
+        "⚠️ You are viewing the documentation for an old version of scippnexus. "
+        "Switch to <a href='https://github.com/scipp/scippnexus'>latest version.</a> ⚠️"
+    )
+
 html_logo = "_static/logo.png"
 html_favicon = "_static/favicon.ico"
 
