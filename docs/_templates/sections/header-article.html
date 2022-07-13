@@ -63,7 +63,7 @@ title="{{ translate(tooltip) }}"
 {% if text %}<span class="headerbtn__text-container">{{ translate(text) }}</span>{% endif %}
 {% if icon %}<i class="{{ icon }}"></i>{% endif %}
   </button>
-  <div class="menu-dropdown__content">
+  <div class="menu-dropdown__content" style="transform:translate(10%);">
     <ul>
       {%- for button in buttons %}
       <li>
