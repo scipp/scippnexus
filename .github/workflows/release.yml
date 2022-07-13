@@ -1,9 +1,6 @@
 name: Release
 
 on:
-  push:  # TODO consider removing push trigger
-    branches:
-      - main
   release:
     types: [published]
   workflow_dispatch:
