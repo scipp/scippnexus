@@ -10,6 +10,8 @@ from docutils.nodes import document
 from sphinx.application import Sphinx
 import sphinx_book_theme
 
+outdated = 'OUTDATED_VERSION' in os.environ
+
 
 def add_buttons(
     app: Sphinx,
@@ -31,6 +33,8 @@ def add_buttons(
         "icon": "fa fa-caret-down",
         "text": "Related projects"
     })
+    if outdated:
+        return  # No version select on outdated docs, would be incomplete anyway
     l2 = []
     l2.append({"type": "link", "text": "v0.1 (latest)", "url": f"{base}/scippnexus"})
     header_buttons.append({
@@ -167,7 +171,7 @@ html_theme_options = {
     "show_toc_level": 2,  # Show subheadings in secondary sidebar
 }
 
-if 'OUTDATED_VERSION' in os.environ:
+if outdated:
     html_theme_options["announcement"] = (
         "⚠️ You are viewing the documentation for an old version of scippnexus. "
         "Switch to <a href='https://github.com/scipp/scippnexus'>latest version.</a> ⚠️"

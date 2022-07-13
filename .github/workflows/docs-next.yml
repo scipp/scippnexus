@@ -31,7 +31,6 @@ jobs:
     steps:
       - run: sudo apt install --yes graphviz pandoc
       - uses: actions/checkout@v3
-        # TODO checkout correct tag, given by version
       - uses: actions/setup-python@v3
         with:
           python-version: 3.8
@@ -55,4 +54,5 @@ jobs:
           #target-folder: ${{ inputs.version == '' && '' || format('release/{0}', github.ref_name) }}
           target-folder: ${{ inputs.version == '' && '' || format('release-test/{0}', inputs.version) }}
           single-commit: true
+          clean-exclude: release
           ssh-key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
