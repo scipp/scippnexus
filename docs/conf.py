@@ -10,7 +10,7 @@ from docutils.nodes import document
 from sphinx.application import Sphinx
 import sphinx_book_theme
 
-outdated = 'OUTDATED_VERSION' in os.environ
+outdated = os.environ.get('OUTDATED_VERSION', 'false') == 'true'
 
 
 def add_buttons(

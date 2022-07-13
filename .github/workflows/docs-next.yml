@@ -28,6 +28,7 @@ on:
 
 env:
   VERSION: ${{ inputs.version }}
+  OUTDATED_VERSION: ${{ inputs.outdated }}
 
 jobs:
   docs:
@@ -41,8 +42,6 @@ jobs:
           python-version: 3.8
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements/ci.txt
-      - run: export OUTDATED_VERSION=1
-        if: ${{ inputs.outdated }}
       - run: tox --skip-pkg-install -e docs scippnexus==${VERSION}
         if: ${{ inputs.publish }}
       - run: tox -e docs
@@ -59,7 +58,7 @@ jobs:
           folder: html
           #target-folder: ${{ format('release/{0}', steps.manage-folders.folder) }}
           #target-folder: ${{ inputs.version == '' && '' || format('release/{0}', github.ref_name) }}
-          target-folder: ${{ inputs.outdated && format('release-test/{0}', inputs.version) || 'release-next/stable' }}
+          target-folder: ${{ inputs.outdated && format('release-test/{0}', inputs.version) || 'release-test/stable' }}
           single-commit: true
           clean-exclude: release
           ssh-key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
