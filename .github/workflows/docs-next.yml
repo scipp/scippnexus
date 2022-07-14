@@ -6,9 +6,6 @@ on:
       publish:
         default: false
         type: boolean
-      outdated:
-        default: false
-        type: boolean
       version:
         default: ''
         required: false
@@ -18,9 +15,6 @@ on:
       publish:
         default: false
         type: boolean
-      outdated:
-        default: false
-        type: boolean
       version:
         default: ''
         required: false
@@ -28,7 +22,6 @@ on:
 
 env:
   VERSION: ${{ inputs.version }}
-  OUTDATED_VERSION: ${{ inputs.outdated }}
 
 jobs:
   docs:
@@ -37,14 +30,22 @@ jobs:
     steps:
       - run: sudo apt install --yes graphviz pandoc
       - uses: actions/checkout@v3
+        with:
+          ref: $${ inputs.publish && inputs.version || 'main' }}
       - uses: actions/setup-python@v3
         with:
           python-version: 3.8
+      - name: Manage versions
+        id: version
+        # TODO get release list
+        run: |
+          echo "version.latest=$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=is-latest)" >> $GITHUB_ENV
+          echo "version.target=${VERSION%.*}" >> $GITHUB_ENV
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements/ci.txt
-        # TODO Right now this uses the same version as the folder name. Trim patch version below,
-        # or rely on pip installing latest patch?
-      - run: tox --skip-pkg-install -e docs scippnexus==${VERSION}
+      - run: |
+          export LATEST_VERSION=${version.latest}
+          tox --skip-pkg-install -e docs scippnexus==${VERSION}
         if: ${{ inputs.publish }}
       - run: tox -e docs
         if: ${{ !inputs.publish }}
@@ -54,13 +55,16 @@ jobs:
           path: html/
 
       - uses: JamesIves/github-pages-deploy-action@v4.3.4
-        if: ${{ github.event.inputs.publish == 'true' || inputs.publish }}
+        # when to publish?
+        # - build-replaced && new (requested build-replaced build and version is new) => release
+        # - !outdated => release if(!latest) else root
+        if: ${{ inputs.publish }}
         with:
           branch: gh-pages
           folder: html
           # TODO change release-test to release
           # TODO change 'release-test/stable' to ''
-          target-folder: ${{ inputs.outdated && format('release-test/{0}', inputs.version) || 'release-test/stable' }}
+          target-folder: ${{ env.version.latest == 'True' && 'release-test/stable' || format('release-test/{0}', env.version.target) }}
           single-commit: true
           clean-exclude: release
           ssh-key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
