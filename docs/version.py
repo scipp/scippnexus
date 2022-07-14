@@ -12,6 +12,11 @@ def get_releases(repo, organization: str = 'scipp') -> List[Version]:
     return sorted([parse(e['tag_name']) for e in data if not e['draft']], reverse=True)
 
 
+def is_latest(releases, version):
+    latest = releases[0]
+    return (latest.major, latest.minor) <= (version.major, version.minor)
+
+
 def main(repo: str, action: str, version: str) -> int:
     releases = get_releases(repo=repo)
     version = parse(version)
@@ -19,7 +24,7 @@ def main(repo: str, action: str, version: str) -> int:
         releases.remove(version)
     latest = releases[0]
     if action == 'is-latest':  # This major or minor release exists
-        print((latest.major, latest.minor) <= (version.major, version.minor))
+        print(is_latest(releases, version))
     elif action == 'is-new':  # New major or minor release
         print((latest.major, latest.minor) < (version.major, version.minor))
     elif action == 'get-replaced':
@@ -28,6 +33,11 @@ def main(repo: str, action: str, version: str) -> int:
             if (release.major, release.minor) != (version.major, version.minor):
                 print(release)
                 break
+    elif action == 'get-target':
+        if is_latest(releases, version):
+            print('release-test/stable')
+        else:
+            print(f'release-test/{version.major}.{version.minor}')
 
     return 0
 
@@ -36,7 +46,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--repo', dest='repo', required=True, help='Repository name')
     parser.add_argument('--action',
-                        choices=['is-latest', 'is-new', 'get-replaced'],
+                        choices=['is-latest', 'is-new', 'get-replaced', 'get-target'],
                         required=True,
                         help='Action to perform: Check whether this major or minor '
                         'release exists (is-latest), check whether this is a new major '
