@@ -30,8 +30,9 @@ jobs:
     steps:
       - run: sudo apt install --yes graphviz pandoc
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.version }}
+        #TODO uncomment this, once we have release with docs/version,py
+        #with:
+        #  ref: ${{ inputs.version }}
       - uses: actions/setup-python@v3
         with:
           python-version: 3.8
@@ -39,6 +40,7 @@ jobs:
         id: version
         # TODO get release list
         run: |
+          # TODO move into tox step, change script to give target folder, to avoid mess in deploy step
           echo "version.latest=$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=is-latest)" >> $GITHUB_ENV
           echo "version.target=${VERSION%.*}" >> $GITHUB_ENV
       - run: python -m pip install --upgrade pip
@@ -55,9 +57,6 @@ jobs:
           path: html/
 
       - uses: JamesIves/github-pages-deploy-action@v4.3.4
-        # when to publish?
-        # - build-replaced && new (requested build-replaced build and version is new) => release
-        # - !outdated => release if(!latest) else root
         if: ${{ inputs.publish }}
         with:
           branch: gh-pages
