@@ -43,6 +43,7 @@ def add_buttons(
     if outdated:
         return  # No version select on outdated docs, would be incomplete anyway
     l2 = []
+    # TODO get release list
     l2.append({"type": "link", "text": "v0.1 (latest)", "url": f"{base}/scippnexus"})
     header_buttons.append({
         "type": "group",

@@ -37,6 +37,7 @@ def main(repo: str, action: str, version: str) -> int:
                 print(release)
                 break
     elif action == 'get-target':
+        # TODO change to non-test folders
         if is_latest(releases, version):
             print('release-test/stable')
         else:
