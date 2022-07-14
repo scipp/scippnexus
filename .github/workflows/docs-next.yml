@@ -31,7 +31,7 @@ jobs:
       - run: sudo apt install --yes graphviz pandoc
       - uses: actions/checkout@v3
         with:
-          ref: $${ inputs.publish && inputs.version || 'main' }}
+          ref: ${{ inputs.version }}
       - uses: actions/setup-python@v3
         with:
           python-version: 3.8
