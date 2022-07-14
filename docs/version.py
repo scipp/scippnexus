@@ -13,10 +13,13 @@ def get_releases(repo, organization: str = 'scipp') -> List[Version]:
 
 
 def is_latest(releases, version):
+    if isinstance(version, str):
+        version = parse(version)
     latest = releases[0]
     return (latest.major, latest.minor) <= (version.major, version.minor)
 
 
+# TODO refactor entirly to return struct or similar, for use from Python
 def main(repo: str, action: str, version: str) -> int:
     releases = get_releases(repo=repo)
     version = parse(version)

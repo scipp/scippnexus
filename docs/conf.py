@@ -3,14 +3,21 @@
 import doctest
 from datetime import date
 import scippnexus
+
 import os
+import sys
 
 from typing import Any, Dict, Optional
 from docutils.nodes import document
 from sphinx.application import Sphinx
 import sphinx_book_theme
 
-outdated = os.environ.get('LATEST_VERSION', 'True') == 'False'
+sys.path.insert(0, os.path.abspath('.'))
+
+from version import get_releases, is_latest  # noqa: E402
+
+releases = get_releases(repo='scippnexus')
+outdated = not is_latest(releases, str(scippnexus.__version__))
 
 
 def add_buttons(
