@@ -41,12 +41,12 @@ jobs:
         # TODO get release list
         run: |
           # TODO move into tox step, change script to give target folder, to avoid mess in deploy step
-          echo "version.latest=$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=is-latest)" >> $GITHUB_ENV
-          echo "version.target=${VERSION%.*}" >> $GITHUB_ENV
+          echo "version-latest=$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=is-latest)" >> $GITHUB_ENV
+          echo "version-target=${VERSION%.*}" >> $GITHUB_ENV
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements/ci.txt
       - run: |
-          export LATEST_VERSION=${version.latest}
+          export LATEST_VERSION=${version-latest}
           tox --skip-pkg-install -e docs scippnexus==${VERSION}
         if: ${{ inputs.publish }}
       - run: tox -e docs
@@ -63,7 +63,7 @@ jobs:
           folder: html
           # TODO change release-test to release
           # TODO change 'release-test/stable' to ''
-          target-folder: ${{ env.version.latest == 'True' && 'release-test/stable' || format('release-test/{0}', env.version.target) }}
+          target-folder: ${{ env.version-latest == 'True' && 'release-test/stable' || format('release-test/{0}', env.version-target) }}
           single-commit: true
           clean-exclude: release
           ssh-key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
