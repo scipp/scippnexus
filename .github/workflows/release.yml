@@ -96,7 +96,7 @@ jobs:
 
   replaced-docs:
     needs: [upload_packages, manage-versions]
-    if: github.event_name == 'release' && github.event.action == 'published' && needs.manage-versions.outputs.version-new
+    if: github.event_name == 'release' && github.event.action == 'published' && needs.manage-versions.outputs.version-new == 'True'
     uses: ./.github/workflows/docs.yml
     with:
       publish: true
