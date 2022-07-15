@@ -35,7 +35,8 @@ class VersionInfo:
         """
         first = parse(first)
         releases = [r for r in self._releases if r >= first]
-        return sorted(set(f'{r.major}.{r.minor}' for r in releases), reverse=True)
+        releases = sorted(set((r.major, r.minor) for r in releases), reverse=True)
+        return [f'{major}.{minor}' for major, minor in releases]
 
     def is_latest(self, version: str) -> bool:
         """Return True if `version` has the same major and minor as the latest release.
