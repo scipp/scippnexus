@@ -48,12 +48,6 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -r requirements/wheels.txt
 
-      - name: Manage versions
-        id: version
-        run: |
-          "::set-output name=new::$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=is-new)"
-          "::set-output name=replaced::$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=get-replaced)"
-
       - name: Build wheels
         run: python -m build
 
@@ -81,17 +75,36 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
 
+  manage-versions:
+    name: Manage Versions
+    runs-on: ubuntu-20.04
+    outputs:
+      version-new: ${{ steps.version.outputs.new }}
+      version-replaced: ${{ steps.version.outputs.replaced }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements/ci.txt
+      - name: Set outputs
+        id: version
+        run: |
+          "::set-output name=new::$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=is-new)"
+          "::set-output name=replaced::$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=get-replaced)"
+
   replaced-docs:
-    needs: [build_conda, build_wheels]
-    if: github.event_name == 'release' && github.event.action == 'published' && needs.build_wheels.outputs.version-new
+    needs: [upload_packages, manage-versions]
+    if: github.event_name == 'release' && github.event.action == 'published' && needs.manage-versions.outputs.version-new
     uses: ./.github/workflows/docs.yml
     with:
       publish: true
-      version: ${{ needs.build_wheels.outputs.version-replaced }}
+      version: ${{ needs.manage-versions.outputs.version-replaced }}
     secrets: inherit
 
   docs:
-    needs: upload_packages
+    needs: replaced-docs
     uses: ./.github/workflows/docs.yml
     with:
       publish: ${{ github.event_name == 'release' && github.event.action == 'published' }}
