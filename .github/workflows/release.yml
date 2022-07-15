@@ -45,14 +45,14 @@ jobs:
         with:
           python-version: 3.8
 
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r requirements/wheels.txt
+
       - name: Manage versions
         id: version
         run: |
           "::set-output name=new::$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=is-new)"
           "::set-output name=replaced::$(python docs/version.py --repo=scippnexus --version=${VERSION} --action=get-replaced)"
-
-      - run: python -m pip install --upgrade pip
-      - run: python -m pip install -r requirements/wheels.txt
 
       - name: Build wheels
         run: python -m build
