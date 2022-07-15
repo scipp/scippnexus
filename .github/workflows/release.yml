@@ -91,8 +91,8 @@ jobs:
       - name: Set outputs
         id: version
         run: |
-          "::set-output name=new::$(python docs/version.py --repo=scippnexus --version=${GITHUB_REF_NAME} --action=is-new)"
-          "::set-output name=replaced::$(python docs/version.py --repo=scippnexus --version=${GITHUB_REF_NAME} --action=get-replaced)"
+          echo "::set-output name=new::$(python docs/version.py --repo=scippnexus --version=${GITHUB_REF_NAME} --action=is-new)"
+          echo "::set-output name=replaced::$(python docs/version.py --repo=scippnexus --version=${GITHUB_REF_NAME} --action=get-replaced)"
 
   replaced-docs:
     needs: [upload_packages, manage-versions]
