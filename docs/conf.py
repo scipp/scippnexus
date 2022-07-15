@@ -46,30 +46,25 @@ def add_buttons(
         "icon": "fa fa-caret-down",
         "text": "Related projects"
     })
-    l2 = []
     releases = version_info.minor_releases(first='0.1')
     if outdated:
         current = f"{long_version} (outdated)"
-        l2.append({"type": "link", "text": "latest", "url": f"{base}/{project}"})
-        brief_version = '.'.join(long_version.split('.')[:2])
-        l2.append({
-            "type": "link",
-            "text": f"{brief_version}",
-            "url": f"{base}/{project}/release/{brief_version}"
-        })
+        latest = "latest"
+        entries = ['.'.join(long_version.split('.')[:2])]
     else:
         current = f"{long_version} (latest)"
         latest = f"{releases[0]} (latest)"
-        l2.append({"type": "link", "text": latest, "url": f"{base}/{project}"})
-        for r in releases[1:]:
-            l2.append({
-                "type": "link",
-                "text": f"{r}",
-                "url": f"{base}/{project}/release/{r}"
-            })
+        entries = releases[1:]
+    lines = [{"type": "link", "text": latest, "url": f"{base}/{project}"}]
+    for r in entries:
+        lines.append({
+            "type": "link",
+            "text": f"{r}",
+            "url": f"{base}/{project}/release/{r}"
+        })
     header_buttons.append({
         "type": "group",
-        "buttons": l2,
+        "buttons": lines,
         "icon": "fa fa-caret-down",
         "text": current
     })
