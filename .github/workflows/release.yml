@@ -104,7 +104,7 @@ jobs:
     secrets: inherit
 
   docs:
-    needs: replaced-docs
+    needs: upload_packages
     uses: ./.github/workflows/docs.yml
     with:
       publish: ${{ github.event_name == 'release' && github.event.action == 'published' }}
