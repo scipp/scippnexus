@@ -22,7 +22,8 @@ copyright = u'2022 Scipp contributors'
 author = u'Scipp contributors'
 
 version_info = VersionInfo(repo=project)
-outdated = not version_info.is_latest(scippnexus.__version__)
+long_version = scippnexus.__version__
+outdated = not version_info.is_latest(long_version)
 
 
 def add_buttons(
@@ -48,10 +49,16 @@ def add_buttons(
     l2 = []
     releases = version_info.minor_releases(first='0.1')
     if outdated:
-        current = f"{scippnexus.__version__} (outdated)"
+        current = f"{long_version} (outdated)"
         l2.append({"type": "link", "text": "latest", "url": f"{base}/{project}"})
+        brief_version = '.'.join(long_version.split('.')[:2])
+        l2.append({
+            "type": "link",
+            "text": f"{brief_version}",
+            "url": f"{base}/{project}/release/{brief_version}"
+        })
     else:
-        current = f"{scippnexus.__version__} (latest)"
+        current = f"{long_version} (latest)"
         latest = f"{releases[0]} (latest)"
         l2.append({"type": "link", "text": latest, "url": f"{base}/{project}"})
         for r in releases[1:]:
