@@ -39,7 +39,8 @@ class VersionInfo:
         return [f'{major}.{minor}' for major, minor in releases]
 
     def is_latest(self, version: str) -> bool:
-        """Return True if `version` has the same major and minor as the latest release.
+        """Return True if `version` has the same or larger major and minor as the
+        latest release.
         """
         version = self._to_version(version)
         latest = self._releases[0]
