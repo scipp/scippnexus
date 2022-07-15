@@ -86,11 +86,11 @@ if __name__ == '__main__':
                         choices=['is-latest', 'is-new', 'get-replaced', 'get-target'],
                         required=True,
                         help='Action to perform: Check whether this major or minor '
-                        'release exists (is-latest), check whether this is a new major '
-                        'or minor release (is-new), get the version this is replacing '
-                        '(get-replaced), get the target folder for publishing the docs '
-                        '(get-target). In all cases the patch/micro version is '
-                        'ignored.')
+                        'release exists or is new (is-latest), check whether this is a '
+                        'new major or minor release (is-new), get the version this is '
+                        'replacing (get-replaced), get the target folder for '
+                        'publishing the docs (get-target). In all cases the '
+                        'patch/micro version is ignored.')
     parser.add_argument('--version',
                         dest='version',
                         required=True,
