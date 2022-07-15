@@ -47,11 +47,10 @@ class VersionInfo:
 
     def target(self, version: str) -> str:
         version = self._to_version(version)
-        # TODO change to non-test folders
         if self.is_latest(version):
-            return 'release-test/stable'
+            return ''
         else:
-            return f'release-test/{version.major}.{version.minor}'
+            return f'release/{version.major}.{version.minor}'
 
     def replaced(self, version: str) -> str:
         version = self._to_version(version)
