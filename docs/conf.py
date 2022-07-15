@@ -48,8 +48,7 @@ def add_buttons(
     if outdated:
         return  # No version select on outdated docs, would be incomplete anyway
     l2 = []
-    # TODO change to 0.1, using 0.0 for testing purposes
-    releases = version_info.minor_releases(first='0.0')
+    releases = version_info.minor_releases(first='0.1')
     latest = f"{releases[0]} (latest)"
     l2.append({"type": "link", "text": latest, "url": f"{base}/{project}"})
     for r in releases[1:]:
