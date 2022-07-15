@@ -177,7 +177,7 @@ html_theme = 'sphinx_book_theme'
 #
 html_theme_options = {
     "logo_only": True,
-    "repository_url": "https://github.com/scipp/scippnexus",
+    "repository_url": "https://github.com/scipp/{project}",
     "repository_branch": "main",
     "path_to_docs": "docs",
     "use_repository_button": True,
@@ -188,8 +188,8 @@ html_theme_options = {
 
 if outdated:
     html_theme_options["announcement"] = (
-        "⚠️ You are viewing the documentation for an old version of scippnexus. "
-        "Switch to <a href='https://scipp.github.io/scippnexus' "
+        "⚠️ You are viewing the documentation for an old version of {project}. "
+        f"Switch to <a href='https://scipp.github.io/{project}' "
         "style='color:white;text-decoration:underline;'"
         ">latest</a> version. ⚠️")
 
@@ -208,23 +208,7 @@ htmlhelp_basename = 'scippnexusdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
-
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
-
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-}
+latex_elements = {}
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
