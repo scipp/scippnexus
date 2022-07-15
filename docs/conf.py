@@ -14,10 +14,15 @@ import sphinx_book_theme
 
 sys.path.insert(0, os.path.abspath('.'))
 
-from version import get_releases, is_latest  # noqa: E402
+from version import VersionInfo  # noqa: E402
 
-releases = get_releases(repo='scippnexus')
-outdated = not is_latest(releases, str(scippnexus.__version__))
+# General information about the project.
+project = u'scippnexus'
+copyright = u'2022 Scipp contributors'
+author = u'Scipp contributors'
+
+version_info = VersionInfo(repo=project)
+outdated = not version_info.is_latest(scippnexus.__version__)
 
 
 def add_buttons(
@@ -43,13 +48,21 @@ def add_buttons(
     if outdated:
         return  # No version select on outdated docs, would be incomplete anyway
     l2 = []
-    # TODO get release list
-    l2.append({"type": "link", "text": "v0.1 (latest)", "url": f"{base}/scippnexus"})
+    # TODO change to 0.1, using 0.0 for testing purposes
+    releases = version_info.minor_releases(first='0.0')
+    latest = f"{releases[0]} (latest)"
+    l2.append({"type": "link", "text": latest, "url": f"{base}/{project}"})
+    for r in releases[1:]:
+        l2.append({
+            "type": "link",
+            "text": f"{r}",
+            "url": f"{base}/{project}/release/{r}"
+        })
     header_buttons.append({
         "type": "group",
         "buttons": l2,
         "icon": "fa fa-caret-down",
-        "text": "Version"
+        "text": latest
     })
 
 
@@ -121,11 +134,6 @@ html_sourcelink_suffix = ''  # Avoid .ipynb.txt extensions in sources
 
 # The master toctree document.
 master_doc = 'index'
-
-# General information about the project.
-project = u'scippnexus'
-copyright = u'2022 Scipp contributors'
-author = u'Scipp contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
