@@ -177,7 +177,7 @@ html_theme = 'sphinx_book_theme'
 #
 html_theme_options = {
     "logo_only": True,
-    "repository_url": "https://github.com/scipp/{project}",
+    "repository_url": f"https://github.com/scipp/{project}",
     "repository_branch": "main",
     "path_to_docs": "docs",
     "use_repository_button": True,
@@ -188,7 +188,7 @@ html_theme_options = {
 
 if outdated:
     html_theme_options["announcement"] = (
-        "⚠️ You are viewing the documentation for an old version of {project}. "
+        f"⚠️ You are viewing the documentation for an old version of {project}. "
         f"Switch to <a href='https://scipp.github.io/{project}' "
         "style='color:white;text-decoration:underline;'"
         ">latest</a> version. ⚠️")
