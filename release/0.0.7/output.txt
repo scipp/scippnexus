@@ -1,0 +1,1 @@
+getting-started/installation.rst:11: [redirected with Found] https://conda.anaconda.org/scipp to https://anaconda.org/scipp/repo?type=conda&label=main

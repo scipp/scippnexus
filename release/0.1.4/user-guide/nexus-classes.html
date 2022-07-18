@@ -1,0 +1,1454 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeXus classes &#8212; scippnexus  documentation</title>
+    
+  <link href="../_static/css/theme.css" rel="stylesheet">
+  <link href="../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-book-theme.css?digest=84ace793992934648b4de8eed757e5a2" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    
+  <link rel="preload" as="script" href="../_static/js/index.be7d3bbb2ef33a8344ce.js">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/sphinx-book-theme.9d8b4a8b9bb19db25eeaddc40d639ba2.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Classes" href="classes.html" />
+    <link rel="prev" title="Quick Start Guide" href="../getting-started/quick-start-guide.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<div class="col-12 col-md-3 bd-sidebar site-navigation " id="site-navigation">
+    
+        <div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../_static/logo.png" class="logo" alt="logo">
+      
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Getting Started
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../getting-started/installation.html">
+   Installation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../getting-started/quick-start-guide.html">
+   Quick Start Guide
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  User Guide
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   NeXus classes
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="classes.html">
+   Classes
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.Field.html">
+     scippnexus.Field
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.File.html">
+     scippnexus.File
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXdata.html">
+     scippnexus.NXdata
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXdetector.html">
+     scippnexus.NXdetector
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXdisk_chopper.html">
+     scippnexus.NXdisk_chopper
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXentry.html">
+     scippnexus.NXentry
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXevent_data.html">
+     scippnexus.NXevent_data
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXinstrument.html">
+     scippnexus.NXinstrument
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXlog.html">
+     scippnexus.NXlog
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXmonitor.html">
+     scippnexus.NXmonitor
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXobject.html">
+     scippnexus.NXobject
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXroot.html">
+     scippnexus.NXroot
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXsample.html">
+     scippnexus.NXsample
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXsource.html">
+     scippnexus.NXsource
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NXtransformations.html">
+     scippnexus.NXtransformations
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.NexusStructureError.html">
+     scippnexus.NexusStructureError
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.typing.H5Dataset.html">
+     scippnexus.typing.H5Dataset
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.typing.H5Group.html">
+     scippnexus.typing.H5Group
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../generated/classes/scippnexus.typing.ScippIndex.html">
+     scippnexus.typing.ScippIndex
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  About
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../about/about.html">
+   About scippnexus
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../about/release-notes.html">
+   Release Notes
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav> <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<!-- This is an invisible pixel that we watch to see if we've scrolled. -->
+<div class="sbt-scroll-pixel-helper"></div>
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="topbar container-xl fixed-top">
+    <div class="topbar-contents row">
+        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
+        <div class="col pl-md-4 topbar-main">
+            <div class="topbar-left">
+                
+                <label class="nav-toggle-button" for="__navigation">
+                    <div class="visually-hidden">Toggle navigation</div>
+                    <i class="fas fa-bars"></i>
+                </label>
+                
+            </div>
+            
+<!-- Minimally modifed from original theme to specify "download" attribute in <a> so ipynb is downloaded instead of opened by browser. -->
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../_sources/user-guide/nexus-classes.ipynb" download><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+</div>
+
+            <!-- Source interaction buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
+    <div class="dropdown-buttons sourcebuttons">
+        <a class="repository-button"
+            href="https://github.com/scipp/scippnexus"><button type="button" class="btn btn-secondary topbarbtn"
+                data-toggle="tooltip" data-placement="left" title="Source repository"><i
+                    class="fab fa-github"></i>repository</button></a>
+        <a class="issues-button"
+            href="https://github.com/scipp/scippnexus/issues/new?title=Issue%20on%20page%20%2Fuser-guide/nexus-classes.html&body=Your%20issue%20content%20here."><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Open an issue"><i class="fas fa-lightbulb"></i>open issue</button></a>
+        <a class="edit-button" href="https://github.com/scipp/scippnexus/edit/main/docs/user-guide/nexus-classes.ipynb"><button
+                type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip" data-placement="left"
+                title="Edit this page"><i class="fas fa-pencil-alt"></i>suggest edit</button></a>
+    </div>
+</div>
+
+            <!-- Full screen (wrap in <a> to have style consistency -->
+
+<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+        title="Fullscreen mode"><i
+            class="fas fa-expand"></i></button></a>
+
+            <!-- Here, we override the default launchbuttons.html by replacing it with our
+     version selection menu, since we do not intend to use the launchbuttons.
+     This allows us to add the version selection menu in some unused white space
+     that is always visible. -->
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" style="font-size: 1em;padding-top:0.33rem;">Version
+      <i class="fa fa-caret-down"></i>
+    </button>
+
+    <div class="dropdown-buttons" style="transform:translate(10%);">
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/scippnexus"><button type="button"
+                class="btn btn-secondary topbarbtn">latest</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/scippnexus/release/0.1.3"><button type="button"
+                class="btn btn-secondary topbarbtn">v0.1</button></a>
+    </div>
+</div>
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" style="font-size: 1em;padding-top:0.33rem;">Related projects
+      <i class="fa fa-caret-down"></i>
+    </button>
+
+    <div class="dropdown-buttons" style="transform:translate(10%);">
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io"><button type="button"
+                class="btn btn-secondary topbarbtn">scipp</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/scippnexus"><button type="button"
+                class="btn btn-secondary topbarbtn">scippnexus</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/scippneutron"><button type="button"
+                class="btn btn-secondary topbarbtn">scippneutron</button></a>
+        <a class="dropdown-buttons"
+            href="https://scipp.github.io/ess"><button type="button"
+                class="btn btn-secondary topbarbtn">ess</button></a>
+    </div>
+</div>
+        </div>
+
+        <!-- Table of contents -->
+        <div class="d-none d-md-block col-md-2 bd-toc show noprint">
+            
+            <div class="tocsection onthispage pt-5 pb-3">
+                <i class="fas fa-list"></i> Contents
+            </div>
+            <nav id="bd-toc-nav" aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Overview">
+   Overview
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Base-class:-NXobject">
+   Base class: NXobject
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXdata">
+   NXdata
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXdetector">
+   NXdetector
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXevent_data">
+   NXevent_data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXlog">
+   NXlog
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXmonitor">
+   NXmonitor
+  </a>
+ </li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>NeXus classes</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Overview">
+   Overview
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Base-class:-NXobject">
+   Base class: NXobject
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXdata">
+   NXdata
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXdetector">
+   NXdetector
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXevent_data">
+   NXevent_data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXlog">
+   NXlog
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#NXmonitor">
+   NXmonitor
+  </a>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+              <div>
+                
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="section" id="NeXus-classes">
+<h1>NeXus classes<a class="headerlink" href="#NeXus-classes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Overview">
+<h2>Overview<a class="headerlink" href="#Overview" title="Permalink to this headline">¶</a></h2>
+<p>NeXus provides a substantial number of <a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/index.html#base-class-definitions">base class definitions</a>. At this point scippnexus supports only a very limited number of these. Furthermore, not all features of each class definition are implemented. The class of a group is read from the group’s <code class="docutils literal notranslate"><span class="pre">'NX_class'</span></code> attribute.</p>
+<p>The following table gives an overview of supported classes. There are roughly two categories of classes, those that contain data and can be read as a <code class="docutils literal notranslate"><span class="pre">scipp.DataArray</span></code> (for example NXdata), and those that mostly serve as groups for nested classes (for example NXentry containing NXdata):</p>
+<table class="table">
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 7%" />
+<col style="width: 21%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>NeXus class</p></th>
+<th class="head"><p>read as</p></th>
+<th class="head"><p>comment</p></th>
+<th class="head"><p>NeXus specification</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXdata.html"><span class="doc">NXdata</span></a></p></td>
+<td><p>scipp.DataArray</p></td>
+<td><p><a class="reference external" href="#NXdata">example below</a></p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXdata.html">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXdetector.html"><span class="doc">NXdetector</span></a></p></td>
+<td><p>scipp.DataArray</p></td>
+<td><p><a class="reference external" href="#NXdetector">example below</a></p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXdetector.html">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXdisk_chopper.html"><span class="doc">NXdisk_chopper</span></a></p></td>
+<td><p>scipp.Dataset</p></td>
+<td><p>very incomplete support</p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXdisk_chopper.html">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXentry.html"><span class="doc">NXentry</span></a></p></td>
+<td><p>—</p></td>
+<td><p><a class="reference external" href="#Base-class:-NXobject">generic group-like</a></p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXentry.html">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXevent_data.html"><span class="doc">NXevent_data</span></a></p></td>
+<td><p>scipp.DataArray</p></td>
+<td><p><a class="reference external" href="#NXevent_data">example below</a></p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXevent_data.html">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXinstrument.html"><span class="doc">NXinstrument</span></a></p></td>
+<td><p>—</p></td>
+<td><p><a class="reference external" href="#Base-class:-NXobject">generic group-like</a></p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXinstrument.html">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXlog.html"><span class="doc">NXlog</span></a></p></td>
+<td><p>scipp.DataArray</p></td>
+<td><p><a class="reference external" href="#NXlog">example below</a></p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXlog.html">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXmonitor.html"><span class="doc">NXmonitor</span></a></p></td>
+<td><p>scipp.DataArray</p></td>
+<td><p><a class="reference external" href="#NXmonitor">example below</a></p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXmonitor.html">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXroot.html"><span class="doc">NXroot</span></a></p></td>
+<td><p>—</p></td>
+<td><p><a class="reference external" href="#Base-class:-NXobject">generic group-like</a></p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXroot.html">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXsample.html"><span class="doc">NXsample</span></a></p></td>
+<td><p>scipp.Dataset</p></td>
+<td><p>very incomplete support</p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXsample.html">link</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXsource.html"><span class="doc">NXsource</span></a></p></td>
+<td><p>scipp.Dataset</p></td>
+<td><p>very incomplete support</p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXsource.html">link</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../generated/classes/scippnexus.NXtransformations.html"><span class="doc">NXtransformations</span></a></p></td>
+<td><p>—</p></td>
+<td><p><a class="reference external" href="#Base-class:-NXobject">generic group-like</a></p></td>
+<td><p><a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXtransformations.html">link</a></p></td>
+</tr>
+</tbody>
+</table>
+<p>For the examples below we use a file from the scippnexus sample data:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scippnexus</span> <span class="kn">import</span> <span class="n">data</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;PG3_4844_event.nxs&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">scippnexus</span> <span class="k">as</span> <span class="nn">snx</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Base-class:-NXobject">
+<h2>Base class: NXobject<a class="headerlink" href="#Base-class:-NXobject" title="Permalink to this headline">¶</a></h2>
+<p>Base of all other NeXus classes. Provides a generic group-like interface. That is, this is equivalent to a dictionary of fields and/or other groups.</p>
+<p>NeXus classes that group other information but cannot be read as a data array or dataset provide this interface.</p>
+</div>
+<div class="section" id="NXdata">
+<h2>NXdata<a class="headerlink" href="#NXdata" title="Permalink to this headline">¶</a></h2>
+<p>Provides multi-dimensional labeled data. See the NeXus format <a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXdata.html">NXdata base class definition</a> for details. Can be read as a data array using slicing syntax.</p>
+<p>Example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;entry/bank103&#39;</span><span class="p">]</span>
+<span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;NXdata &#34;/entry/bank103&#34;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x_pixel_offset&#39;</span><span class="p">,</span> <span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-has-index{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (348 Bytes)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-3cd54424-f5dc-41f0-b59c-f6938afb573a' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-3cd54424-f5dc-41f0-b59c-f6938afb573a' class='sc-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>x_pixel_offset</span>: 10</li><li><span class='sc-has-index'>y_pixel_offset</span>: 7</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-e13d1855-539b-4abb-a6f2-ab2baa968dc9' class='sc-section-summary-in' type='checkbox'  checked><label for='section-e13d1855-539b-4abb-a6f2-ab2baa968dc9' class='sc-section-summary' >Coordinates: <span>(2)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span class='sc-has-index'>x_pixel_offset</span></div><div class='sc-var-dims'>(x_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>-0.3825, -0.3775, ..., -0.3425, -0.3375</div></span></div><input id='attrs-885a1402-0672-4e22-bfd0-c189b9ff36d5' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-885a1402-0672-4e22-bfd0-c189b9ff36d5' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-be84e35d-6a5f-4256-9507-6d3710bdd010' class='sc-var-data-in' type='checkbox'><label for='data-be84e35d-6a5f-4256-9507-6d3710bdd010' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([-0.3825, -0.3775, -0.3725, -0.3675, -0.3625, -0.3575, -0.3525,
+       -0.3475, -0.3425, -0.3375], dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-has-index'>y_pixel_offset</span></div><div class='sc-var-dims'>(y_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>-0.1629, -0.1086, ..., 0.1086, 0.1629</div></span></div><input id='attrs-67e19869-6589-4dee-9d39-8ea03ef8e0ca' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-67e19869-6589-4dee-9d39-8ea03ef8e0ca' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-30276c58-4536-4fb9-9090-fcab2e66cbdb' class='sc-var-data-in' type='checkbox'><label for='data-30276c58-4536-4fb9-9090-fcab2e66cbdb' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([-0.1629, -0.1086, -0.0543,  0.    ,  0.0543,  0.1086,  0.1629],
+      dtype=float32)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-443e6c05-0e3d-4640-82c4-3bf1cbc67b1e' class='sc-section-summary-in' type='checkbox'  checked><label for='section-443e6c05-0e3d-4640-82c4-3bf1cbc67b1e' class='sc-section-summary' >Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>int32</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>0, 0, ..., 0, 0</div></span></div><input id='attrs-eb5c7e03-c0ff-4dbb-8141-03b260522e74' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-eb5c7e03-c0ff-4dbb-8141-03b260522e74' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e7276ca7-c0b1-4d13-a96d-d609251ced95' class='sc-var-data-in' type='checkbox'><label for='data-e7276ca7-c0b1-4d13-a96d-d609251ced95' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0, 0, 0]], dtype=int32)</pre></li></ul></div></li></ul></div></div></div>
+</div>
+</div>
+<div class="section" id="NXdetector">
+<h2>NXdetector<a class="headerlink" href="#NXdetector" title="Permalink to this headline">¶</a></h2>
+<p>Provides data for a detector. See the NeXus format <a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXdetector.html">NXdetector base class definition</a> for details. Can be read as a data array using slicing syntax. The underlying data may be dense data or event data.</p>
+<p>Example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">detector</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;entry/instrument/bank102&#39;</span><span class="p">]</span>
+<span class="n">detector</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;NXdetector &#34;/entry/instrument/bank102&#34;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">detector</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-has-index{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (8.74 MB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-83be8c55-e67b-4035-8a7e-b83b30220cec' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-83be8c55-e67b-4035-8a7e-b83b30220cec' class='sc-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>x_pixel_offset</span>: 154</li><li><span class='sc-has-index'>y_pixel_offset</span>: 7</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-71fb1f04-1104-4eba-9774-8eca8a41a412' class='sc-section-summary-in' type='checkbox'  checked><label for='section-71fb1f04-1104-4eba-9774-8eca8a41a412' class='sc-section-summary' >Coordinates: <span>(8)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>azimuthal_angle</span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>rad</div><div class='sc-value-preview sc-preview'><span><div>-0.3123652, -0.2958419, ..., -0.22583345, -0.20972791</div></span></div><input id='attrs-ed5b779d-d9e7-4f31-9c27-75bc6f5744d7' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-ed5b779d-d9e7-4f31-9c27-75bc6f5744d7' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b3d8b627-782f-4e5c-a320-43566214b796' class='sc-var-data-in' type='checkbox'><label for='data-b3d8b627-782f-4e5c-a320-43566214b796' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[-0.3123652 , -0.2958419 , -0.27932844, ..., -0.24636689,
+        -0.22993654, -0.21355148],
+       [-0.3123288 , -0.2958073 , -0.27929565, ..., -0.24633776,
+        -0.22990927, -0.21352607],
+       [-0.31229237, -0.29577267, -0.27926287, ..., -0.24630865,
+        -0.229882  , -0.21350066],
+       ...,
+       [-0.30695337, -0.29069847, -0.2744558 , ..., -0.24204123,
+        -0.2258862 , -0.20977707],
+       [-0.3069181 , -0.29066497, -0.27442405, ..., -0.24201305,
+        -0.22585982, -0.20975249],
+       [-0.3068829 , -0.29063147, -0.27439234, ..., -0.24198489,
+        -0.22583345, -0.20972791]], dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>distance</span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>3.2983806, 3.2987897, ..., 3.5141585, 3.518735</div></span></div><input id='attrs-a51469cc-877a-4c8d-8ebb-e242ad595155' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-a51469cc-877a-4c8d-8ebb-e242ad595155' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f34b7f6f-158c-4a1e-9390-27fb06bfeffc' class='sc-var-data-in' type='checkbox'><label for='data-f34b7f6f-158c-4a1e-9390-27fb06bfeffc' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[3.2983806, 3.2987897, 3.3000927, ..., 3.305374 , 3.3093479,
+        3.314207 ],
+       [3.299189 , 3.2995982, 3.3009007, ..., 3.3061805, 3.3101537,
+        3.3150117],
+       [3.300005 , 3.300414 , 3.301716 , ..., 3.3069947, 3.310967 ,
+        3.3158238],
+       ...,
+       [3.500146 , 3.5005317, 3.5017593, ..., 3.506737 , 3.510483 ,
+        3.5150642],
+       [3.501986 , 3.5023715, 3.5035987, ..., 3.5085735, 3.5123177,
+        3.5168965],
+       [3.5038323, 3.5042174, 3.505444 , ..., 3.5104163, 3.5141585,
+        3.518735 ]], dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>local_name</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>string</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>F2</div></span></div><input id='attrs-8043812f-de5d-49b7-b80b-415c5331b970' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-8043812f-de5d-49b7-b80b-415c5331b970' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ffc1bea9-bf38-4a8e-ad95-dfae25f4240f' class='sc-var-data-in' type='checkbox'><label for='data-ffc1bea9-bf38-4a8e-ad95-dfae25f4240f' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>&#x27;F2&#x27;</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>pixel_id</span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>int32</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>127500, 127501, ..., 128576, 128577</div></span></div><input id='attrs-3e3a3155-eb83-4bc3-94c9-58e01e742954' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-3e3a3155-eb83-4bc3-94c9-58e01e742954' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-28f5feb6-a105-4d50-8cfb-61ec54799dbf' class='sc-var-data-in' type='checkbox'><label for='data-28f5feb6-a105-4d50-8cfb-61ec54799dbf' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[127500, 127501, 127502, ..., 127504, 127505, 127506],
+       [127507, 127508, 127509, ..., 127511, 127512, 127513],
+       [127514, 127515, 127516, ..., 127518, 127519, 127520],
+       ...,
+       [128557, 128558, 128559, ..., 128561, 128562, 128563],
+       [128564, 128565, 128566, ..., 128568, 128569, 128570],
+       [128571, 128572, 128573, ..., 128575, 128576, 128577]], dtype=int32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>polar_angle</span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>rad</div><div class='sc-value-preview sc-preview'><span><div>1.4804635, 1.4808731, ..., 1.266226, 1.2670246</div></span></div><input id='attrs-82c9b29a-bc8f-42dd-bb25-af6f4acc8a6f' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-82c9b29a-bc8f-42dd-bb25-af6f4acc8a6f' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-cece2a36-e80a-4355-9840-d88b0ecb7bb9' class='sc-var-data-in' type='checkbox'><label for='data-cece2a36-e80a-4355-9840-d88b0ecb7bb9' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[1.4804635, 1.4808731, 1.4813068, ..., 1.4822451, 1.4827487,
+        1.4832746],
+       [1.4789683, 1.4793779, 1.4798121, ..., 1.4807527, 1.481258 ,
+        1.4817859],
+       [1.4774736, 1.4778835, 1.4783182, ..., 1.479261 , 1.479768 ,
+        1.480298 ],
+       ...,
+       [1.2659944, 1.266421 , 1.2669227, ..., 1.2681499, 1.2688735,
+        1.2696692],
+       [1.2646669, 1.2650936, 1.2655957, ..., 1.2668242, 1.267549 ,
+        1.2683462],
+       [1.2633408, 1.2637675, 1.2642701, ..., 1.2655001, 1.266226 ,
+        1.2670246]], dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>total_counts</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>int32</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>456601</div></span></div><input id='attrs-3483551d-de5f-492f-a6fe-9c8ec7fc20b4' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-3483551d-de5f-492f-a6fe-9c8ec7fc20b4' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7263524e-de9e-43cc-9784-84deec684905' class='sc-var-data-in' type='checkbox'><label for='data-7263524e-de9e-43cc-9784-84deec684905' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(456601, dtype=int32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-has-index'>x_pixel_offset</span></div><div class='sc-var-dims'>(x_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>-0.3825, -0.3775, ..., 0.3775, 0.3825</div></span></div><input id='attrs-55160bca-466c-49fc-8575-27485a6201e9' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-55160bca-466c-49fc-8575-27485a6201e9' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b8b8e4dc-033f-4c67-94ba-e0b4176f578d' class='sc-var-data-in' type='checkbox'><label for='data-b8b8e4dc-033f-4c67-94ba-e0b4176f578d' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([-0.3825, -0.3775, -0.3725, -0.3675, -0.3625, -0.3575, -0.3525,
+       -0.3475, -0.3425, -0.3375, -0.3325, -0.3275, -0.3225, -0.3175,
+       -0.3125, -0.3075, -0.3025, -0.2975, -0.2925, -0.2875, -0.2825,
+       -0.2775, -0.2725, -0.2675, -0.2625, -0.2575, -0.2525, -0.2475,
+       -0.2425, -0.2375, -0.2325, -0.2275, -0.2225, -0.2175, -0.2125,
+       -0.2075, -0.2025, -0.1975, -0.1925, -0.1875, -0.1825, -0.1775,
+       -0.1725, -0.1675, -0.1625, -0.1575, -0.1525, -0.1475, -0.1425,
+       -0.1375, -0.1325, -0.1275, -0.1225, -0.1175, -0.1125, -0.1075,
+       -0.1025, -0.0975, -0.0925, -0.0875, -0.0825, -0.0775, -0.0725,
+       -0.0675, -0.0625, -0.0575, -0.0525, -0.0475, -0.0425, -0.0375,
+       -0.0325, -0.0275, -0.0225, -0.0175, -0.0125, -0.0075, -0.0025,
+        0.0025,  0.0075,  0.0125,  0.0175,  0.0225,  0.0275,  0.0325,
+        0.0375,  0.0425,  0.0475,  0.0525,  0.0575,  0.0625,  0.0675,
+        0.0725,  0.0775,  0.0825,  0.0875,  0.0925,  0.0975,  0.1025,
+        0.1075,  0.1125,  0.1175,  0.1225,  0.1275,  0.1325,  0.1375,
+        0.1425,  0.1475,  0.1525,  0.1575,  0.1625,  0.1675,  0.1725,
+        0.1775,  0.1825,  0.1875,  0.1925,  0.1975,  0.2025,  0.2075,
+        0.2125,  0.2175,  0.2225,  0.2275,  0.2325,  0.2375,  0.2425,
+        0.2475,  0.2525,  0.2575,  0.2625,  0.2675,  0.2725,  0.2775,
+        0.2825,  0.2875,  0.2925,  0.2975,  0.3025,  0.3075,  0.3125,
+        0.3175,  0.3225,  0.3275,  0.3325,  0.3375,  0.3425,  0.3475,
+        0.3525,  0.3575,  0.3625,  0.3675,  0.3725,  0.3775,  0.3825],
+      dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-has-index'>y_pixel_offset</span></div><div class='sc-var-dims'>(y_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>-0.1629, -0.1086, ..., 0.1086, 0.1629</div></span></div><input id='attrs-93596e56-2fbe-4906-b90f-f48cc659e69b' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-93596e56-2fbe-4906-b90f-f48cc659e69b' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7ee07fc3-2c7f-4340-a5c0-acf6c2853207' class='sc-var-data-in' type='checkbox'><label for='data-7ee07fc3-2c7f-4340-a5c0-acf6c2853207' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([-0.1629, -0.1086, -0.0543,  0.    ,  0.0543,  0.1086,  0.1629],
+      dtype=float32)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-7527b171-6174-4779-adb7-f45cbc05e298' class='sc-section-summary-in' type='checkbox'  checked><label for='section-7527b171-6174-4779-adb7-f45cbc05e298' class='sc-section-summary' >Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>DataArrayView</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>binned data [len=0, len=0, ..., len=0, len=0]</div></span></div><input id='attrs-13d07cf2-d381-4a87-9862-891310037bbd' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-13d07cf2-d381-4a87-9862-891310037bbd' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-fe094219-68ae-4bff-8a11-a3cdebfdcb1e' class='sc-var-data-in' type='checkbox'><label for='data-fe094219-68ae-4bff-8a11-a3cdebfdcb1e' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>[&lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_time_offset         float32            [µs]  (event)  []
+  event_time_zero         datetime64             [ns]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+, &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_time_offset         float32            [µs]  (event)  []
+  event_time_zero         datetime64             [ns]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+, ..., &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_time_offset         float32            [µs]  (event)  []
+  event_time_zero         datetime64             [ns]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+, &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_time_offset         float32            [µs]  (event)  []
+  event_time_zero         datetime64             [ns]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+]</pre></li></ul></div></li></ul></div></div></div>
+</div>
+<p>If the underlying data is event data, the underlying event data can be selected using the special <code class="docutils literal notranslate"><span class="pre">select_events</span></code> property. For example, we can select the first 1000 pulses and load data for all pixels:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">detector</span><span class="o">.</span><span class="n">select_events</span><span class="p">[</span><span class="s1">&#39;pulse&#39;</span><span class="p">,</span> <span class="p">:</span><span class="mi">1000</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-has-index{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (65.77 KB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-6327fb71-faa6-49c8-9241-e89def6ad965' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-6327fb71-faa6-49c8-9241-e89def6ad965' class='sc-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>x_pixel_offset</span>: 154</li><li><span class='sc-has-index'>y_pixel_offset</span>: 7</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-83c3ba31-4665-424a-99cd-787d65cbd16f' class='sc-section-summary-in' type='checkbox'  checked><label for='section-83c3ba31-4665-424a-99cd-787d65cbd16f' class='sc-section-summary' >Coordinates: <span>(8)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>azimuthal_angle</span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>rad</div><div class='sc-value-preview sc-preview'><span><div>-0.3123652, -0.2958419, ..., -0.22583345, -0.20972791</div></span></div><input id='attrs-b0697e2f-30df-4e36-a64a-24d615454a5d' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-b0697e2f-30df-4e36-a64a-24d615454a5d' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-059c8de6-9f80-4b25-9a96-aaf267cd14bd' class='sc-var-data-in' type='checkbox'><label for='data-059c8de6-9f80-4b25-9a96-aaf267cd14bd' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[-0.3123652 , -0.2958419 , -0.27932844, ..., -0.24636689,
+        -0.22993654, -0.21355148],
+       [-0.3123288 , -0.2958073 , -0.27929565, ..., -0.24633776,
+        -0.22990927, -0.21352607],
+       [-0.31229237, -0.29577267, -0.27926287, ..., -0.24630865,
+        -0.229882  , -0.21350066],
+       ...,
+       [-0.30695337, -0.29069847, -0.2744558 , ..., -0.24204123,
+        -0.2258862 , -0.20977707],
+       [-0.3069181 , -0.29066497, -0.27442405, ..., -0.24201305,
+        -0.22585982, -0.20975249],
+       [-0.3068829 , -0.29063147, -0.27439234, ..., -0.24198489,
+        -0.22583345, -0.20972791]], dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>distance</span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>3.2983806, 3.2987897, ..., 3.5141585, 3.518735</div></span></div><input id='attrs-f4071880-dd65-43a9-8b03-726b00304334' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-f4071880-dd65-43a9-8b03-726b00304334' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-261ced58-284b-4c0e-9704-f4301965e8d7' class='sc-var-data-in' type='checkbox'><label for='data-261ced58-284b-4c0e-9704-f4301965e8d7' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[3.2983806, 3.2987897, 3.3000927, ..., 3.305374 , 3.3093479,
+        3.314207 ],
+       [3.299189 , 3.2995982, 3.3009007, ..., 3.3061805, 3.3101537,
+        3.3150117],
+       [3.300005 , 3.300414 , 3.301716 , ..., 3.3069947, 3.310967 ,
+        3.3158238],
+       ...,
+       [3.500146 , 3.5005317, 3.5017593, ..., 3.506737 , 3.510483 ,
+        3.5150642],
+       [3.501986 , 3.5023715, 3.5035987, ..., 3.5085735, 3.5123177,
+        3.5168965],
+       [3.5038323, 3.5042174, 3.505444 , ..., 3.5104163, 3.5141585,
+        3.518735 ]], dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>local_name</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>string</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>F2</div></span></div><input id='attrs-c1f7a0c4-fc91-4490-bd1a-1ce14b37ad37' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-c1f7a0c4-fc91-4490-bd1a-1ce14b37ad37' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-97f42e8b-399b-47ea-b0f9-fbf3a0a3dff5' class='sc-var-data-in' type='checkbox'><label for='data-97f42e8b-399b-47ea-b0f9-fbf3a0a3dff5' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>&#x27;F2&#x27;</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>pixel_id</span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>int32</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>127500, 127501, ..., 128576, 128577</div></span></div><input id='attrs-41856fb8-6a1b-41b8-95fb-0a16029b5b1b' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-41856fb8-6a1b-41b8-95fb-0a16029b5b1b' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-77db869b-2870-46a8-a789-e9d55c72ba07' class='sc-var-data-in' type='checkbox'><label for='data-77db869b-2870-46a8-a789-e9d55c72ba07' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[127500, 127501, 127502, ..., 127504, 127505, 127506],
+       [127507, 127508, 127509, ..., 127511, 127512, 127513],
+       [127514, 127515, 127516, ..., 127518, 127519, 127520],
+       ...,
+       [128557, 128558, 128559, ..., 128561, 128562, 128563],
+       [128564, 128565, 128566, ..., 128568, 128569, 128570],
+       [128571, 128572, 128573, ..., 128575, 128576, 128577]], dtype=int32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>polar_angle</span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>rad</div><div class='sc-value-preview sc-preview'><span><div>1.4804635, 1.4808731, ..., 1.266226, 1.2670246</div></span></div><input id='attrs-7fa11f86-7221-434e-a071-38c47d5b8363' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-7fa11f86-7221-434e-a071-38c47d5b8363' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-16209d03-5b3c-47c0-97a4-437e672047c2' class='sc-var-data-in' type='checkbox'><label for='data-16209d03-5b3c-47c0-97a4-437e672047c2' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([[1.4804635, 1.4808731, 1.4813068, ..., 1.4822451, 1.4827487,
+        1.4832746],
+       [1.4789683, 1.4793779, 1.4798121, ..., 1.4807527, 1.481258 ,
+        1.4817859],
+       [1.4774736, 1.4778835, 1.4783182, ..., 1.479261 , 1.479768 ,
+        1.480298 ],
+       ...,
+       [1.2659944, 1.266421 , 1.2669227, ..., 1.2681499, 1.2688735,
+        1.2696692],
+       [1.2646669, 1.2650936, 1.2655957, ..., 1.2668242, 1.267549 ,
+        1.2683462],
+       [1.2633408, 1.2637675, 1.2642701, ..., 1.2655001, 1.266226 ,
+        1.2670246]], dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>total_counts</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>int32</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>456601</div></span></div><input id='attrs-f3228f42-c985-49d3-aa27-f1c0361259b3' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-f3228f42-c985-49d3-aa27-f1c0361259b3' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-da4ea6ab-a935-4892-bec7-665036660ed2' class='sc-var-data-in' type='checkbox'><label for='data-da4ea6ab-a935-4892-bec7-665036660ed2' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(456601, dtype=int32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-has-index'>x_pixel_offset</span></div><div class='sc-var-dims'>(x_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>-0.3825, -0.3775, ..., 0.3775, 0.3825</div></span></div><input id='attrs-68f8d788-9232-4925-8f2d-935574cad555' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-68f8d788-9232-4925-8f2d-935574cad555' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3df329b2-1499-488e-a843-56584c313d6c' class='sc-var-data-in' type='checkbox'><label for='data-3df329b2-1499-488e-a843-56584c313d6c' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([-0.3825, -0.3775, -0.3725, -0.3675, -0.3625, -0.3575, -0.3525,
+       -0.3475, -0.3425, -0.3375, -0.3325, -0.3275, -0.3225, -0.3175,
+       -0.3125, -0.3075, -0.3025, -0.2975, -0.2925, -0.2875, -0.2825,
+       -0.2775, -0.2725, -0.2675, -0.2625, -0.2575, -0.2525, -0.2475,
+       -0.2425, -0.2375, -0.2325, -0.2275, -0.2225, -0.2175, -0.2125,
+       -0.2075, -0.2025, -0.1975, -0.1925, -0.1875, -0.1825, -0.1775,
+       -0.1725, -0.1675, -0.1625, -0.1575, -0.1525, -0.1475, -0.1425,
+       -0.1375, -0.1325, -0.1275, -0.1225, -0.1175, -0.1125, -0.1075,
+       -0.1025, -0.0975, -0.0925, -0.0875, -0.0825, -0.0775, -0.0725,
+       -0.0675, -0.0625, -0.0575, -0.0525, -0.0475, -0.0425, -0.0375,
+       -0.0325, -0.0275, -0.0225, -0.0175, -0.0125, -0.0075, -0.0025,
+        0.0025,  0.0075,  0.0125,  0.0175,  0.0225,  0.0275,  0.0325,
+        0.0375,  0.0425,  0.0475,  0.0525,  0.0575,  0.0625,  0.0675,
+        0.0725,  0.0775,  0.0825,  0.0875,  0.0925,  0.0975,  0.1025,
+        0.1075,  0.1125,  0.1175,  0.1225,  0.1275,  0.1325,  0.1375,
+        0.1425,  0.1475,  0.1525,  0.1575,  0.1625,  0.1675,  0.1725,
+        0.1775,  0.1825,  0.1875,  0.1925,  0.1975,  0.2025,  0.2075,
+        0.2125,  0.2175,  0.2225,  0.2275,  0.2325,  0.2375,  0.2425,
+        0.2475,  0.2525,  0.2575,  0.2625,  0.2675,  0.2725,  0.2775,
+        0.2825,  0.2875,  0.2925,  0.2975,  0.3025,  0.3075,  0.3125,
+        0.3175,  0.3225,  0.3275,  0.3325,  0.3375,  0.3425,  0.3475,
+        0.3525,  0.3575,  0.3625,  0.3675,  0.3725,  0.3775,  0.3825],
+      dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-has-index'>y_pixel_offset</span></div><div class='sc-var-dims'>(y_pixel_offset)</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>-0.1629, -0.1086, ..., 0.1086, 0.1629</div></span></div><input id='attrs-a9f685cb-64b3-4110-b875-9748a1bc5ab7' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-a9f685cb-64b3-4110-b875-9748a1bc5ab7' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e5ac5e48-dd05-407c-af50-fd1145440101' class='sc-var-data-in' type='checkbox'><label for='data-e5ac5e48-dd05-407c-af50-fd1145440101' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([-0.1629, -0.1086, -0.0543,  0.    ,  0.0543,  0.1086,  0.1629],
+      dtype=float32)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-3c717e70-a92e-4411-8bec-5bce36b93da2' class='sc-section-summary-in' type='checkbox'  checked><label for='section-3c717e70-a92e-4411-8bec-5bce36b93da2' class='sc-section-summary' >Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(x_pixel_offset, y_pixel_offset)</div><div class='sc-var-dtype'>DataArrayView</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>binned data [len=0, len=0, ..., len=0, len=0]</div></span></div><input id='attrs-b19aef1c-6942-4c6c-b212-867ffa84bb27' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-b19aef1c-6942-4c6c-b212-867ffa84bb27' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-daee07cc-cb74-4694-b408-a654400922ff' class='sc-var-data-in' type='checkbox'><label for='data-daee07cc-cb74-4694-b408-a654400922ff' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>[&lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_time_offset         float32            [µs]  (event)  []
+  event_time_zero         datetime64             [ns]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+, &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_time_offset         float32            [µs]  (event)  []
+  event_time_zero         datetime64             [ns]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+, ..., &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_time_offset         float32            [µs]  (event)  []
+  event_time_zero         datetime64             [ns]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+, &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_time_offset         float32            [µs]  (event)  []
+  event_time_zero         datetime64             [ns]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+]</pre></li></ul></div></li></ul></div></div></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note:</p>
+<p>Selecting a range of events allows for loading only a potentially very small section of the underlying event data and can thus be very fast.</p>
+<p>In contrast, e.g., selecting a small range of pixels in presence of underlying event data is <em>not</em> fast, since the events for all pixels are stored in the order as they arrive in the acquisition system and the entire <a class="reference external" href="#NXevent_data">NXevent_data</a> group must be loaded.</p>
+</div>
+</div>
+<div class="section" id="NXevent_data">
+<h2>NXevent_data<a class="headerlink" href="#NXevent_data" title="Permalink to this headline">¶</a></h2>
+<p>Provides event data in raw format as produced by the acquisition system, i.e., not grouped into detector pixels. See the NeXus format <a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXevent_data.html">NXevent_data base class definition</a> for details. Can be read as a data array using slicing syntax.</p>
+<p>Example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">event_data</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;entry/bank102_events&#39;</span><span class="p">]</span>
+<span class="n">event_data</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-has-index{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (14.53 MB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-edb8568f-38eb-40ae-8570-35e2ff0d1787' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-edb8568f-38eb-40ae-8570-35e2ff0d1787' class='sc-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span>pulse</span>: 330473</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-7bf206dd-c195-4924-85dd-eeb65b795724' class='sc-section-summary-in' type='checkbox'  checked><label for='section-7bf206dd-c195-4924-85dd-eeb65b795724' class='sc-section-summary' >Coordinates: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>event_time_zero</span></div><div class='sc-var-dims'>(pulse)</div><div class='sc-var-dtype'>datetime64</div><div class='sc-var-unit'>ns</div><div class='sc-value-preview sc-preview'><span><div>2011-08-12T15:50:17.000000000, 2011-08-12T15:50:17.016659999, ..., 2011-08-12T17:22:05.085449218, 2011-08-12T17:22:05.102050781</div></span></div><input id='attrs-50dc0c6e-a897-4d75-be56-780b10f7b647' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-50dc0c6e-a897-4d75-be56-780b10f7b647' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6c32ed54-066d-42cb-aded-0692235c2df5' class='sc-var-data-in' type='checkbox'><label for='data-6c32ed54-066d-42cb-aded-0692235c2df5' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([&#x27;2011-08-12T15:50:17.000000000&#x27;, &#x27;2011-08-12T15:50:17.016659999&#x27;,
+       &#x27;2011-08-12T15:50:17.033321000&#x27;, ...,
+       &#x27;2011-08-12T17:22:05.068359375&#x27;, &#x27;2011-08-12T17:22:05.085449218&#x27;,
+       &#x27;2011-08-12T17:22:05.102050781&#x27;], dtype=&#x27;datetime64[ns]&#x27;)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-1b24a034-0e6b-408d-9231-c8019d789c65' class='sc-section-summary-in' type='checkbox'  checked><label for='section-1b24a034-0e6b-408d-9231-c8019d789c65' class='sc-section-summary' >Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(pulse)</div><div class='sc-var-dtype'>DataArrayView</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>binned data [len=0, len=3, ..., len=3, len=2]</div></span></div><input id='attrs-94bfa0df-2e61-4425-b16e-99c213dbed69' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-94bfa0df-2e61-4425-b16e-99c213dbed69' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-835560ab-cccb-4d7f-88d4-19652aa9bfc3' class='sc-var-data-in' type='checkbox'><label for='data-835560ab-cccb-4d7f-88d4-19652aa9bfc3' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>[&lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_id                    int32        &lt;no unit&gt;  (event)  []
+  event_time_offset         float32            [µs]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+, &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:3, ]
+Coordinates:
+  event_id                    int32        &lt;no unit&gt;  (event)  [127851, 127953, 127541]
+  event_time_offset         float32            [µs]  (event)  [6027.5, 7976.1, 13263.2]
+Data:
+                            float32         [counts]  (event)  [1, 1, 1]  [1, 1, 1]
+
+, ..., &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:3, ]
+Coordinates:
+  event_id                    int32        &lt;no unit&gt;  (event)  [127661, 127749, 127794]
+  event_time_offset         float32            [µs]  (event)  [7051, 12723.1, 15404.1]
+Data:
+                            float32         [counts]  (event)  [1, 1, 1]  [1, 1, 1]
+
+, &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:2, ]
+Coordinates:
+  event_id                    int32        &lt;no unit&gt;  (event)  [127868, 127692]
+  event_time_offset         float32            [µs]  (event)  [10003.6, 3044.1]
+Data:
+                            float32         [counts]  (event)  [1, 1]  [1, 1]
+
+]</pre></li></ul></div></li></ul></div></div></div>
+</div>
+<p>In some cases the event data fields may be contained directly within an <a class="reference external" href="#NXdetector">NXdetector</a>. The event data can also be accessed from there:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;entry/instrument/bank102&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">events</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-has-index{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (14.53 MB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-741347a9-734b-4de3-9306-c2dd3f0e1e64' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-741347a9-734b-4de3-9306-c2dd3f0e1e64' class='sc-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span>pulse</span>: 330473</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-75d84a73-160a-4e01-8800-fdfeb631b5c5' class='sc-section-summary-in' type='checkbox'  checked><label for='section-75d84a73-160a-4e01-8800-fdfeb631b5c5' class='sc-section-summary' >Coordinates: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>event_time_zero</span></div><div class='sc-var-dims'>(pulse)</div><div class='sc-var-dtype'>datetime64</div><div class='sc-var-unit'>ns</div><div class='sc-value-preview sc-preview'><span><div>2011-08-12T15:50:17.000000000, 2011-08-12T15:50:17.016659999, ..., 2011-08-12T17:22:05.085449218, 2011-08-12T17:22:05.102050781</div></span></div><input id='attrs-76b0a957-b414-43ff-a1d8-e1b912e6e61d' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-76b0a957-b414-43ff-a1d8-e1b912e6e61d' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c9ecb703-6ffe-47b7-b160-64307c6e957b' class='sc-var-data-in' type='checkbox'><label for='data-c9ecb703-6ffe-47b7-b160-64307c6e957b' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([&#x27;2011-08-12T15:50:17.000000000&#x27;, &#x27;2011-08-12T15:50:17.016659999&#x27;,
+       &#x27;2011-08-12T15:50:17.033321000&#x27;, ...,
+       &#x27;2011-08-12T17:22:05.068359375&#x27;, &#x27;2011-08-12T17:22:05.085449218&#x27;,
+       &#x27;2011-08-12T17:22:05.102050781&#x27;], dtype=&#x27;datetime64[ns]&#x27;)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-5553637b-51be-49d7-8fc3-c1d937e1a3dd' class='sc-section-summary-in' type='checkbox'  checked><label for='section-5553637b-51be-49d7-8fc3-c1d937e1a3dd' class='sc-section-summary' >Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(pulse)</div><div class='sc-var-dtype'>DataArrayView</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>binned data [len=0, len=3, ..., len=3, len=2]</div></span></div><input id='attrs-db03d64d-a027-4346-be42-d45634cd3cbb' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-db03d64d-a027-4346-be42-d45634cd3cbb' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b20a3620-713f-4be0-a70b-5e72001063f4' class='sc-var-data-in' type='checkbox'><label for='data-b20a3620-713f-4be0-a70b-5e72001063f4' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>[&lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:0, ]
+Coordinates:
+  event_id                    int32        &lt;no unit&gt;  (event)  []
+  event_time_offset         float32            [µs]  (event)  []
+Data:
+                            float32         [counts]  (event)  []  []
+
+, &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:3, ]
+Coordinates:
+  event_id                    int32        &lt;no unit&gt;  (event)  [127851, 127953, 127541]
+  event_time_offset         float32            [µs]  (event)  [6027.5, 7976.1, 13263.2]
+Data:
+                            float32         [counts]  (event)  [1, 1, 1]  [1, 1, 1]
+
+, ..., &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:3, ]
+Coordinates:
+  event_id                    int32        &lt;no unit&gt;  (event)  [127661, 127749, 127794]
+  event_time_offset         float32            [µs]  (event)  [7051, 12723.1, 15404.1]
+Data:
+                            float32         [counts]  (event)  [1, 1, 1]  [1, 1, 1]
+
+, &lt;scipp.DataArray&gt;
+Dimensions: Sizes[event:2, ]
+Coordinates:
+  event_id                    int32        &lt;no unit&gt;  (event)  [127868, 127692]
+  event_time_offset         float32            [µs]  (event)  [10003.6, 3044.1]
+Data:
+                            float32         [counts]  (event)  [1, 1]  [1, 1]
+
+]</pre></li></ul></div></li></ul></div></div></div>
+</div>
+</div>
+<div class="section" id="NXlog">
+<h2>NXlog<a class="headerlink" href="#NXlog" title="Permalink to this headline">¶</a></h2>
+<p>Provides a time-series log. See the NeXus format <a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXlog.html">NXlog base class definition</a> for details. Can be read as a data array using slicing syntax.</p>
+<p>Example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">proton_charge</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;/entry/DASlogs/proton_charge&#39;</span><span class="p">]</span>
+<span class="n">proton_charge</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;NXlog &#34;/entry/DASlogs/proton_charge&#34;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">proton_charge</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-has-index{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (5.04 MB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-73ecaa68-731d-45f7-b99a-961e5e8fce77' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-73ecaa68-731d-45f7-b99a-961e5e8fce77' class='sc-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>time</span>: 330473</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-eb24e219-1aa3-47a2-b5a9-82e92252d1df' class='sc-section-summary-in' type='checkbox'  checked><label for='section-eb24e219-1aa3-47a2-b5a9-82e92252d1df' class='sc-section-summary' >Coordinates: <span>(6)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>average_value</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>pC</div><div class='sc-value-preview sc-preview'><span><div>12766652.799260454</div></span><span><div>σ = 5061670.635363746</div></span></div><input id='attrs-8b6164e2-cb80-4bec-bf04-975922149ecc' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-8b6164e2-cb80-4bec-bf04-975922149ecc' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-33a20155-59a7-4e39-b0be-d16b3a2c3e74' class='sc-var-data-in' type='checkbox'><label for='data-33a20155-59a7-4e39-b0be-d16b3a2c3e74' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(12766652.79926045)<br><br>Variances (σ²):<br>array(2.56205096e+13)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>description</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>string</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>description</div></span></div><input id='attrs-affa6814-950f-4ee4-8fec-6acc7d85cf17' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-affa6814-950f-4ee4-8fec-6acc7d85cf17' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-2b5a8122-7a21-4ff2-8c33-0d6792944c25' class='sc-var-data-in' type='checkbox'><label for='data-2b5a8122-7a21-4ff2-8c33-0d6792944c25' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>&#x27;description&#x27;</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>duration</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>s</div><div class='sc-value-preview sc-preview'><span><div>5508.0</div></span></div><input id='attrs-3bca837b-a296-4cc9-8846-831027e7f119' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-3bca837b-a296-4cc9-8846-831027e7f119' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-76ed4350-aada-4020-8c9e-54286b814b94' class='sc-var-data-in' type='checkbox'><label for='data-76ed4350-aada-4020-8c9e-54286b814b94' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(5508., dtype=float32)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>maximum_value</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>pC</div><div class='sc-value-preview sc-preview'><span><div>15146700.0</div></span></div><input id='attrs-ca0b7d5c-ece2-4793-8630-a2dd376c15f1' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-ca0b7d5c-ece2-4793-8630-a2dd376c15f1' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-86f8bd20-8962-4ffd-99b0-06b864e1e600' class='sc-var-data-in' type='checkbox'><label for='data-86f8bd20-8962-4ffd-99b0-06b864e1e600' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(15146700.)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>minimum_value</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>pC</div><div class='sc-value-preview sc-preview'><span><div>0.0</div></span></div><input id='attrs-65eb011d-aad4-4dad-842c-671610354f20' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-65eb011d-aad4-4dad-842c-671610354f20' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-77e40b21-dafb-4f0b-a286-8451bbb1a988' class='sc-var-data-in' type='checkbox'><label for='data-77e40b21-dafb-4f0b-a286-8451bbb1a988' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(0.)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-has-index'>time</span></div><div class='sc-var-dims'>(time)</div><div class='sc-var-dtype'>datetime64</div><div class='sc-var-unit'>ns</div><div class='sc-value-preview sc-preview'><span><div>2011-08-12T15:50:17.000000000, 2011-08-12T15:50:17.016659999, ..., 2011-08-12T17:22:05.085449218, 2011-08-12T17:22:05.102050781</div></span></div><input id='attrs-f25f993e-ba58-4a0f-821f-d5cef87eb136' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-f25f993e-ba58-4a0f-821f-d5cef87eb136' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-92eb49f1-2fcf-4b91-9e3e-af7e304f269c' class='sc-var-data-in' type='checkbox'><label for='data-92eb49f1-2fcf-4b91-9e3e-af7e304f269c' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([&#x27;2011-08-12T15:50:17.000000000&#x27;, &#x27;2011-08-12T15:50:17.016659999&#x27;,
+       &#x27;2011-08-12T15:50:17.033321000&#x27;, ...,
+       &#x27;2011-08-12T17:22:05.068359375&#x27;, &#x27;2011-08-12T17:22:05.085449218&#x27;,
+       &#x27;2011-08-12T17:22:05.102050781&#x27;], dtype=&#x27;datetime64[ns]&#x27;)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-a4858840-9fba-43ee-a625-196228589959' class='sc-section-summary-in' type='checkbox'  checked><label for='section-a4858840-9fba-43ee-a625-196228589959' class='sc-section-summary' >Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(time)</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>pC</div><div class='sc-value-preview sc-preview'><span><div>1.484e+07, 1.484e+07, ..., 1.487e+07, 1.484e+07</div></span></div><input id='attrs-89326b81-a5c3-4790-9b70-b5edab8d7b69' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-89326b81-a5c3-4790-9b70-b5edab8d7b69' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-078ce012-00a4-4710-99b1-9568ddb1daed' class='sc-var-data-in' type='checkbox'><label for='data-078ce012-00a4-4710-99b1-9568ddb1daed' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([14843360., 14843360., 14787820., ..., 14809180., 14873260.,
+       14839090.])</pre></li></ul></div></li></ul></div></div></div>
+</div>
+</div>
+<div class="section" id="NXmonitor">
+<h2>NXmonitor<a class="headerlink" href="#NXmonitor" title="Permalink to this headline">¶</a></h2>
+<p>Provides data for a beam monitor. See the NeXus format <a class="reference external" href="https://manual.nexusformat.org/classes/base_classes/NXmonitor.html">NXmonitor base class definition</a> for details. Can be read as a data array using slicing syntax.</p>
+<p>Example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">monitor</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;entry/monitor1&#39;</span><span class="p">]</span>
+<span class="n">monitor</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);--sc-table-data-color:#f6d028;--sc-table-coords-color:#c6e590;--sc-table-masks-color:#c8c8c8;--sc-table-attrs-color:#ff5555;--sc-table-header-font-color:#111111;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{color:var(--sc-font-color3);}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-has-index{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-table{border-collapse:collapse;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-table th,.sc-table td{border:1px solid var(--sc-inverse-background-color0);padding:0 5px 0 5px;}.sc-table th{text-align:center;}.sc-table tr{background-color:var(--sc-background-color1);text-align:right;}.sc-table tr:hover{background-color:var(--sc-background-color2);}.sc-table th.sc-data{background-color:var(--sc-table-data-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-coords{background-color:var(--sc-table-coords-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-masks{background-color:var(--sc-table-masks-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-attrs{background-color:var(--sc-table-attrs-color);color:var(--sc-table-header-font-color);}.sc-table th.sc-subheader{background-color:var(--sc-background-color2);}.sc-table td.sc-padding{background-color:var(--sc-background-color1);border:0 solid var(--sc-background-color1);height:1.2em;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (1.53 MB)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-9eafd0f3-d360-4210-9df4-3403c3472d84' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-9eafd0f3-d360-4210-9df4-3403c3472d84' class='sc-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span class='sc-has-index'>time_of_flight</span>: 200001</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-ed0a5dbd-4738-4eca-b162-bd3fcd3eca11' class='sc-section-summary-in' type='checkbox'  checked><label for='section-ed0a5dbd-4738-4eca-b162-bd3fcd3eca11' class='sc-section-summary' >Coordinates: <span>(3)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span>distance</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>float64</div><div class='sc-var-unit'>m</div><div class='sc-value-preview sc-preview'><span><div>-1.0</div></span></div><input id='attrs-08b5a780-9661-4201-88fa-afab2bef6abb' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-08b5a780-9661-4201-88fa-afab2bef6abb' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-23c8a10d-8420-4ee3-9a24-a719b93621a6' class='sc-var-data-in' type='checkbox'><label for='data-23c8a10d-8420-4ee3-9a24-a719b93621a6' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array(-1.)</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span>mode</span></div><div class='sc-var-dims'>()</div><div class='sc-var-dtype'>string</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>monitor</div></span></div><input id='attrs-60f50515-60a8-45d1-bebd-0863ce20b985' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-60f50515-60a8-45d1-bebd-0863ce20b985' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f4463bd4-6816-4af4-9faf-78938479d8c1' class='sc-var-data-in' type='checkbox'><label for='data-f4463bd4-6816-4af4-9faf-78938479d8c1' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>&#x27;monitor&#x27;</pre></span></li><li class='sc-var-item'><div class='sc-var-name'><span class='sc-has-index'>time_of_flight</span></div><div class='sc-var-dims'>(time_of_flight [bin-edge])</div><div class='sc-var-dtype'>float32</div><div class='sc-var-unit'>µs</div><div class='sc-value-preview sc-preview'><span><div>0.0, 1.0, ..., 200000.0, 200001.0</div></span></div><input id='attrs-70255e4d-7f9d-4ba0-acc1-a355a5caf779' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-70255e4d-7f9d-4ba0-acc1-a355a5caf779' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e7884a09-d88d-4863-8c7c-124aa1736d16' class='sc-var-data-in' type='checkbox'><label for='data-e7884a09-d88d-4863-8c7c-124aa1736d16' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([0.00000e+00, 1.00000e+00, 2.00000e+00, ..., 1.99999e+05,
+       2.00000e+05, 2.00001e+05], dtype=float32)</pre></span></li></ul></div></li><li class='sc-section-item'><input id='section-7c385c24-d0f6-4307-b261-65d71bfdd3d1' class='sc-section-summary-in' type='checkbox'  checked><label for='section-7c385c24-d0f6-4307-b261-65d71bfdd3d1' class='sc-section-summary' >Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(time_of_flight)</div><div class='sc-var-dtype'>int32</div><div class='sc-var-unit'></div><div class='sc-value-preview sc-preview'><span><div>25, 10, ..., 0, 0</div></span></div><input id='attrs-8f508e4a-15f5-46f9-841e-e21513d690d3' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-8f508e4a-15f5-46f9-841e-e21513d690d3' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-fecb9d91-9178-4c80-b9b9-0ab34826d213' class='sc-var-data-in' type='checkbox'><label for='data-fecb9d91-9178-4c80-b9b9-0ab34826d213' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([25, 10, 12, ...,  0,  0,  0], dtype=int32)</pre></li></ul></div></li></ul></div></div></div>
+</div>
+</div>
+</div>
+
+
+              </div>
+              
+            
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'> 
+    <a class='left-prev' id="prev-link" href="../getting-started/quick-start-guide.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Quick Start Guide</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="classes.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Classes</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            
+        </div>
+    </div>
+    <footer class="footer">
+  <p>
+    
+      By Scipp contributors<br/>
+    
+        &copy; Copyright 2022 Scipp contributors.<br/>
+  </p>
+</footer>
+</main>
+
+
+      </div>
+    </div>
+  
+  <script src="../_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+
+  </body>
+</html>
