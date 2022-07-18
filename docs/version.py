@@ -35,10 +35,12 @@ class VersionInfo:
         """
         first = parse(first)
         releases = [r for r in self._releases if r >= first]
-        return sorted(set(f'{r.major}.{r.minor}' for r in releases), reverse=True)
+        releases = sorted(set((r.major, r.minor) for r in releases), reverse=True)
+        return [f'{major}.{minor}' for major, minor in releases]
 
     def is_latest(self, version: str) -> bool:
-        """Return True if `version` has the same major and minor as the latest release.
+        """Return True if `version` has the same or larger major and minor as the
+        latest release.
         """
         version = self._to_version(version)
         latest = self._releases[0]
@@ -86,11 +88,11 @@ if __name__ == '__main__':
                         choices=['is-latest', 'is-new', 'get-replaced', 'get-target'],
                         required=True,
                         help='Action to perform: Check whether this major or minor '
-                        'release exists (is-latest), check whether this is a new major '
-                        'or minor release (is-new), get the version this is replacing '
-                        '(get-replaced), get the target folder for publishing the docs '
-                        '(get-target). In all cases the patch/micro version is '
-                        'ignored.')
+                        'release exists or is new (is-latest), check whether this is a '
+                        'new major or minor release (is-new), get the version this is '
+                        'replacing (get-replaced), get the target folder for '
+                        'publishing the docs (get-target). In all cases the '
+                        'patch/micro version is ignored.')
     parser.add_argument('--version',
                         dest='version',
                         required=True,

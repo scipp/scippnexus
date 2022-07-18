@@ -22,7 +22,8 @@ copyright = u'2022 Scipp contributors'
 author = u'Scipp contributors'
 
 version_info = VersionInfo(repo=project)
-outdated = not version_info.is_latest(scippnexus.__version__)
+long_version = scippnexus.__version__
+outdated = not version_info.is_latest(long_version)
 
 
 def add_buttons(
@@ -45,23 +46,27 @@ def add_buttons(
         "icon": "fa fa-caret-down",
         "text": "Related projects"
     })
-    if outdated:
-        return  # No version select on outdated docs, would be incomplete anyway
-    l2 = []
     releases = version_info.minor_releases(first='0.1')
-    latest = f"{releases[0]} (latest)"
-    l2.append({"type": "link", "text": latest, "url": f"{base}/{project}"})
-    for r in releases[1:]:
-        l2.append({
+    if outdated:
+        current = f"{long_version} (outdated)"
+        latest = "latest"
+        entries = ['.'.join(long_version.split('.')[:2])]
+    else:
+        current = f"{long_version} (latest)"
+        latest = f"{releases[0]} (latest)"
+        entries = releases[1:]
+    lines = [{"type": "link", "text": latest, "url": f"{base}/{project}"}]
+    for r in entries:
+        lines.append({
             "type": "link",
             "text": f"{r}",
             "url": f"{base}/{project}/release/{r}"
         })
     header_buttons.append({
         "type": "group",
-        "buttons": l2,
+        "buttons": lines,
         "icon": "fa fa-caret-down",
-        "text": latest
+        "text": current
     })
 
 
@@ -177,7 +182,7 @@ html_theme = 'sphinx_book_theme'
 #
 html_theme_options = {
     "logo_only": True,
-    "repository_url": "https://github.com/scipp/{project}",
+    "repository_url": f"https://github.com/scipp/{project}",
     "repository_branch": "main",
     "path_to_docs": "docs",
     "use_repository_button": True,
@@ -188,7 +193,7 @@ html_theme_options = {
 
 if outdated:
     html_theme_options["announcement"] = (
-        "⚠️ You are viewing the documentation for an old version of {project}. "
+        f"⚠️ You are viewing the documentation for an old version of {project}. "
         f"Switch to <a href='https://scipp.github.io/{project}' "
         "style='color:white;text-decoration:underline;'"
         ">latest</a> version. ⚠️")
