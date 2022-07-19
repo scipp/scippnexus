@@ -20,7 +20,7 @@ python-dateutil==2.8.2
     # via -r requirements/base.in
 pyyaml==6.0
     # via confuse
-scipp==0.14.0
+scipp==0.15.0
     # via -r requirements/base.in
 scipy==1.8.1
     # via -r requirements/base.in
