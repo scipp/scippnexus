@@ -6,7 +6,7 @@
 
 ## About
 
-scippnexus is a h5py-like utility for NeXus files based with seamless scipp integration.
+scippnexus is a h5py-like utility for NeXus files with seamless scipp integration.
 See the [documentation](https://scipp.github.io/scippnexus) for more details.
 
 ## Installation
