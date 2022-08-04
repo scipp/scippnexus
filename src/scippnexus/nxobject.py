@@ -29,7 +29,6 @@ class DimensionedArray(Protocol):
 
     Could be, e.g., a scipp.Variable or a dimple dataclass wrapping a numpy array.
     """
-
     @property
     def values(self):
         """Multi-dimensional array of values"""
@@ -44,7 +43,6 @@ class DimensionedArray(Protocol):
 
 
 class AttributeManager(Protocol):
-
     def __getitem__(self, name: str):
         """Get attribute"""
 
@@ -73,7 +71,6 @@ class NX_class(Enum):
 class Attrs:
     """HDF5 attributes.
     """
-
     def __init__(self, attrs: AttributeManager):
         self._attrs = attrs
 
@@ -148,7 +145,6 @@ class Field:
 
     In HDF5 fields are represented as dataset.
     """
-
     def __init__(self, dataset: H5Dataset, dims=None, is_time=None):
         self._dataset = dataset
         self._shape = list(self._dataset.shape)
@@ -296,6 +292,7 @@ class Field:
 class NXobject:
     """Base class for all NeXus groups.
     """
+    _nxclasses = {e.name[2:]: e for e in NX_class}
 
     def __init__(self, group: H5Group):
         self._group = group
@@ -397,7 +394,10 @@ class NXobject:
         is not actually set. This is to support the majority of all legacy files, which
         do not have this attribute.
         """
-        return NX_class[self.attrs['NX_class']]
+        try:
+            return NX_class[self.attrs['NX_class']]
+        except KeyError:
+            return None
 
     @property
     def depends_on(self) -> Union[sc.Variable, sc.DataArray, None]:
@@ -438,10 +438,53 @@ class NXobject:
         else:
             self.create_field(name, value)
 
+    def _get_by_class(self, tag):
+        nxclass = self._nxclasses.get(tag)
+        matches = []
+        for key, node in self.items():
+            if isinstance(node, NXobject) and node.nx_class == nxclass:
+                matches.append(key)
+        return matches
+
+    def __getattr__(self, attr):
+        # TODO Fix plural of classes ending in `y`, such as NXentry
+        if not (attr in self._nxclasses or attr[:-1] in self._nxclasses):
+            raise AttributeError(f"'NXobject' object has no attribute {attr}")
+        if attr in self._nxclasses:
+            matches = self._get_by_class(attr)
+            if len(matches) == 0:
+                raise NexusStructureError(
+                    f"No group with requested NX_class='NX{attr}'")
+            if len(matches) == 1:
+                return self[matches[0]]
+            raise RuntimeError(f"Multiple keys match NX{attr}, use the '{attr}s'"
+                               f" property instead of the '{attr}' property.")
+        else:
+            matches = self._get_by_class(attr[:-1])
+            if len(matches) == 0:
+                raise NexusStructureError(
+                    f"No group with requested NX_class='NX{attr[:-1]}'")
+            return {key: self[key] for key in matches}
+
+    def __dir__(self):
+        nxclasses = []
+        for val in self.values():
+            if isinstance(val, NXobject):
+                nxclasses.append(val.nx_class)
+        keys = super().__dir__()
+        for key in set(nxclasses):
+            if key is None:
+                continue
+            # Strictly speaking we should have >= 1 here, since __getattr__ defines
+            # the singular version with a useful error message.
+            if nxclasses.count(key) == 1:
+                keys.append(key.name[2:])
+            keys.append(f'{key.name[2:]}s')
+        return keys
+
 
 class NXroot(NXobject):
     """Root of a NeXus file."""
-
     @property
     def nx_class(self) -> NX_class:
         # As an oversight in the NeXus standard and the reference implementation,
