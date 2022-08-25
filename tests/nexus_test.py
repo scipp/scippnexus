@@ -5,7 +5,7 @@ import h5py
 import numpy as np
 import pytest
 import scipp as sc
-from scippnexus import Field, NXroot, NX_class
+from scippnexus import Field, NXroot, NX_class, NXentry, NXmonitor, NXlog, NXevent_data
 
 # representative sample of UTF-8 test strings from
 # https://www.w3.org/2001/06/utf-8-test/UTF-8-demo.html
@@ -186,28 +186,17 @@ def test_nxobject_grandchild_can_be_accessed_using_path(nxroot):
     assert nxroot['/entry/log'].name == '/entry/log'
 
 
-def test_nxobject_by_nx_class_of_root_contains_everything(nxroot):
+def test_nxobject_getitem_by_class(nxroot):
     nxroot.create_class('monitor', NX_class.NXmonitor)
     nxroot['entry'].create_class('log', NX_class.NXlog)
     nxroot['entry'].create_class('events_0', NX_class.NXevent_data)
     nxroot['entry'].create_class('events_1', NX_class.NXevent_data)
-    classes = nxroot.by_nx_class()
-    assert list(classes[NX_class.NXentry]) == ['entry']
-    assert list(classes[NX_class.NXmonitor]) == ['monitor']
-    assert list(classes[NX_class.NXlog]) == ['log']
-    assert set(classes[NX_class.NXevent_data]) == {'events_0', 'events_1'}
-
-
-def test_nxobject_by_nx_class_contains_only_children(nxroot):
-    nxroot.create_class('monitor', NX_class.NXmonitor)
-    nxroot['entry'].create_class('log', NX_class.NXlog)
-    nxroot['entry'].create_class('events_0', NX_class.NXevent_data)
-    nxroot['entry'].create_class('events_1', NX_class.NXevent_data)
-    classes = nxroot['entry'].by_nx_class()
-    assert list(classes[NX_class.NXentry]) == []
-    assert list(classes[NX_class.NXmonitor]) == []
-    assert list(classes[NX_class.NXlog]) == ['log']
-    assert set(classes[NX_class.NXevent_data]) == set(['events_0', 'events_1'])
+    assert list(nxroot[NXentry]) == ['entry']
+    assert list(nxroot[NXmonitor]) == ['monitor']
+    assert list(nxroot['entry'][NXmonitor]) == []  # not nested
+    assert list(nxroot[NXlog]) == []  # nested
+    assert list(nxroot['entry'][NXlog]) == ['log']
+    assert set(nxroot['entry'][NXevent_data]) == {'events_0', 'events_1'}
 
 
 def test_nxobject_dataset_items_are_returned_as_Field(nxroot):
