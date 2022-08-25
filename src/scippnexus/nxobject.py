@@ -317,11 +317,11 @@ class NXobject:
         return da
 
     def _get_children_by_nx_class(self, select: type) -> Dict['NXobject']:
-        return {
-            key: value
-            for key, value in self.items()
-            if (nx_class := value.attrs.get('NX_class')) == select.__name__
-        }
+        children = {}
+        for key in self.keys():
+            if (child := self._get_child(key)).attrs.get('NX_class') == select.__name__:
+                children[key] = child
+        return children
 
     def __getitem__(
             self,

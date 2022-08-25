@@ -5,7 +5,7 @@ from __future__ import annotations
 from copy import copy
 from typing import List, Optional, Union
 import scipp as sc
-from .nxobject import NX_class, NXobject, Field, ScippIndex, NexusStructureError
+from .nxobject import NXobject, Field, ScippIndex, NexusStructureError
 from .nxdata import NXdata
 from .nxevent_data import NXevent_data
 
@@ -20,7 +20,6 @@ def group(da: sc.DataArray, groups: sc.Variable) -> sc.DataArray:
 class EventSelector:
     """A proxy object for creating an NXdetector based on a selection of events.
     """
-
     def __init__(self, detector):
         self._detector = detector
 
@@ -37,7 +36,6 @@ class _EventField:
     This has no equivalent in the NeXus format, but represents the conceptual
     event-data "signal" dataset of an NXdetector.
     """
-
     def __init__(self,
                  nxevent_data: NXevent_data,
                  event_select: ScippIndex,
@@ -117,7 +115,6 @@ class NXdetector(NXobject):
     is used to map event do detector pixels. Otherwise this returns event data in the
     same format as NXevent_data.
     """
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._event_select = tuple()
@@ -170,7 +167,7 @@ class NXdetector(NXobject):
         # The standard is unclear on whether the 'data' field may be NXevent_data or
         # whether the fields of NXevent_data should be stored directly within this
         # NXdetector. Both cases are observed in the wild.
-        event_entries = self.by_nx_class()[NX_class.NXevent_data]
+        event_entries = self[NXevent_data]
         if len(event_entries) > 1:
             raise NexusStructureError("No unique NXevent_data entry in NXdetector. "
                                       f"Found {len(event_entries)}.")
