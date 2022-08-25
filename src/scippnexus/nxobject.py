@@ -8,7 +8,7 @@ import warnings
 import datetime
 import dateutil.parser
 import functools
-from typing import List, Union, Any, Dict, Tuple, Protocol
+from typing import overload, List, Union, Any, Dict, Tuple, Protocol
 import numpy as np
 import scipp as sc
 import h5py
@@ -29,7 +29,6 @@ class DimensionedArray(Protocol):
 
     Could be, e.g., a scipp.Variable or a dimple dataclass wrapping a numpy array.
     """
-
     @property
     def values(self):
         """Multi-dimensional array of values"""
@@ -44,7 +43,6 @@ class DimensionedArray(Protocol):
 
 
 class AttributeManager(Protocol):
-
     def __getitem__(self, name: str):
         """Get attribute"""
 
@@ -58,7 +56,6 @@ class NexusStructureError(Exception):
 class Attrs:
     """HDF5 attributes.
     """
-
     def __init__(self, attrs: AttributeManager):
         self._attrs = attrs
 
@@ -133,7 +130,6 @@ class Field:
 
     In HDF5 fields are represented as dataset.
     """
-
     def __init__(self, dataset: H5Dataset, dims=None, is_time=None):
         self._dataset = dataset
         self._shape = list(self._dataset.shape)
@@ -281,7 +277,6 @@ class Field:
 class NXobject:
     """Base class for all NeXus groups.
     """
-
     def __init__(self, group: H5Group):
         self._group = group
         self.child_params = {}
@@ -305,16 +300,48 @@ class NXobject:
             da.coords['depends_on'] = t if isinstance(t, sc.Variable) else sc.scalar(t)
         return da
 
-    def _get_children_by_nx_class(self, select: type) -> Dict['NXobject']:
+    def _get_children_by_nx_class(self, select: type) -> Dict[str, 'NXobject']:
         children = {}
         for key in self.keys():
             if (child := self._get_child(key)).attrs.get('NX_class') == select.__name__:
                 children[key] = child
         return children
 
-    def __getitem__(
-            self,
-            name: NXobjectIndex) -> Union['NXobject', Field, sc.DataArray, sc.Dataset]:
+    @overload
+    def __getitem__(self, name: str) -> Union['NXobject', Field]:
+        ...
+
+    @overload
+    def __getitem__(self, name: ScippIndex) -> Union[sc.DataArray, sc.Dataset]:
+        ...
+
+    @overload
+    def __getitem__(self, name: type) -> Dict[str, 'NXobject']:
+        ...
+
+    def __getitem__(self, name):
+        """
+        Get a child group or child dataset, a selection of child groups, or load and
+        return the current group.
+
+        Three cases are supported:
+
+        - String name: The child group or child dataset of that name is returned.
+        - Class such as ``NXdata`` or ``NXlog``: A dict containing all direct children
+          with a matching ``NX_class`` attribute are returned.
+        - Scipp-style index: Load the specified slice of the current group, returning
+          a :class:`scipp.DataArray` or :class:`scipp.Dataset`.
+
+        Parameters
+        ----------
+        name:
+            Child name, class, or index.
+
+        Returns
+        -------
+        :
+            Field, group, dict of fields, or loaded data.
+        """
         if inspect.isclass(name) and issubclass(name, NXobject):
             return self._get_children_by_nx_class(name)
         return self._get_child(name, use_field_dims=True)
@@ -412,7 +439,6 @@ class NXobject:
 
 class NXroot(NXobject):
     """Root of a NeXus file."""
-
     @property
     def nx_class(self) -> type:
         # As an oversight in the NeXus standard and the reference implementation,
