@@ -20,6 +20,7 @@ def group(da: sc.DataArray, groups: sc.Variable) -> sc.DataArray:
 class EventSelector:
     """A proxy object for creating an NXdetector based on a selection of events.
     """
+
     def __init__(self, detector):
         self._detector = detector
 
@@ -36,6 +37,7 @@ class _EventField:
     This has no equivalent in the NeXus format, but represents the conceptual
     event-data "signal" dataset of an NXdetector.
     """
+
     def __init__(self,
                  nxevent_data: NXevent_data,
                  event_select: ScippIndex,
@@ -115,6 +117,7 @@ class NXdetector(NXobject):
     is used to map event do detector pixels. Otherwise this returns event data in the
     same format as NXevent_data.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._event_select = tuple()
