@@ -7,7 +7,6 @@ import inspect
 import warnings
 import datetime
 import dateutil.parser
-from enum import Enum, auto
 import functools
 from typing import List, Union, Any, Dict, Tuple, Protocol
 import numpy as np
@@ -52,21 +51,6 @@ class NexusStructureError(Exception):
     """Invalid or unsupported class and field structure in Nexus.
     """
     pass
-
-
-class NX_class(Enum):
-    NXdata = auto()
-    NXdetector = auto()
-    NXdisk_chopper = auto()
-    NXentry = auto()
-    NXevent_data = auto()
-    NXinstrument = auto()
-    NXlog = auto()
-    NXmonitor = auto()
-    NXroot = auto()
-    NXsample = auto()
-    NXsource = auto()
-    NXtransformations = auto()
 
 
 class Attrs:
@@ -372,14 +356,14 @@ class NXobject:
         return list(zip(self.keys(), self.values()))
 
     @property
-    def nx_class(self) -> NX_class:
+    def nx_class(self) -> type:
         """The value of the NX_class attribute of the group.
 
         In case of the subclass NXroot this returns 'NXroot' even if the attribute
         is not actually set. This is to support the majority of all legacy files, which
         do not have this attribute.
         """
-        return NX_class[self.attrs['NX_class']]
+        return _nx_class_registry()[self.attrs['NX_class']]
 
     @property
     def depends_on(self) -> Union[sc.Variable, sc.DataArray, None]:
@@ -406,9 +390,9 @@ class NXobject:
             dataset.attrs['start'] = str(start.value)
         return Field(dataset, data.dims)
 
-    def create_class(self, name: str, nx_class: NX_class) -> NXobject:
+    def create_class(self, name: str, nx_class: type) -> NXobject:
         group = self._group.create_group(name)
-        group.attrs['NX_class'] = nx_class.name
+        group.attrs['NX_class'] = nx_class.__name__
         return _make(group)
 
     def __setitem__(self, name: str, value: Union[Field, NXobject, DimensionedArray]):
@@ -424,12 +408,12 @@ class NXobject:
 class NXroot(NXobject):
     """Root of a NeXus file."""
     @property
-    def nx_class(self) -> NX_class:
+    def nx_class(self) -> type:
         # As an oversight in the NeXus standard and the reference implementation,
         # the NX_class was never set to NXroot. This applies to essentially all
         # files in existence before 2016, and files written by other implementations
         # that were inspired by the reference implementation. We thus hardcode NXroot:
-        return NX_class['NXroot']
+        return NXroot
 
 
 class NXentry(NXobject):
