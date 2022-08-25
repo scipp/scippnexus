@@ -8,7 +8,7 @@ import warnings
 import datetime
 import dateutil.parser
 import functools
-from typing import overload, List, Union, Any, Dict, Tuple, Protocol
+from typing import overload, List, Union, Any, Dict, Tuple, Protocol, Optional
 import numpy as np
 import scipp as sc
 import h5py
@@ -393,14 +393,15 @@ class NXobject:
         return list(zip(self.keys(), self.values()))
 
     @property
-    def nx_class(self) -> type:
+    def nx_class(self) -> Optional[type]:
         """The value of the NX_class attribute of the group.
 
         In case of the subclass NXroot this returns 'NXroot' even if the attribute
         is not actually set. This is to support the majority of all legacy files, which
         do not have this attribute.
         """
-        return _nx_class_registry()[self.attrs['NX_class']]
+        if (nxclass := self.attrs.get('NX_class')) is not None:
+            return _nx_class_registry().get(nxclass)
 
     @property
     def depends_on(self) -> Union[sc.Variable, sc.DataArray, None]:
@@ -440,6 +441,32 @@ class NXobject:
             self._group[name] = value._group
         else:
             self.create_field(name, value)
+
+    def __getattr__(self, attr):
+        nxclass = _nx_class_registry().get(f'NX{attr}')
+        if nxclass is None:
+            raise AttributeError(f"'NXobject' object has no attribute {attr}")
+        matches = self[nxclass]
+        if len(matches) == 0:
+            raise NexusStructureError(f"No group with requested NX_class='{nxclass}'")
+        if len(matches) == 1:
+            return next(iter(matches.values()))
+        raise RuntimeError(f"Multiple keys match {nxclass}, use obj[{nxclass}] to "
+                           f"obtain all matches instead of obj.{attr}.")
+
+    @functools.lru_cache(maxsize=1)
+    def __dir__(self):
+        nxclasses = []
+        for val in self.values():
+            if isinstance(val, NXobject):
+                nxclasses.append(val.nx_class)
+        keys = super().__dir__()
+        for key in set(nxclasses):
+            if key is None:
+                continue
+            if nxclasses.count(key) == 1:
+                keys.append(key.__name__[2:])
+        return keys
 
 
 class NXroot(NXobject):
