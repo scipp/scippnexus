@@ -454,7 +454,6 @@ class NXobject:
         raise RuntimeError(f"Multiple keys match {nxclass}, use obj[{nxclass}] to "
                            f"obtain all matches instead of obj.{attr}.")
 
-    @functools.lru_cache(maxsize=1)
     def __dir__(self):
         nxclasses = []
         for val in self.values():
