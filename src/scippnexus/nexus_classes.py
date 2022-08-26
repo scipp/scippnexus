@@ -1,7 +1,27 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from .nxobject import NXobject
+from .nxdata import NXdata  # noqa F401
+from .nxdetector import NXdetector  # noqa F401
+from .nxdisk_chopper import NXdisk_chopper  # noqa F401
+from .nxevent_data import NXevent_data  # noqa F401
+from .nxlog import NXlog  # noqa F401
+from .nxmonitor import NXmonitor  # noqa F401
+from .nxobject import NXobject, NXroot  # noqa F401
+from .nxsample import NXsample  # noqa F401
+from .nxsource import NXsource  # noqa F401
+
+
+class NXentry(NXobject):
+    """Entry in a NeXus file."""
+
+
+class NXinstrument(NXobject):
+    """Group of instrument-related information."""
+
+
+class NXtransformations(NXobject):
+    """Group of transformations."""
 
 
 class NXaperture(NXobject):
@@ -180,4 +200,5 @@ class NXxraylens(NXobject):
     """NXxraylens"""
 
 
+# Not included in list of NeXus classes since this is the "base" of all others
 del NXobject

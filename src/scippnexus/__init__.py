@@ -11,15 +11,6 @@ except importlib.metadata.PackageNotFoundError:
 
 from . import typing
 from .file import File
-from .nxdata import NXdata
-from .nxdetector import NXdetector
-from .nxdisk_chopper import NXdisk_chopper
-from .nxevent_data import NXevent_data
-from .nxlog import NXlog
-from .nxmonitor import NXmonitor
 from .nxobject import NXobject, Field, Attrs
-from .nxobject import NXentry, NXinstrument, NXroot, NXtransformations
 from .nxobject import NexusStructureError
-from .nxsample import NXsample
-from .nxsource import NXsource
 from .nexus_classes import *

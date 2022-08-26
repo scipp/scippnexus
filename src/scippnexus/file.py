@@ -4,7 +4,7 @@
 from contextlib import AbstractContextManager
 import h5py
 
-from .nxobject import NXroot
+from .nexus_classes import NXroot
 
 
 class File(AbstractContextManager, NXroot):

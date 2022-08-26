@@ -484,6 +484,12 @@ class NXobject:
         return keys
 
 
+def _make(group) -> NXobject:
+    if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
+        return _nx_class_registry().get(nx_class, NXobject)(group)
+    return group  # Return underlying (h5py) group
+
+
 class NXroot(NXobject):
     """Root of a NeXus file."""
 
@@ -496,46 +502,7 @@ class NXroot(NXobject):
         return NXroot
 
 
-class NXentry(NXobject):
-    """Entry in a NeXus file."""
-
-
-class NXinstrument(NXobject):
-    """Group of instrument-related information."""
-
-
-class NXtransformations(NXobject):
-    """Group of transformations."""
-
-
-def _make(group) -> NXobject:
-    if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
-        return _nx_class_registry().get(nx_class, NXobject)(group)
-    return group  # Return underlying (h5py) group
-
-
 @functools.lru_cache()
 def _nx_class_registry():
-    from .nxevent_data import NXevent_data
-    from .nxdata import NXdata
-    from .nxdetector import NXdetector
-    from .nxdisk_chopper import NXdisk_chopper
-    from .nxlog import NXlog
-    from .nxmonitor import NXmonitor
-    from .nxsample import NXsample
-    from .nxsource import NXsource
     from . import nexus_classes
-    lut = {
-        name: cls
-        for name, cls in inspect.getmembers(nexus_classes, inspect.isclass)
-    }
-    implemented = {
-        cls.__name__: cls
-        for cls in [
-            NXroot, NXentry, NXevent_data, NXlog, NXmonitor, NXdata, NXdetector,
-            NXsample, NXsource, NXdisk_chopper, NXinstrument, NXtransformations
-        ]
-    }
-    assert set(lut).isdisjoint(implemented)
-    lut.update(implemented)
-    return lut
+    return dict(inspect.getmembers(nexus_classes, inspect.isclass))
