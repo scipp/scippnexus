@@ -466,13 +466,18 @@ class NXobject:
                                   f"to obtain all matches instead of obj.{attr}.")
 
     def __dir__(self):
-        nxclasses = []
-        for val in self.values():
-            if isinstance(val, NXobject):
-                nxclasses.append(val.nx_class)
         keys = super().__dir__()
+        try:
+            nxclasses = []
+            for val in self.values():
+                if isinstance(val, NXobject):
+                    nxclasses.append(val.nx_class)
+        except Exception:
+            pass
         for key in set(nxclasses):
             if key is None:
+                continue
+            if key in keys:
                 continue
             if nxclasses.count(key) == 1:
                 keys.append(key.__name__[2:])

@@ -5,7 +5,8 @@ import h5py
 import numpy as np
 import pytest
 import scipp as sc
-from scippnexus import Field, NXroot, NXentry, NXmonitor, NXlog, NXevent_data
+from scippnexus import (Field, NXroot, NXentry, NXmonitor, NXlog, NXevent_data,
+                        NXdetector)
 from scippnexus import NexusStructureError
 
 # representative sample of UTF-8 test strings from
@@ -413,3 +414,11 @@ def test___dir__(nxroot):
     assert 'log' in entry.__dir__()
     entry.create_class('log2', NXlog)
     assert 'log' not in entry.__dir__()
+
+
+def test___dir__includes_non_dynamic_properties(nxroot):
+    entry = nxroot['entry']
+    det = entry.create_class('det', NXdetector)
+    det.create_class('events', NXevent_data)
+    # Ensure we are not replacing __dir__ but adding to it
+    assert 'unit' in det.__dir__()
