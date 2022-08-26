@@ -17,7 +17,7 @@ from .nxdisk_chopper import NXdisk_chopper
 from .nxevent_data import NXevent_data
 from .nxlog import NXlog
 from .nxmonitor import NXmonitor
-from .nxobject import NXobject, Field
+from .nxobject import NXobject, Field, Attrs
 from .nxobject import NXentry, NXinstrument, NXroot, NXtransformations
 from .nxobject import NexusStructureError
 from .nxsample import NXsample
