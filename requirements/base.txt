@@ -5,13 +5,13 @@
 #
 #    pip-compile-multi
 #
-confuse==1.7.0
+confuse==2.0.0
     # via scipp
 graphlib-backport==1.0.3
     # via scipp
 h5py==3.7.0
     # via -r requirements/base.in
-numpy==1.23.1
+numpy==1.23.2
     # via
     #   h5py
     #   scipp
@@ -22,7 +22,7 @@ pyyaml==6.0
     # via confuse
 scipp==0.16.1
     # via -r requirements/base.in
-scipy==1.8.1
+scipy==1.9.0
     # via -r requirements/base.in
 six==1.16.0
     # via python-dateutil
