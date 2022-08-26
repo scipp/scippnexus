@@ -3,12 +3,12 @@
 # @author Simon Heybrock
 from __future__ import annotations
 import re
+import inspect
 import warnings
 import datetime
 import dateutil.parser
-from enum import Enum, auto
 import functools
-from typing import List, Union, Any, Dict, Tuple, Protocol
+from typing import overload, List, Union, Any, Dict, Tuple, Protocol
 import numpy as np
 import scipp as sc
 import h5py
@@ -53,21 +53,6 @@ class NexusStructureError(Exception):
     """Invalid or unsupported class and field structure in Nexus.
     """
     pass
-
-
-class NX_class(Enum):
-    NXdata = auto()
-    NXdetector = auto()
-    NXdisk_chopper = auto()
-    NXentry = auto()
-    NXevent_data = auto()
-    NXinstrument = auto()
-    NXlog = auto()
-    NXmonitor = auto()
-    NXroot = auto()
-    NXsample = auto()
-    NXsource = auto()
-    NXtransformations = auto()
 
 
 class Attrs:
@@ -320,9 +305,50 @@ class NXobject:
             da.coords['depends_on'] = t if isinstance(t, sc.Variable) else sc.scalar(t)
         return da
 
-    def __getitem__(
-            self,
-            name: NXobjectIndex) -> Union['NXobject', Field, sc.DataArray, sc.Dataset]:
+    def _get_children_by_nx_class(self, select: type) -> Dict[str, 'NXobject']:
+        children = {}
+        for key in self.keys():
+            if (child := self._get_child(key)).attrs.get('NX_class') == select.__name__:
+                children[key] = child
+        return children
+
+    @overload
+    def __getitem__(self, name: str) -> Union['NXobject', Field]:
+        ...
+
+    @overload
+    def __getitem__(self, name: ScippIndex) -> Union[sc.DataArray, sc.Dataset]:
+        ...
+
+    @overload
+    def __getitem__(self, name: type) -> Dict[str, 'NXobject']:
+        ...
+
+    def __getitem__(self, name):
+        """
+        Get a child group or child dataset, a selection of child groups, or load and
+        return the current group.
+
+        Three cases are supported:
+
+        - String name: The child group or child dataset of that name is returned.
+        - Class such as ``NXdata`` or ``NXlog``: A dict containing all direct children
+          with a matching ``NX_class`` attribute are returned.
+        - Scipp-style index: Load the specified slice of the current group, returning
+          a :class:`scipp.DataArray` or :class:`scipp.Dataset`.
+
+        Parameters
+        ----------
+        name:
+            Child name, class, or index.
+
+        Returns
+        -------
+        :
+            Field, group, dict of fields, or loaded data.
+        """
+        if inspect.isclass(name) and issubclass(name, NXobject):
+            return self._get_children_by_nx_class(name)
         return self._get_child(name, use_field_dims=True)
 
     def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.Dataset]:
@@ -366,38 +392,15 @@ class NXobject:
     def items(self) -> List[Tuple[str, Union[Field, 'NXobject']]]:
         return list(zip(self.keys(), self.values()))
 
-    @functools.lru_cache()
-    def by_nx_class(self) -> Dict[NX_class, Dict[str, 'NXobject']]:
-        classes = {name: [] for name in _nx_class_registry()}
-
-        # TODO implement visititems for NXobject and merge the two blocks
-        def _match_nx_class(_, node):
-            if not hasattr(node, 'shape'):
-                if (nx_class := node.attrs.get('NX_class')) is not None:
-                    if not isinstance(nx_class, str):
-                        nx_class = nx_class.decode('UTF-8')
-                    if nx_class in _nx_class_registry():
-                        classes[nx_class].append(node)
-
-        self._group.visititems(_match_nx_class)
-
-        out = {}
-        for nx_class, groups in classes.items():
-            names = [group.name.split('/')[-1] for group in groups]
-            if len(names) != len(set(names)):  # fall back to full path if duplicate
-                names = [group.name for group in groups]
-            out[NX_class[nx_class]] = {n: _make(g) for n, g in zip(names, groups)}
-        return out
-
     @property
-    def nx_class(self) -> NX_class:
+    def nx_class(self) -> type:
         """The value of the NX_class attribute of the group.
 
         In case of the subclass NXroot this returns 'NXroot' even if the attribute
         is not actually set. This is to support the majority of all legacy files, which
         do not have this attribute.
         """
-        return NX_class[self.attrs['NX_class']]
+        return _nx_class_registry()[self.attrs['NX_class']]
 
     @property
     def depends_on(self) -> Union[sc.Variable, sc.DataArray, None]:
@@ -424,9 +427,9 @@ class NXobject:
             dataset.attrs['start'] = str(start.value)
         return Field(dataset, data.dims)
 
-    def create_class(self, name: str, nx_class: NX_class) -> NXobject:
+    def create_class(self, name: str, nx_class: type) -> NXobject:
         group = self._group.create_group(name)
-        group.attrs['NX_class'] = nx_class.name
+        group.attrs['NX_class'] = nx_class.__name__
         return _make(group)
 
     def __setitem__(self, name: str, value: Union[Field, NXobject, DimensionedArray]):
@@ -443,12 +446,12 @@ class NXroot(NXobject):
     """Root of a NeXus file."""
 
     @property
-    def nx_class(self) -> NX_class:
+    def nx_class(self) -> type:
         # As an oversight in the NeXus standard and the reference implementation,
         # the NX_class was never set to NXroot. This applies to essentially all
         # files in existence before 2016, and files written by other implementations
         # that were inspired by the reference implementation. We thus hardcode NXroot:
-        return NX_class['NXroot']
+        return NXroot
 
 
 class NXentry(NXobject):

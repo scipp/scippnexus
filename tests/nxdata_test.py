@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 import scipp as sc
-from scippnexus import NXroot, NX_class
+from scippnexus import NXroot, NXentry, NXdata, NXlog
 import pytest
 
 
@@ -10,13 +10,13 @@ def nxroot(request):
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         root = NXroot(f)
-        root.create_class('entry', NX_class.NXentry)
+        root.create_class('entry', NXentry)
         yield root
 
 
 def test_without_coords(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.create_field('signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
@@ -27,7 +27,7 @@ def test_with_coords_matching_axis_names(nxroot):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['yy', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -39,7 +39,7 @@ def test_guessed_dim_for_coord_not_matching_axis_name(nxroot):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx2'] = da.data['yy', 1]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -53,7 +53,7 @@ def test_multiple_coords(nxroot):
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -68,7 +68,7 @@ def test_slice_of_1d(nxroot):
     da.coords['xx'] = da.data
     da.coords['xx2'] = da.data
     da.coords['scalar'] = sc.scalar(1.2)
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -85,7 +85,7 @@ def test_slice_of_multiple_coords(nxroot):
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -99,7 +99,7 @@ def test_guessed_dim_for_2d_coord_not_matching_axis_name(nxroot):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx2'] = da.data
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -111,7 +111,7 @@ def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(nxroot):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
     da.coords['yy2'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -124,7 +124,7 @@ def test_guesses_transposed_dims_for_2d_coord(nxroot):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx2'] = sc.transpose(da.data)
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -136,7 +136,7 @@ def test_guesses_transposed_dims_for_2d_coord(nxroot):
 def test_indices_attribute_for_coord(nxroot, indices):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     da.coords['yy2'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.attrs['yy2_indices'] = indices
@@ -149,7 +149,7 @@ def test_indices_attribute_for_coord(nxroot, indices):
 def test_indices_attribute_for_coord_with_nontrivial_slice(nxroot, indices):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     da.coords['yy2'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.attrs['yy2_indices'] = indices
@@ -161,7 +161,7 @@ def test_indices_attribute_for_coord_with_nontrivial_slice(nxroot, indices):
 def test_transpose_indices_attribute_for_coord(nxroot):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     da.coords['xx2'] = sc.transpose(da.data)
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.attrs['xx2_indices'] = [1, 0]
@@ -174,7 +174,7 @@ def test_auxiliary_signal_is_not_loaded_as_coord(nxroot):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     # We flag 'xx' as auxiliary_signal. It should thus not be loaded as a coord,
@@ -192,7 +192,7 @@ def test_field_dims_match_NXdata_dims(nxroot):
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal1'
     data.create_field('signal1', da.data)
@@ -209,7 +209,7 @@ def test_uses_default_field_dims_if_inference_fails(nxroot):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['yy2'] = sc.arange('yy', 4)
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -236,7 +236,7 @@ def test_create_datetime_field_from_variable(nxroot):
     assert sc.identical(loaded, var.rename(time=loaded.dim))
 
 
-@pytest.mark.parametrize("nx_class", [NX_class.NXdata, NX_class.NXlog])
+@pytest.mark.parametrize("nx_class", [NXdata, NXlog])
 def test_create_class(nxroot, nx_class):
     group = nxroot.create_class('group', nx_class)
     assert group.nx_class == nx_class
@@ -248,7 +248,7 @@ def test_field_matching_errors_regex_is_loaded_if_no_corresponding_value_field(
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords[f'xx{errors_suffix}'] = da.data['yy', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -271,7 +271,7 @@ def test_uncertainties_of_coords_are_loaded(nxroot, errors_suffix):
                                 variances=[4, 9],
                                 dtype='float64')
     da.coords['scalar'] = sc.scalar(value=1.2, variance=4.0, unit='K')
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.attrs['xx2_indices'] = 0
@@ -287,7 +287,7 @@ def test_uncertainties_of_coords_are_loaded(nxroot, errors_suffix):
 
 def test_unnamed_extra_dims_of_coords_are_squeezed(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.create_field('signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
@@ -302,7 +302,7 @@ def test_unnamed_extra_dims_of_coords_are_squeezed(nxroot):
 
 def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
     signal = sc.array(dims=['xx'], unit='m', values=[1.1, 2.2])
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.create_field('signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
@@ -318,7 +318,7 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
 
 def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.create_field('signal', signal)
     data.attrs['axes'] = ['xx', 'yy']
     data.attrs['signal'] = 'signal'
@@ -330,7 +330,7 @@ def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
 
 def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.create_field('signal', signal)
     data.attrs['signal'] = 'signal'
     loaded = data[...]
@@ -341,7 +341,7 @@ def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
 
 def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2]])
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.create_field('signal', signal)
     data.attrs['signal'] = 'signal'
     loaded = data[...]
@@ -355,7 +355,7 @@ def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
 
 def test_only_one_axis_specified_for_2d_field(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.create_field('signal', signal)
     data.attrs['axes'] = ['zz']
     data.attrs['signal'] = 'signal'
@@ -370,7 +370,7 @@ def test_fields_with_datetime_attribute_are_loaded_as_datetime(nxroot):
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NX_class.NXdata)
+    data = nxroot.create_class('data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
@@ -384,7 +384,7 @@ def test_slicing_with_bin_edge_coord_returns_bin_edges(nxroot):
     da = sc.DataArray(sc.array(dims=['xx'], unit='K', values=[1.1, 2.2, 3.3]))
     da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2, 0.3, 0.4])
     da.coords['xx2'] = sc.array(dims=['xx'], unit='m', values=[0.3, 0.4, 0.5, 0.6])
-    data = nxroot.create_class('data', NX_class.NXdata)
+    data = nxroot.create_class('data', NXdata)
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('data', da.data)

@@ -5,7 +5,7 @@ from __future__ import annotations
 from copy import copy
 from typing import List, Optional, Union
 import scipp as sc
-from .nxobject import NX_class, NXobject, Field, ScippIndex, NexusStructureError
+from .nxobject import NXobject, Field, ScippIndex, NexusStructureError
 from .nxdata import NXdata
 from .nxevent_data import NXevent_data
 
@@ -170,7 +170,7 @@ class NXdetector(NXobject):
         # The standard is unclear on whether the 'data' field may be NXevent_data or
         # whether the fields of NXevent_data should be stored directly within this
         # NXdetector. Both cases are observed in the wild.
-        event_entries = self.by_nx_class()[NX_class.NXevent_data]
+        event_entries = self[NXevent_data]
         if len(event_entries) > 1:
             raise NexusStructureError("No unique NXevent_data entry in NXdetector. "
                                       f"Found {len(event_entries)}.")
