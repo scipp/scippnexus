@@ -524,10 +524,18 @@ def _nx_class_registry():
     from .nxmonitor import NXmonitor
     from .nxsample import NXsample
     from .nxsource import NXsource
-    return {
+    from . import nexus_classes
+    lut = {
+        name: cls
+        for name, cls in inspect.getmembers(nexus_classes, inspect.isclass)
+    }
+    implemented = {
         cls.__name__: cls
         for cls in [
             NXroot, NXentry, NXevent_data, NXlog, NXmonitor, NXdata, NXdetector,
             NXsample, NXsource, NXdisk_chopper, NXinstrument, NXtransformations
         ]
     }
+    assert set(lut).isdisjoint(implemented)
+    lut.update(implemented)
+    return lut

@@ -22,3 +22,4 @@ from .nxobject import NXentry, NXinstrument, NXroot, NXtransformations
 from .nxobject import NexusStructureError
 from .nxsample import NXsample
 from .nxsource import NXsource
+from .nexus_classes import *
