@@ -428,9 +428,20 @@ class NXobject:
             dataset.attrs['start'] = str(start.value)
         return Field(dataset, data.dims)
 
-    def create_class(self, name: str, nx_class: type) -> NXobject:
+    def create_class(self, name: str, nx_class: Union[str, type]) -> NXobject:
+        """Create empty HDF5 group with given name and set the NX_class attribute.
+
+        Parameters
+        ----------
+        name:
+            Group name.
+        nx_class:
+            Nexus class, can be a valid string for the NX_class attribute, or a
+            subclass of NXobject, such as NXdata or NXlog.
+        """
         group = self._group.create_group(name)
-        group.attrs['NX_class'] = nx_class.__name__
+        attr = nx_class if isinstance(nx_class, str) else nx_class.__name__
+        group.attrs['NX_class'] = attr
         return _make(group)
 
     def __setitem__(self, name: str, value: Union[Field, NXobject, DimensionedArray]):
@@ -442,7 +453,7 @@ class NXobject:
         else:
             self.create_field(name, value)
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Union[Any, 'NXobject']:
         nxclass = _nx_class_registry().get(f'NX{attr}')
         if nxclass is None:
             raise AttributeError(f"'NXobject' object has no attribute {attr}")

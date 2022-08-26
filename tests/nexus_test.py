@@ -36,6 +36,11 @@ def test_nxobject_create_class_creates_keys(nxroot):
     assert set(nxroot.keys()) == {'entry', 'log'}
 
 
+def test_nxobject_create_class_with_string_nx_class(nxroot):
+    nxroot.create_class('log', 'NXlog')
+    assert set(nxroot.keys()) == {'entry', 'log'}
+
+
 def test_nxobject_items(nxroot):
     items = nxroot.items()
     assert len(items) == 1
@@ -392,7 +397,10 @@ def test___getattr__for_unique_child_groups(nxroot):
     with pytest.raises(NexusStructureError):
         entry.log
     entry.create_class('log1', NXlog)
-    assert entry.log.name == '/entry/log1'
+    log = entry.log
+    assert log.nx_class == NXlog
+    assert log.name == '/entry/log1'
+    assert isinstance(log, NXlog)
     entry.create_class('log2', NXlog)
     with pytest.raises(NexusStructureError):
         entry.log
