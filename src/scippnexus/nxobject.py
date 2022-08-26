@@ -451,8 +451,8 @@ class NXobject:
             raise NexusStructureError(f"No group with requested NX_class='{nxclass}'")
         if len(matches) == 1:
             return next(iter(matches.values()))
-        raise RuntimeError(f"Multiple keys match {nxclass}, use obj[{nxclass}] to "
-                           f"obtain all matches instead of obj.{attr}.")
+        raise NexusStructureError(f"Multiple keys match {nxclass}, use obj[{nxclass}] "
+                                  f"to obtain all matches instead of obj.{attr}.")
 
     def __dir__(self):
         nxclasses = []
