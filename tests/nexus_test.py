@@ -384,3 +384,12 @@ def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot):
     da = monitor[...]
     assert len(da.bins.coords) == 1
     assert 'event_time_offset' in da.bins.coords
+
+
+def test___dir__(nxroot):
+    entry = nxroot['entry']
+    assert 'log' not in entry.__dir__()
+    entry.create_class('log1', NXlog)
+    assert 'log' in entry.__dir__()
+    entry.create_class('log2', NXlog)
+    assert 'log' not in entry.__dir__()
