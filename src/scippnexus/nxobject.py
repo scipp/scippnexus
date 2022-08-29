@@ -469,7 +469,7 @@ class NXobject:
         keys = super().__dir__()
         nxclasses = []
         # Avoiding self.values() since it is more costly, but mainly since there may be
-        # edges cases where creation of Field/NXobject may raise on unrelated children.
+        # edge cases where creation of Field/NXobject may raise on unrelated children.
         for name, val in self._group.items():
             if not hasattr(val, 'shape'):  # not a dataset
                 nxclasses.append(_make(val).nx_class)
