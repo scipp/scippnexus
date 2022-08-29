@@ -27,7 +27,8 @@ This is especially powerful since a number of concepts of scipp map well to conc
 News
 ----
 
-- [June 2022] Scippnexus-0.1.3 has been released.
+- [August 2022] Scippnexus-0.2.0 has been released.
+  This provides more convenient access to child groups based on the `NX_class` attribute.
 
 Get in touch
 ------------
