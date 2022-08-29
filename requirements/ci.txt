@@ -9,7 +9,7 @@ certifi==2022.6.15
     # via requests
 charset-normalizer==2.1.1
     # via requests
-distlib==0.3.5
+distlib==0.3.6
     # via virtualenv
 filelock==3.8.0
     # via

@@ -43,7 +43,7 @@ docutils==0.17.1
     #   sphinx
 entrypoints==0.4
     # via jupyter-client
-executing==0.10.0
+executing==1.0.0
     # via stack-data
 fastjsonschema==2.16.1
     # via nbformat
@@ -208,7 +208,7 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-stack-data==0.4.0
+stack-data==0.5.0
     # via ipython
 tinycss2==1.1.1
     # via nbconvert
