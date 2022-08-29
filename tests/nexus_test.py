@@ -5,7 +5,9 @@ import h5py
 import numpy as np
 import pytest
 import scipp as sc
-from scippnexus import Field, NXroot, NXentry, NXmonitor, NXlog, NXevent_data
+from scippnexus import (Field, NXroot, NXentry, NXmonitor, NXlog, NXevent_data,
+                        NXdetector)
+from scippnexus import NexusStructureError
 
 # representative sample of UTF-8 test strings from
 # https://www.w3.org/2001/06/utf-8-test/UTF-8-demo.html
@@ -32,6 +34,11 @@ def test_nxobject_root(nxroot):
 
 def test_nxobject_create_class_creates_keys(nxroot):
     nxroot.create_class('log', NXlog)
+    assert set(nxroot.keys()) == {'entry', 'log'}
+
+
+def test_nxobject_create_class_with_string_nx_class(nxroot):
+    nxroot.create_class('log', 'NXlog')
     assert set(nxroot.keys()) == {'entry', 'log'}
 
 
@@ -384,3 +391,34 @@ def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot):
     da = monitor[...]
     assert len(da.bins.coords) == 1
     assert 'event_time_offset' in da.bins.coords
+
+
+def test___getattr__for_unique_child_groups(nxroot):
+    entry = nxroot['entry']
+    with pytest.raises(NexusStructureError):
+        entry.log
+    entry.create_class('log1', NXlog)
+    log = entry.log
+    assert log.nx_class == NXlog
+    assert log.name == '/entry/log1'
+    assert isinstance(log, NXlog)
+    entry.create_class('log2', NXlog)
+    with pytest.raises(NexusStructureError):
+        entry.log
+
+
+def test___dir__(nxroot):
+    entry = nxroot['entry']
+    assert 'log' not in entry.__dir__()
+    entry.create_class('log1', NXlog)
+    assert 'log' in entry.__dir__()
+    entry.create_class('log2', NXlog)
+    assert 'log' not in entry.__dir__()
+
+
+def test___dir__includes_non_dynamic_properties(nxroot):
+    entry = nxroot['entry']
+    det = entry.create_class('det', NXdetector)
+    det.create_class('events', NXevent_data)
+    # Ensure we are not replacing __dir__ but adding to it
+    assert 'unit' in det.__dir__()

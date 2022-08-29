@@ -8,7 +8,7 @@ import warnings
 import datetime
 import dateutil.parser
 import functools
-from typing import overload, List, Union, Any, Dict, Tuple, Protocol
+from typing import overload, List, Union, Any, Dict, Tuple, Protocol, Optional
 import numpy as np
 import scipp as sc
 import h5py
@@ -393,14 +393,15 @@ class NXobject:
         return list(zip(self.keys(), self.values()))
 
     @property
-    def nx_class(self) -> type:
+    def nx_class(self) -> Optional[type]:
         """The value of the NX_class attribute of the group.
 
         In case of the subclass NXroot this returns 'NXroot' even if the attribute
         is not actually set. This is to support the majority of all legacy files, which
         do not have this attribute.
         """
-        return _nx_class_registry()[self.attrs['NX_class']]
+        if (nxclass := self.attrs.get('NX_class')) is not None:
+            return _nx_class_registry().get(nxclass)
 
     @property
     def depends_on(self) -> Union[sc.Variable, sc.DataArray, None]:
@@ -427,9 +428,20 @@ class NXobject:
             dataset.attrs['start'] = str(start.value)
         return Field(dataset, data.dims)
 
-    def create_class(self, name: str, nx_class: type) -> NXobject:
+    def create_class(self, name: str, nx_class: Union[str, type]) -> NXobject:
+        """Create empty HDF5 group with given name and set the NX_class attribute.
+
+        Parameters
+        ----------
+        name:
+            Group name.
+        nx_class:
+            Nexus class, can be a valid string for the NX_class attribute, or a
+            subclass of NXobject, such as NXdata or NXlog.
+        """
         group = self._group.create_group(name)
-        group.attrs['NX_class'] = nx_class.__name__
+        attr = nx_class if isinstance(nx_class, str) else nx_class.__name__
+        group.attrs['NX_class'] = attr
         return _make(group)
 
     def __setitem__(self, name: str, value: Union[Field, NXobject, DimensionedArray]):
@@ -440,6 +452,41 @@ class NXobject:
             self._group[name] = value._group
         else:
             self.create_field(name, value)
+
+    def __getattr__(self, attr: str) -> Union[Any, 'NXobject']:
+        nxclass = _nx_class_registry().get(f'NX{attr}')
+        if nxclass is None:
+            raise AttributeError(f"'NXobject' object has no attribute {attr}")
+        matches = self[nxclass]
+        if len(matches) == 0:
+            raise NexusStructureError(f"No group with requested NX_class='{nxclass}'")
+        if len(matches) == 1:
+            return next(iter(matches.values()))
+        raise NexusStructureError(f"Multiple keys match {nxclass}, use obj[{nxclass}] "
+                                  f"to obtain all matches instead of obj.{attr}.")
+
+    def __dir__(self):
+        keys = super().__dir__()
+        nxclasses = []
+        # Avoiding self.values() since it is more costly, but mainly since there may be
+        # edge cases where creation of Field/NXobject may raise on unrelated children.
+        for name, val in self._group.items():
+            if not hasattr(val, 'shape'):  # not a dataset
+                nxclasses.append(_make(val).nx_class)
+        for key in set(nxclasses):
+            if key is None:
+                continue
+            if key in keys:
+                continue
+            if nxclasses.count(key) == 1:
+                keys.append(key.__name__[2:])
+        return keys
+
+
+def _make(group) -> NXobject:
+    if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
+        return _nx_class_registry().get(nx_class, NXobject)(group)
+    return group  # Return underlying (h5py) group
 
 
 class NXroot(NXobject):
@@ -454,38 +501,7 @@ class NXroot(NXobject):
         return NXroot
 
 
-class NXentry(NXobject):
-    """Entry in a NeXus file."""
-
-
-class NXinstrument(NXobject):
-    """Group of instrument-related information."""
-
-
-class NXtransformations(NXobject):
-    """Group of transformations."""
-
-
-def _make(group) -> NXobject:
-    if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
-        return _nx_class_registry().get(nx_class, NXobject)(group)
-    return group  # Return underlying (h5py) group
-
-
 @functools.lru_cache()
 def _nx_class_registry():
-    from .nxevent_data import NXevent_data
-    from .nxdata import NXdata
-    from .nxdetector import NXdetector
-    from .nxdisk_chopper import NXdisk_chopper
-    from .nxlog import NXlog
-    from .nxmonitor import NXmonitor
-    from .nxsample import NXsample
-    from .nxsource import NXsource
-    return {
-        cls.__name__: cls
-        for cls in [
-            NXroot, NXentry, NXevent_data, NXlog, NXmonitor, NXdata, NXdetector,
-            NXsample, NXsource, NXdisk_chopper, NXinstrument, NXtransformations
-        ]
-    }
+    from . import nexus_classes
+    return dict(inspect.getmembers(nexus_classes, inspect.isclass))
