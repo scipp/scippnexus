@@ -3,13 +3,14 @@
 Release Notes
 =============
 
-v0.2.0 (September 2022)
------------------------
+v0.2.0 (August 2022)
+--------------------
 
 Features
 ~~~~~~~~
 
 * :meth:`scippnexus.NXobject.__getitem__` now accepts classes such as :class:`scippnexus.NXlog` or :class:`scippnexus.NXdata` as key and returns all direct children with an ``NX_class`` attribute matching the provided class `#48 <https://github.com/scipp/scipp/pull/48>`_.
+* Added "dynamic" properties to :class:`scippnexus.NXobject`, to access unique children such as entry or instrument `#49 <https://github.com/scipp/scipp/pull/49>`_.
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
