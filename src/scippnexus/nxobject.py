@@ -278,6 +278,15 @@ class Field:
         return None
 
 
+def is_dataset(obj: Union[H5Group, H5Dataset]) -> bool:
+    """Return true if the object is an h5py.Dataset or equivalent.
+
+    Use this instead of isinstance(obj, h5py.Dataset) to ensure that code is compatible
+    with other h5py-alike interfaces.
+    """
+    return hasattr(obj, 'shape')
+
+
 class NXobject:
     """Base class for all NeXus groups.
     """
@@ -295,7 +304,7 @@ class NXobject:
             raise KeyError("None is not a valid index")
         if isinstance(name, str):
             item = self._group[name]
-            if hasattr(item, 'shape'):
+            if is_dataset(item):
                 dims = self._get_field_dims(name) if use_field_dims else None
                 return Field(item, dims=dims, **self.child_params.get(name, {}))
             else:
@@ -471,7 +480,7 @@ class NXobject:
         # Avoiding self.values() since it is more costly, but mainly since there may be
         # edge cases where creation of Field/NXobject may raise on unrelated children.
         for name, val in self._group.items():
-            if not hasattr(val, 'shape'):  # not a dataset
+            if not is_dataset(val):
                 nxclasses.append(_make(val).nx_class)
         for key in set(nxclasses):
             if key is None:

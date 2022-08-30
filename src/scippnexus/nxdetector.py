@@ -5,7 +5,7 @@ from __future__ import annotations
 from copy import copy
 from typing import List, Optional, Union
 import scipp as sc
-from .nxobject import NXobject, Field, ScippIndex, NexusStructureError
+from .nxobject import NXobject, Field, ScippIndex, NexusStructureError, is_dataset
 from .nxdata import NXdata
 from .nxevent_data import NXevent_data
 
@@ -163,7 +163,7 @@ class NXdetector(NXobject):
         return NXdata(
             self._group,
             signal_name_default='data'
-            if 'data' in self and hasattr(self._group['data'], 'shape') else None,
+            if 'data' in self and is_dataset(self._group['data']) else None,
             signal_override=signal,
             skip=self._nxevent_data_fields if self.events is not None else None)
 
