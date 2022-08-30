@@ -132,12 +132,15 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
-    assert detector.dims == ['dim_0']
+    assert detector.dims == ['detector_number']
     assert detector.shape == [4]
     loaded = detector[...]
     assert sc.identical(
         loaded.bins.size().data,
-        sc.array(dims=['dim_0'], unit=None, dtype='int64', values=[2, 3, 0, 1]))
+        sc.array(dims=['detector_number'],
+                 unit=None,
+                 dtype='int64',
+                 values=[2, 3, 0, 1]))
     assert 'event_time_offset' in loaded.bins.coords
     assert 'event_time_zero' in loaded.bins.coords
 
@@ -249,7 +252,7 @@ def test_event_data_field_dims_labels(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
-    assert detector['detector_number'].dims == ['dim_0']
+    assert detector['detector_number'].dims == ['detector_number']
 
 
 def test_nxevent_data_selection_yields_correct_pulses(nxroot):

@@ -5,7 +5,7 @@ from __future__ import annotations
 from copy import copy
 from typing import List, Optional, Union
 import scipp as sc
-from .nxobject import NXobject, Field, ScippIndex, NexusStructureError
+from .nxobject import NXobject, Field, ScippIndex, NexusStructureError, is_dataset
 from .nxdata import NXdata
 from .nxevent_data import NXevent_data
 
@@ -158,9 +158,12 @@ class NXdetector(NXobject):
         # NXdata uses the 'signal' attribute to define the field name of the signal.
         # NXdetector uses a "hard-coded" signal name 'data', without specifying the
         # attribute in the file, so we pass this explicitly to NXdata.
+        # Note the special case of an NXevent_data subgroup named 'data', which we
+        # avoid by checking if 'data' is a dataset.
         return NXdata(
             self._group,
-            signal_name_default='data' if 'data' in self else None,
+            signal_name_default='data'
+            if 'data' in self and is_dataset(self._group['data']) else None,
             signal_override=signal,
             skip=self._nxevent_data_fields if self.events is not None else None)
 
@@ -204,6 +207,9 @@ class NXdetector(NXobject):
                 nxdata = self._nxdata(use_event_signal=False)
                 if nxdata._signal_name is not None:
                     return nxdata._get_field_dims(name)
+                # If grouping is 1-D then we use this name as the dim
+                if self._get_child(name).ndim == 1:
+                    return [name]
                 return None
         return self._nxdata()._get_field_dims(name)
 
