@@ -3,6 +3,55 @@
 Release Notes
 =============
 
+
+.. Template, copy this to create a new section after a release:
+
+   v0.xy.0 (Unreleased)
+   --------------------
+
+   Features
+   ~~~~~~~~
+
+   Breaking changes
+   ~~~~~~~~~~~~~~~~
+
+   Bugfixes
+   ~~~~~~~~
+
+   Deprecations
+   ~~~~~~~~~~~~
+
+   Contributors
+   ~~~~~~~~~~~~
+
+   Simon Heybrock :sup:`a`\ ,
+   Neil Vaytet :sup:`a`\ ,
+   and Jan-Lukas Wynen :sup:`a`
+
+v0.2.1 (Unreleased)
+-------------------
+
+Features
+~~~~~~~~
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+Bugfixes
+~~~~~~~~
+
+* Improved mechanism to determine dimension labels in ``NXdetector`` which previous resulted in inconsistent behavior `#53 <https://github.com/scipp/scipp/pull/53>`_.
+
+Deprecations
+~~~~~~~~~~~~
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`\ ,
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
+
 v0.2.0 (August 2022)
 --------------------
 
