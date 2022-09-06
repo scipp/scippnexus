@@ -47,6 +47,12 @@ More concretely this means that, e.g., for loading an `NXdetector` from a NH, th
 
 If the above yields no more than one item, the group can be loaded.
 
+## NXlog as field replacement
+
+According to TR [NXlog](https://manual.nexusformat.org/classes/base_classes/NXlog.html) can replace any field, if the field is time dependent.
+This is typically used within [NXsource](https://manual.nexusformat.org/classes/base_classes/NXsource.html), [NXsample](https://manual.nexusformat.org/classes/base_classes/NXsample.html), [NXdisk_chopper](https://manual.nexusformat.org/classes/base_classes/NXdisk_chopper.html), and others.
+Another example is [NXtransformations](https://manual.nexusformat.org/classes/base_classes/NXtransformations.html) for time-dependent positions of beamline components.
+
 ## Datetime fields
 
 HDF5 does not support storing date and time information such as `np.datetime64`.
@@ -64,11 +70,11 @@ For [NXdetector](https://manual.nexusformat.org/classes/base_classes/NXdetector.
 Since what is recorded in `NXdetector` may not actually be time-of-flight, in practice this coordinate may be named differently, e.g., `time_offset`.
 Therefore, we assume that this is valid in general, i.e., also for other axis values (axis tick labels) that may be defined using the [`axes` attribute](https://manual.nexusformat.org/classes/base_classes/NXdata.html#nxdata-axes-attribute).
 
-According to TR this is also used frequently in some fields/applications of [NX_data](https://manual.nexusformat.org/classes/base_classes/NX_data.html).
+According to TR this is also used frequently in some fields/applications of [NXdata](https://manual.nexusformat.org/classes/base_classes/NXdata.html).
 
 ## Missing axis labels
 
-[NX_data](https://manual.nexusformat.org/classes/base_classes/NX_data.html) uses the [`axes` attribute](https://manual.nexusformat.org/classes/base_classes/NXdata.html#nxdata-axes-attribute) to define the names of fields that store coordinates for axes.
+[NXdata](https://manual.nexusformat.org/classes/base_classes/NXdata.html) uses the [`axes` attribute](https://manual.nexusformat.org/classes/base_classes/NXdata.html#nxdata-axes-attribute) to define the names of fields that store coordinates for axes.
 There is a legacy mechanism where the signal field has an [`axes` attribute](https://manual.nexusformat.org/classes/base_classes/NXdata.html#nxdata-data-axes-attribute) and this should not be used according to the NF.
 
 The `axes` attribute uses `'.'` to define an axis without values, i.e., without a field.
