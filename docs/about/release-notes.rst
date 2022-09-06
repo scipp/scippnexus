@@ -28,8 +28,27 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
-v0.2.1 (Unreleased)
+v0.3.0 (Unreleased)
 -------------------
+
+Features
+~~~~~~~~
+
+* :class:`scippnexus.NXsource`, :class:`scippnexus.NXsample`, and :class:`scippnexus.NXdisk_chopper` now load all entries `#54 <https://github.com/scipp/scipp/pull/54>`_.
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* :class:`scippnexus.NXsource`, :class:`scippnexus.NXsample`, and :class:`scippnexus.NXdisk_chopper` return a ``dict`` instead of ``scipp.Dataset`` `#54 <https://github.com/scipp/scipp/pull/54>`_.
+
+Bugfixes
+~~~~~~~~
+
+Deprecations
+~~~~~~~~~~~~
+
+v0.2.1 (August 2022)
+--------------------
 
 Features
 ~~~~~~~~
