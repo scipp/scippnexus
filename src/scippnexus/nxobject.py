@@ -311,7 +311,11 @@ class NXobject:
                 return _make(item)
         da = self._getitem(name)
         if (t := self.depends_on) is not None:
-            da.coords['depends_on'] = t if isinstance(t, sc.Variable) else sc.scalar(t)
+            if isinstance(da, dict):
+                da['depends_on'] = t
+            else:
+                da.coords['depends_on'] = t if isinstance(t,
+                                                          sc.Variable) else sc.scalar(t)
         return da
 
     def _get_children_by_nx_class(self, select: type) -> Dict[str, 'NXobject']:
