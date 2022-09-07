@@ -318,14 +318,12 @@ class NXobject:
                                                           sc.Variable) else sc.scalar(t)
         return da
 
-    def _get_children_by_nx_class(self,
-                                  select: type) -> Dict[str, Union['NXobject', Field]]:
+    def _get_children_by_nx_class(
+            self, select: Union[type,
+                                Tuple[type]]) -> Dict[str, Union['NXobject', Field]]:
         children = {}
         for key in self.keys():
-            child = self._get_child(key)
-            if isinstance(child, Field) and select == Field:
-                children[key] = child
-            elif child.attrs.get('NX_class') == select.__name__:
+            if issubclass(type(child := self._get_child(key)), select):
                 children[key] = child
         return children
 
@@ -338,7 +336,7 @@ class NXobject:
         ...
 
     @overload
-    def __getitem__(self, name: type) -> Dict[str, 'NXobject']:
+    def __getitem__(self, name: Union[type, Tuple[type]]) -> Dict[str, 'NXobject']:
         ...
 
     def __getitem__(self, name):
@@ -350,7 +348,9 @@ class NXobject:
 
         - String name: The child group or child dataset of that name is returned.
         - Class such as ``NXdata`` or ``NXlog``: A dict containing all direct children
-          with a matching ``NX_class`` attribute are returned.
+          with a matching ``NX_class`` attribute are returned. Also accepts a tuple of
+          classes. ``Field`` selects all child fields, i.e., all datasets but not
+          groups.
         - Scipp-style index: Load the specified slice of the current group, returning
           a :class:`scipp.DataArray` or :class:`scipp.Dataset`.
 
@@ -364,7 +364,12 @@ class NXobject:
         :
             Field, group, dict of fields, or loaded data.
         """
-        if inspect.isclass(name) and issubclass(name, (Field, NXobject)):
+
+        def isclass(x):
+            return inspect.isclass(x) and issubclass(x, (Field, NXobject))
+
+        if isclass(name) or (isinstance(name, tuple) and len(name)
+                             and all(isclass(x) for x in name)):
             return self._get_children_by_nx_class(name)
         return self._get_child(name, use_field_dims=True)
 
