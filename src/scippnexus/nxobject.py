@@ -318,10 +318,14 @@ class NXobject:
                                                           sc.Variable) else sc.scalar(t)
         return da
 
-    def _get_children_by_nx_class(self, select: type) -> Dict[str, 'NXobject']:
+    def _get_children_by_nx_class(self,
+                                  select: type) -> Dict[str, Union['NXobject', Field]]:
         children = {}
         for key in self.keys():
-            if (child := self._get_child(key)).attrs.get('NX_class') == select.__name__:
+            child = self._get_child(key)
+            if isinstance(child, Field) and select == Field:
+                children[key] = child
+            elif child.attrs.get('NX_class') == select.__name__:
                 children[key] = child
         return children
 
@@ -360,7 +364,7 @@ class NXobject:
         :
             Field, group, dict of fields, or loaded data.
         """
-        if inspect.isclass(name) and issubclass(name, NXobject):
+        if inspect.isclass(name) and issubclass(name, (Field, NXobject)):
             return self._get_children_by_nx_class(name)
         return self._get_child(name, use_field_dims=True)
 
