@@ -35,6 +35,8 @@ Features
 ~~~~~~~~
 
 * :class:`scippnexus.NXsource`, :class:`scippnexus.NXsample`, and :class:`scippnexus.NXdisk_chopper` now load all entries `#54 <https://github.com/scipp/scipp/pull/54>`_.
+* :meth:`scippnexus.NXobject.__getitem__` now also accepts :class:`scippnexus.Field` as key and returns all direct children that are NeXus fields, i.e., HDF5 datasets (not groups) `#55 <https://github.com/scipp/scipp/pull/55>`_.
+* :meth:`scippnexus.NXobject.__getitem__` now also accepts tuples of classes for selecting multiple child classes `#55 <https://github.com/scipp/scipp/pull/55>`_.
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
