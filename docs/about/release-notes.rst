@@ -28,8 +28,8 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
-v0.3.0 (Unreleased)
--------------------
+v0.3.0 (September 2022)
+-----------------------
 
 Features
 ~~~~~~~~
