@@ -4,6 +4,7 @@
 from .nxdata import NXdata  # noqa F401
 from .nxdetector import NXdetector  # noqa F401
 from .nxdisk_chopper import NXdisk_chopper  # noqa F401
+from .nxfermi_chopper import NXfermi_chopper  # noqa F401
 from .nxevent_data import NXevent_data  # noqa F401
 from .nxlog import NXlog  # noqa F401
 from .nxmonitor import NXmonitor  # noqa F401
@@ -78,10 +79,6 @@ class NXdetector_module(NXobject):
 
 class NXenvironment(NXobject):
     """NXenvironment"""
-
-
-class NXfermi_chopper(NXobject):
-    """NXfermi_chopper"""
 
 
 class NXfilter(NXobject):

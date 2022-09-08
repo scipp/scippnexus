@@ -22,6 +22,10 @@ from ._common import convert_time_to_datetime64
 NXobjectIndex = Union[str, ScippIndex]
 
 
+def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
+    return obj if isinstance(obj, sc.Variable) else sc.scalar(obj, unit=None)
+
+
 # TODO move into scipp
 class DimensionedArray(Protocol):
     """
@@ -157,7 +161,12 @@ class Field:
             self._shape = [size for size in self._shape if size != 1]
             self._dims = [f'dim_{i}' for i in range(self.ndim)]
 
-    def __getitem__(self, select) -> sc.Variable:
+    def __getitem__(self, select) -> Union[Any, sc.Variable]:
+        """Load the field as a :py:class:`scipp.Variable` or Python object.
+
+        If the shape is empty and no unit is given this returns a Python object, such
+        as a string or integer. Otherwise a :py:class:`scipp.Variable` is returned.
+        """
         index = to_plain_index(self.dims, select)
         if isinstance(index, (int, slice)):
             index = (index, )
@@ -212,6 +221,8 @@ class Field:
                     variable,
                     start=starts[0],
                     scaling_factor=self.attrs.get('scaling_factor'))
+        if variable.ndim == 0 and variable.unit is None:
+            return variable.value
         return variable
 
     def __repr__(self) -> str:

@@ -8,7 +8,7 @@ import scipp as sc
 import numpy as np
 from ._common import to_child_select
 from .typing import H5Group
-from .nxobject import Field, NXobject, ScippIndex, NexusStructureError
+from .nxobject import Field, NXobject, ScippIndex, NexusStructureError, asarray
 
 
 class NXdata(NXobject):
@@ -188,7 +188,7 @@ class NXdata(NXobject):
                                       field.dims,
                                       select,
                                       bin_edge_dim=self._bin_edge_dim(field))
-                coord: sc.Variable = self[name][sel]
+                coord: sc.Variable = asarray(self[name][sel])
                 for suffix in self._error_suffixes:
                     if f'{name}{suffix}' in self:
                         if coord.variances is not None:

@@ -42,6 +42,7 @@ Breaking changes
 ~~~~~~~~~~~~~~~~
 
 * :class:`scippnexus.NXsource`, :class:`scippnexus.NXsample`, and :class:`scippnexus.NXdisk_chopper` return a ``dict`` instead of ``scipp.Dataset`` `#54 <https://github.com/scipp/scipp/pull/54>`_.
+* :meth:`scippnexus.Field.__getitem__` now returns a Python object instead of a ``scipp.Variable`` if the field's shape is empty and no unit is given `#57 <https://github.com/scipp/scipp/pull/57>`_.
 
 Bugfixes
 ~~~~~~~~

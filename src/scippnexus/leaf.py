@@ -16,7 +16,7 @@ class Leaf(NXobject):
         from .nexus_classes import NXtransformations
         index = to_plain_index([], select)
         if index != tuple():
-            raise ValueError("Cannot select slice when loading NXsource")
+            raise ValueError(f"Cannot select slice when loading {type(self).__name__}")
         content = {}
         for key, obj in self.items():
             if key == 'depends_on' or isinstance(obj, NXtransformations):
