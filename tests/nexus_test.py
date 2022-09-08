@@ -269,6 +269,23 @@ def test_field_unit_is_none_if_no_units_attribute(nxroot):
     assert field.unit is None
 
 
+@pytest.mark.parametrize('value,type_', [(1.2, float), (123, int), ('abc', str),
+                                         (True, bool)])
+def test_field_is_returned_as_python_object_if_shape_empty_and_no_unit(
+        nxroot, value, type_):
+    nxroot['field1'] = sc.scalar(value, unit=None)
+    field = nxroot['field1'][()]
+    assert isinstance(field, type_)
+    assert field == value
+
+
+@pytest.mark.parametrize('value', [1.2, 123, True, 'abc'])
+def test_field_is_returned_as_variable_if_shape_empty_and_unit(nxroot, value):
+    nxroot['field1'] = sc.scalar(value, unit='K')
+    field = nxroot['field1'][()]
+    assert isinstance(field, sc.Variable)
+
+
 def test_field_getitem_returns_variable_with_correct_size_and_values(nxroot):
     nxroot['field'] = sc.arange('ignored', 6, dtype='int64', unit='ns')
     field = nxroot['field']
