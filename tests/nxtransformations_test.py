@@ -43,7 +43,7 @@ def test_Transformation_with_single_value(nxroot):
     value.attrs['offset_units'] = str(offset.unit)
     value.attrs['vector'] = vector.value
 
-    depends_on = detector['depends_on'][()].value
+    depends_on = detector['depends_on'][()]
     t = nxtransformations.Transformation(nxroot[depends_on])
     assert t.depends_on is None
     assert sc.identical(t.offset, offset)
@@ -99,7 +99,7 @@ def test_Transformation_with_multiple_values(nxroot):
     value.attrs['offset_units'] = str(offset.unit)
     value.attrs['vector'] = vector.value
 
-    depends_on = detector['depends_on'][()].value
+    depends_on = detector['depends_on'][()]
     t = nxtransformations.Transformation(nxroot[depends_on])
     assert t.depends_on is None
     assert sc.identical(t.offset, offset)

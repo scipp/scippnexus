@@ -107,7 +107,7 @@ def get_full_transformation(depends_on: Field) -> Union[None, sc.DataArray]:
     from the full chain of transformations linked by "depends_on"
     attributes
     """
-    if (t0 := make_transformation(depends_on, depends_on[()].value)) is None:
+    if (t0 := make_transformation(depends_on, depends_on[()])) is None:
         return None
     transformations = _get_transformations(t0)
 
