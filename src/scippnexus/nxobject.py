@@ -320,8 +320,9 @@ class NXobject:
 
     def _get_children_by_nx_class(
             self, select: Union[type,
-                                Tuple[type]]) -> Dict[str, Union['NXobject', Field]]:
+                                List[type]]) -> Dict[str, Union['NXobject', Field]]:
         children = {}
+        select = tuple(select) if isinstance(select, list) else select
         for key in self.keys():
             if issubclass(type(child := self._get_child(key)), select):
                 children[key] = child
@@ -368,7 +369,7 @@ class NXobject:
         def isclass(x):
             return inspect.isclass(x) and issubclass(x, (Field, NXobject))
 
-        if isclass(name) or (isinstance(name, tuple) and len(name)
+        if isclass(name) or (isinstance(name, list) and len(name)
                              and all(isclass(x) for x in name)):
             return self._get_children_by_nx_class(name)
         return self._get_child(name, use_field_dims=True)
