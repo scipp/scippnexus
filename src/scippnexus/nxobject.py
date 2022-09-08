@@ -221,7 +221,7 @@ class Field:
                     variable,
                     start=starts[0],
                     scaling_factor=self.attrs.get('scaling_factor'))
-        if variable.shape == () and variable.unit is None:
+        if variable.ndim == 0 and variable.unit is None:
             return variable.value
         return variable
 
