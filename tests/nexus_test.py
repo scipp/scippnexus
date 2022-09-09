@@ -56,6 +56,14 @@ def test_nxobject_items(nxroot):
             }
 
 
+def test_nxobject_iter(nxroot):
+    nxroot.create_class('entry2', NXentry)
+    # With missing __iter__ this used to raise since NXroot cannot be loaded.
+    list(nxroot)
+    for key in nxroot:
+        pass
+
+
 def test_nxobject_entry(nxroot):
     entry = nxroot['entry']
     assert entry.nx_class == NXentry
