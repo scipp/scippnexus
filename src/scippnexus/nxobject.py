@@ -222,7 +222,11 @@ class Field:
                     start=starts[0],
                     scaling_factor=self.attrs.get('scaling_factor'))
         if variable.ndim == 0 and variable.unit is None:
-            return variable.value
+            # Work around scipp/scipp#2815, and avoid returning NumPy bool
+            if isinstance(variable.values, np.ndarray) and variable.dtype != 'bool':
+                return variable.values[()]
+            else:
+                return variable.value
         return variable
 
     def __repr__(self) -> str:

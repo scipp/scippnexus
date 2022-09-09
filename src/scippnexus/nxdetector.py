@@ -6,7 +6,7 @@ from copy import copy
 from typing import List, Optional, Union
 import scipp as sc
 from .nxobject import NXobject, Field, ScippIndex, NexusStructureError
-from .nxobject import is_dataset
+from .nxobject import is_dataset, asarray
 from .nxdata import NXdata
 from .nxevent_data import NXevent_data
 
@@ -91,9 +91,7 @@ class _EventField:
                                  stop=id_max.value + 1,
                                  dtype=id_min.dtype)
         else:
-            grouping = self._grouping[select]
-            if not isinstance(grouping, sc.Variable):
-                grouping = sc.scalar(grouping, unit=None, dtype=self._grouping.dtype)
+            grouping = asarray(self._grouping[select])
             if (self._grouping_key in event_data.coords) and sc.identical(
                     grouping, event_data.coords[self._grouping_key]):
                 return event_data
