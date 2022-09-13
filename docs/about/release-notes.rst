@@ -34,15 +34,15 @@ v0.3.0 (September 2022)
 Features
 ~~~~~~~~
 
-* :class:`scippnexus.NXsource`, :class:`scippnexus.NXsample`, and :class:`scippnexus.NXdisk_chopper` now load all entries `#54 <https://github.com/scipp/scipp/pull/54>`_.
-* :meth:`scippnexus.NXobject.__getitem__` now also accepts :class:`scippnexus.Field` as key and returns all direct children that are NeXus fields, i.e., HDF5 datasets (not groups) `#55 <https://github.com/scipp/scipp/pull/55>`_.
-* :meth:`scippnexus.NXobject.__getitem__` now also accepts a list of classes for selecting multiple child classes `#55 <https://github.com/scipp/scipp/pull/55>`_.
+* :class:`scippnexus.NXsource`, :class:`scippnexus.NXsample`, and :class:`scippnexus.NXdisk_chopper` now load all entries `#54 <https://github.com/scipp/scippnexus/pull/54>`_.
+* :meth:`scippnexus.NXobject.__getitem__` now also accepts :class:`scippnexus.Field` as key and returns all direct children that are NeXus fields, i.e., HDF5 datasets (not groups) `#55 <https://github.com/scipp/scippnexus/pull/55>`_.
+* :meth:`scippnexus.NXobject.__getitem__` now also accepts a list of classes for selecting multiple child classes `#55 <https://github.com/scipp/scippnexus/pull/55>`_.
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
-* :class:`scippnexus.NXsource`, :class:`scippnexus.NXsample`, and :class:`scippnexus.NXdisk_chopper` return a ``dict`` instead of ``scipp.Dataset`` `#54 <https://github.com/scipp/scipp/pull/54>`_.
-* :meth:`scippnexus.Field.__getitem__` now returns a Python object instead of a ``scipp.Variable`` if the field's shape is empty and no unit is given `#57 <https://github.com/scipp/scipp/pull/57>`_.
+* :class:`scippnexus.NXsource`, :class:`scippnexus.NXsample`, and :class:`scippnexus.NXdisk_chopper` return a ``dict`` instead of ``scipp.Dataset`` `#54 <https://github.com/scipp/scippnexus/pull/54>`_.
+* :meth:`scippnexus.Field.__getitem__` now returns a Python object instead of a ``scipp.Variable`` if the field's shape is empty and no unit is given `#57 <https://github.com/scipp/scippnexus/pull/57>`_.
 
 Bugfixes
 ~~~~~~~~
@@ -62,7 +62,7 @@ Breaking changes
 Bugfixes
 ~~~~~~~~
 
-* Improved mechanism to determine dimension labels in ``NXdetector`` which previous resulted in inconsistent behavior `#53 <https://github.com/scipp/scipp/pull/53>`_.
+* Improved mechanism to determine dimension labels in ``NXdetector`` which previous resulted in inconsistent behavior `#53 <https://github.com/scipp/scippnexus/pull/53>`_.
 
 Deprecations
 ~~~~~~~~~~~~
@@ -80,14 +80,14 @@ v0.2.0 (August 2022)
 Features
 ~~~~~~~~
 
-* :meth:`scippnexus.NXobject.__getitem__` now accepts classes such as :class:`scippnexus.NXlog` or :class:`scippnexus.NXdata` as key and returns all direct children with an ``NX_class`` attribute matching the provided class `#48 <https://github.com/scipp/scipp/pull/48>`_.
-* Added "dynamic" properties to :class:`scippnexus.NXobject`, to access unique children such as entry or instrument `#49 <https://github.com/scipp/scipp/pull/49>`_.
+* :meth:`scippnexus.NXobject.__getitem__` now accepts classes such as :class:`scippnexus.NXlog` or :class:`scippnexus.NXdata` as key and returns all direct children with an ``NX_class`` attribute matching the provided class `#48 <https://github.com/scipp/scippnexus/pull/48>`_.
+* Added "dynamic" properties to :class:`scippnexus.NXobject`, to access unique children such as entry or instrument `#49 <https://github.com/scipp/scippnexus/pull/49>`_.
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
-* The ``NX_class`` enum has been removed. Use classes such as ``NXlog`` as keys from now on `#48 <https://github.com/scipp/scipp/pull/48>`_.
-* The ``by_nx_class`` method has been removed `#48 <https://github.com/scipp/scipp/pull/48>`_.
+* The ``NX_class`` enum has been removed. Use classes such as ``NXlog`` as keys from now on `#48 <https://github.com/scipp/scippnexus/pull/48>`_.
+* The ``by_nx_class`` method has been removed `#48 <https://github.com/scipp/scippnexus/pull/48>`_.
 
 Bugfixes
 ~~~~~~~~
@@ -105,8 +105,8 @@ v0.1.3 (June 2022)
 Bugfixes
 ~~~~~~~~
 
-* Fixed exception when slicing with single integer (instead of a range) `#36 <https://github.com/scipp/scipp/pull/36>`_.
-* Fixed slicing with bin-edge coords, which previously dropped the upper bound `#36 <https://github.com/scipp/scipp/pull/36>`_.
+* Fixed exception when slicing with single integer (instead of a range) `#36 <https://github.com/scipp/scippnexus/pull/36>`_.
+* Fixed slicing with bin-edge coords, which previously dropped the upper bound `#36 <https://github.com/scipp/scippnexus/pull/36>`_.
 
 Contributors
 ~~~~~~~~~~~~
