@@ -421,6 +421,9 @@ class NXobject:
     def _ipython_key_completions_(self) -> List[str]:
         return list(self.keys())
 
+    def __iter__(self):
+        yield from self._group
+
     def keys(self) -> List[str]:
         return self._group.keys()
 
