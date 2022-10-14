@@ -8,7 +8,7 @@ ScippNexus
       </br></br>
    </span>
 
-**scippnexus** provides a link between the HDF5-based `NeXus Data Format <https://www.nexusformat.org/>`_ and `scipp <https://scipp.github.io/>`_.
+ScippNexus provides a link between the HDF5-based `NeXus Data Format <https://www.nexusformat.org/>`_ and `scipp <https://scipp.github.io/>`_.
 This is possible since NeXus classes (a specification of an HDF5 group and the contained dataset) such as `NXdata <https://manual.nexusformat.org/classes/base_classes/NXdata.html>`_ partially resemble Scipp's `DataArray <https://scipp.github.io/user-guide/data-structures.html#DataArray>`_.
 
 `h5py <https://docs.h5py.org/en/stable/>`_ is a convenient and powerful tool for accessing groups, datasets, and attributes in an HDF5 file.
