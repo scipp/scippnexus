@@ -305,9 +305,17 @@ class NXobject:
     """Base class for all NeXus groups.
     """
 
-    def __init__(self, group: H5Group):
+    def __init__(self, group: H5Group, definition=None):
         self._group = group
+        # TODO can definition replace child-params?
         self.child_params = {}
+        self._definition = definition
+        if (self._definition is not None) and (group_def :=
+                                               self._definition.definition_for_group(
+                                                   self._group)) is not None:
+            self._group_definition = group_def(self._group)
+        else:
+            self._group_definition = None
 
     def _get_child(
             self,
@@ -322,7 +330,7 @@ class NXobject:
                 dims = self._get_field_dims(name) if use_field_dims else None
                 return Field(item, dims=dims, **self.child_params.get(name, {}))
             else:
-                return _make(item)
+                return _make(item, definition=self._definition)
         da = self._getitem(name)
         if (t := self.depends_on) is not None:
             if isinstance(da, dict):
@@ -483,7 +491,7 @@ class NXobject:
         group = self._group.create_group(name)
         attr = nx_class if isinstance(nx_class, str) else nx_class.__name__
         group.attrs['NX_class'] = attr
-        return _make(group)
+        return _make(group, definition=self._definition)
 
     def __setitem__(self, name: str, value: Union[Field, NXobject, DimensionedArray]):
         """Create a link or a new field."""
@@ -513,7 +521,7 @@ class NXobject:
         # edge cases where creation of Field/NXobject may raise on unrelated children.
         for name, val in self._group.items():
             if not is_dataset(val):
-                nxclasses.append(_make(val).nx_class)
+                nxclasses.append(_make(val, definition=self._definition).nx_class)
         for key in set(nxclasses):
             if key is None:
                 continue
@@ -523,10 +531,15 @@ class NXobject:
                 keys.append(key.__name__[2:])
         return keys
 
+    @property
+    def group_definition(self):
+        return self._group_definition
 
-def _make(group) -> NXobject:
+
+def _make(group, definition=None) -> NXobject:
     if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
-        return _nx_class_registry().get(nx_class, NXobject)(group)
+        return _nx_class_registry().get(nx_class, NXobject)(group,
+                                                            definition=definition)
     return group  # Return underlying (h5py) group
 
 

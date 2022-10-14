@@ -16,6 +16,8 @@ class NXdata(NXobject):
     def __init__(
             self,
             group: H5Group,
+            *,
+            definition=None,
             signal_name_default: str = None,
             signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
             axes: List[str] = None,
@@ -34,7 +36,7 @@ class NXdata(NXobject):
         skip:
             Names of fields to skip when loading coords.
         """
-        super().__init__(group)
+        super().__init__(group, definition=definition)
         self._signal_name_default = signal_name_default
         self._signal_override = signal_override
         self._axes_default = axes
@@ -77,6 +79,9 @@ class NXdata(NXobject):
 
     @property
     def _errors_name(self) -> str:
+        if (appdef := self.group_definition) is not None:
+            if hasattr(appdef, 'signal_errors'):
+                return appdef.signal_errors
         if self._signal_name_default is None:
             return 'errors'
         else:
@@ -189,12 +194,19 @@ class NXdata(NXobject):
                                       select,
                                       bin_edge_dim=self._bin_edge_dim(field))
                 coord: sc.Variable = asarray(self[name][sel])
-                for suffix in self._error_suffixes:
-                    if f'{name}{suffix}' in self:
+                if (definition := self.group_definition) is not None:
+                    if hasattr(definition, 'coord_errors'):
+                        errors = [definition.coord_errors(name)]
+                    else:
+                        errors = []
+                else:
+                    errors = [f'{name}{suffix}' for suffix in self._error_suffixes]
+                for error_name in errors:
+                    if error_name is not None and error_name in self:
                         if coord.variances is not None:
                             warn(f"Found {name}_errors as well as the deprecated "
                                  f"{name}_error. The latter will be ignored.")
-                        stddevs = self[f'{name}{suffix}'][sel]
+                        stddevs = self[error_name][sel]
                         coord.variances = sc.pow(stddevs, sc.scalar(2)).values
                 if self._coord_to_attr(da, name, field):
                     # Like scipp, slicing turns coord into attr if slicing removes the
