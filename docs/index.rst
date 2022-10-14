@@ -1,4 +1,4 @@
-scippnexus
+ScippNexus
 ==========
 
 .. raw:: html
