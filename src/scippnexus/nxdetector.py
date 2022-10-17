@@ -15,8 +15,13 @@ class NXdetectorStrategy(NXdataStrategy):
 
     @property
     def signal(self):
-        return 'data' if 'data' in self._group and is_dataset(
-            self._group._group['data']) else None
+        # NXdata uses the 'signal' attribute to define the field name of the signal.
+        # NXdetector uses a "hard-coded" signal name 'data', without specifying the
+        # attribute in the file, so we pass this explicitly to NXdata.
+        # Note the special case of an NXevent_data subgroup named 'data', which we
+        # avoid by checking if 'data' is a dataset.
+        group = self._group
+        return 'data' if 'data' in group and is_dataset(group._group['data']) else None
 
 
 def group(da: sc.DataArray, groups: sc.Variable) -> sc.DataArray:
@@ -164,11 +169,6 @@ class NXdetector(NXobject):
                                  **self._event_grouping)
         else:
             signal = None
-        # NXdata uses the 'signal' attribute to define the field name of the signal.
-        # NXdetector uses a "hard-coded" signal name 'data', without specifying the
-        # attribute in the file, so we pass this explicitly to NXdata.
-        # Note the special case of an NXevent_data subgroup named 'data', which we
-        # avoid by checking if 'data' is a dataset.
         return NXdata(
             self._group,
             strategy=NXdetectorStrategy,

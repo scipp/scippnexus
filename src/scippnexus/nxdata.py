@@ -23,7 +23,16 @@ class NXdataStrategy:
 
     @property
     def signal(self):
-        return self._group.attrs.get('signal')
+        group = self._group
+        if (name := group.attrs.get('signal')) is not None:
+            return name
+        # Legacy NXdata defines signal not as group attribute, but attr on dataset
+        for name in group.keys():
+            # What is the meaning of the attribute value? It is undocumented, we simply
+            # ignore it.
+            if 'signal' in group._get_child(name).attrs:
+                return name
+        return None
 
     def coord_errors(self, name):
         errors = [f'{name}{suffix}' for suffix in self._error_suffixes]
@@ -42,7 +51,7 @@ class NXdata(NXobject):
             self,
             group: H5Group,
             *,
-            strategy=NXdataStrategy,
+            strategy=None,
             definition=None,
             signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
             skip: List[str] = None):
@@ -65,6 +74,8 @@ class NXdata(NXobject):
         # How can we customize the tree? For example, NXdetector modifies the NXdata
         # strategy, how can we get it to use the correct strategy from the definion?
         # self._strategy = self._make_strategy(NXdataStrategy)
+        if strategy is None:
+            strategy = NXdataStrategy
         self._strategy = strategy(self)
 
     @property
@@ -92,20 +103,13 @@ class NXdata(NXobject):
 
     @property
     def _signal_name(self) -> str:
-        if (name := self._strategy.signal) is not None:
-            return name
-        # Legacy NXdata defines signal not as group attribute, but attr on dataset
-        for name in self.keys():
-            # TODO What is the meaning of the attribute value?
-            if 'signal' in self._get_child(name).attrs:
-                return name
-        return None
+        return self._strategy.signal
 
     @property
     def _errors_name(self) -> str:
-        # TODO allo customization in strategy
+        # TODO allow customization in strategy
         # TODO plain "errors" is deprecated, should be {signal}_errors, but should
-        # also support this
+        # also support the former
         return f'{self._strategy.signal}_errors'
 
     @property

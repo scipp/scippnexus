@@ -305,9 +305,9 @@ class NXobject:
     """Base class for all NeXus groups.
     """
 
-    def __init__(self, group: H5Group, *, strategy=None, definition=None):
+    def __init__(self, group: H5Group, *, definition=None):
         self._group = group
-        # TODO can definition replace child-params?
+        # TODO can definition or strategies replace child-params?
         self.child_params = {}
         self._definition = definition
 
