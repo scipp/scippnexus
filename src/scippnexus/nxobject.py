@@ -140,26 +140,25 @@ class Field:
 
     def __init__(self, dataset: H5Dataset, dims=None, is_time=None):
         self._dataset = dataset
-        self._shape = list(self._dataset.shape)
+        self._shape = self._dataset.shape
         self._is_time = is_time
         # NeXus treats [] and [1] interchangeably. In general this is ill-defined, but
         # the best we can do appears to be squeezing unless the file provides names for
         # dimensions. The shape property of this class does thus not necessarily return
         # the same as the shape of the underlying dataset.
         if dims is not None:
-            self._dims = dims
+            self._dims = tuple(dims)
             if len(self._dims) < len(self._shape):
                 # The convention here is that the given dimensions apply to the shapes
                 # starting from the left. So we only squeeze dimensions that are after
                 # len(dims).
-                self._shape = self._shape[:len(self._dims)] + [
-                    size for size in self._shape[len(self._dims):] if size != 1
-                ]
+                self._shape = self._shape[:len(self._dims)] + tuple(
+                    size for size in self._shape[len(self._dims):] if size != 1)
         elif (axes := self.attrs.get('axes')) is not None:
-            self._dims = axes.split(',')
+            self._dims = tuple(axes.split(','))
         else:
-            self._shape = [size for size in self._shape if size != 1]
-            self._dims = [f'dim_{i}' for i in range(self.ndim)]
+            self._shape = tuple(size for size in self._shape if size != 1)
+            self._dims = tuple(f'dim_{i}' for i in range(self.ndim))
 
     def __getitem__(self, select) -> Union[Any, sc.Variable]:
         """Load the field as a :py:class:`scipp.Variable` or Python object.
@@ -339,8 +338,9 @@ class NXobject:
         children = {}
         select = tuple(select) if isinstance(select, list) else select
         for key in self.keys():
-            if issubclass(type(child := self._get_child(key)), select):
-                children[key] = child
+            if issubclass(type(self._get_child(key)), select):
+                # Get child again via __getitem__ so correct field dims are used.
+                children[key] = self[key]
         return children
 
     @overload

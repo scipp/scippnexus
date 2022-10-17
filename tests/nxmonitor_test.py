@@ -38,8 +38,8 @@ def create_event_data_no_ids(group):
 def test_loads_event_data_in_current_group(nxroot):
     monitor = nxroot.create_class('monitor1', NXmonitor)
     create_event_data_no_ids(monitor)
-    assert monitor.dims == ['pulse']
-    assert monitor.shape == [4]
+    assert monitor.dims == ('pulse', )
+    assert monitor.shape == (4, )
     loaded = monitor[...]
     assert sc.identical(
         loaded.bins.size().data,
@@ -49,8 +49,8 @@ def test_loads_event_data_in_current_group(nxroot):
 def test_loads_event_data_in_child_group(nxroot):
     monitor = nxroot.create_class('monitor1', NXmonitor)
     create_event_data_no_ids(monitor.create_class('events', NXevent_data))
-    assert monitor.dims == ['pulse']
-    assert monitor.shape == [4]
+    assert monitor.dims == ('pulse', )
+    assert monitor.shape == (4, )
     loaded = monitor[...]
     assert sc.identical(
         loaded.bins.size().data,

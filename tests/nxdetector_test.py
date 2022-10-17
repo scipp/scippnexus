@@ -132,8 +132,8 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
-    assert detector.dims == ['detector_number']
-    assert detector.shape == [4]
+    assert detector.dims == ('detector_number', )
+    assert detector.shape == (4, )
     loaded = detector[...]
     assert sc.identical(
         loaded.bins.size().data,
@@ -149,8 +149,8 @@ def test_loads_event_data_with_0d_detector_numbers(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', sc.index(1, dtype='int64'))
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
-    assert detector.dims == []
-    assert detector.shape == []
+    assert detector.dims == ()
+    assert detector.shape == ()
     loaded = detector[...]
     assert sc.identical(loaded.bins.size().data, sc.index(2, dtype='int64'))
 
@@ -159,8 +159,8 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
-    assert detector.dims == ['dim_0', 'dim_1']
-    assert detector.shape == [2, 2]
+    assert detector.dims == ('dim_0', 'dim_1')
+    assert detector.shape == (2, 2)
     loaded = detector[...]
     assert sc.identical(
         loaded.bins.size().data,
@@ -252,7 +252,7 @@ def test_event_data_field_dims_labels(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
-    assert detector['detector_number'].dims == ['detector_number']
+    assert detector['detector_number'].dims == ('detector_number', )
 
 
 def test_nxevent_data_selection_yields_correct_pulses(nxroot):

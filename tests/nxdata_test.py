@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 import scipp as sc
-from scippnexus import NXroot, NXentry, NXdata, NXlog
+from scippnexus import Field, NXroot, NXentry, NXdata, NXlog
 import pytest
 
 
@@ -205,6 +205,26 @@ def test_field_dims_match_NXdata_dims(nxroot):
     assert sc.identical(data['xx', :2].coords['yy'], data['yy'][:])
 
 
+def test_field_dims_match_NXdata_dims_when_selected_via_class_name(nxroot):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+    da.coords['xx'] = da.data['yy', 0]
+    da.coords['xx2'] = da.data['yy', 1]
+    da.coords['yy'] = da.data['xx', 0]
+    data = nxroot.create_class('data1', NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal1'
+    data.create_field('signal1', da.data)
+    data.create_field('xx', da.coords['xx'])
+    data.create_field('xx2', da.coords['xx2'])
+    data.create_field('yy', da.coords['yy'])
+    fields = data[Field]
+    assert fields['signal1'].dims == ('xx', 'yy')
+    assert fields['xx'].dims == ('xx', )
+    assert fields['xx2'].dims == ('xx', )
+    assert fields['yy'].dims == ('yy', )
+
+
 def test_uses_default_field_dims_if_inference_fails(nxroot):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
@@ -296,7 +316,7 @@ def test_unnamed_extra_dims_of_coords_are_squeezed(nxroot):
     loaded = data[...]
     assert sc.identical(loaded.coords['scalar'], sc.scalar(1.2))
     assert data['scalar'].ndim == 0
-    assert data['scalar'].shape == []
+    assert data['scalar'].shape == ()
     assert sc.identical(data['scalar'][...], sc.scalar(1.2))
 
 
@@ -312,7 +332,7 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
     loaded = data[...]
     assert sc.identical(loaded.coords['xx'], xx['ignored', 0])
     assert data['xx'].ndim == 1
-    assert data['xx'].shape == [2]
+    assert data['xx'].shape == (2, )
     assert sc.identical(data['xx'][...], xx['ignored', 0])
 
 
@@ -325,7 +345,7 @@ def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
     loaded = data[...]
     assert sc.identical(loaded.data, signal)
     assert data['signal'].ndim == 2
-    assert data['signal'].shape == [1, 1]
+    assert data['signal'].shape == (1, 1)
 
 
 def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
@@ -336,7 +356,7 @@ def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
     loaded = data[...]
     assert sc.identical(loaded.data, sc.scalar(1.1, unit='m'))
     assert data['signal'].ndim == 0
-    assert data['signal'].shape == []
+    assert data['signal'].shape == ()
 
 
 def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
@@ -349,8 +369,8 @@ def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
     assert sc.identical(loaded.data,
                         sc.array(dims=['dim_0'], unit='m', values=[1.1, 2.2]))
     assert data['signal'].ndim == 1
-    assert data['signal'].shape == [2]
-    assert data['signal'].dims == ['dim_0']
+    assert data['signal'].shape == (2, )
+    assert data['signal'].dims == ('dim_0', )
 
 
 def test_only_one_axis_specified_for_2d_field(nxroot):
