@@ -339,8 +339,9 @@ class NXobject:
         children = {}
         select = tuple(select) if isinstance(select, list) else select
         for key in self.keys():
-            if issubclass(type(child := self._get_child(key)), select):
-                children[key] = child
+            if issubclass(type(self._get_child(key)), select):
+                # Get child again via __getitem__ so correct field dims are used.
+                children[key] = self[key]
         return children
 
     @overload
