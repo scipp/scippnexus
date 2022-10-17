@@ -35,7 +35,7 @@ Bugfixes
 ~~~~~~~~
 
 * Fix :meth:`scippnexus.Field.dims` and :meth:`scippnexus.Field.shape` to consistently return tuples instead of lists `#62 <https://github.com/scipp/scippnexus/pull/62>`_.
-* Fix :meth:`scippnexus.NXobject.__getitem__` to return children with correctly setup field dimensions when indexed with a class name `#62 <https://github.com/scipp/scippnexus/pull/62>`_.
+* Fix :meth:`scippnexus.NXobject.__getitem__` to return children with correctly set up field dimensions when indexed with a class name `#62 <https://github.com/scipp/scippnexus/pull/62>`_.
 
 v0.3.0 (September 2022)
 -----------------------
