@@ -11,6 +11,23 @@ from .typing import H5Group
 from .nxobject import Field, NXobject, ScippIndex, NexusStructureError, asarray
 
 
+class NXdataStrategy:
+    _error_suffixes = ['_errors', '_error']  # _error is the deprecated suffix
+
+    def __init__(self, group):
+        self._group = group
+
+    def coord_errors(self, name):
+        errors = [f'{name}{suffix}' for suffix in self._error_suffixes]
+        errors = [x for x in errors if x in self._group]
+        if len(errors) == 0:
+            return None
+        if len(errors) == 2:
+            warn(f"Found {name}_errors as well as the deprecated "
+                 f"{name}_error. The latter will be ignored.")
+        return errors[0]
+
+
 class NXdata(NXobject):
 
     def __init__(
@@ -41,7 +58,10 @@ class NXdata(NXobject):
         self._signal_override = signal_override
         self._axes_default = axes
         self._skip = skip if skip is not None else []
-        self._error_suffixes = ['_error', '_errors']  # _error is the deprecated suffix
+        if (d := self.group_definition) is not None:
+            self._strategy = d
+        else:
+            self._strategy = NXdataStrategy(self)
 
     @property
     def shape(self) -> List[int]:
@@ -146,13 +166,6 @@ class NXdata(NXobject):
             return [name]
         return self._try_guess_dims(name)
 
-    def _is_errors(self, name):
-        for suffix in self._error_suffixes:
-            if name.endswith(suffix):
-                if name[:-len(suffix)] in self:
-                    return True
-        return False
-
     def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
         sizes = dict(zip(self.dims, self.shape))
         for dim, size in zip(coord.dims, coord.shape):
@@ -186,13 +199,12 @@ class NXdata(NXobject):
         skip = self._skip
         skip += [self._signal_name, self._errors_name]
         skip += list(self.attrs.get('auxiliary_signals', []))
-        if ((df := self.group_definition) is not None) and hasattr(df, 'coord_errors'):
-            for name in self:
-                if (errors := df.coord_errors(name)) is not None:
-                    skip += [errors]
+        for name in self:
+            if (errors := self._strategy.coord_errors(name)) is not None:
+                skip += [errors]
 
         for name, field in self[Field].items():
-            if (name in skip) or self._is_errors(name):
+            if name in skip:
                 continue
             try:
                 sel = to_child_select(self.dims,
@@ -200,20 +212,9 @@ class NXdata(NXobject):
                                       select,
                                       bin_edge_dim=self._bin_edge_dim(field))
                 coord: sc.Variable = asarray(self[name][sel])
-                if (definition := self.group_definition) is not None:
-                    if hasattr(definition, 'coord_errors'):
-                        errors = [definition.coord_errors(name)]
-                    else:
-                        errors = []
-                else:
-                    errors = [f'{name}{suffix}' for suffix in self._error_suffixes]
-                for error_name in errors:
-                    if error_name is not None and error_name in self:
-                        if coord.variances is not None:
-                            warn(f"Found {name}_errors as well as the deprecated "
-                                 f"{name}_error. The latter will be ignored.")
-                        stddevs = self[error_name][sel]
-                        coord.variances = sc.pow(stddevs, sc.scalar(2)).values
+                if (error_name := self._strategy.coord_errors(name)) is not None:
+                    stddevs = self[error_name][sel]
+                    coord.variances = sc.pow(stddevs, sc.scalar(2)).values
                 if self._coord_to_attr(da, name, field):
                     # Like scipp, slicing turns coord into attr if slicing removes the
                     # dim corresponding to the coord.
