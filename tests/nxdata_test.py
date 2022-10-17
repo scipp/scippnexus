@@ -296,7 +296,7 @@ def test_unnamed_extra_dims_of_coords_are_squeezed(nxroot):
     loaded = data[...]
     assert sc.identical(loaded.coords['scalar'], sc.scalar(1.2))
     assert data['scalar'].ndim == 0
-    assert data['scalar'].shape == []
+    assert data['scalar'].shape == ()
     assert sc.identical(data['scalar'][...], sc.scalar(1.2))
 
 
@@ -312,7 +312,7 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
     loaded = data[...]
     assert sc.identical(loaded.coords['xx'], xx['ignored', 0])
     assert data['xx'].ndim == 1
-    assert data['xx'].shape == [2]
+    assert data['xx'].shape == (2, )
     assert sc.identical(data['xx'][...], xx['ignored', 0])
 
 
@@ -325,7 +325,7 @@ def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
     loaded = data[...]
     assert sc.identical(loaded.data, signal)
     assert data['signal'].ndim == 2
-    assert data['signal'].shape == [1, 1]
+    assert data['signal'].shape == (1, 1)
 
 
 def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
@@ -336,7 +336,7 @@ def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
     loaded = data[...]
     assert sc.identical(loaded.data, sc.scalar(1.1, unit='m'))
     assert data['signal'].ndim == 0
-    assert data['signal'].shape == []
+    assert data['signal'].shape == ()
 
 
 def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
@@ -349,8 +349,8 @@ def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
     assert sc.identical(loaded.data,
                         sc.array(dims=['dim_0'], unit='m', values=[1.1, 2.2]))
     assert data['signal'].ndim == 1
-    assert data['signal'].shape == [2]
-    assert data['signal'].dims == ['dim_0']
+    assert data['signal'].shape == (2, )
+    assert data['signal'].dims == ('dim_0', )
 
 
 def test_only_one_axis_specified_for_2d_field(nxroot):

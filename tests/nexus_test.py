@@ -247,7 +247,7 @@ def test_field_properties(nxroot):
     field = nxroot['entry/events_0/event_time_offset']
     assert field.dtype == 'int64'
     assert field.name == '/entry/events_0/event_time_offset'
-    assert field.shape == [6]
+    assert field.shape == (6, )
     assert field.unit == sc.Unit('ns')
 
 
@@ -258,15 +258,15 @@ def test_field_dim_labels(nxroot):
     events['event_index'] = sc.arange('ignored', 2)
     events['event_id'] = sc.arange('ignored', 2)
     event_data = nxroot['entry/events_0']
-    assert event_data['event_time_offset'].dims == ['event']
-    assert event_data['event_time_zero'].dims == ['pulse']
-    assert event_data['event_index'].dims == ['pulse']
-    assert event_data['event_id'].dims == ['event']
+    assert event_data['event_time_offset'].dims == ('event', )
+    assert event_data['event_time_zero'].dims == ('pulse', )
+    assert event_data['event_index'].dims == ('pulse', )
+    assert event_data['event_id'].dims == ('event', )
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = sc.arange('ignored', 2)
     log['time'] = sc.arange('ignored', 2)
-    assert log['time'].dims == ['time']
-    assert log['value'].dims == ['time']
+    assert log['time'].dims == ('time', )
+    assert log['value'].dims == ('time', )
 
 
 def test_field_unit_is_none_if_no_units_attribute(nxroot):
