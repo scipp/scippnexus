@@ -17,6 +17,14 @@ class NXdataStrategy:
     def __init__(self, group):
         self._group = group
 
+    @property
+    def axes(self):
+        return self._group.attrs.get('axes')
+
+    @property
+    def signal(self):
+        return self._group.attrs.get('signal')
+
     def coord_errors(self, name):
         errors = [f'{name}{suffix}' for suffix in self._error_suffixes]
         errors = [x for x in errors if x in self._group]
@@ -34,46 +42,39 @@ class NXdata(NXobject):
             self,
             group: H5Group,
             *,
+            strategy=NXdataStrategy,
             definition=None,
-            signal_name_default: str = None,
             signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
-            axes: List[str] = None,
             skip: List[str] = None):
         """
         Parameters
         ----------
-        signal_name_default:
-            Default signal name used, if no `signal` attribute found in file.
         signal_override:
             Field-like to use instead of trying to read signal from the file. This is
             used when there is no signal or to provide a signal computed from
             NXevent_data.
-        axes:
-            Default axes used, if no `axes` attribute found in file.
         skip:
             Names of fields to skip when loading coords.
         """
         super().__init__(group, definition=definition)
-        self._signal_name_default = signal_name_default
         self._signal_override = signal_override
-        self._axes_default = axes
         self._skip = skip if skip is not None else []
-        if (d := self.group_definition) is not None:
-            self._strategy = d
-        else:
-            self._strategy = NXdataStrategy(self)
+        # TODO need mechanism for overriding strategy without subclassing, outside
+        # the use of application definitions. E.g., NXlog want a different axes strategy
+        # Would it be better if strategies took the place of the definition?
+        # How can we customize the tree? For example, NXdetector modifies the NXdata
+        # strategy, how can we get it to use the correct strategy from the definion?
+        # self._strategy = self._make_strategy(NXdataStrategy)
+        self._strategy = strategy(self)
 
     @property
     def shape(self) -> List[int]:
         return self._signal.shape
 
     def _get_group_dims(self) -> Union[None, List[str]]:
-        if self.group_definition is not None:
-            if hasattr(self.group_definition, 'dims'):
-                return self.group_definition.dims
         # Apparently it is not possible to define dim labels unless there are
         # corresponding coords. Special case of '.' entries means "no coord".
-        if (axes := self.attrs.get('axes', self._axes_default)) is not None:
+        if (axes := self._strategy.axes) is not None:
             return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
         return None
 
@@ -91,7 +92,7 @@ class NXdata(NXobject):
 
     @property
     def _signal_name(self) -> str:
-        if (name := self.attrs.get('signal', self._signal_name_default)) is not None:
+        if (name := self._strategy.signal) is not None:
             return name
         # Legacy NXdata defines signal not as group attribute, but attr on dataset
         for name in self.keys():
@@ -102,13 +103,10 @@ class NXdata(NXobject):
 
     @property
     def _errors_name(self) -> str:
-        if (appdef := self.group_definition) is not None:
-            if hasattr(appdef, 'signal_errors'):
-                return appdef.signal_errors
-        if self._signal_name_default is None:
-            return 'errors'
-        else:
-            return f'{self._signal_name_default}_errors'
+        # TODO allo customization in strategy
+        # TODO plain "errors" is deprecated, should be {signal}_errors, but should
+        # also support this
+        return f'{self._strategy.signal}_errors'
 
     @property
     def _signal(self) -> Union[Field, '_EventField']:  # noqa: F821
@@ -118,7 +116,7 @@ class NXdata(NXobject):
 
     def _get_axes(self):
         """Return labels of named axes. Does not include default 'dim_{i}' names."""
-        if (axes := self.attrs.get('axes', self._axes_default)) is not None:
+        if (axes := self._strategy.axes) is not None:
             # Unlike self.dims we *drop* entries that are '.'
             return [a for a in axes if a != '.']
         elif (axes := self._signal.attrs.get('axes')) is not None:

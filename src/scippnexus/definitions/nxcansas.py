@@ -14,7 +14,7 @@ from ..typing import H5Group
 class Definition:
 
     @classmethod
-    def definition_for_group(cls, group: H5Group):
+    def make_strategy(cls, group: H5Group):
         if (definition_class := group.attrs.get(cls.class_attribute)) is not None:
             return cls.definitions.get(definition_class)
 

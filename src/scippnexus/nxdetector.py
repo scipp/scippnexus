@@ -7,8 +7,16 @@ from typing import List, Optional, Union
 import scipp as sc
 from .nxobject import NXobject, Field, ScippIndex, NexusStructureError
 from .nxobject import is_dataset, asarray
-from .nxdata import NXdata
+from .nxdata import NXdata, NXdataStrategy
 from .nxevent_data import NXevent_data
+
+
+class NXdetectorStrategy(NXdataStrategy):
+
+    @property
+    def signal(self):
+        return 'data' if 'data' in self._group and is_dataset(
+            self._group._group['data']) else None
 
 
 def group(da: sc.DataArray, groups: sc.Variable) -> sc.DataArray:
@@ -163,8 +171,7 @@ class NXdetector(NXobject):
         # avoid by checking if 'data' is a dataset.
         return NXdata(
             self._group,
-            signal_name_default='data'
-            if 'data' in self and is_dataset(self._group['data']) else None,
+            strategy=NXdetectorStrategy,
             signal_override=signal,
             skip=self._nxevent_data_fields if self.events is not None else None)
 
