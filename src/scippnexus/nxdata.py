@@ -48,6 +48,9 @@ class NXdata(NXobject):
         return self._signal.shape
 
     def _get_group_dims(self) -> Union[None, List[str]]:
+        if self.group_definition is not None:
+            if hasattr(self.group_definition, 'dims'):
+                return self.group_definition.dims
         # Apparently it is not possible to define dim labels unless there are
         # corresponding coords. Special case of '.' entries means "no coord".
         if (axes := self.attrs.get('axes', self._axes_default)) is not None:
@@ -174,7 +177,7 @@ class NXdata(NXobject):
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         signal = self._signal[select]
-        if self._errors_name in self:
+        if self._errors_name is not None and self._errors_name in self:
             stddevs = self[self._errors_name][select]
             signal.variances = sc.pow(stddevs, sc.scalar(2)).values
 
@@ -183,6 +186,10 @@ class NXdata(NXobject):
         skip = self._skip
         skip += [self._signal_name, self._errors_name]
         skip += list(self.attrs.get('auxiliary_signals', []))
+        if ((df := self.group_definition) is not None) and hasattr(df, 'coord_errors'):
+            for name in self:
+                if (errors := df.coord_errors(name)) is not None:
+                    skip += [errors]
 
         for name, field in self.items():
             if (not isinstance(field, Field)) or (name

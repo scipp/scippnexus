@@ -310,6 +310,9 @@ class NXobject:
         # TODO can definition replace child-params?
         self.child_params = {}
         self._definition = definition
+        # TODO probably not a good idea to operate on h5py, e.g., our attrs to
+        # a couple of useful things on strings. But we have recursion problems
+        # with getitem, should try to finally resolve those.
         if (self._definition is not None) and (group_def :=
                                                self._definition.definition_for_group(
                                                    self._group)) is not None:
