@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 import scipp as sc
-from scippnexus import NXroot, NXentry, NXdata, NXlog
+from scippnexus import Field, NXroot, NXentry, NXdata, NXlog
 import pytest
 
 
@@ -203,6 +203,26 @@ def test_field_dims_match_NXdata_dims(nxroot):
     assert sc.identical(data['xx', :2].coords['xx'], data['xx']['xx', :2])
     assert sc.identical(data['xx', :2].coords['xx2'], data['xx2']['xx', :2])
     assert sc.identical(data['xx', :2].coords['yy'], data['yy'][:])
+
+
+def test_field_dims_match_NXdata_dims_when_selected_via_class_name(nxroot):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+    da.coords['xx'] = da.data['yy', 0]
+    da.coords['xx2'] = da.data['yy', 1]
+    da.coords['yy'] = da.data['xx', 0]
+    data = nxroot.create_class('data1', NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal1'
+    data.create_field('signal1', da.data)
+    data.create_field('xx', da.coords['xx'])
+    data.create_field('xx2', da.coords['xx2'])
+    data.create_field('yy', da.coords['yy'])
+    fields = data[Field]
+    assert fields['signal1'].dims == ('xx', 'yy')
+    assert fields['xx'].dims == ('xx', )
+    assert fields['xx2'].dims == ('xx', )
+    assert fields['yy'].dims == ('yy', )
 
 
 def test_uses_default_field_dims_if_inference_fails(nxroot):
