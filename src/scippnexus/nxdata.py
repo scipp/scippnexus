@@ -191,9 +191,8 @@ class NXdata(NXobject):
                 if (errors := df.coord_errors(name)) is not None:
                     skip += [errors]
 
-        for name, field in self.items():
-            if (not isinstance(field, Field)) or (name
-                                                  in skip) or self._is_errors(name):
+        for name, field in self[Field].items():
+            if (name in skip) or self._is_errors(name):
                 continue
             try:
                 sel = to_child_select(self.dims,
