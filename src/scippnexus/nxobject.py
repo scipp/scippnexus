@@ -8,7 +8,7 @@ import warnings
 import datetime
 import dateutil.parser
 import functools
-from typing import overload, List, Union, Any, Dict, Tuple, Protocol, Optional
+from typing import overload, List, Union, Any, Dict, Tuple, Protocol, Optional, Callable
 import numpy as np
 import scipp as sc
 import h5py
@@ -138,7 +138,9 @@ class Field:
     In HDF5 fields are represented as dataset.
     """
 
-    def __init__(self, dataset: H5Dataset, dims=None, is_time=None):
+    def __init__(self, dataset: H5Dataset, *, parent, dims=None, is_time=None):
+        # TODO May be grandparent in some cases
+        self._parent = parent
         self._dataset = dataset
         self._shape = self._dataset.shape
         self._is_time = is_time
@@ -254,7 +256,7 @@ class Field:
 
     @property
     def parent(self) -> NXobject:
-        return _make(self._dataset.parent)
+        return self._parent._make(self._dataset.parent)
 
     @property
     def ndim(self) -> int:
@@ -305,11 +307,34 @@ class NXobject:
     """Base class for all NeXus groups.
     """
 
-    def __init__(self, group: H5Group, *, definition=None):
+    def __init__(self, group: H5Group, *, strategy: Optional[Callable] = None):
         self._group = group
-        # TODO can definition or strategies replace child-params?
+        # TODO can strategies replace child-params?
         self.child_params = {}
-        self._definition = definition
+        self._strategy = self._make_strategy(strategy)
+
+    # override in child classes to provide default
+    def _default_strategy(self):
+        return None
+
+    def _make_strategy(self, strategy: Optional[Callable]):
+        if strategy is not None:
+            return strategy(self)
+        if (strategy := self._default_strategy()) is not None:
+            return strategy(self)
+
+    def _make_child_strategy(self, group):
+        # TODO Careful here, group may be a grandchild. Should we try and recurse here,
+        # or let strategy deal with it?
+        if self._strategy is not None:
+            if hasattr(self._strategy, 'child_strategy'):
+                return self._strategy.child_strategy(group)
+
+    def _make(self, group) -> NXobject:
+        if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
+            return _nx_class_registry().get(nx_class, NXobject)(
+                group, strategy=self._make_child_strategy(group))
+        return group  # Return underlying (h5py) group
 
     def _get_child(
             self,
@@ -322,9 +347,12 @@ class NXobject:
             item = self._group[name]
             if is_dataset(item):
                 dims = self._get_field_dims(name) if use_field_dims else None
-                return Field(item, dims=dims, **self.child_params.get(name, {}))
+                return Field(item,
+                             dims=dims,
+                             parent=self,
+                             **self.child_params.get(name, {}))
             else:
-                return _make(item, definition=self._definition)
+                return self._make(item)
         da = self._getitem(name)
         if (t := self.depends_on) is not None:
             if isinstance(da, dict):
@@ -418,7 +446,7 @@ class NXobject:
 
     @property
     def parent(self) -> NXobject:
-        return _make(self._group.parent)
+        return self._make(self._group.parent)
 
     def _ipython_key_completions_(self) -> List[str]:
         return list(self.keys())
@@ -469,7 +497,7 @@ class NXobject:
             dataset.attrs['units'] = str(data.unit)
         if data.dtype == sc.DType.datetime64:
             dataset.attrs['start'] = str(start.value)
-        return Field(dataset, data.dims)
+        return Field(dataset, dims=data.dims, parent=self)
 
     def create_class(self, name: str, nx_class: Union[str, type]) -> NXobject:
         """Create empty HDF5 group with given name and set the NX_class attribute.
@@ -485,7 +513,7 @@ class NXobject:
         group = self._group.create_group(name)
         attr = nx_class if isinstance(nx_class, str) else nx_class.__name__
         group.attrs['NX_class'] = attr
-        return _make(group, definition=self._definition)
+        return self._make(group)
 
     def __setitem__(self, name: str, value: Union[Field, NXobject, DimensionedArray]):
         """Create a link or a new field."""
@@ -515,7 +543,7 @@ class NXobject:
         # edge cases where creation of Field/NXobject may raise on unrelated children.
         for name, val in self._group.items():
             if not is_dataset(val):
-                nxclasses.append(_make(val, definition=self._definition).nx_class)
+                nxclasses.append(self._make(val).nx_class)
         for key in set(nxclasses):
             if key is None:
                 continue
@@ -524,19 +552,6 @@ class NXobject:
             if nxclasses.count(key) == 1:
                 keys.append(key.__name__[2:])
         return keys
-
-    def _make_strategy(self, strategy: type):
-        if self._definition is not None:
-            if (strat := self._definition.make_strategy(self)) is not None:
-                return strat
-        return strategy(self)
-
-
-def _make(group, definition=None) -> NXobject:
-    if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
-        return _nx_class_registry().get(nx_class, NXobject)(group,
-                                                            definition=definition)
-    return group  # Return underlying (h5py) group
 
 
 class NXroot(NXobject):

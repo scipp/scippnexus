@@ -9,9 +9,9 @@ from .nexus_classes import NXroot
 
 class File(AbstractContextManager, NXroot):
 
-    def __init__(self, *args, definition=None, **kwargs):
+    def __init__(self, *args, strategy=None, **kwargs):
         self._file = h5py.File(*args, **kwargs)
-        NXroot.__init__(self, self._file, definition=definition)
+        NXroot.__init__(self, self._file, strategy=strategy)
 
     def __enter__(self):
         self._file.__enter__()

@@ -11,21 +11,21 @@ from ..typing import H5Group
 # such as SASData!?
 
 
-class Definition:
-
-    @classmethod
-    def make_strategy(cls, group: H5Group):
-        if (definition_class := group.attrs.get(cls.class_attribute)) is not None:
-            return cls.definitions.get(definition_class)
-
-
-class SASobject:
+class ApplicationDefinitionStrategy:
 
     def __init__(self, group: H5Group):
         self._group = group
 
+    def child_strategy(self, group: H5Group):
+        if (definition_class := group.attrs.get(self.class_attribute)) is not None:
+            return self.strategies.get(definition_class)
 
-class SASdata(SASobject):
+
+class NXcanSAS(ApplicationDefinitionStrategy):
+    class_attribute = 'canSAS_class'
+
+
+class SASdata(NXcanSAS):
 
     @property
     def dims(self):
@@ -43,6 +43,14 @@ class SASdata(SASobject):
                     axes[i] = f'Q{index}'
                     index += 1
         return tuple(axes)
+
+    @property
+    def axes(self):
+        return self._group.attrs.get('I_axes')
+
+    @property
+    def signal(self):
+        return self._group.attrs.get('signal', 'I')
 
     @property
     def signal_errors(self) -> Optional[str]:
@@ -64,7 +72,7 @@ class SASdata(SASobject):
         raise RuntimeError("Cannot handle both uncertainties and resolutions for Q")
 
 
-class SAStransmission_spectrum(SASdata):
+class SAStransmission_spectrum(NXcanSAS):
 
     @property
     def dims(self):
@@ -74,15 +82,13 @@ class SAStransmission_spectrum(SASdata):
         return ('lambda', )
 
 
-class SASentry(SASobject):
+class SASentry(NXcanSAS):
     pass
 
 
-class SASroot(SASobject):
+class SASroot(NXcanSAS):
     pass
 
 
-class NXcanSAS(Definition):
-    class_attribute = 'canSAS_class'
-    classes = [SASroot, SASentry, SASdata, SAStransmission_spectrum]
-    definitions = {cls.__name__: cls for cls in classes}
+NXcanSAS.classes = [SASroot, SASentry, SASdata, SAStransmission_spectrum]
+NXcanSAS.strategies = {cls.__name__: cls for cls in NXcanSAS.classes}

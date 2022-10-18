@@ -52,7 +52,6 @@ class NXdata(NXobject):
             group: H5Group,
             *,
             strategy=None,
-            definition=None,
             signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
             skip: List[str] = None):
         """
@@ -65,18 +64,12 @@ class NXdata(NXobject):
         skip:
             Names of fields to skip when loading coords.
         """
-        super().__init__(group, definition=definition)
+        super().__init__(group, strategy=strategy)
         self._signal_override = signal_override
         self._skip = skip if skip is not None else []
-        # TODO need mechanism for overriding strategy without subclassing, outside
-        # the use of application definitions. E.g., NXlog want a different axes strategy
-        # Would it be better if strategies took the place of the definition?
-        # How can we customize the tree? For example, NXdetector modifies the NXdata
-        # strategy, how can we get it to use the correct strategy from the definion?
-        # self._strategy = self._make_strategy(NXdataStrategy)
-        if strategy is None:
-            strategy = NXdataStrategy
-        self._strategy = strategy(self)
+
+    def _default_strategy(self):
+        return NXdataStrategy
 
     @property
     def shape(self) -> List[int]:
