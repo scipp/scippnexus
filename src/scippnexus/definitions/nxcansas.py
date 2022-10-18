@@ -55,7 +55,7 @@ class SASdata(NXcanSAS):
     @property
     def signal_errors(self) -> Optional[str]:
         signal_name = self._group.attrs.get('signal', 'I')
-        signal = self._group[signal_name]
+        signal = self._group._group[signal_name]
         return signal.attrs.get('uncertainties')
 
     def coord_errors(self, name) -> Optional[str]:

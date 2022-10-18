@@ -2,7 +2,7 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
-from typing import List, Union
+from typing import List, Union, Optional
 from warnings import warn
 import scipp as sc
 import numpy as np
@@ -33,6 +33,16 @@ class NXdataStrategy:
             if 'signal' in group._get_child(name).attrs:
                 return name
         return None
+
+    @property
+    def signal_errors(self) -> Optional[str]:
+        group = self._group
+        name = f'{self.signal}_errors'
+        if name in group:
+            return name
+        # This is a legacy named, deprecated in the NeXus format.
+        if 'errors' in group:
+            return 'errors'
 
     def coord_errors(self, name):
         errors = [f'{name}{suffix}' for suffix in self._error_suffixes]
@@ -99,11 +109,8 @@ class NXdata(NXobject):
         return self._strategy.signal
 
     @property
-    def _errors_name(self) -> str:
-        # TODO allow customization in strategy
-        # TODO plain "errors" is deprecated, should be {signal}_errors, but should
-        # also support the former
-        return f'{self._strategy.signal}_errors'
+    def _errors_name(self) -> Optional[str]:
+        return self._strategy.signal_errors
 
     @property
     def _signal(self) -> Union[Field, '_EventField']:  # noqa: F821
@@ -185,7 +192,7 @@ class NXdata(NXobject):
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         signal = self._signal[select]
-        if self._errors_name is not None and self._errors_name in self:
+        if self._errors_name is not None:
             stddevs = self[self._errors_name][select]
             signal.variances = sc.pow(stddevs, sc.scalar(2)).values
 
