@@ -4,15 +4,8 @@
 from typing import Optional
 from ..typing import H5Group
 
-# required children
-# required attrs
-# meaning of special attrs (e.g., errors)
-# consider structure verification out of scope, just deal with leaf class,
-# such as SASData!?
-
 
 def make_application_definition_strategy(application_definition, strategy):
-    print(application_definition, strategy)
 
     class ApplicationDefinitionStrategy(strategy):
         _application_definition = application_definition
