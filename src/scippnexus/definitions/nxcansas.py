@@ -11,21 +11,45 @@ from ..typing import H5Group
 # such as SASData!?
 
 
-class ApplicationDefinitionStrategy:
+def make_application_definition_strategy(application_definition, strategy):
+    print(application_definition, strategy)
 
-    def __init__(self, group: H5Group):
-        self._group = group
+    class ApplicationDefinitionStrategy(strategy):
+        _application_definition = application_definition
 
-    def child_strategy(self, group: H5Group):
-        if (definition_class := group.attrs.get(self.class_attribute)) is not None:
-            return self.strategies.get(definition_class)
+        def __init__(self, group: H5Group):
+            self._group = group
+            super().__init__()
+
+        def child_strategy(self, group: H5Group):
+            return self._application_definition.child_strategy(group)
+
+    return ApplicationDefinitionStrategy
 
 
-class NXcanSAS(ApplicationDefinitionStrategy):
-    class_attribute = 'canSAS_class'
+class ApplicationDefinition:
+
+    def __init__(self, class_attribute, default=None):
+        self._default_class = default
+        self._class_attribute = class_attribute
+        self._strategies = {}
+
+    def child_strategy(self, group):
+        if (definition_class := group.attrs.get(self._class_attribute,
+                                                self._default_class)) is not None:
+            return self._strategies.get(definition_class)
+
+    def __call__(self, strategy):
+        strat = make_application_definition_strategy(self, strategy)
+        self._strategies[strategy.__name__] = strat
+        return strat
 
 
-class SASdata(NXcanSAS):
+NXcanSAS = ApplicationDefinition('canSAS_class', 'SASroot')
+
+
+@NXcanSAS
+class SASdata:
 
     @property
     def dims(self):
@@ -72,7 +96,8 @@ class SASdata(NXcanSAS):
         raise RuntimeError("Cannot handle both uncertainties and resolutions for Q")
 
 
-class SAStransmission_spectrum(NXcanSAS):
+@NXcanSAS
+class SAStransmission_spectrum:
 
     @property
     def dims(self):
@@ -82,13 +107,11 @@ class SAStransmission_spectrum(NXcanSAS):
         return ('lambda', )
 
 
-class SASentry(NXcanSAS):
+@NXcanSAS
+class SASentry:
     pass
 
 
-class SASroot(NXcanSAS):
+@NXcanSAS
+class SASroot:
     pass
-
-
-NXcanSAS.classes = [SASroot, SASentry, SASdata, SAStransmission_spectrum]
-NXcanSAS.strategies = {cls.__name__: cls for cls in NXcanSAS.classes}
