@@ -2,17 +2,18 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 import scipp as sc
-from typing import Optional
+from typing import Optional, Tuple, Union
+from ..nxobject import NXobject
 
 
 class ApplicationDefinition:
 
-    def __init__(self, class_attribute, default=None):
+    def __init__(self, class_attribute: str, default: str = None):
         self._default_class = default
         self._class_attribute = class_attribute
         self._strategies = {}
 
-    def make_strategy(self, group):
+    def make_strategy(self, group: NXobject):
         # This approach will likely need to be generalized as many application
         # definitions to not define a "class attribute" in the style of canSAS_class,
         # but seem to rely on basic strcture and the NX_class attribute.
@@ -38,7 +39,7 @@ class SASdata:
     def __init__(self, data):
         self.data = data
 
-    def __write_to_nexus_group__(self, group):
+    def __write_to_nexus_group__(self, group: NXobject):
         da = self.data
         group.attrs['canSAS_class'] = 'SASdata'
         group.attrs['signal'] = 'I'
@@ -60,7 +61,7 @@ class SASdata:
 class SASdataStrategy:
 
     @staticmethod
-    def dims(group):
+    def dims(group: NXobject) -> Tuple[str]:
         axes = group.attrs.get('axes')
         if isinstance(axes, str):
             axes = axes.split(" ")
@@ -77,20 +78,20 @@ class SASdataStrategy:
         return tuple(axes)
 
     @staticmethod
-    def axes(group):
+    def axes(group: NXobject) -> Tuple[str]:
         return group.attrs.get('I_axes')
 
     @staticmethod
-    def signal(group):
+    def signal(group: NXobject) -> str:
         return group.attrs.get('signal', 'I')
 
     @staticmethod
-    def signal_errors(group) -> Optional[str]:
+    def signal_errors(group: NXobject) -> Optional[str]:
         signal_name = group.attrs.get('signal', 'I')
         signal = group._group[signal_name]
         return signal.attrs.get('uncertainties')
 
-    def coord_errors(group, name) -> Optional[str]:
+    def coord_errors(group: NXobject, name: str) -> Optional[str]:
         if name != 'Q':
             return None
         # TODO This naively stores this as Scipp errors, which are just Gaussian.
@@ -108,7 +109,7 @@ class SASdataStrategy:
 class SAStransmission_spectrumStrategy:
 
     @staticmethod
-    def dims(group):
+    def dims(group: NXobject) -> Tuple[str]:
         # TODO A valid file should have T_axes, do we need to fallback?
         if (axes := group.attrs.get('T_axes')) is not None:
             return (axes, )
@@ -118,11 +119,11 @@ class SAStransmission_spectrumStrategy:
 class SASentry:
     nx_class = 'NXentry'
 
-    def __init__(self, *, title, run):
+    def __init__(self, *, title: str, run: Union[str, int]):
         self.title = title
         self.run = run
 
-    def __write_to_nexus_group__(self, group):
+    def __write_to_nexus_group__(self, group: NXobject):
         group.attrs['canSAS_class'] = 'SASentry'
         group.attrs['version'] = '1.0'
         group.attrs['definition'] = 'NXcanSAS'
