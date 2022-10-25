@@ -319,9 +319,9 @@ class NXobject:
 
     def _make_strategy(self, strategy: Optional[Callable]):
         if strategy is not None:
-            return strategy(self)
+            return strategy
         if (strategy := self._default_strategy()) is not None:
-            return strategy(self)
+            return strategy
 
     def _make_child_strategy(self, group):
         # TODO Careful here, group may be a grandchild. Should we try and recurse here,

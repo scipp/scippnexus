@@ -13,14 +13,13 @@ from .nxevent_data import NXevent_data
 
 class NXdetectorStrategy(NXdataStrategy):
 
-    @property
-    def signal(self):
+    @staticmethod
+    def signal(group):
         # NXdata uses the 'signal' attribute to define the field name of the signal.
         # NXdetector uses a "hard-coded" signal name 'data', without specifying the
         # attribute in the file, so we pass this explicitly to NXdata.
         # Note the special case of an NXevent_data subgroup named 'data', which we
         # avoid by checking if 'data' is a dataset.
-        group = self._group
         return 'data' if 'data' in group and is_dataset(group._group['data']) else None
 
 

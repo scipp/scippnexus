@@ -14,16 +14,12 @@ from .nxobject import Field, NXobject, ScippIndex, NexusStructureError, asarray
 class NXdataStrategy:
     _error_suffixes = ['_errors', '_error']  # _error is the deprecated suffix
 
-    def __init__(self, group):
-        self._group = group
+    @staticmethod
+    def axes(group):
+        return group.attrs.get('axes')
 
-    @property
-    def axes(self):
-        return self._group.attrs.get('axes')
-
-    @property
-    def signal(self):
-        group = self._group
+    @staticmethod
+    def signal(group):
         if (name := group.attrs.get('signal')) is not None:
             return name
         # Legacy NXdata defines signal not as group attribute, but attr on dataset
@@ -34,19 +30,19 @@ class NXdataStrategy:
                 return name
         return None
 
-    @property
-    def signal_errors(self) -> Optional[str]:
-        group = self._group
-        name = f'{self.signal}_errors'
+    @staticmethod
+    def signal_errors(group) -> Optional[str]:
+        name = f'{NXdataStrategy.signal(group)}_errors'
         if name in group:
             return name
         # This is a legacy named, deprecated in the NeXus format.
         if 'errors' in group:
             return 'errors'
 
-    def coord_errors(self, name):
-        errors = [f'{name}{suffix}' for suffix in self._error_suffixes]
-        errors = [x for x in errors if x in self._group]
+    @staticmethod
+    def coord_errors(group, name):
+        errors = [f'{name}{suffix}' for suffix in NXdataStrategy._error_suffixes]
+        errors = [x for x in errors if x in group]
         if len(errors) == 0:
             return None
         if len(errors) == 2:
@@ -88,7 +84,7 @@ class NXdata(NXobject):
     def _get_group_dims(self) -> Union[None, List[str]]:
         # Apparently it is not possible to define dim labels unless there are
         # corresponding coords. Special case of '.' entries means "no coord".
-        if (axes := self._strategy.axes) is not None:
+        if (axes := self._strategy.axes(self)) is not None:
             return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
         return None
 
@@ -106,11 +102,11 @@ class NXdata(NXobject):
 
     @property
     def _signal_name(self) -> str:
-        return self._strategy.signal
+        return self._strategy.signal(self)
 
     @property
     def _errors_name(self) -> Optional[str]:
-        return self._strategy.signal_errors
+        return self._strategy.signal_errors(self)
 
     @property
     def _signal(self) -> Union[Field, '_EventField']:  # noqa: F821
@@ -120,7 +116,7 @@ class NXdata(NXobject):
 
     def _get_axes(self):
         """Return labels of named axes. Does not include default 'dim_{i}' names."""
-        if (axes := self._strategy.axes) is not None:
+        if (axes := self._strategy.axes(self)) is not None:
             # Unlike self.dims we *drop* entries that are '.'
             return [a for a in axes if a != '.']
         elif (axes := self._signal.attrs.get('axes')) is not None:
@@ -202,7 +198,7 @@ class NXdata(NXobject):
         skip += [self._signal_name, self._errors_name]
         skip += list(self.attrs.get('auxiliary_signals', []))
         for name in self:
-            if (errors := self._strategy.coord_errors(name)) is not None:
+            if (errors := self._strategy.coord_errors(self, name)) is not None:
                 skip += [errors]
 
         for name, field in self[Field].items():
@@ -214,7 +210,7 @@ class NXdata(NXobject):
                                       select,
                                       bin_edge_dim=self._bin_edge_dim(field))
                 coord: sc.Variable = asarray(self[name][sel])
-                if (error_name := self._strategy.coord_errors(name)) is not None:
+                if (error_name := self._strategy.coord_errors(self, name)) is not None:
                     stddevs = self[error_name][sel]
                     coord.variances = sc.pow(stddevs, sc.scalar(2)).values
                 if self._coord_to_attr(da, name, field):
