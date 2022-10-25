@@ -307,27 +307,32 @@ class NXobject:
     """Base class for all NeXus groups.
     """
 
-    def __init__(self, group: H5Group, *, strategy: Optional[Callable] = None):
+    def __init__(self,
+                 group: H5Group,
+                 *,
+                 definition: Any = None,
+                 strategy: Optional[Callable] = None):
         self._group = group
         # TODO can strategies replace child-params?
         self.child_params = {}
-        self._strategy = self._default_strategy() if strategy is None else strategy
+        self._definition = definition
+        self._strategy = self._default_strategy()
+        if strategy is not None:
+            self._strategy = strategy
+        elif self._definition is not None:
+            self._strategy = self._definition.make_strategy(self)
+        else:
+            self._strategy = self._default_strategy()
 
     # override in child classes to provide default
     def _default_strategy(self):
         return None
 
-    def _make_child_strategy(self, group):
-        # TODO Careful here, group may be a grandchild. Should we try and recurse here,
-        # or let strategy deal with it?
-        if self._strategy is not None:
-            if hasattr(self._strategy, 'child_strategy'):
-                return self._strategy.child_strategy(group)
-
     def _make(self, group) -> NXobject:
         if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
-            return _nx_class_registry().get(nx_class, NXobject)(
-                group, strategy=self._make_child_strategy(group))
+            return _nx_class_registry().get(nx_class,
+                                            NXobject)(group,
+                                                      definition=self._definition)
         return group  # Return underlying (h5py) group
 
     def _get_child(

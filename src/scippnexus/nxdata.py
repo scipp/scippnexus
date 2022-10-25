@@ -57,6 +57,7 @@ class NXdata(NXobject):
             self,
             group: H5Group,
             *,
+            definition=None,
             strategy=None,
             signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
             skip: List[str] = None):
@@ -70,7 +71,7 @@ class NXdata(NXobject):
         skip:
             Names of fields to skip when loading coords.
         """
-        super().__init__(group, strategy=strategy)
+        super().__init__(group, definition=definition, strategy=strategy)
         self._signal_override = signal_override
         self._skip = skip if skip is not None else []
 

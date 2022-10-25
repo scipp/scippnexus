@@ -11,9 +11,7 @@ class File(AbstractContextManager, NXroot):
 
     def __init__(self, *args, definition=None, **kwargs):
         self._file = h5py.File(*args, **kwargs)
-        NXroot.__init__(self, self._file)
-        if definition is not None:
-            self._strategy = definition.child_strategy(self)
+        NXroot.__init__(self, self._file, definition=definition)
 
     def __enter__(self):
         self._file.__enter__()
