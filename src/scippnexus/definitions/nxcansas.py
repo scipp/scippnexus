@@ -3,22 +3,6 @@
 # @author Simon Heybrock
 import scipp as sc
 from typing import Optional
-from ..typing import H5Group
-
-
-def make_application_definition_strategy(application_definition, strategy):
-
-    class ApplicationDefinitionStrategy(strategy):
-
-        @staticmethod
-        def __class_attribute__():
-            return application_definition._class_attribute
-
-        @staticmethod
-        def child_strategy(group: H5Group):
-            return application_definition.child_strategy(group)
-
-    return ApplicationDefinitionStrategy
 
 
 class ApplicationDefinition:
@@ -28,7 +12,7 @@ class ApplicationDefinition:
         self._class_attribute = class_attribute
         self._strategies = {}
 
-    def child_strategy(self, group):
+    def make_strategy(self, group):
         # This approach will likely need to be generalized as many application
         # definitions to not define a "class attribute" in the style of canSAS_class,
         # but seem to rely on basic strcture and the NX_class attribute.
@@ -36,16 +20,15 @@ class ApplicationDefinition:
                                                 self._default_class)) is not None:
             return self._strategies.get(definition_class)
 
-    def __call__(self, strategy):
-        strat = make_application_definition_strategy(self, strategy)
-        self._strategies[strategy.__name__] = strat
-        return strat
+    def register(self, strategy):
+        self._strategies[strategy.__name__] = strategy
+        return strategy
 
 
 NXcanSAS = ApplicationDefinition('canSAS_class', 'SASroot')
 
 
-@NXcanSAS
+@NXcanSAS.register
 class SASdata:
     nx_class = 'NXdata'
 
@@ -114,7 +97,7 @@ class SASdata:
         raise RuntimeError("Cannot handle both uncertainties and resolutions for Q")
 
 
-@NXcanSAS
+@NXcanSAS.register
 class SAStransmission_spectrum:
 
     @staticmethod
@@ -125,7 +108,7 @@ class SAStransmission_spectrum:
         return ('lambda', )
 
 
-@NXcanSAS
+@NXcanSAS.register
 class SASentry:
     nx_class = 'NXentry'
 
@@ -141,6 +124,6 @@ class SASentry:
         group.create_field('run', self.run)
 
 
-@NXcanSAS
+@NXcanSAS.register
 class SASroot:
     pass
