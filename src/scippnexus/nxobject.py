@@ -326,6 +326,10 @@ class NXobject:
 
     # override in child classes to provide default
     def _default_strategy(self):
+        """
+        Default strategy to use when none given and when the application definition
+        does not provide one. Override in child classes to set a default.
+        """
         return None
 
     def _make(self, group) -> NXobject:
