@@ -29,6 +29,9 @@ class ApplicationDefinition:
         self._strategies = {}
 
     def child_strategy(self, group):
+        # This approach will likely need to be generalized as many application
+        # definitions to not define a "class attribute" in the style of canSAS_class,
+        # but seem to rely on basic strcture and the NX_class attribute.
         if (definition_class := group.attrs.get(self._class_attribute,
                                                 self._default_class)) is not None:
             return self._strategies.get(definition_class)
@@ -44,25 +47,27 @@ NXcanSAS = ApplicationDefinition('canSAS_class', 'SASroot')
 
 @NXcanSAS
 class SASdata:
+    nx_class = 'NXdata'
 
     def __init__(self, data):
         self.data = data
 
-    @property
-    def nx_class(self):
-        return 'NXdata'
-
-    def __application_definition__(self, group):
+    def __write_to_nexus_group__(self, group):
         da = self.data
-        group.attrs['NX_class'] = self.nx_class
-        group.attrs[self.__class_attribute__()] = 'SASdata'
+        group.attrs['canSAS_class'] = 'SASdata'
         group.attrs['signal'] = 'I'
         group.attrs['I_axes'] = da.dims
         group.attrs['Q_indices'] = tuple(da.dims.index(d) for d in da.coords['Q'].dims)
         signal = group.create_field('I', sc.values(da.data))
-        signal.attrs['uncertainties'] = 'Idev'
-        group.create_field('Idev', sc.stddevs(da.data))
-        group.create_field('Q', self.data.coords['Q'])
+        if da.variances is not None:
+            signal.attrs['uncertainties'] = 'Idev'
+            group.create_field('Idev', sc.stddevs(da.data))
+        coord = group.create_field('Q', da.coords['Q'])
+        if da.coords['Q'].variances is not None:
+            # Note that there is also an "uncertainties" attribute. It is not clear
+            # to me what the difference is.
+            coord.attrs['resolutions'] = 'Qdev'
+            group.create_field('Qdev', sc.stddevs(da.coords['Q']))
 
     @staticmethod
     def dims(group):
@@ -122,19 +127,14 @@ class SAStransmission_spectrum:
 
 @NXcanSAS
 class SASentry:
+    nx_class = 'NXentry'
 
     def __init__(self, *, title, run):
         self.title = title
         self.run = run
 
-    @property
-    def nx_class(self):
-        return 'NXentry'
-
-    def __application_definition__(self, group):
-        # TODO automatic mechanism for definition class
-        # TODO Should we require from strategies to define the NX_class they apply to?
-        group.attrs[self.__class_attribute__()] = 'SASentry'
+    def __write_to_nexus_group__(self, group):
+        group.attrs['canSAS_class'] = 'SASentry'
         group.attrs['version'] = '1.0'
         group.attrs['definition'] = 'NXcanSAS'
         group.create_field('title', self.title)

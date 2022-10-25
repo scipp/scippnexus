@@ -311,17 +311,11 @@ class NXobject:
         self._group = group
         # TODO can strategies replace child-params?
         self.child_params = {}
-        self._strategy = self._make_strategy(strategy)
+        self._strategy = self._default_strategy() if strategy is None else strategy
 
     # override in child classes to provide default
     def _default_strategy(self):
         return None
-
-    def _make_strategy(self, strategy: Optional[Callable]):
-        if strategy is not None:
-            return strategy
-        if (strategy := self._default_strategy()) is not None:
-            return strategy
 
     def _make_child_strategy(self, group):
         # TODO Careful here, group may be a grandchild. Should we try and recurse here,
@@ -523,9 +517,9 @@ class NXobject:
             self._group[name] = value._dataset
         elif isinstance(value, NXobject):
             self._group[name] = value._group
-        elif hasattr(value, '__application_definition__'):
+        elif hasattr(value, '__write_to_nexus_group__'):
             group = self.create_class(name, nx_class=value.nx_class)
-            value.__application_definition__(group)
+            value.__write_to_nexus_group__(group)
         else:
             self.create_field(name, value)
 

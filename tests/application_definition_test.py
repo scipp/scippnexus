@@ -14,7 +14,7 @@ def nxroot(request):
         yield root
 
 
-def test_setitem_application_definition(nxroot):
+def test_setitem_SASentry(nxroot):
     nxroot['sasentry'] = SASentry(title='A test', run=12345)
     assert 'sasentry' in nxroot
     entry = nxroot['sasentry']
@@ -31,6 +31,7 @@ def test_setitem_SASdata(nxroot):
         unit='1/counts')
     da = sc.DataArray(data=data)
     da.coords['Q'] = sc.linspace('Q', 0, 1, num=5, unit='1/angstrom')
+    da.coords['Q'].variances = sc.array(dims=['Q'], values=[1, 1, 4, 4, 1])
     nxroot['sasdata'] = SASdata(da)
     nxroot._strategy = NXcanSAS.child_strategy(nxroot)
     data = nxroot['sasdata']
