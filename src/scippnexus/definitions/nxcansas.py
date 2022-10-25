@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+import scipp as sc
 from typing import Optional
 from ..typing import H5Group
 
@@ -8,6 +9,10 @@ from ..typing import H5Group
 def make_application_definition_strategy(application_definition, strategy):
 
     class ApplicationDefinitionStrategy(strategy):
+
+        @staticmethod
+        def __class_attribute__():
+            return application_definition._class_attribute
 
         @staticmethod
         def child_strategy(group: H5Group):
@@ -39,6 +44,25 @@ NXcanSAS = ApplicationDefinition('canSAS_class', 'SASroot')
 
 @NXcanSAS
 class SASdata:
+
+    def __init__(self, data):
+        self.data = data
+
+    @property
+    def nx_class(self):
+        return 'NXdata'
+
+    def __application_definition__(self, group):
+        da = self.data
+        group.attrs['NX_class'] = self.nx_class
+        group.attrs[self.__class_attribute__()] = 'SASdata'
+        group.attrs['signal'] = 'I'
+        group.attrs['I_axes'] = da.dims
+        group.attrs['Q_indices'] = tuple(da.dims.index(d) for d in da.coords['Q'].dims)
+        signal = group.create_field('I', sc.values(da.data))
+        signal.attrs['uncertainties'] = 'Idev'
+        group.create_field('Idev', sc.stddevs(da.data))
+        group.create_field('Q', self.data.coords['Q'])
 
     @staticmethod
     def dims(group):
@@ -98,7 +122,23 @@ class SAStransmission_spectrum:
 
 @NXcanSAS
 class SASentry:
-    pass
+
+    def __init__(self, *, title, run):
+        self.title = title
+        self.run = run
+
+    @property
+    def nx_class(self):
+        return 'NXentry'
+
+    def __application_definition__(self, group):
+        # TODO automatic mechanism for definition class
+        # TODO Should we require from strategies to define the NX_class they apply to?
+        group.attrs[self.__class_attribute__()] = 'SASentry'
+        group.attrs['version'] = '1.0'
+        group.attrs['definition'] = 'NXcanSAS'
+        group.create_field('title', self.title)
+        group.create_field('run', self.run)
 
 
 @NXcanSAS

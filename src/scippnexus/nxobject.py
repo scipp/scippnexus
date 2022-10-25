@@ -486,6 +486,8 @@ class NXobject:
         return f'<{type(self).__name__} "{self._group.name}">'
 
     def create_field(self, name: str, data: DimensionedArray, **kwargs) -> Field:
+        if not isinstance(data, sc.Variable):
+            return self._group.create_dataset(name, data=data, **kwargs)
         values = data.values
         if data.dtype == sc.DType.string:
             values = np.array(data.values, dtype=object)
@@ -521,6 +523,9 @@ class NXobject:
             self._group[name] = value._dataset
         elif isinstance(value, NXobject):
             self._group[name] = value._group
+        elif hasattr(value, '__application_definition__'):
+            group = self.create_class(name, nx_class=value.nx_class)
+            value.__application_definition__(group)
         else:
             self.create_field(name, value)
 
