@@ -20,15 +20,18 @@ class ApplicationDefinition:
                                                 self._default_class)) is not None:
             return self._strategies.get(definition_class)
 
-    def register(self, strategy):
-        self._strategies[strategy.__name__] = strategy
-        return strategy
+    def register(self, sas_class):
+
+        def decorator(strategy):
+            self._strategies[sas_class] = strategy
+            return strategy
+
+        return decorator
 
 
 NXcanSAS = ApplicationDefinition('canSAS_class', 'SASroot')
 
 
-@NXcanSAS.register
 class SASdata:
     nx_class = 'NXdata'
 
@@ -51,6 +54,10 @@ class SASdata:
             # to me what the difference is.
             coord.attrs['resolutions'] = 'Qdev'
             group.create_field('Qdev', sc.stddevs(da.coords['Q']))
+
+
+@NXcanSAS.register('SASdata')
+class SASdataStrategy:
 
     @staticmethod
     def dims(group):
@@ -97,8 +104,8 @@ class SASdata:
         raise RuntimeError("Cannot handle both uncertainties and resolutions for Q")
 
 
-@NXcanSAS.register
-class SAStransmission_spectrum:
+@NXcanSAS.register('SAStransmission_spectrum')
+class SAStransmission_spectrumStrategy:
 
     @staticmethod
     def dims(group):
@@ -108,7 +115,6 @@ class SAStransmission_spectrum:
         return ('lambda', )
 
 
-@NXcanSAS.register
 class SASentry:
     nx_class = 'NXentry'
 
@@ -124,6 +130,11 @@ class SASentry:
         group.create_field('run', self.run)
 
 
-@NXcanSAS.register
-class SASroot:
+@NXcanSAS.register('SASentry')
+class SASentryStrategy:
+    pass
+
+
+@NXcanSAS.register('SASroot')
+class SASrootStrategy:
     pass
