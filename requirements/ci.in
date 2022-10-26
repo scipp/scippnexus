@@ -1,3 +1,4 @@
 packaging
+pip-compile-multi
 requests
 tox
