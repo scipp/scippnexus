@@ -9,13 +9,15 @@ attrs==22.1.0
     # via pytest
 confuse==2.0.0
     # via scipp
+exceptiongroup==1.0.0rc9
+    # via pytest
 graphlib-backport==1.0.3
     # via scipp
 h5py==3.7.0
     # via -r requirements/test-lowest.in
 iniconfig==1.1.1
     # via pytest
-numpy==1.23.2
+numpy==1.23.4
     # via
     #   h5py
     #   scipp
@@ -24,11 +26,9 @@ packaging==21.3
     # via pytest
 pluggy==1.0.0
     # via pytest
-py==1.11.0
-    # via pytest
 pyparsing==3.0.9
     # via packaging
-pytest==7.1.2
+pytest==7.2.0
     # via -r requirements/test-lowest.in
 python-dateutil==2.8.2
     # via -r requirements/test-lowest.in
@@ -36,7 +36,7 @@ pyyaml==6.0
     # via confuse
 scipp==0.12.4
     # via -r requirements/test-lowest.in
-scipy==1.9.1
+scipy==1.9.3
     # via -r requirements/test-lowest.in
 six==1.16.0
     # via python-dateutil
