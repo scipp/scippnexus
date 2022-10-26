@@ -20,5 +20,6 @@ jobs:
       - run: pip-compile-multi -P scipp
       - uses: peter-evans/create-pull-request@v4
         with:
+          base: ${{ github.head_ref }}  # avoid base being a merge commit when triggered by PR
           branch: update-scipp
           title: Update to latest Scipp version
