@@ -8,7 +8,7 @@
 -r base.txt
 attrs==22.1.0
     # via pytest
-exceptiongroup==1.0.0rc9
+exceptiongroup==1.0.0
     # via pytest
 iniconfig==1.1.1
     # via pytest

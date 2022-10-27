@@ -10,19 +10,19 @@ confuse==2.0.0
 graphlib-backport==1.0.3
     # via scipp
 h5py==3.7.0
-    # via -r base.in
+    # via -r requirements/base.in
 numpy==1.23.4
     # via
     #   h5py
     #   scipp
     #   scipy
 python-dateutil==2.8.2
-    # via -r base.in
+    # via -r requirements/base.in
 pyyaml==6.0
     # via confuse
 scipp==0.17.0
-    # via -r base.in
+    # via -r requirements/base.in
 scipy==1.9.3
-    # via -r base.in
+    # via -r requirements/base.in
 six==1.16.0
     # via python-dateutil
