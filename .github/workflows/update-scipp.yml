@@ -21,3 +21,4 @@ jobs:
           base: ${{ github.head_ref }}  # avoid base being a merge commit when triggered by PR
           branch: auto-update-scipp
           title: Update to latest Scipp version
+          token: ${{ secrets.SCIPP_AUTO_UPDATE_PRIVATE_KEY }}
