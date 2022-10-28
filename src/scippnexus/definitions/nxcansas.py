@@ -61,23 +61,6 @@ class SASdata:
 class SASdataStrategy:
 
     @staticmethod
-    def dims(group: NXobject) -> Tuple[str, ...]:
-        axes = group.attrs.get('axes')
-        if isinstance(axes, str):
-            axes = axes.split(" ")
-        if axes is None:
-            axes = group.attrs.get('I_axes')
-        if isinstance(axes, int):
-            axes = [axes]
-        if axes.count('Q') != 1:
-            index = 0
-            for i, ax in enumerate(axes):
-                if ax == 'Q':
-                    axes[i] = f'Q{index}'
-                    index += 1
-        return tuple(axes)
-
-    @staticmethod
     def axes(group: NXobject) -> Tuple[str]:
         return group.attrs.get('I_axes')
 
