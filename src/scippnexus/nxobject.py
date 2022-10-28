@@ -138,9 +138,8 @@ class Field:
     In HDF5 fields are represented as dataset.
     """
 
-    def __init__(self, dataset: H5Dataset, *, parent, dims=None, is_time=None):
-        # TODO May be grandparent in some cases
-        self._parent = parent
+    def __init__(self, dataset: H5Dataset, *, ancestor, dims=None, is_time=None):
+        self._ancestor = ancestor  # Ususally the parent, but may be grandparent, etc.
         self._dataset = dataset
         self._shape = self._dataset.shape
         self._is_time = is_time
@@ -256,7 +255,7 @@ class Field:
 
     @property
     def parent(self) -> NXobject:
-        return self._parent._make(self._dataset.parent)
+        return self._ancestor._make(self._dataset.parent)
 
     @property
     def ndim(self) -> int:
@@ -350,7 +349,7 @@ class NXobject:
                 dims = self._get_field_dims(name) if use_field_dims else None
                 return Field(item,
                              dims=dims,
-                             parent=self,
+                             ancestor=self,
                              **self.child_params.get(name, {}))
             else:
                 return self._make(item)
@@ -500,7 +499,7 @@ class NXobject:
             dataset.attrs['units'] = str(data.unit)
         if data.dtype == sc.DType.datetime64:
             dataset.attrs['start'] = str(start.value)
-        return Field(dataset, dims=data.dims, parent=self)
+        return Field(dataset, dims=data.dims, ancestor=self)
 
     def create_class(self, name: str, nx_class: Union[str, type]) -> NXobject:
         """Create empty HDF5 group with given name and set the NX_class attribute.
