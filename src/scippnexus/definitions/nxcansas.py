@@ -43,18 +43,21 @@ class SASdata:
         da = self.data
         group.attrs['canSAS_class'] = 'SASdata'
         group.attrs['signal'] = 'I'
+        group.attrs['axes'] = da.dims  # for NeXus compliance, same as I_axes
         group.attrs['I_axes'] = da.dims
         group.attrs['Q_indices'] = tuple(da.dims.index(d) for d in da.coords['Q'].dims)
         signal = group.create_field('I', sc.values(da.data))
+        # We use the _errors suffix for NeXus compliance, unlike the examples given in
+        # NXcanSAS.
         if da.variances is not None:
-            signal.attrs['uncertainties'] = 'Idev'
-            group.create_field('Idev', sc.stddevs(da.data))
+            signal.attrs['uncertainties'] = 'I_errors'
+            group.create_field('I_errors', sc.stddevs(da.data))
         coord = group.create_field('Q', da.coords['Q'])
         if da.coords['Q'].variances is not None:
             # Note that there is also an "uncertainties" attribute. It is not clear
             # to me what the difference is.
-            coord.attrs['resolutions'] = 'Qdev'
-            group.create_field('Qdev', sc.stddevs(da.coords['Q']))
+            coord.attrs['resolutions'] = 'Q_errors'
+            group.create_field('Q_errors', sc.stddevs(da.coords['Q']))
 
 
 @NXcanSAS.register('SASdata')
