@@ -316,7 +316,6 @@ class NXobject:
         # TODO can strategies replace child-params?
         self.child_params = {}
         self._definition = definition
-        self._strategy = self._default_strategy()
         if strategy is not None:
             self._strategy = strategy
         elif self._definition is not None:
@@ -324,7 +323,6 @@ class NXobject:
         else:
             self._strategy = self._default_strategy()
 
-    # override in child classes to provide default
     def _default_strategy(self):
         """
         Default strategy to use when none given and when the application definition
