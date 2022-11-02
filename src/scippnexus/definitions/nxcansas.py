@@ -2,7 +2,7 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 import scipp as sc
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, Literal
 from ..nxobject import NXobject
 
 
@@ -36,8 +36,12 @@ NXcanSAS = ApplicationDefinition('canSAS_class', 'SASroot')
 class SASdata:
     nx_class = 'NXdata'
 
-    def __init__(self, data):
+    def __init__(self,
+                 data: sc.DataArray,
+                 variances: Optional[Literal['uncertainties', 'resolutions']] = None):
         self.data = data
+        assert variances in (None, 'uncertainties', 'resolutions')
+        self._variances = variances
 
     def __write_to_nexus_group__(self, group: NXobject):
         da = self.data
@@ -54,9 +58,12 @@ class SASdata:
             group.create_field('I_errors', sc.stddevs(da.data))
         coord = group.create_field('Q', da.coords['Q'])
         if da.coords['Q'].variances is not None:
-            # Note that there is also an "uncertainties" attribute. It is not clear
-            # to me what the difference is.
-            coord.attrs['resolutions'] = 'Q_errors'
+            if self._variances is None:
+                raise ValueError(
+                    "Q has variances, must specify whether these represent "
+                    "'uncertainties' or 'resolutions' using the 'variances' option'")
+
+            coord.attrs[self._variances] = 'Q_errors'
             group.create_field('Q_errors', sc.stddevs(da.coords['Q']))
 
 
