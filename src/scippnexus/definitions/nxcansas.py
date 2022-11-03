@@ -40,7 +40,9 @@ class SASdata:
                  data: sc.DataArray,
                  Q_variances: Optional[Literal['uncertainties', 'resolutions']] = None):
         self.data = data
-        assert Q_variances in (None, 'uncertainties', 'resolutions')
+        valid = ('uncertainties', 'resolutions')
+        if Q_variances not in (None, ) + valid:
+            raise ValueError(f"Q_variances must be in {valid}")
         self._variances = Q_variances
 
     def __write_to_nexus_group__(self, group: NXobject):
