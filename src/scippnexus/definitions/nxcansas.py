@@ -38,10 +38,10 @@ class SASdata:
 
     def __init__(self,
                  data: sc.DataArray,
-                 variances: Optional[Literal['uncertainties', 'resolutions']] = None):
+                 Q_variances: Optional[Literal['uncertainties', 'resolutions']] = None):
         self.data = data
-        assert variances in (None, 'uncertainties', 'resolutions')
-        self._variances = variances
+        assert Q_variances in (None, 'uncertainties', 'resolutions')
+        self._variances = Q_variances
 
     def __write_to_nexus_group__(self, group: NXobject):
         da = self.data
@@ -61,7 +61,7 @@ class SASdata:
             if self._variances is None:
                 raise ValueError(
                     "Q has variances, must specify whether these represent "
-                    "'uncertainties' or 'resolutions' using the 'variances' option'")
+                    "'uncertainties' or 'resolutions' using the 'Q_variances' option'")
 
             coord.attrs[self._variances] = 'Q_errors'
             group.create_field('Q_errors', sc.stddevs(da.coords['Q']))

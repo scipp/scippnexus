@@ -32,7 +32,7 @@ def test_setitem_SASdata(nxroot):
     da = sc.DataArray(data=data)
     da.coords['Q'] = sc.linspace('Q', 0, 1, num=5, unit='1/angstrom')
     da.coords['Q'].variances = sc.array(dims=['Q'], values=[1, 1, 4, 4, 1]).values
-    nxroot['sasdata'] = SASdata(da, variances='resolutions')
+    nxroot['sasdata'] = SASdata(da, Q_variances='resolutions')
     nxroot._definition = NXcanSAS
     data = nxroot['sasdata']
     assert sc.identical(data[...], da)
