@@ -2,7 +2,7 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
-from typing import List, Union
+from typing import List, Union, Optional
 from warnings import warn
 import scipp as sc
 import numpy as np
@@ -11,35 +11,72 @@ from .typing import H5Group
 from .nxobject import Field, NXobject, ScippIndex, NexusStructureError, asarray
 
 
+class NXdataStrategy:
+    _error_suffixes = ['_errors', '_error']  # _error is the deprecated suffix
+
+    @staticmethod
+    def axes(group):
+        return group.attrs.get('axes')
+
+    @staticmethod
+    def signal(group):
+        if (name := group.attrs.get('signal')) is not None:
+            return name
+        # Legacy NXdata defines signal not as group attribute, but attr on dataset
+        for name in group.keys():
+            # What is the meaning of the attribute value? It is undocumented, we simply
+            # ignore it.
+            if 'signal' in group._get_child(name).attrs:
+                return name
+        return None
+
+    @staticmethod
+    def signal_errors(group) -> Optional[str]:
+        name = f'{NXdataStrategy.signal(group)}_errors'
+        if name in group:
+            return name
+        # This is a legacy named, deprecated in the NeXus format.
+        if 'errors' in group:
+            return 'errors'
+
+    @staticmethod
+    def coord_errors(group, name):
+        errors = [f'{name}{suffix}' for suffix in NXdataStrategy._error_suffixes]
+        errors = [x for x in errors if x in group]
+        if len(errors) == 0:
+            return None
+        if len(errors) == 2:
+            warn(f"Found {name}_errors as well as the deprecated "
+                 f"{name}_error. The latter will be ignored.")
+        return errors[0]
+
+
 class NXdata(NXobject):
 
     def __init__(
             self,
             group: H5Group,
-            signal_name_default: str = None,
+            *,
+            definition=None,
+            strategy=None,
             signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
-            axes: List[str] = None,
             skip: List[str] = None):
         """
         Parameters
         ----------
-        signal_name_default:
-            Default signal name used, if no `signal` attribute found in file.
         signal_override:
             Field-like to use instead of trying to read signal from the file. This is
             used when there is no signal or to provide a signal computed from
             NXevent_data.
-        axes:
-            Default axes used, if no `axes` attribute found in file.
         skip:
             Names of fields to skip when loading coords.
         """
-        super().__init__(group)
-        self._signal_name_default = signal_name_default
+        super().__init__(group, definition=definition, strategy=strategy)
         self._signal_override = signal_override
-        self._axes_default = axes
         self._skip = skip if skip is not None else []
-        self._error_suffixes = ['_error', '_errors']  # _error is the deprecated suffix
+
+    def _default_strategy(self):
+        return NXdataStrategy
 
     @property
     def shape(self) -> List[int]:
@@ -48,7 +85,7 @@ class NXdata(NXobject):
     def _get_group_dims(self) -> Union[None, List[str]]:
         # Apparently it is not possible to define dim labels unless there are
         # corresponding coords. Special case of '.' entries means "no coord".
-        if (axes := self.attrs.get('axes', self._axes_default)) is not None:
+        if (axes := self._strategy.axes(self)) is not None:
             return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
         return None
 
@@ -66,21 +103,11 @@ class NXdata(NXobject):
 
     @property
     def _signal_name(self) -> str:
-        if (name := self.attrs.get('signal', self._signal_name_default)) is not None:
-            return name
-        # Legacy NXdata defines signal not as group attribute, but attr on dataset
-        for name in self.keys():
-            # TODO What is the meaning of the attribute value?
-            if 'signal' in self._get_child(name).attrs:
-                return name
-        return None
+        return self._strategy.signal(self)
 
     @property
-    def _errors_name(self) -> str:
-        if self._signal_name_default is None:
-            return 'errors'
-        else:
-            return f'{self._signal_name_default}_errors'
+    def _errors_name(self) -> Optional[str]:
+        return self._strategy.signal_errors(self)
 
     @property
     def _signal(self) -> Union[Field, '_EventField']:  # noqa: F821
@@ -90,7 +117,7 @@ class NXdata(NXobject):
 
     def _get_axes(self):
         """Return labels of named axes. Does not include default 'dim_{i}' names."""
-        if (axes := self.attrs.get('axes', self._axes_default)) is not None:
+        if (axes := self._strategy.axes(self)) is not None:
             # Unlike self.dims we *drop* entries that are '.'
             return [a for a in axes if a != '.']
         elif (axes := self._signal.attrs.get('axes')) is not None:
@@ -138,13 +165,6 @@ class NXdata(NXobject):
             return [name]
         return self._try_guess_dims(name)
 
-    def _is_errors(self, name):
-        for suffix in self._error_suffixes:
-            if name.endswith(suffix):
-                if name[:-len(suffix)] in self:
-                    return True
-        return False
-
     def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
         sizes = dict(zip(self.dims, self.shape))
         for dim, size in zip(coord.dims, coord.shape):
@@ -169,7 +189,7 @@ class NXdata(NXobject):
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         signal = self._signal[select]
-        if self._errors_name in self:
+        if self._errors_name is not None:
             stddevs = self[self._errors_name][select]
             signal.variances = sc.pow(stddevs, sc.scalar(2)).values
 
@@ -178,10 +198,12 @@ class NXdata(NXobject):
         skip = self._skip
         skip += [self._signal_name, self._errors_name]
         skip += list(self.attrs.get('auxiliary_signals', []))
+        for name in self:
+            if (errors := self._strategy.coord_errors(self, name)) is not None:
+                skip += [errors]
 
-        for name, field in self.items():
-            if (not isinstance(field, Field)) or (name
-                                                  in skip) or self._is_errors(name):
+        for name, field in self[Field].items():
+            if name in skip:
                 continue
             try:
                 sel = to_child_select(self.dims,
@@ -189,13 +211,9 @@ class NXdata(NXobject):
                                       select,
                                       bin_edge_dim=self._bin_edge_dim(field))
                 coord: sc.Variable = asarray(self[name][sel])
-                for suffix in self._error_suffixes:
-                    if f'{name}{suffix}' in self:
-                        if coord.variances is not None:
-                            warn(f"Found {name}_errors as well as the deprecated "
-                                 f"{name}_error. The latter will be ignored.")
-                        stddevs = self[f'{name}{suffix}'][sel]
-                        coord.variances = sc.pow(stddevs, sc.scalar(2)).values
+                if (error_name := self._strategy.coord_errors(self, name)) is not None:
+                    stddevs = self[error_name][sel]
+                    coord.variances = sc.pow(stddevs, sc.scalar(2)).values
                 if self._coord_to_attr(da, name, field):
                     # Like scipp, slicing turns coord into attr if slicing removes the
                     # dim corresponding to the coord.
