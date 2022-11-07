@@ -72,6 +72,17 @@ Data Structures
    NXvelocity_selector
    NXxraylens
 
+Strategies
+----------
+
+.. autosummary::
+   :toctree: ../generated/classes
+   :template: scipp-class-template.rst
+   :recursive:
+
+   NXdataStrategy
+   NXdetectorsStrategy
+   NXlogStrategy
 
 Exceptions
 ----------
