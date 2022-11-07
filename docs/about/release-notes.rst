@@ -28,6 +28,19 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
+v0.4.0 (November 2022)
+----------------------
+
+Features
+~~~~~~~~
+
+* Add experimental support for application definitions and customization of loader strategies `#63 <https://github.com/scipp/scippnexus/pull/63>`_.
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a` and Jan-Lukas Wynen :sup:`a`
+
 v0.3.3 (October 2022)
 ---------------------
 
