@@ -14,3 +14,7 @@ from .file import File
 from .nxobject import NXobject, Field, Attrs
 from .nxobject import NexusStructureError
 from .nexus_classes import *
+
+from .nxdata import NXdataStrategy
+from .nxdetector import NXdetectorStrategy
+from .nxlog import NXlogStrategy
