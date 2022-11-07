@@ -81,7 +81,7 @@ Strategies
    :recursive:
 
    NXdataStrategy
-   NXdetectorsStrategy
+   NXdetectorStrategy
    NXlogStrategy
 
 Exceptions

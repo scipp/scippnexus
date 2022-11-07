@@ -52,6 +52,7 @@ Get in touch
    :maxdepth: 3
 
    user-guide/nexus-classes
+   user-guide/application-definitions
    user-guide/classes
 
 .. toctree::
