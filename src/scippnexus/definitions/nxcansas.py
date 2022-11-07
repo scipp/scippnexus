@@ -4,9 +4,10 @@
 import scipp as sc
 from typing import Optional, Tuple, Union, Literal
 from ..nxobject import NXobject
+from ..definition import ApplicationDefinition as BaseDef
 
 
-class ApplicationDefinition:
+class ApplicationDefinition(BaseDef):
 
     def __init__(self, class_attribute: str, default: str = None):
         self._default_class = default

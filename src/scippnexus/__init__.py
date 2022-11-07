@@ -18,3 +18,4 @@ from .nexus_classes import *
 from .nxdata import NXdataStrategy
 from .nxdetector import NXdetectorStrategy
 from .nxlog import NXlogStrategy
+from .definition import ApplicationDefinition
