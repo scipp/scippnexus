@@ -11,6 +11,7 @@ Data Structures
    :template: scipp-class-template.rst
    :recursive:
 
+   ApplicationDefinition
    Attrs
    Field
    File
