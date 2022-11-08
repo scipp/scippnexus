@@ -54,9 +54,23 @@ jobs:
           name: dist
           path: dist
 
-  upload_packages:
-    name: Deploy packages
-    needs: [build_conda, build_wheels]
+  upload_pypi:
+    name: Deploy PyPI
+    needs: [build_wheels, build_conda]
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
+      - uses: actions/download-artifact@v2
+      - uses: actions/setup-python@v3
+      - uses: pypa/gh-action-pypi-publish@v1.5.1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+
+  upload_conda:
+    name: Deploy Conda Forge
+    needs: [build_wheels, build_conda]
     runs-on: ubuntu-20.04
     if: github.event_name == 'release' && github.event.action == 'published'
 
@@ -65,12 +79,6 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
       - run: conda install -c conda-forge --yes anaconda-client
       - run: anaconda --token ${{ secrets.ANACONDATOKEN }} upload --user scipp --label main $(ls conda-package-*/*/*.tar.bz2)
-      - uses: actions/setup-python@v3
-
-      - uses: pypa/gh-action-pypi-publish@v1.5.1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
 
   manage-versions:
     name: Manage Versions
@@ -92,7 +100,7 @@ jobs:
           echo "::set-output name=replaced::$(python docs/version.py --repo=scippnexus --version=${GITHUB_REF_NAME} --action=get-replaced)"
 
   replaced-docs:
-    needs: [upload_packages, manage-versions]
+    needs: [upload_conda, upload_pypi, manage-versions]
     if: github.event_name == 'release' && github.event.action == 'published' && needs.manage-versions.outputs.version-new == 'True'
     uses: ./.github/workflows/docs.yml
     with:
@@ -101,7 +109,7 @@ jobs:
     secrets: inherit
 
   docs:
-    needs: upload_packages
+    needs: replaced-docs
     uses: ./.github/workflows/docs.yml
     with:
       publish: ${{ github.event_name == 'release' && github.event.action == 'published' }}
