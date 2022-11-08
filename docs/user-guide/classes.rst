@@ -11,6 +11,7 @@ Data Structures
    :template: scipp-class-template.rst
    :recursive:
 
+   ApplicationDefinition
    Attrs
    Field
    File
@@ -72,6 +73,17 @@ Data Structures
    NXvelocity_selector
    NXxraylens
 
+Strategies
+----------
+
+.. autosummary::
+   :toctree: ../generated/classes
+   :template: scipp-class-template.rst
+   :recursive:
+
+   NXdataStrategy
+   NXdetectorStrategy
+   NXlogStrategy
 
 Exceptions
 ----------

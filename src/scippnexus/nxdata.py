@@ -12,14 +12,21 @@ from .nxobject import Field, NXobject, ScippIndex, NexusStructureError, asarray
 
 
 class NXdataStrategy:
+    """
+    Strategy used by :py:class:`scippnexus.NXdata`.
+
+    May be subclassed to customize behavior.
+    """
     _error_suffixes = ['_errors', '_error']  # _error is the deprecated suffix
 
     @staticmethod
     def axes(group):
+        """Names of the axes (dimension labels)."""
         return group.attrs.get('axes')
 
     @staticmethod
     def signal(group):
+        """Name of the signal field."""
         if (name := group.attrs.get('signal')) is not None:
             return name
         # Legacy NXdata defines signal not as group attribute, but attr on dataset
@@ -32,6 +39,7 @@ class NXdataStrategy:
 
     @staticmethod
     def signal_errors(group) -> Optional[str]:
+        """Name of the field to use for standard-deviations of the signal."""
         name = f'{NXdataStrategy.signal(group)}_errors'
         if name in group:
             return name
@@ -41,6 +49,7 @@ class NXdataStrategy:
 
     @staticmethod
     def coord_errors(group, name):
+        """Name of the field to use for standard-deviations of a coordinate."""
         errors = [f'{name}{suffix}' for suffix in NXdataStrategy._error_suffixes]
         errors = [x for x in errors if x in group]
         if len(errors) == 0:

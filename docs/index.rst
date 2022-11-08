@@ -27,6 +27,8 @@ This is especially powerful since a number of concepts of Scipp map well to conc
 News
 ----
 
+- [November 2022] scippnexus-0.4.0 has been released.
+  This provides and experimental mechanism for customizing reading and writing of data based on NeXus application definitions.
 - [September 2022] scippnexus-0.3.0 has been released.
 - [August 2022] scippnexus-0.2.0 has been released.
   This provides more convenient access to child groups based on the `NX_class` attribute.
@@ -52,6 +54,7 @@ Get in touch
    :maxdepth: 3
 
    user-guide/nexus-classes
+   user-guide/application-definitions
    user-guide/classes
 
 .. toctree::
