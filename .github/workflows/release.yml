@@ -56,7 +56,7 @@ jobs:
 
   upload_pypi:
     name: Deploy PyPI
-    needs: [build_conda, build_wheels]
+    needs: build_wheels
     runs-on: ubuntu-20.04
     if: github.event_name == 'release' && github.event.action == 'published'
 
@@ -70,7 +70,7 @@ jobs:
 
   upload_conda:
     name: Deploy Conda Forge
-    needs: [upload_pypi]
+    needs: build_conda
     runs-on: ubuntu-20.04
     if: github.event_name == 'release' && github.event.action == 'published'
 
@@ -100,7 +100,7 @@ jobs:
           echo "::set-output name=replaced::$(python docs/version.py --repo=scippnexus --version=${GITHUB_REF_NAME} --action=get-replaced)"
 
   replaced-docs:
-    needs: [upload_conda, manage-versions]
+    needs: [upload_conda, upload_pypi, manage-versions]
     if: github.event_name == 'release' && github.event.action == 'published' && needs.manage-versions.outputs.version-new == 'True'
     uses: ./.github/workflows/docs.yml
     with:
