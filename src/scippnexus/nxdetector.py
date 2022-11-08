@@ -20,6 +20,8 @@ class NXdetectorStrategy(NXdataStrategy):
         # attribute in the file, so we pass this explicitly to NXdata.
         # Note the special case of an NXevent_data subgroup named 'data', which we
         # avoid by checking if 'data' is a dataset.
+        if (name := NXdataStrategy.signal(group)) is not None:
+            return name
         return 'data' if 'data' in group and is_dataset(group._group['data']) else None
 
 

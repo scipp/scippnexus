@@ -22,6 +22,17 @@ def test_raises_if_no_data_found(nxroot):
         detector[...]
 
 
+def test_finds_data_from_group_attr(nxroot):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]]))
+    da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_numbers', da.coords['detector_numbers'])
+    detector.create_field('custom', da.data)
+    detector.attrs['signal'] = 'custom'
+    assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
+
+
 def test_loads_events_when_data_and_events_found(nxroot):
     detector_number = sc.array(dims=[''], unit=None, values=np.array([1, 2]))
     data = sc.ones(dims=['xx'], shape=[2])
