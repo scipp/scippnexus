@@ -99,19 +99,19 @@ jobs:
           echo "::set-output name=new::$(python docs/version.py --repo=scippnexus --version=${GITHUB_REF_NAME} --action=is-new)"
           echo "::set-output name=replaced::$(python docs/version.py --repo=scippnexus --version=${GITHUB_REF_NAME} --action=get-replaced)"
 
-  replaced-docs:
+  docs:
     needs: [upload_conda, upload_pypi, manage-versions]
+    uses: ./.github/workflows/docs.yml
+    with:
+      publish: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+      version: ${{ github.ref_name }}
+    secrets: inherit
+
+  replaced-docs:
+    needs: docs
     if: github.event_name == 'release' && github.event.action == 'published' && needs.manage-versions.outputs.version-new == 'True'
     uses: ./.github/workflows/docs.yml
     with:
       publish: true
       version: ${{ needs.manage-versions.outputs.version-replaced }}
-    secrets: inherit
-
-  docs:
-    needs: replaced-docs
-    uses: ./.github/workflows/docs.yml
-    with:
-      publish: ${{ github.event_name == 'release' && github.event.action == 'published' }}
-      version: ${{ github.ref_name }}
     secrets: inherit
