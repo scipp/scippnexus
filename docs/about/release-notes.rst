@@ -28,6 +28,19 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
+v0.4.1 (November 2022)
+----------------------
+
+Bugfixes
+~~~~~~~~
+
+* Fix NXdetetector mechanism for finding dimension labels, which was broken in 0.4.0 in certain cases `#76 <https://github.com/scipp/scippnexus/pull/76>`_.
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`
+
 v0.4.0 (November 2022)
 ----------------------
 
