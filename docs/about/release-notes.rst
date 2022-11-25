@@ -28,6 +28,19 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
+v0.4.2 (November 2022)
+----------------------
+
+Bugfixes
+~~~~~~~~
+
+* Fix SASdata to raise an exception when given Q-edges, which is not valid for SASdata `#77 <https://github.com/scipp/scippnexus/pull/77>`_.
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`
+
 v0.4.1 (November 2022)
 ----------------------
 

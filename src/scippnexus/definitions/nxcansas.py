@@ -59,6 +59,10 @@ class SASdata:
         if da.variances is not None:
             signal.attrs['uncertainties'] = 'I_errors'
             group.create_field('I_errors', sc.stddevs(da.data))
+        if da.coords.is_edges('Q'):
+            raise ValueError(
+                "Q is given as bin-edges, but NXcanSAS requires Q points (such as "
+                "bin centers).")
         coord = group.create_field('Q', da.coords['Q'])
         if da.coords['Q'].variances is not None:
             if self._variances is None:
