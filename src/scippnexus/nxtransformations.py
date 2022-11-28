@@ -5,7 +5,10 @@ import numpy as np
 from typing import Union
 import scipp as sc
 import scipp.spatial
-import scipp.scipy.interpolate
+try:
+    import scipp.scipy.interpolate
+except ImportError:  # scipp<22.11
+    import scipp.interpolate
 from .nxobject import Field, NXobject, ScippIndex
 
 
