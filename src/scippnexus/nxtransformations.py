@@ -8,7 +8,7 @@ import scipp.spatial
 try:
     from scipp.scipy import interpolate
 except ImportError:  # scipp<22.11
-    import scipp.interpolate
+    from scipp import interpolate
 from .nxobject import Field, NXobject, ScippIndex
 
 
