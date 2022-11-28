@@ -5,7 +5,10 @@ import numpy as np
 from typing import Union
 import scipp as sc
 import scipp.spatial
-import scipp.interpolate
+try:
+    from scipp.scipy import interpolate
+except ImportError:  # scipp<22.11
+    from scipp import interpolate
 from .nxobject import Field, NXobject, ScippIndex
 
 
@@ -85,10 +88,10 @@ def _interpolate_transform(transform, xnew):
     # scipy can't interpolate with a single value
     if transform.sizes["time"] == 1:
         transform = sc.concat([transform, transform], dim="time")
-    return sc.interpolate.interp1d(transform,
-                                   "time",
-                                   kind="previous",
-                                   fill_value="extrapolate")(xnew=xnew)
+    return interpolate.interp1d(transform,
+                                "time",
+                                kind="previous",
+                                fill_value="extrapolate")(xnew=xnew)
 
 
 def _smaller_unit(a, b):
