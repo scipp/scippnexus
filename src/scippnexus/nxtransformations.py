@@ -6,7 +6,7 @@ from typing import Union
 import scipp as sc
 import scipp.spatial
 try:
-    import scipp.scipy.interpolate
+    from scipp.scipy import interpolate
 except ImportError:  # scipp<22.11
     import scipp.interpolate
 from .nxobject import Field, NXobject, ScippIndex
