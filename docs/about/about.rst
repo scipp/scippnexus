@@ -13,6 +13,16 @@ License
 
 ScippNexus is available as open source under the `BSD-3 license <https://opensource.org/licenses/BSD-3-Clause>`_.
 
+Citing ScippNexus
+-----------------
+
+Please cite the following:
+
+.. image:: https://zenodo.org/badge/475453428.svg
+   :target: https://zenodo.org/badge/latestdoi/475453428
+
+To cite a specific version of ScippNexus, select the desired version on Zenodo to get the corresponding DOI.
+
 Source code and development
 ---------------------------
 
