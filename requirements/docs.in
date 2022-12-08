@@ -2,6 +2,7 @@
 ipykernel
 ipywidgets
 packaging
+plopp<0.3  # https://github.com/scipp/plopp/issues/111
 pooch
 requests
 sphinx
