@@ -1,6 +1,6 @@
 import sys
 from typing import List
-from packaging.version import parse, Version, LegacyVersion
+from packaging.version import parse, Version
 import requests
 import argparse
 
@@ -15,16 +15,13 @@ def _get_releases(repo: str, organization: str = 'scipp') -> List[Version]:
 
 
 class VersionInfo:
+
     def __init__(self, repo: str, organization: str = 'scipp'):
         self._releases = _get_releases(repo=repo, organization=organization)
 
     def _to_version(self, version) -> Version:
         if isinstance(version, str):
             version = parse(version)
-            # When not building for a tagged release we may get, e.g., 'main'.
-            # Pretend this means the current latest release.
-            if isinstance(version, LegacyVersion):
-                return self._releases[0]
         return version
 
     def minor_releases(self, first: str = '0.1') -> List[str]:
