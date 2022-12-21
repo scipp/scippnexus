@@ -18,8 +18,15 @@ def test_raises_if_no_data_found(nxroot):
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_numbers', detector_numbers)
-    with pytest.raises(KeyError):
+    with pytest.raises(NexusStructureError):
         detector[...]
+
+
+def test_can_load_fields_if_no_data_found(nxroot):
+    detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_numbers', detector_numbers)
+    detector['detector_numbers'][...]
 
 
 def test_finds_data_from_group_attr(nxroot):

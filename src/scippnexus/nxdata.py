@@ -119,18 +119,21 @@ class NXdata(NXobject):
         return self._strategy.signal_errors(self)
 
     @property
-    def _signal(self) -> Union[Field, '_EventField']:  # noqa: F821
+    def _signal(self) -> Union[Field, '_EventField', None]:  # noqa: F821
         if self._signal_override is not None:
             return self._signal_override
-        return self[self._signal_name]
+        if self._signal_name is not None:
+            return self[self._signal_name]
+        return None
 
     def _get_axes(self):
         """Return labels of named axes. Does not include default 'dim_{i}' names."""
         if (axes := self._strategy.axes(self)) is not None:
             # Unlike self.dims we *drop* entries that are '.'
             return [a for a in axes if a != '.']
-        elif (axes := self._signal.attrs.get('axes')) is not None:
-            return axes.split(',')
+        elif (signal := self._signal) is not None:
+            if (axes := signal.attrs.get('axes')) is not None:
+                return axes.split(',')
         return []
 
     def _guess_dims(self, name: str):
@@ -138,13 +141,14 @@ class NXdata(NXobject):
 
         Does not check for potential bin-edge coord.
         """
-        lut = {}
-        for d, s in zip(self.dims, self.shape):
-            if self.shape.count(s) == 1:
-                lut[s] = d
         shape = self._get_child(name).shape
         if self.shape == shape:
             return self.dims
+        lut = {}
+        if self._signal is not None:
+            for d, s in zip(self.dims, self.shape):
+                if self.shape.count(s) == 1:
+                    lut[s] = d
         try:
             dims = [lut[s] for s in shape]
         except KeyError:
@@ -197,7 +201,10 @@ class NXdata(NXobject):
         return False
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
-        signal = self._signal[select]
+        signal = self._signal
+        if signal is None:
+            raise NexusStructureError("No signal field found, cannot load group")
+        signal = signal[select]
         if self._errors_name is not None:
             stddevs = self[self._errors_name][select]
             signal.variances = sc.pow(stddevs, sc.scalar(2)).values
