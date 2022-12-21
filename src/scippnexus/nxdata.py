@@ -141,14 +141,14 @@ class NXdata(NXobject):
 
         Does not check for potential bin-edge coord.
         """
+        shape = self._get_child(name).shape
+        if self.shape == shape:
+            return self.dims
         lut = {}
         if self._signal is not None:
             for d, s in zip(self.dims, self.shape):
                 if self.shape.count(s) == 1:
                     lut[s] = d
-        shape = self._get_child(name).shape
-        if self.shape == shape:
-            return self.dims
         try:
             dims = [lut[s] for s in shape]
         except KeyError:
