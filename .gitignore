@@ -17,3 +17,4 @@ CMakeSettings.json
 .hypothesis
 .pytest_cache
 .mypy_cache
+docs/generated/
