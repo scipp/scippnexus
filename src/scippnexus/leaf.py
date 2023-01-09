@@ -2,9 +2,11 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from typing import Dict, Union
+
 import scipp as sc
-from .nxobject import NXobject, ScippIndex
+
 from ._common import to_plain_index
+from .nxobject import NXobject, ScippIndex
 
 
 class Leaf(NXobject):

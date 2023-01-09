@@ -2,13 +2,16 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
-from typing import List, Union, Optional
+
+from typing import List, Optional, Union
 from warnings import warn
-import scipp as sc
+
 import numpy as np
+import scipp as sc
+
 from ._common import to_child_select
+from .nxobject import Field, NexusStructureError, NXobject, ScippIndex, asarray
 from .typing import H5Group
-from .nxobject import Field, NXobject, ScippIndex, NexusStructureError, asarray
 
 
 class NXdataStrategy:

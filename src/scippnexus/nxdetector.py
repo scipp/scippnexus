@@ -2,13 +2,16 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
+
 from copy import copy
 from typing import List, Optional, Union
+
 import scipp as sc
-from .nxobject import NXobject, Field, ScippIndex, NexusStructureError
-from .nxobject import is_dataset, asarray
+
 from .nxdata import NXdata, NXdataStrategy
 from .nxevent_data import NXevent_data
+from .nxobject import (Field, NexusStructureError, NXobject, ScippIndex, asarray,
+                       is_dataset)
 
 
 class NXdetectorStrategy(NXdataStrategy):

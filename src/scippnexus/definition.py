@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from abc import ABC, abstractmethod
+
 from .nxobject import NXobject
 
 

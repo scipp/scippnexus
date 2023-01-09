@@ -1,9 +1,10 @@
 import h5py
 import numpy as np
-import scipp as sc
-from scippnexus import NXroot, NXentry, NXdetector, NXtransformations, NXlog
-from scippnexus import nxtransformations
 import pytest
+import scipp as sc
+
+from scippnexus import (NXdetector, NXentry, NXlog, NXroot, NXtransformations,
+                        nxtransformations)
 
 
 @pytest.fixture()

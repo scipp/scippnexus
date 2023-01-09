@@ -31,7 +31,7 @@ News
   This provides and experimental mechanism for customizing reading and writing of data based on NeXus application definitions.
 - [September 2022] scippnexus-0.3.0 has been released.
 - [August 2022] scippnexus-0.2.0 has been released.
-  This provides more convenient access to child groups based on the `NX_class` attribute.
+  This provides more convenient access to child groups based on the ``NX_class`` attribute.
 
 Get in touch
 ------------

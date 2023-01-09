@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Dict, Union, List, Optional
-import scipp as sc
+from typing import Dict, List, Optional, Union
+
 import numpy as np
+import scipp as sc
+
 from .typing import ScippIndex
 
 

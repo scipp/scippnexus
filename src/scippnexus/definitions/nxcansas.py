@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+from typing import Literal, Optional, Tuple, Union
+
 import scipp as sc
-from typing import Optional, Tuple, Union, Literal
-from ..nxobject import NXobject
+
 from ..definition import ApplicationDefinition as BaseDef
+from ..nxobject import NXobject
 
 
 class ApplicationDefinition(BaseDef):
@@ -17,7 +19,7 @@ class ApplicationDefinition(BaseDef):
     def make_strategy(self, group: NXobject):
         # This approach will likely need to be generalized as many application
         # definitions to not define a "class attribute" in the style of canSAS_class,
-        # but seem to rely on basic strcture and the NX_class attribute.
+        # but seem to rely on basic structure and the NX_class attribute.
         if (definition_class := group.attrs.get(self._class_attribute,
                                                 self._default_class)) is not None:
             return self._strategies.get(definition_class)

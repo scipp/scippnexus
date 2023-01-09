@@ -2,8 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
-from typing import Any, Protocol, Union, Tuple, Dict, List, Callable
-from typing import TYPE_CHECKING
+
+from typing import (TYPE_CHECKING, Any, Callable, Dict, List, Protocol, Tuple, Union)
 
 
 class H5Base(Protocol):

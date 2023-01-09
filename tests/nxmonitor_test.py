@@ -1,7 +1,8 @@
 import h5py
-import scipp as sc
-from scippnexus import NXroot, NXentry, NXmonitor, NXevent_data
 import pytest
+import scipp as sc
+
+from scippnexus import NXentry, NXevent_data, NXmonitor, NXroot
 
 
 @pytest.fixture()

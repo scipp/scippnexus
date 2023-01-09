@@ -2,22 +2,24 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
-import re
-import inspect
-import warnings
+
 import datetime
-import dateutil.parser
 import functools
-from typing import overload, List, Union, Any, Dict, Tuple, Protocol, Optional, Callable
+import inspect
+import re
+import warnings
+from typing import (Any, Callable, Dict, List, Optional, Protocol, Tuple, Union,
+                    overload)
+
+import dateutil.parser
+import h5py
 import numpy as np
 import scipp as sc
-import h5py
 
-from ._hdf5_nexus import _cset_to_encoding, _ensure_str
-from ._hdf5_nexus import _ensure_supported_int_type, _warn_latin1_decode
-from .typing import H5Group, H5Dataset, ScippIndex
-from ._common import to_plain_index
-from ._common import convert_time_to_datetime64
+from ._common import convert_time_to_datetime64, to_plain_index
+from ._hdf5_nexus import (_cset_to_encoding, _ensure_str, _ensure_supported_int_type,
+                          _warn_latin1_decode)
+from .typing import H5Dataset, H5Group, ScippIndex
 
 NXobjectIndex = Union[str, ScippIndex]
 
@@ -139,7 +141,7 @@ class Field:
     """
 
     def __init__(self, dataset: H5Dataset, *, ancestor, dims=None, is_time=None):
-        self._ancestor = ancestor  # Ususally the parent, but may be grandparent, etc.
+        self._ancestor = ancestor  # Usually the parent, but may be grandparent, etc.
         self._dataset = dataset
         self._shape = self._dataset.shape
         self._is_time = is_time
@@ -546,7 +548,7 @@ class NXobject:
         nxclasses = []
         # Avoiding self.values() since it is more costly, but mainly since there may be
         # edge cases where creation of Field/NXobject may raise on unrelated children.
-        for name, val in self._group.items():
+        for _, val in self._group.items():
             if not is_dataset(val):
                 nxclasses.append(self._make(val).nx_class)
         for key in set(nxclasses):
