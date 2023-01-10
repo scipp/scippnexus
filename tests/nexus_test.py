@@ -6,8 +6,16 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from scippnexus import (Field, NexusStructureError, NXdetector, NXentry, NXevent_data,
-                        NXlog, NXmonitor, NXroot)
+from scippnexus import (
+    Field,
+    NexusStructureError,
+    NXdetector,
+    NXentry,
+    NXevent_data,
+    NXlog,
+    NXmonitor,
+    NXroot,
+)
 
 # representative sample of UTF-8 test strings from
 # https://www.w3.org/2001/06/utf-8-test/UTF-8-demo.html

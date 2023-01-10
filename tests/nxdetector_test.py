@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from scippnexus import (NexusStructureError, NXdetector, NXentry, NXevent_data, NXroot)
+from scippnexus import NexusStructureError, NXdetector, NXentry, NXevent_data, NXroot
 
 
 @pytest.fixture()

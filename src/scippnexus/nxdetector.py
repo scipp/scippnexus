@@ -10,8 +10,14 @@ import scipp as sc
 
 from .nxdata import NXdata, NXdataStrategy
 from .nxevent_data import NXevent_data
-from .nxobject import (Field, NexusStructureError, NXobject, ScippIndex, asarray,
-                       is_dataset)
+from .nxobject import (
+    Field,
+    NexusStructureError,
+    NXobject,
+    ScippIndex,
+    asarray,
+    is_dataset,
+)
 
 
 class NXdetectorStrategy(NXdataStrategy):

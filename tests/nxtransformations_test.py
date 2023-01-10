@@ -3,8 +3,14 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from scippnexus import (NXdetector, NXentry, NXlog, NXroot, NXtransformations,
-                        nxtransformations)
+from scippnexus import (
+    NXdetector,
+    NXentry,
+    NXlog,
+    NXroot,
+    NXtransformations,
+    nxtransformations,
+)
 
 
 @pytest.fixture()

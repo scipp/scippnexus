@@ -3,7 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-from typing import (TYPE_CHECKING, Any, Callable, Dict, List, Protocol, Tuple, Union)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Protocol, Tuple, Union
 
 
 class H5Base(Protocol):
