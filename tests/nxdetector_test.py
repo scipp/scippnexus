@@ -1,8 +1,9 @@
 import h5py
 import numpy as np
-import scipp as sc
-from scippnexus import NXroot, NXentry, NXdetector, NXevent_data, NexusStructureError
 import pytest
+import scipp as sc
+
+from scippnexus import NexusStructureError, NXdetector, NXentry, NXevent_data, NXroot
 
 
 @pytest.fixture()

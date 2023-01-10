@@ -1,8 +1,9 @@
 import h5py
-import scipp as sc
-from scippnexus import NXroot, NXentry
-from scippnexus.definitions.nxcansas import NXcanSAS, SASentry, SASdata
 import pytest
+import scipp as sc
+
+from scippnexus import NXentry, NXroot
+from scippnexus.definitions.nxcansas import NXcanSAS, SASdata, SASentry
 
 
 @pytest.fixture()

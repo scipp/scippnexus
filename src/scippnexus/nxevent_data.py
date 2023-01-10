@@ -2,11 +2,12 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from typing import List, Union
+
 import numpy as np
 import scipp as sc
 
 from ._common import to_plain_index
-from .nxobject import NXobject, ScippIndex, NexusStructureError
+from .nxobject import NexusStructureError, NXobject, ScippIndex
 
 _event_dimension = "event"
 _pulse_dimension = "pulse"
@@ -62,7 +63,7 @@ class NXevent_data(NXobject):
 
         num_event = self["event_time_offset"].shape[0]
         # Some files contain uint64 "max" indices, which turn into negatives during
-        # conversion to int64. This is a hack to get arround this.
+        # conversion to int64. This is a hack to get around this.
         event_index[event_index < 0] = num_event
 
         if len(event_index) > 0:

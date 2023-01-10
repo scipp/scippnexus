@@ -5,9 +5,17 @@ import h5py
 import numpy as np
 import pytest
 import scipp as sc
-from scippnexus import (Field, NXroot, NXentry, NXmonitor, NXlog, NXevent_data,
-                        NXdetector)
-from scippnexus import NexusStructureError
+
+from scippnexus import (
+    Field,
+    NexusStructureError,
+    NXdetector,
+    NXentry,
+    NXevent_data,
+    NXlog,
+    NXmonitor,
+    NXroot,
+)
 
 # representative sample of UTF-8 test strings from
 # https://www.w3.org/2001/06/utf-8-test/UTF-8-demo.html
@@ -61,7 +69,7 @@ def test_nxobject_iter(nxroot):
     # With missing __iter__ this used to raise since Python just calls __getitem__
     # with an int range.
     list(nxroot)
-    for key in nxroot:
+    for _ in nxroot:
         pass
 
 

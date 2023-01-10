@@ -1,14 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-import numpy as np
 from typing import Union
+
+import numpy as np
 import scipp as sc
 import scipp.spatial
+
 try:
     from scipp.scipy import interpolate
 except ImportError:  # scipp<22.11
     from scipp import interpolate
+
 from .nxobject import Field, NXobject, ScippIndex
 
 

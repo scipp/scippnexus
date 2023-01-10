@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from .leaf import Leaf
 from typing import Dict, Union
+
 import scipp as sc
 from scipp.spatial import linear_transform
+
+from .leaf import Leaf
 from .nxobject import ScippIndex
 
 _matrix_units = dict(zip(['orientation_matrix', 'ub_matrix'], ['one', '1/Angstrom']))

@@ -3,9 +3,11 @@
 # @author Simon Heybrock
 
 from typing import List, Union
+
 import scipp as sc
-from .nxobject import NXobject, ScippIndex
+
 from .nxdata import NXdata, NXdataStrategy
+from .nxobject import NXobject, ScippIndex
 
 
 class NXlogStrategy(NXdataStrategy):
@@ -20,7 +22,7 @@ class NXlogStrategy(NXdataStrategy):
         ndim = child_dataset.ndim
         shape = child_dataset.shape
         # The outermost axis in NXlog is pre-defined to 'time' (if present). Note
-        # that this may be overriden by an `axes` attribute, if defined for the group.
+        # that this may be overridden by an `axes` attribute, if defined for the group.
         if 'time' in group:
             raw_axes = ['time'] + (['.'] * (ndim - 1))
         else:

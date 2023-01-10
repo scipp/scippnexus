@@ -1,8 +1,9 @@
 import h5py
 import numpy as np
-import scipp as sc
-from scippnexus import Field, NXroot, NXentry, NXdata, NXlog
 import pytest
+import scipp as sc
+
+from scippnexus import Field, NXdata, NXentry, NXlog, NXroot
 
 
 @pytest.fixture()

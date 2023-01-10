@@ -2,8 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Matthew Jones
 import warnings
-
-from typing import Union, Any
+from typing import Any, Union
 
 import h5py
 import numpy as np

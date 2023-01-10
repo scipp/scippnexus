@@ -2,8 +2,9 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from typing import Dict, Union
-from .nxobject import Field
+
 from .nxdetector import NXdetector
+from .nxobject import Field
 
 
 class NXmonitor(NXdetector):

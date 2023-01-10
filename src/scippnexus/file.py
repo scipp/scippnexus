@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from contextlib import AbstractContextManager
+
 import h5py
 
 from .nexus_classes import NXroot

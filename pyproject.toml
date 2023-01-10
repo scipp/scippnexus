@@ -15,6 +15,16 @@ filterwarnings = [
   "ignore::UserWarning",
 ]
 
+[tool.bandit]
+# Excluding tests because bandit doesn't like `assert`.
+exclude_dirs = ["docs/conf.py", "tests"]
+
+[tool.isort]
+skip_gitignore = true
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+
 [tool.mypy]
 mypy_path = "src"
 ignore_missing_imports = true

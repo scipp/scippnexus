@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import doctest
-from datetime import date
-import scippnexus
-
 import os
 import sys
-
+from datetime import date
 from typing import Any, Dict, Optional
+
+import sphinx_book_theme
 from docutils.nodes import document
 from sphinx.application import Sphinx
-import sphinx_book_theme
+
+import scippnexus
 
 sys.path.insert(0, os.path.abspath('.'))
 
