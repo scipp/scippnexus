@@ -6,7 +6,6 @@ from typing import List, Union
 
 import scipp as sc
 
-
 from .nxdata import NXdata, NXdataStrategy
 from .nxobject import NXobject, ScippIndex
 
