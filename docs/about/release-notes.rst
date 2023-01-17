@@ -34,7 +34,7 @@ v23.01.0
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
-* :class:`scippnexus.NXevent_data` is not loaded without automatically assigning a variance of 1 to the even weights `#92 <https://github.com/scipp/scippnexus/pull/92>`_.
+* :class:`scippnexus.NXevent_data` is not loaded without automatically assigning a variance of 1 to the even weights `#94 <https://github.com/scipp/scippnexus/pull/94>`_.
 
 Contributors
 ~~~~~~~~~~~~
