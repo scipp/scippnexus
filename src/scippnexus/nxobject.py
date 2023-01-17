@@ -287,6 +287,10 @@ class Field:
         return self._dims
 
     @property
+    def sizes(self) -> Dict[str, int]:
+        return dict(zip(self.dims, self.shape))
+
+    @property
     def unit(self) -> Union[sc.Unit, None]:
         if (unit := self.attrs.get('units')) is not None:
             try:
@@ -360,11 +364,11 @@ class NXobject:
                 return self._make(item)
         da = self._getitem(name)
         if (t := self.depends_on) is not None:
-            if isinstance(da, dict):
-                da['depends_on'] = t
-            else:
+            if hasattr(da, 'coords'):
                 da.coords['depends_on'] = t if isinstance(t,
                                                           sc.Variable) else sc.scalar(t)
+            else:
+                da['depends_on'] = t
         return da
 
     def _get_children_by_nx_class(
@@ -425,7 +429,15 @@ class NXobject:
         return self._get_child(name, use_field_dims=True)
 
     def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.Dataset]:
-        raise NotImplementedError(f'Loading {self.nx_class} is not supported.')
+        from .nxevent_data import NXevent_data
+        # If we would load NXevent_data, this would duplicate data (in almost all cases
+        # in practice). Furthermore, it has a tendency of failing. Is it conceptually
+        # ok to consider NXevent_data as pure "implementation details" of NXdetector
+        # and not load them?
+        return sc.DataGroup({
+            name: child[index]
+            for name, child in self.items() if not isinstance(child, NXevent_data)
+        })
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
         """Subclasses should reimplement this to provide dimension labels for fields."""

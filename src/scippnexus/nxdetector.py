@@ -232,4 +232,8 @@ class NXdetector(NXobject):
         return self._nxdata()._get_field_dims(name)
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
-        return self._nxdata()._getitem(select)
+        # If loading NXevent_data fails, we return the underlying datasets.
+        try:
+            return self._nxdata()._getitem(select)
+        except IndexError:
+            return NXobject._getitem(self._nxdata(), select)
