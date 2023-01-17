@@ -28,6 +28,19 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
+v23.01.0
+--------
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* :class:`scippnexus.NXevent_data` is not loaded without automatically assigning a variance of 1 to the even weights `#92 <https://github.com/scipp/scippnexus/pull/92>`_.
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`
+
 v0.4.2 (November 2022)
 ----------------------
 

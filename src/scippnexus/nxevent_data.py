@@ -84,8 +84,7 @@ class NXevent_data(NXobject):
         weights = sc.ones(dims=[_event_dimension],
                           shape=event_time_offset.shape,
                           unit='counts',
-                          dtype=np.float32,
-                          with_variances=True)
+                          dtype=np.float32)
 
         events = sc.DataArray(data=weights,
                               coords={'event_time_offset': event_time_offset})

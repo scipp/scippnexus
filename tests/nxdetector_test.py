@@ -53,7 +53,9 @@ def test_loads_events_when_data_and_events_found(nxroot):
                                                         values=[1]))
     detector.create_field('event_time_zero', sc.array(dims=[''], unit='s', values=[1]))
     detector.create_field('event_index', sc.array(dims=[''], unit='None', values=[0]))
-    assert detector[...].bins is not None
+    loaded = detector[...]
+    assert loaded.bins is not None
+    assert loaded.values[0].variances is None
 
 
 def detector_numbers_xx_yy_1234():
