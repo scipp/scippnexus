@@ -311,6 +311,14 @@ def is_dataset(obj: Union[H5Group, H5Dataset]) -> bool:
     return hasattr(obj, 'shape')
 
 
+class NXobjectStrategy:
+
+    @staticmethod
+    def include_child(_) -> bool:
+        """Return True if the child should be included when loading."""
+        return True
+
+
 class NXobject:
     """Base class for all NeXus groups.
     """
@@ -324,11 +332,10 @@ class NXobject:
         # TODO can strategies replace child-params?
         self.child_params = {}
         self._definition = definition
-        if strategy is not None:
-            self._strategy = strategy
-        elif self._definition is not None:
+        self._strategy = strategy
+        if strategy is None and self._definition is not None:
             self._strategy = self._definition.make_strategy(self)
-        else:
+        if self._strategy is None:
             self._strategy = self._default_strategy()
 
     def _default_strategy(self):
@@ -336,7 +343,7 @@ class NXobject:
         Default strategy to use when none given and when the application definition
         does not provide one. Override in child classes to set a default.
         """
-        return None
+        return NXobjectStrategy
 
     def _make(self, group) -> NXobject:
         if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
@@ -436,16 +443,10 @@ class NXobject:
         return self._get_child(name, use_field_dims=True)
 
     def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]:
-        from .nxevent_data import NXevent_data
-
-        # If we would load NXevent_data, this would duplicate data (in almost all cases
-        # in practice). Furthermore, it has a tendency of failing. Is it conceptually
-        # ok to consider NXevent_data as pure "implementation details" of NXdetector
-        # and not load them?
-        return sc.DataGroup({
-            name: child[index]
-            for name, child in self.items() if not isinstance(child, NXevent_data)
-        })
+        include = getattr(self._strategy, 'include_child', lambda x: True)
+        return sc.DataGroup(
+            {name: child[index]
+             for name, child in self.items() if include(child)})
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
         """Subclasses should reimplement this to provide dimension labels for fields."""

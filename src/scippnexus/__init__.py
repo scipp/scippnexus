@@ -11,10 +11,10 @@ except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 from . import typing
-from .definition import ApplicationDefinition
+from .definition import ApplicationDefinition, make_definition
 from .file import File
 from .nexus_classes import *
 from .nxdata import NXdataStrategy
 from .nxdetector import NXdetectorStrategy
 from .nxlog import NXlogStrategy
-from .nxobject import Attrs, Field, NexusStructureError, NXobject
+from .nxobject import Attrs, Field, NexusStructureError, NXobject, NXobjectStrategy
