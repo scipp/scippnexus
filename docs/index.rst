@@ -56,6 +56,7 @@ Get in touch
    user-guide/nexus-classes
    user-guide/application-definitions
    user-guide/classes
+   user-guide/functions
 
 .. toctree::
    :caption: About
