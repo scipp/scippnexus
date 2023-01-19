@@ -387,7 +387,7 @@ class NXobject:
         ...
 
     @overload
-    def __getitem__(self, name: ScippIndex) -> Union[sc.DataArray, sc.Dataset]:
+    def __getitem__(self, name: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]:
         ...
 
     @overload
@@ -407,7 +407,7 @@ class NXobject:
           classes. ``Field`` selects all child fields, i.e., all datasets but not
           groups.
         - Scipp-style index: Load the specified slice of the current group, returning
-          a :class:`scipp.DataArray` or :class:`scipp.Dataset`.
+          a :class:`scipp.DataArray` or :class:`scipp.DataGroup`.
 
         Parameters
         ----------
@@ -428,8 +428,9 @@ class NXobject:
             return self._get_children_by_nx_class(name)
         return self._get_child(name, use_field_dims=True)
 
-    def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.Dataset]:
+    def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]:
         from .nxevent_data import NXevent_data
+
         # If we would load NXevent_data, this would duplicate data (in almost all cases
         # in practice). Furthermore, it has a tendency of failing. Is it conceptually
         # ok to consider NXevent_data as pure "implementation details" of NXdetector
