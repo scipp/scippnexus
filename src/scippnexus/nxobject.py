@@ -362,7 +362,14 @@ class NXobject:
                              **self.child_params.get(name, {}))
             else:
                 return self._make(item)
-        da = self._getitem(name)
+        try:
+            da = self._getitem(name)
+        except Exception:
+            # If the child class cannot load this group, we fall back to returning the
+            # underlying datasets in a DataGroup.
+            if type(self)._getitem == NXobject._getitem:
+                raise
+            da = NXobject._getitem(self, name)
         if (t := self.depends_on) is not None:
             if hasattr(da, 'coords'):
                 da.coords['depends_on'] = t if isinstance(t,
