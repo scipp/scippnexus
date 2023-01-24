@@ -39,6 +39,7 @@ Features
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
+* :class:`scippnexus.NXevent_data` is now loaded without automatically assigning a variance of 1 to the event weights `#94 <https://github.com/scipp/scippnexus/pull/94>`_.
 * If an implementation of :class:`scippnexus.NXobject` fails to load (e.g., as a :class:`scipp.DataArray`), the implementation will fall back to a generic load of all datasets in subgroups as a :class:`scipp.DataGroup`.
   Previously, this was handled in a variety of cases by simply skipping the offending dataset or group `#95 <https://github.com/scipp/scippnexus/pull/95>`_.
 
