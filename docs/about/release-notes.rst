@@ -28,6 +28,20 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
+v23.02.0
+--------
+
+Features
+~~~~~~~~
+
+* Any NXobject can now be loaded as ``scipp.DataGroup`` `#95 <https://github.com/scipp/scippnexus/pull/95>`_.
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* If an implementation of :class:`scippnexus.NXobject` fails to load (e.g., as a :class:`scipp.DataArray`), the implementation will fall back to a generic load of all datasets in subgroups as a :class:`scipp.DataGroup`.
+  Previously, this was handled in a variety of cases by simply skipping the offending dataset or group `#95 <https://github.com/scipp/scippnexus/pull/95>`_.
+
 v0.4.2 (November 2022)
 ----------------------
 
