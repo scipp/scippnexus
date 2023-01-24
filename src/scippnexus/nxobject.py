@@ -379,7 +379,7 @@ class NXobject:
             else:
                 warnings.warn(
                     f"Failed to load {self.name} as {type(self).__name__}:\n{e}\n"
-                    "Falling back to loading HDF5 group children as scipp.DataGroup")
+                    "Falling back to loading HDF5 group children as scipp.DataGroup.")
             da = NXobject._getitem(self, name)
         if (t := self.depends_on) is not None:
             if hasattr(da, 'coords'):
@@ -508,8 +508,14 @@ class NXobject:
     def depends_on(self) -> Union[sc.Variable, sc.DataArray, None]:
         if (depends_on := self.get('depends_on')) is not None:
             # Imported late to avoid cyclic import
-            from .nxtransformations import get_full_transformation
-            return get_full_transformation(depends_on)
+            from .nxtransformations import TransformationError, get_full_transformation
+            try:
+                return get_full_transformation(depends_on)
+            except TransformationError as e:
+                warnings.warn(
+                    f"Failed to load transformation {self.name}/{depends_on}:\n{e}\n"
+                    "Falling back to returning the path to the transformation.")
+                return depends_on[()]
         return None
 
     def __repr__(self) -> str:

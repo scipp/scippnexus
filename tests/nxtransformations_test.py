@@ -178,3 +178,31 @@ def test_chain_with_multiple_values_and_different_time_unit(nxroot):
     expected = sc.spatial.affine_transform(value=np.identity(4), unit=t.unit)
     expected = t * (t * (offset * expected))
     assert sc.identical(detector[...].coords['depends_on'].value, expected)
+
+
+def test_broken_time_dependent_transformation_returns_path(nxroot):
+    detector = create_detector(nxroot)
+    detector.create_field('depends_on', sc.scalar('/detector_0/transformations/t1'))
+    transformations = detector.create_class('transformations', NXtransformations)
+    log = sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
+        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')})
+    log.coords['time'] = sc.epoch(unit='ns') + log.coords['time'].to(unit='ns')
+    offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
+    vector = sc.vector(value=[0, 0, 1])
+    t = log * vector
+    t.data = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit)
+    value = transformations.create_class('t1', NXlog)
+    value['time'] = log.coords['time'] - sc.epoch(unit='ns')
+    value['value'] = log.data[0:0]
+    value.attrs['depends_on'] = '.'
+    value.attrs['transformation_type'] = 'translation'
+    value.attrs['offset'] = offset.values
+    value.attrs['offset_units'] = str(offset.unit)
+    value.attrs['vector'] = vector.value
+
+    depends_on = detector['depends_on'][()]
+    t = nxtransformations.Transformation(nxroot[depends_on])
+    loaded = detector[()]
+    assert sc.identical(loaded.coords['depends_on'],
+                        sc.scalar('/detector_0/transformations/t1'))
