@@ -146,7 +146,8 @@ class NXdetector(NXobject):
         super().__init__(*args, **kwargs)
         self._event_select = tuple()
         self._nxevent_data_fields = [
-            'event_time_zero', 'event_index', 'event_time_offset', 'event_id'
+            'event_time_zero', 'event_index', 'event_time_offset', 'event_id',
+            'cue_timestamp_zero', 'cue_index', 'pulse_height'
         ]
         self._detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
