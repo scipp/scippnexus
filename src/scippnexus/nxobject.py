@@ -371,11 +371,15 @@ class NXobject:
                 return self._make(item)
         try:
             da = self._getitem(name)
-        except Exception:
+        except Exception as e:
             # If the child class cannot load this group, we fall back to returning the
             # underlying datasets in a DataGroup.
             if type(self)._getitem == NXobject._getitem:
                 raise
+            else:
+                warnings.warn(
+                    f"Failed to load {self.name} as {type(self).__name__}:\n{e}\n"
+                    "Falling back to loading HDF5 group children as scipp.DataGroup")
             da = NXobject._getitem(self, name)
         if (t := self.depends_on) is not None:
             if hasattr(da, 'coords'):
