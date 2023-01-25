@@ -382,11 +382,24 @@ class NXobject:
                     "Falling back to loading HDF5 group children as scipp.DataGroup.")
             da = NXobject._getitem(self, name)
         if (t := self.depends_on) is not None:
-            if hasattr(da, 'coords'):
-                da.coords['depends_on'] = t if isinstance(t,
-                                                          sc.Variable) else sc.scalar(t)
-            else:
-                da['depends_on'] = t
+
+            def insert(name, obj):
+                if hasattr(da, 'coords'):
+                    da.coords[name] = obj if isinstance(obj,
+                                                        sc.Variable) else sc.scalar(obj)
+                else:
+                    da[name] = obj
+
+            insert('depends_on', t)
+            # If loading the transformation failed, 'depends_on' returns a string, the
+            # path to the transformation. If this is a nested group, we load it here.
+            # Note that this info is currently incomplete, since attributes are not
+            # loaded.
+            if isinstance(t, str):
+                from .nexus_classes import NXtransformations
+                for name, group in self[NXtransformations].items():
+                    insert(name, group[()])
+
         return da
 
     def _get_children_by_nx_class(

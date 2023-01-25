@@ -180,7 +180,7 @@ def test_chain_with_multiple_values_and_different_time_unit(nxroot):
     assert sc.identical(detector[...].coords['depends_on'].value, expected)
 
 
-def test_broken_time_dependent_transformation_returns_path(nxroot):
+def test_broken_time_dependent_transformation_returns_path_and_transformations(nxroot):
     detector = create_detector(nxroot)
     detector.create_field('depends_on', sc.scalar('/detector_0/transformations/t1'))
     transformations = detector.create_class('transformations', NXtransformations)
@@ -201,8 +201,12 @@ def test_broken_time_dependent_transformation_returns_path(nxroot):
     value.attrs['offset_units'] = str(offset.unit)
     value.attrs['vector'] = vector.value
 
-    depends_on = detector['depends_on'][()]
-    t = nxtransformations.Transformation(nxroot[depends_on])
     loaded = detector[()]
     assert sc.identical(loaded.coords['depends_on'],
                         sc.scalar('/detector_0/transformations/t1'))
+    t = loaded.coords['transformations'].value
+    assert isinstance(t, sc.DataGroup)
+    # Due to the way NXtransformations works, vital information is stored in the
+    # attributes. DataGroup does currently not support attributes, so this information
+    # is mostly useless until that is addressed.
+    assert 't1' in t
