@@ -194,6 +194,7 @@ def test_broken_time_dependent_transformation_returns_path_and_transformations(n
     t.data = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit)
     value = transformations.create_class('t1', NXlog)
     value['time'] = log.coords['time'] - sc.epoch(unit='ns')
+    # This makes the transform "broken" since "time" has length 2 but data has length 0.
     value['value'] = log.data[0:0]
     value.attrs['depends_on'] = '.'
     value.attrs['transformation_type'] = 'translation'
