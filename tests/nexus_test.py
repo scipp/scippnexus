@@ -412,14 +412,14 @@ def test_negative_event_index_converted_to_num_event(nxroot):
     assert events.bins.size().values[3] == 0
 
 
-def test_bad_event_index_raises_IndexError(nxroot):
+def test_bad_event_index_causes_load_as_DataGroup(nxroot):
     event_data = nxroot['entry'].create_class('events_0', NXevent_data)
     event_data['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2])
     event_data['event_time_offset'] = sc.array(dims=[''], unit='s', values=[0, 0, 0, 0])
     event_data['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
     event_data['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 666])
-    with pytest.raises(IndexError):
-        nxroot['entry/events_0'][...]
+    dg = nxroot['entry/events_0'][...]
+    assert isinstance(dg, sc.DataGroup)
 
 
 def create_event_data_without_event_id(group):
