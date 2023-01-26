@@ -19,7 +19,7 @@ class Leaf(NXobject):
         index = to_plain_index([], select)
         if index != tuple():
             raise ValueError(f"Cannot select slice when loading {type(self).__name__}")
-        content = {}
+        content = sc.DataGroup()
         for key, obj in self.items():
             if key == 'depends_on' or isinstance(obj, NXtransformations):
                 continue

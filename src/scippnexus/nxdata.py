@@ -224,22 +224,19 @@ class NXdata(NXobject):
         for name, field in self[Field].items():
             if name in skip:
                 continue
-            try:
-                sel = to_child_select(self.dims,
-                                      field.dims,
-                                      select,
-                                      bin_edge_dim=self._bin_edge_dim(field))
-                coord: sc.Variable = asarray(self[name][sel])
-                if (error_name := self._strategy.coord_errors(self, name)) is not None:
-                    stddevs = self[error_name][sel]
-                    coord.variances = sc.pow(stddevs, sc.scalar(2)).values
-                if self._coord_to_attr(da, name, field):
-                    # Like scipp, slicing turns coord into attr if slicing removes the
-                    # dim corresponding to the coord.
-                    da.attrs[name] = coord
-                else:
-                    da.coords[name] = coord
-            except sc.DimensionError as e:
-                warn(f"Skipped load of axis {field.name} due to:\n{e}")
+            sel = to_child_select(self.dims,
+                                  field.dims,
+                                  select,
+                                  bin_edge_dim=self._bin_edge_dim(field))
+            coord: sc.Variable = asarray(self[name][sel])
+            if (error_name := self._strategy.coord_errors(self, name)) is not None:
+                stddevs = asarray(self[error_name][sel])
+                coord.variances = sc.pow(stddevs, sc.scalar(2)).values
+            if self._coord_to_attr(da, name, field):
+                # Like scipp, slicing turns coord into attr if slicing removes the
+                # dim corresponding to the coord.
+                da.attrs[name] = coord
+            else:
+                da.coords[name] = coord
 
         return da

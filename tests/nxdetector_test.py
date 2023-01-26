@@ -15,12 +15,13 @@ def nxroot(request):
         yield root
 
 
-def test_raises_if_no_data_found(nxroot):
+def test_warns_if_no_data_found(nxroot):
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_numbers', detector_numbers)
-    with pytest.raises(NexusStructureError):
-        detector[...]
+    with pytest.warns(UserWarning, match="Failed to load "):
+        dg = detector[...]
+    assert isinstance(dg, sc.DataGroup)
 
 
 def test_can_load_fields_if_no_data_found(nxroot):
@@ -255,7 +256,7 @@ def test_loading_event_data_with_selection_and_automatic_detector_numbers_raises
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
     assert detector.dims == ['detector_number']
-    with pytest.raises(NexusStructureError):
+    with pytest.raises(ValueError):
         detector['detector_number', 0]
 
 

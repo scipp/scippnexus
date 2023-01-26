@@ -117,8 +117,10 @@ def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(nxroot):
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field('yy2', da.coords['yy2'])
-    da = data[...]
-    assert 'yy2' not in da.coords
+    dg = data[...]
+    assert isinstance(dg, sc.DataGroup)
+    assert 'yy2' in dg
+    assert set(dg.dims) == {'dim_0', 'xx', 'yy'}
 
 
 def test_guesses_transposed_dims_for_2d_coord(nxroot):
@@ -235,7 +237,8 @@ def test_uses_default_field_dims_if_inference_fails(nxroot):
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field('yy2', da.coords['yy2'])
-    assert 'yy2' not in data[()].coords
+    dg = data[()]
+    assert sc.identical(dg['yy2'], da.coords['yy2'].rename(yy='dim_0'))
     assert sc.identical(data['yy2'][()], da.coords['yy2'].rename(yy='dim_0'))
 
 
