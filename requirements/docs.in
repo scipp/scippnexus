@@ -1,8 +1,9 @@
 -r base.in
+gitpython
 ipykernel
 ipywidgets
 packaging
-plopp<0.3  # https://github.com/scipp/plopp/issues/111
+plopp
 pooch
 requests
 sphinx
