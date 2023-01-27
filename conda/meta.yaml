@@ -11,7 +11,7 @@ requirements:
   run:
     - python>=3.8
     - python-dateutil
-    - scipp
+    - scipp>=23.01.1
     - scipy
     - h5py
 
