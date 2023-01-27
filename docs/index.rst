@@ -27,7 +27,7 @@ This is especially powerful since a number of concepts of Scipp map well to conc
 News
 ----
 
-- [February 2023] scippnexus-23.02.0 has been released.
+- [January 2023] scippnexus-23.01.0 has been released.
   This brings support for loading arbitrary groups as :class:`scipp.DataGroup`.
   Furthermore, errors are handled in a more transparent way:
   ScippNexus will now fall back to returning group contents as a :class:`scipp.DataGroup` instead of silently skipping loading certain fields.

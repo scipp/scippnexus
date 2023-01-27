@@ -21,7 +21,7 @@ project = u'scippnexus'
 copyright = u'2023 Scipp contributors'
 author = u'Scipp contributors'
 
-version_info = VersionInfo(repo=project)
+version_info = VersionInfo()
 long_version = scippnexus.__version__
 outdated = not version_info.is_latest(long_version)
 

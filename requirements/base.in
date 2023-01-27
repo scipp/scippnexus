@@ -1,4 +1,4 @@
 python-dateutil
-scipp>=23.01.0
+scipp>=23.01.1
 scipy
 h5py
