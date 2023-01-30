@@ -524,7 +524,7 @@ class NXobject:
             from .nxtransformations import TransformationError, get_full_transformation
             try:
                 return get_full_transformation(depends_on)
-            except TransformationError as e:
+            except (NexusStructureError, TransformationError) as e:
                 warnings.warn(
                     f"Failed to load transformation {self.name}/{depends_on}:\n{e}\n"
                     "Falling back to returning the path to the transformation.")
