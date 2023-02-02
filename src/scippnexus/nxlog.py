@@ -58,7 +58,9 @@ class NXlog(NXobject):
 
     @property
     def _nxbase(self) -> NXdata:
-        return NXdata(self._group, strategy=NXlogStrategy)
+        return NXdata(self._group,
+                      strategy=NXlogStrategy,
+                      skip=['cue_timestamp_zero', 'cue_index'])
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         base = self._nxbase
