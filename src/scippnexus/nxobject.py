@@ -364,7 +364,10 @@ class NXobject:
             if is_dataset(item):
                 try:
                     dims = self._get_field_dims(name) if use_field_dims else None
-                except Exception:
+                except Exception as e:
+                    msg = (f"Failed to determine axis names of {item.name}: {e}. "
+                           "Falling back to default dimension labels.")
+                    warnings.warn(msg)
                     dims = None
                 return Field(item,
                              dims=dims,
