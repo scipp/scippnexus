@@ -362,7 +362,10 @@ class NXobject:
         if isinstance(name, str):
             item = self._group[name]
             if is_dataset(item):
-                dims = self._get_field_dims(name) if use_field_dims else None
+                try:
+                    dims = self._get_field_dims(name) if use_field_dims else None
+                except Exception:
+                    dims = None
                 return Field(item,
                              dims=dims,
                              ancestor=self,
@@ -377,9 +380,10 @@ class NXobject:
             if type(self)._getitem == NXobject._getitem:
                 raise
             else:
-                warnings.warn(
-                    f"Failed to load {self.name} as {type(self).__name__}:\n{e}\n"
+                msg = (
+                    f"Failed to load {self.name} as {type(self).__name__}: {e}. "
                     "Falling back to loading HDF5 group children as scipp.DataGroup.")
+                warnings.warn(msg)
             da = NXobject._getitem(self, name)
         if (t := self.depends_on) is not None:
 
