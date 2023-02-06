@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+from .nxcylindrical_geometry import NXcylindrical_geometry  # noqa F401
 from .nxdata import NXdata  # noqa F401
 from .nxdetector import NXdetector  # noqa F401
 from .nxdisk_chopper import NXdisk_chopper  # noqa F401
@@ -9,6 +10,7 @@ from .nxfermi_chopper import NXfermi_chopper  # noqa F401
 from .nxlog import NXlog  # noqa F401
 from .nxmonitor import NXmonitor  # noqa F401
 from .nxobject import NXobject, NXroot  # noqa F401
+from .nxoff_geometry import NXoff_geometry  # noqa F401
 from .nxsample import NXsample  # noqa F401
 from .nxsource import NXsource  # noqa F401
 
@@ -65,10 +67,6 @@ class NXcrystal(NXobject):
     """NXcrystal"""
 
 
-class NXcylindrical_geometry(NXobject):
-    """NXcylindrical_geometry"""
-
-
 class NXdetector_group(NXobject):
     """NXdetector_group"""
 
@@ -123,10 +121,6 @@ class NXmonochromator(NXobject):
 
 class NXnote(NXobject):
     """NXnote"""
-
-
-class NXoff_geometry(NXobject):
-    """NXoff_geometry"""
 
 
 class NXorientation(NXobject):

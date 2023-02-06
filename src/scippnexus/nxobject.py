@@ -137,16 +137,34 @@ def _as_datetime(obj: Any):
     return None
 
 
+def _dtype_from_dataset(dataset: H5Dataset) -> sc.DType:
+    dtype = dataset.dtype
+    if str(dtype).startswith('str') or h5py.check_string_dtype(dtype):
+        dtype = sc.DType.string
+    else:
+        dtype = sc.DType(_ensure_supported_int_type(str(dtype)))
+    return dtype
+
+
 class Field:
     """NeXus field.
 
     In HDF5 fields are represented as dataset.
     """
 
-    def __init__(self, dataset: H5Dataset, *, ancestor, dims=None, is_time=None):
+    def __init__(self,
+                 dataset: H5Dataset,
+                 *,
+                 ancestor,
+                 dims=None,
+                 dtype: Optional[sc.DType] = None,
+                 is_time=None):
         self._ancestor = ancestor  # Usually the parent, but may be grandparent, etc.
         self._dataset = dataset
+        self._dtype = _dtype_from_dataset(dataset) if dtype is None else dtype
         self._shape = self._dataset.shape
+        if self._dtype == sc.DType.vector3:
+            self._shape = self._shape[:-1]
         self._is_time = is_time
         # NeXus treats [] and [1] interchangeably. In general this is ill-defined, but
         # the best we can do appears to be squeezing unless the file provides names for
@@ -242,13 +260,8 @@ class Field:
         return Attrs(self._dataset.attrs)
 
     @property
-    def dtype(self) -> str:
-        dtype = self._dataset.dtype
-        if str(dtype).startswith('str') or h5py.check_string_dtype(dtype):
-            dtype = sc.DType.string
-        else:
-            dtype = sc.DType(_ensure_supported_int_type(str(dtype)))
-        return dtype
+    def dtype(self) -> sc.DType:
+        return self._dtype
 
     @property
     def name(self) -> str:
@@ -369,8 +382,10 @@ class NXobject:
                            "Falling back to default dimension labels.")
                     warnings.warn(msg)
                     dims = None
+                dtype = self._get_field_dtype(name)
                 return Field(item,
                              dims=dims,
+                             dtype=dtype,
                              ancestor=self,
                              **self.child_params.get(name, {}))
             else:
@@ -474,6 +489,10 @@ class NXobject:
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
         """Subclasses should reimplement this to provide dimension labels for fields."""
+        return None
+
+    def _get_field_dtype(self, name: str) -> Union[None, sc.DType]:
+        """Subclasses should reimplement this to override the dtype for fields."""
         return None
 
     def __contains__(self, name: str) -> bool:
