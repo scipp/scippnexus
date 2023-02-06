@@ -9,13 +9,14 @@ from .leaf import Leaf
 
 
 class NXcylindrical_geometry(Leaf):
+    _dims = {
+        'vertices': ('vertex', ),
+        'detector_number': ('detector_number', ),
+        'cylinders': ('cylinder', 'vertex_index')
+    }
 
     def _get_field_dims(self, name: str) -> Union[None, Tuple[str]]:
-        if name in ('vertices', 'detector_number'):
-            return (name, )
-        if name == 'cylinders':
-            return ('cylinders', 'vertices_index')
-        return None
+        return self._dims.get(name)
 
     def _get_field_dtype(self, name: str) -> Union[None, sc.DType]:
         if name == 'vertices':

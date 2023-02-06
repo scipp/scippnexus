@@ -20,7 +20,7 @@ def test_vertices_loaded_as_vector3(nxroot):
     shape['vertices'] = sc.array(dims=['ignored', 'comp'], values=values, unit='mm')
     loaded = shape[()]
     assert sc.identical(loaded['vertices'],
-                        sc.vectors(dims=['vertices'], values=values, unit='mm'))
+                        sc.vectors(dims=['vertex'], values=values, unit='mm'))
 
 
 def test_field_properties(nxroot):
@@ -30,8 +30,8 @@ def test_field_properties(nxroot):
     shape['winding_order'] = sc.array(dims=['ignored'], values=[], unit=None)
     shape['faces'] = sc.array(dims=['ignored'], values=[], unit=None)
     loaded = shape[()]
-    assert loaded['vertices'].dims == ('vertices', )
+    assert loaded['vertices'].dims == ('vertex', )
     assert loaded['winding_order'].dims == ('winding_order', )
     assert loaded['winding_order'].unit is None
-    assert loaded['faces'].dims == ('faces', )
+    assert loaded['faces'].dims == ('face', )
     assert loaded['faces'].unit is None

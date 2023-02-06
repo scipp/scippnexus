@@ -20,7 +20,7 @@ def test_vertices_loaded_as_vector3(nxroot):
     shape['vertices'] = sc.array(dims=['ignored', 'comp'], values=values, unit='mm')
     loaded = shape[()]
     assert sc.identical(loaded['vertices'],
-                        sc.vectors(dims=['vertices'], values=values, unit='mm'))
+                        sc.vectors(dims=['vertex'], values=values, unit='mm'))
 
 
 def test_field_properties(nxroot):
@@ -32,8 +32,8 @@ def test_field_properties(nxroot):
                                   unit=None)
     shape['detector_number'] = sc.array(dims=['ignored'], values=[], unit=None)
     loaded = shape[()]
-    assert loaded['vertices'].dims == ('vertices', )
-    assert loaded['cylinders'].dims == ('cylinders', 'vertices_index')
+    assert loaded['vertices'].dims == ('vertex', )
+    assert loaded['cylinders'].dims == ('cylinder', 'vertex_index')
     assert loaded['cylinders'].unit is None
     assert loaded['detector_number'].dims == ('detector_number', )
     assert loaded['detector_number'].unit is None

@@ -9,11 +9,14 @@ from .leaf import Leaf
 
 
 class NXoff_geometry(Leaf):
+    _dims = {
+        'vertices': ('vertex', ),
+        'winding_order': ('winding_order', ),
+        'faces': ('face', )
+    }
 
     def _get_field_dims(self, name: str) -> Union[None, Tuple[str]]:
-        if name in ('vertices', 'winding_order', 'faces'):
-            return (name, )
-        return None
+        return self._dims.get(name)
 
     def _get_field_dtype(self, name: str) -> Union[None, sc.DType]:
         if name == 'vertices':
