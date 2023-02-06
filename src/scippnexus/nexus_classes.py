@@ -9,6 +9,7 @@ from .nxfermi_chopper import NXfermi_chopper  # noqa F401
 from .nxlog import NXlog  # noqa F401
 from .nxmonitor import NXmonitor  # noqa F401
 from .nxobject import NXobject, NXroot  # noqa F401
+from .nxoff_geometry import NXoff_geometry  # noqa F401
 from .nxsample import NXsample  # noqa F401
 from .nxsource import NXsource  # noqa F401
 
@@ -123,10 +124,6 @@ class NXmonochromator(NXobject):
 
 class NXnote(NXobject):
     """NXnote"""
-
-
-class NXoff_geometry(NXobject):
-    """NXoff_geometry"""
 
 
 class NXorientation(NXobject):
