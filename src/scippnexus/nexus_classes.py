@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+from .nxcylindrical_geometry import NXcylindrical_geometry  # noqa F401
 from .nxdata import NXdata  # noqa F401
 from .nxdetector import NXdetector  # noqa F401
 from .nxdisk_chopper import NXdisk_chopper  # noqa F401
@@ -64,10 +65,6 @@ class NXcollimator(NXobject):
 
 class NXcrystal(NXobject):
     """NXcrystal"""
-
-
-class NXcylindrical_geometry(NXobject):
-    """NXcylindrical_geometry"""
 
 
 class NXdetector_group(NXobject):
