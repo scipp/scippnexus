@@ -178,6 +178,11 @@ class NXdata(NXobject):
         if name in self._get_axes():
             # If there are named axes then items of same name are "dimension
             # coordinates", i.e., have a dim matching their name.
+            # However, if the item is not 1-D we need more labels. Try to use labels of
+            # signal if dimensionality matches.
+            if self._signal_name in self and self._get_child(name).ndim == len(
+                    self.shape):
+                return self[self._signal_name].dims
             return [name]
         return self._try_guess_dims(name)
 
@@ -210,7 +215,11 @@ class NXdata(NXobject):
         signal = signal[select]
         if self._errors_name is not None:
             stddevs = self[self._errors_name][select]
-            signal.variances = sc.pow(stddevs, sc.scalar(2)).values
+            # According to the standard, errors must have the same shape as the data.
+            # This is not the case in all files we observed, is there any harm in
+            # attempting a broadcast?
+            signal.variances = np.broadcast_to(sc.pow(stddevs, sc.scalar(2)).values,
+                                               shape=signal.shape)
 
         da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
 
