@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from copy import copy
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import scipp as sc
 
@@ -91,8 +91,8 @@ class _EventField:
         return self._grouping.shape
 
     @property
-    def unit(self):
-        self._nxevent_data.unit
+    def unit(self) -> None:
+        return self._nxevent_data.unit
 
     def __getitem__(self, select: ScippIndex) -> sc.DataArray:
         event_data: sc.DataArray = self._nxevent_data[self._event_select]
@@ -164,7 +164,7 @@ class NXdetector(NXobject):
         return self._signal.unit
 
     @property
-    def _event_grouping(self) -> Union[None, Field]:
+    def _event_grouping(self) -> Union[None, Dict[str, Any]]:
         for key in self._detector_number_fields:
             if key in self:
                 return {'grouping_key': key, 'grouping': self[key]}
