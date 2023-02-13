@@ -28,11 +28,16 @@ class NXtransformations(NXobject):
     """Group of transformations."""
 
     def _getitem(self, index: ScippIndex) -> sc.DataGroup:
-        return sc.DataGroup({
-            name: get_full_transformation_starting_at(Transformation(child),
-                                                      index=index)
-            for name, child in self.items()
-        })
+
+        def get_transformation(field: Field):
+            transformation = Transformation(field)
+            if 'depends_on' in field.attrs:
+                return get_full_transformation_starting_at(transformation, index=index)
+            return transformation[index]
+
+        return sc.DataGroup(
+            {name: get_transformation(child)
+             for name, child in self.items()})
 
 
 class Transformation:

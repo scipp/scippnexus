@@ -228,8 +228,7 @@ def test_nxtransformations_group_single_item(nxroot):
     vector = sc.vector(value=[0, 1, 1])
     t = value.to(unit='m') * vector
     expected = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m') *
-                sc.spatial.affine_transform(value=np.identity(4), unit='m'))
+                sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
 
     transformations = nxroot.create_class('transformations', NXtransformations)
     write_translation(transformations, 't1', value, offset, vector)
@@ -248,15 +247,13 @@ def test_nxtransformations_group_two_independent_items(nxroot):
     t = value.to(unit='m') * vector
     write_translation(transformations, 't1', value, offset, vector)
     expected1 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m') *
-                 sc.spatial.affine_transform(value=np.identity(4), unit='m'))
+                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
 
     value = value * 0.1
     t = value.to(unit='m') * vector
     write_translation(transformations, 't2', value, offset, vector)
     expected2 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m') *
-                 sc.spatial.affine_transform(value=np.identity(4), unit='m'))
+                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
 
     loaded = nxroot['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
@@ -273,8 +270,7 @@ def test_nxtransformations_group_single_chain(nxroot):
     t = value.to(unit='m') * vector
     write_translation(transformations, 't1', value, offset, vector)
     expected1 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m') *
-                 sc.spatial.affine_transform(value=np.identity(4), unit='m'))
+                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
 
     value = value * 0.1
     t = value.to(unit='m') * vector
@@ -309,8 +305,7 @@ def test_slice_transformations(nxroot):
     value1.attrs['offset_units'] = str(offset.unit)
     value1.attrs['vector'] = vector.value
 
-    expected = sc.spatial.affine_transform(value=np.identity(4), unit=t.unit)
-    expected = t * (offset * expected)
+    expected = t * offset
 
     assert sc.identical(nxroot['transformations']['time', 1:3]['t1'], expected['time',
                                                                                1:3])
