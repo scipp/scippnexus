@@ -291,7 +291,7 @@ def test_nxtransformations_group_single_chain(nxroot):
     assert sc.allclose(loaded['t2'], expected2)
 
 
-def test_chain_with_multiple_values_asd(nxroot):
+def test_slice_transformations(nxroot):
     transformations = nxroot.create_class('transformations', NXtransformations)
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2, 3.3], unit='m'),
