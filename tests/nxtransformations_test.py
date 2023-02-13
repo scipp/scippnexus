@@ -77,10 +77,8 @@ def test_chain_with_single_values_and_different_unit(nxroot):
     value2.attrs['transformation_type'] = 'translation'
     value2.attrs['vector'] = vector.value
 
-    expected = sc.spatial.affine_transform(value=np.identity(4), unit=t.unit)
-    expected = expected * sc.spatial.translations(
-        dims=t.dims, values=2 * t.values, unit=t.unit)
-    expected = expected * sc.spatial.translation(value=[0.001, 0.002, 0.003], unit='m')
+    expected = (sc.spatial.translations(dims=t.dims, values=2 * t.values, unit=t.unit) *
+                sc.spatial.translation(value=[0.001, 0.002, 0.003], unit='m'))
     assert sc.identical(detector[...].coords['depends_on'], expected)
 
 
@@ -141,8 +139,7 @@ def test_chain_with_multiple_values(nxroot):
     value2.attrs['transformation_type'] = 'translation'
     value2.attrs['vector'] = vector.value
 
-    expected = sc.spatial.affine_transform(value=np.identity(4), unit=t.unit)
-    expected = t * (t * (offset * expected))
+    expected = t * (t * offset)
     assert sc.identical(detector[...].coords['depends_on'].value, expected)
 
 
@@ -175,8 +172,7 @@ def test_chain_with_multiple_values_and_different_time_unit(nxroot):
     value2.attrs['transformation_type'] = 'translation'
     value2.attrs['vector'] = vector.value
 
-    expected = sc.spatial.affine_transform(value=np.identity(4), unit=t.unit)
-    expected = t * (t * (offset * expected))
+    expected = t * (t * offset)
     assert sc.identical(detector[...].coords['depends_on'].value, expected)
 
 
@@ -278,8 +274,7 @@ def test_nxtransformations_group_single_chain(nxroot):
     transformations['t2'].attrs['depends_on'] = 't1'
     expected2 = (expected1 *
                  sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m') *
-                 sc.spatial.affine_transform(value=np.identity(4), unit='m'))
+                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
 
     loaded = nxroot['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}

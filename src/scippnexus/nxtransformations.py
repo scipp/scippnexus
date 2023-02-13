@@ -28,16 +28,11 @@ class NXtransformations(NXobject):
     """Group of transformations."""
 
     def _getitem(self, index: ScippIndex) -> sc.DataGroup:
-
-        def get_transformation(field: Field):
-            transformation = Transformation(field)
-            if 'depends_on' in field.attrs:
-                return get_full_transformation_starting_at(transformation, index=index)
-            return transformation[index]
-
-        return sc.DataGroup(
-            {name: get_transformation(child)
-             for name, child in self.items()})
+        return sc.DataGroup({
+            name: get_full_transformation_starting_at(Transformation(child),
+                                                      index=index)
+            for name, child in self.items()
+        })
 
 
 class Transformation:
@@ -141,10 +136,11 @@ def get_full_transformation_starting_at(
         index: ScippIndex = None) -> Union[None, sc.DataArray, sc.Variable]:
     transformations = _get_transformations(t0, index=() if index is None else index)
 
-    total_transform = sc.spatial.affine_transform(value=np.identity(4), unit=sc.units.m)
-
+    total_transform = None
     for transform in transformations:
-        if isinstance(total_transform, sc.DataArray) and isinstance(
+        if total_transform is None:
+            total_transform = transform
+        elif isinstance(total_transform, sc.DataArray) and isinstance(
                 transform, sc.DataArray):
             unit = _smaller_unit(transform.coords['time'],
                                  total_transform.coords['time'])
