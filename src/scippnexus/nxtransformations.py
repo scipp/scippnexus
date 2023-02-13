@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+from __future__ import annotations
+
 from typing import List, Optional, Union
 
 import numpy as np
 import scipp as sc
-from prompt_toolkit.layout.processors import Transformation
 from scipp.scipy import interpolate
 
 from .nxobject import Field, NXobject, ScippIndex
