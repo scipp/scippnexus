@@ -13,6 +13,7 @@ from .nxobject import NXobject, NXroot  # noqa F401
 from .nxoff_geometry import NXoff_geometry  # noqa F401
 from .nxsample import NXsample  # noqa F401
 from .nxsource import NXsource  # noqa F401
+from .nxtransformations import NXtransformations  # noqa F401
 
 
 class NXentry(NXobject):
@@ -21,10 +22,6 @@ class NXentry(NXobject):
 
 class NXinstrument(NXobject):
     """Group of instrument-related information."""
-
-
-class NXtransformations(NXobject):
-    """Group of transformations."""
 
 
 class NXaperture(NXobject):
