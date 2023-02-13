@@ -6,11 +6,7 @@ from typing import List, Optional, Union
 import numpy as np
 import scipp as sc
 from prompt_toolkit.layout.processors import Transformation
-
-try:
-    from scipp.scipy import interpolate
-except ImportError:  # scipp<22.11
-    from scipp import interpolate
+from scipp.scipy import interpolate
 
 from .nxobject import Field, NXobject, ScippIndex
 
