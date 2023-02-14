@@ -441,3 +441,17 @@ def test_invalid_group_signal_attribute_is_ignored(nxroot):
     field = data.create_field('mysig', signal)
     field.attrs['signal'] = 1  # legacy way of defining signal
     assert sc.identical(data[...], sc.DataArray(signal))
+
+
+def test_legacy_axis_attrs_define_dim_names(nxroot):
+    da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
+    da.coords['xx'] = da.data['yy', 0]
+    da.coords['yy'] = da.data['xx', 0]
+    data = nxroot.create_class('data1', NXdata)
+    signal = data.create_field('signal', da.data)
+    xx = data.create_field('xx', da.coords['xx'])
+    yy = data.create_field('yy', da.coords['yy'])
+    signal.attrs['signal'] = 1
+    xx.attrs['axis'] = 1
+    yy.attrs['axis'] = 2
+    assert sc.identical(data[...], da)

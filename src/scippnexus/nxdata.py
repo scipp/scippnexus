@@ -100,6 +100,13 @@ class NXdata(NXobject):
         # corresponding coords. Special case of '.' entries means "no coord".
         if (axes := self._strategy.axes(self)) is not None:
             return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
+        axes = []
+        # Names of axes that have an "axis" attribute serve as dim labels in legacy case
+        for name, field in self._group.items():
+            if (axis := field.attrs.get('axis')) is not None:
+                axes.append((axis, name))
+        if axes:
+            return [x[1] for x in sorted(axes)]
         return None
 
     @property
@@ -172,6 +179,8 @@ class NXdata(NXobject):
         # since legacy files do not set this attribute.
         if (indices := self.attrs.get(f'{name}_indices')) is not None:
             return list(np.array(self.dims)[np.array(indices).flatten()])
+        if (axis := self._get_child(name).attrs.get('axis')) is not None:
+            return (self._get_group_dims()[axis - 1], )
         if name in [self._signal_name, self._errors_name]:
             return self._get_group_dims()  # if None, field determines dims itself
         if name in list(self.attrs.get('auxiliary_signals', [])):
