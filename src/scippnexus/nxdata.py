@@ -11,6 +11,7 @@ import scipp as sc
 
 from ._common import to_child_select
 from .nxobject import Field, NexusStructureError, NXobject, ScippIndex, asarray
+from .nxtransformations import NXtransformations
 from .typing import H5Group
 
 
@@ -242,7 +243,10 @@ class NXdata(NXobject):
         for name in self:
             if name in skip:
                 continue
-            if not isinstance(self._get_child(name), Field):
+            # It is not entirely clear whether skipping NXtransformations is the right
+            # solution. In principle NXobject will load them via the 'depends_on'
+            # mechanism, so for valid files this should be sufficient.
+            if not isinstance(self._get_child(name), (Field, NXtransformations)):
                 raise NexusStructureError(
                     "Invalid NXdata: may not contain nested groups")
 
