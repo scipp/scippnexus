@@ -31,7 +31,8 @@ class NXdataStrategy:
     def signal(group):
         """Name of the signal field."""
         if (name := group.attrs.get('signal')) is not None:
-            return name
+            if name in group:
+                return name
         # Legacy NXdata defines signal not as group attribute, but attr on dataset
         for name in group.keys():
             # What is the meaning of the attribute value? It is undocumented, we simply

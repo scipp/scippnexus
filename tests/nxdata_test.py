@@ -422,3 +422,22 @@ def test_slicing_with_bin_edge_coord_returns_bin_edges(nxroot):
     assert sc.identical(data['xx', 0:1], da['xx', 0:1])
     assert sc.identical(data['xx', 1:3], da['xx', 1:3])
     assert sc.identical(data['xx', 1:1], da['xx', 1:1])  # empty slice
+
+
+def test_legacy_signal_attr_is_used(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
+    data = nxroot.create_class('data1', NXdata)
+    data.attrs['axes'] = signal.dims
+    field = data.create_field('mysig', signal)
+    field.attrs['signal'] = 1  # legacy way of defining signal
+    assert sc.identical(data[...], sc.DataArray(signal))
+
+
+def test_invalid_group_signal_attribute_is_ignored(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
+    data = nxroot.create_class('data1', NXdata)
+    data.attrs['axes'] = signal.dims
+    data.attrs['signal'] = 'signal'
+    field = data.create_field('mysig', signal)
+    field.attrs['signal'] = 1  # legacy way of defining signal
+    assert sc.identical(data[...], sc.DataArray(signal))
