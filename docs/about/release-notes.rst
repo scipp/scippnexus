@@ -28,6 +28,23 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
+v23.02.0
+--------
+
+Features
+~~~~~~~~
+
+* Improve handling of files with legacy ``signal`` and ``axis`` attributes, yielding better dim labels `#108 <https://github.com/scipp/scippnexus/pull/108>`_.
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+Bugfixes
+~~~~~~~~
+
+* Fix issue where subgroups in NXdata-like groups where silently skipped.
+  This now falls back to loading as ``scipp.DataGroup`` `#108 <https://github.com/scipp/scippnexus/pull/108>`_.
+
 v23.01.0
 --------
 
