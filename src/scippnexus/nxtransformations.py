@@ -1,16 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Union
+from __future__ import annotations
+
+from typing import List, Optional, Union
 
 import numpy as np
 import scipp as sc
-import scipp.spatial
-
-try:
-    from scipp.scipy import interpolate
-except ImportError:  # scipp<22.11
-    from scipp import interpolate
+from scipp.scipy import interpolate
 
 from .nxobject import Field, NXobject, ScippIndex
 
@@ -19,12 +16,23 @@ class TransformationError(Exception):
     pass
 
 
-def make_transformation(obj, /, path):
+def make_transformation(obj, /, path) -> Optional[Transformation]:
     if path.startswith('/'):
         return Transformation(obj.file[path])
     elif path != '.':
         return Transformation(obj.parent[path])
     return None  # end of chain
+
+
+class NXtransformations(NXobject):
+    """Group of transformations."""
+
+    def _getitem(self, index: ScippIndex) -> sc.DataGroup:
+        return sc.DataGroup({
+            name: get_full_transformation_starting_at(Transformation(child),
+                                                      index=index)
+            for name, child in self.items()
+        })
 
 
 class Transformation:
@@ -110,7 +118,8 @@ def _smaller_unit(a, b):
         return b.unit
 
 
-def get_full_transformation(depends_on: Field) -> Union[None, sc.DataArray]:
+def get_full_transformation(
+        depends_on: Field) -> Union[None, sc.DataArray, sc.Variable]:
     """
     Get the 4x4 transformation matrix for a component, resulting
     from the full chain of transformations linked by "depends_on"
@@ -118,12 +127,20 @@ def get_full_transformation(depends_on: Field) -> Union[None, sc.DataArray]:
     """
     if (t0 := make_transformation(depends_on, depends_on[()])) is None:
         return None
-    transformations = _get_transformations(t0)
+    return get_full_transformation_starting_at(t0)
 
-    total_transform = sc.spatial.affine_transform(value=np.identity(4), unit=sc.units.m)
 
+def get_full_transformation_starting_at(
+        t0: Transformation,
+        *,
+        index: ScippIndex = None) -> Union[None, sc.DataArray, sc.Variable]:
+    transformations = _get_transformations(t0, index=() if index is None else index)
+
+    total_transform = None
     for transform in transformations:
-        if isinstance(total_transform, sc.DataArray) and isinstance(
+        if total_transform is None:
+            total_transform = transform
+        elif isinstance(total_transform, sc.DataArray) and isinstance(
                 transform, sc.DataArray):
             unit = _smaller_unit(transform.coords['time'],
                                  total_transform.coords['time'])
@@ -146,12 +163,13 @@ def get_full_transformation(depends_on: Field) -> Union[None, sc.DataArray]:
     return total_transform
 
 
-def _get_transformations(transform: Union[Field, NXobject]):
+def _get_transformations(transform: Transformation, *,
+                         index: ScippIndex) -> List[Union[sc.DataArray, sc.Variable]]:
     """Get all transformations in the depends_on chain."""
     transformations = []
     t = transform
     while t is not None:
-        transformations.append(t[()])
+        transformations.append(t[index])
         t = t.depends_on
     # TODO: this list of transformation should probably be cached in the future
     # to deal with changing beamline components (e.g. pixel positions) during a
