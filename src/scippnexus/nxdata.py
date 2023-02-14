@@ -11,6 +11,7 @@ import scipp as sc
 
 from ._common import to_child_select
 from .nxobject import Field, NexusStructureError, NXobject, ScippIndex, asarray
+from .nxtransformations import NXtransformations
 from .typing import H5Group
 
 
@@ -31,7 +32,8 @@ class NXdataStrategy:
     def signal(group):
         """Name of the signal field."""
         if (name := group.attrs.get('signal')) is not None:
-            return name
+            if name in group:
+                return name
         # Legacy NXdata defines signal not as group attribute, but attr on dataset
         for name in group.keys():
             # What is the meaning of the attribute value? It is undocumented, we simply
@@ -99,6 +101,13 @@ class NXdata(NXobject):
         # corresponding coords. Special case of '.' entries means "no coord".
         if (axes := self._strategy.axes(self)) is not None:
             return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
+        axes = []
+        # Names of axes that have an "axis" attribute serve as dim labels in legacy case
+        for name, field in self._group.items():
+            if (axis := field.attrs.get('axis')) is not None:
+                axes.append((axis, name))
+        if axes:
+            return [x[1] for x in sorted(axes)]
         return None
 
     @property
@@ -171,6 +180,8 @@ class NXdata(NXobject):
         # since legacy files do not set this attribute.
         if (indices := self.attrs.get(f'{name}_indices')) is not None:
             return list(np.array(self.dims)[np.array(indices).flatten()])
+        if (axis := self._get_child(name).attrs.get('axis')) is not None:
+            return (self._get_group_dims()[axis - 1], )
         if name in [self._signal_name, self._errors_name]:
             return self._get_group_dims()  # if None, field determines dims itself
         if name in list(self.attrs.get('auxiliary_signals', [])):
@@ -229,6 +240,15 @@ class NXdata(NXobject):
         for name in self:
             if (errors := self._strategy.coord_errors(self, name)) is not None:
                 skip += [errors]
+        for name in self:
+            if name in skip:
+                continue
+            # It is not entirely clear whether skipping NXtransformations is the right
+            # solution. In principle NXobject will load them via the 'depends_on'
+            # mechanism, so for valid files this should be sufficient.
+            if not isinstance(self._get_child(name), (Field, NXtransformations)):
+                raise NexusStructureError(
+                    "Invalid NXdata: may not contain nested groups")
 
         for name, field in self[Field].items():
             if name in skip:

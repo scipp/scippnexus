@@ -422,3 +422,46 @@ def test_slicing_with_bin_edge_coord_returns_bin_edges(nxroot):
     assert sc.identical(data['xx', 0:1], da['xx', 0:1])
     assert sc.identical(data['xx', 1:3], da['xx', 1:3])
     assert sc.identical(data['xx', 1:1], da['xx', 1:1])  # empty slice
+
+
+def test_legacy_signal_attr_is_used(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
+    data = nxroot.create_class('data1', NXdata)
+    data.attrs['axes'] = signal.dims
+    field = data.create_field('mysig', signal)
+    field.attrs['signal'] = 1  # legacy way of defining signal
+    assert sc.identical(data[...], sc.DataArray(signal))
+
+
+def test_invalid_group_signal_attribute_is_ignored(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
+    data = nxroot.create_class('data1', NXdata)
+    data.attrs['axes'] = signal.dims
+    data.attrs['signal'] = 'signal'
+    field = data.create_field('mysig', signal)
+    field.attrs['signal'] = 1  # legacy way of defining signal
+    assert sc.identical(data[...], sc.DataArray(signal))
+
+
+def test_legacy_axis_attrs_define_dim_names(nxroot):
+    da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
+    da.coords['xx'] = da.data['yy', 0]
+    da.coords['yy'] = da.data['xx', 0]
+    data = nxroot.create_class('data1', NXdata)
+    signal = data.create_field('signal', da.data)
+    xx = data.create_field('xx', da.coords['xx'])
+    yy = data.create_field('yy', da.coords['yy'])
+    signal.attrs['signal'] = 1
+    xx.attrs['axis'] = 1
+    yy.attrs['axis'] = 2
+    assert sc.identical(data[...], da)
+
+
+def test_nested_groups_trigger_fallback_to_load_as_data_group(nxroot):
+    da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
+    data = nxroot.create_class('data1', NXdata)
+    data.create_field('signal', da.data)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data.create_class('nested', NXdata)
+    assert sc.identical(data[...], sc.DataGroup(signal=da.data, nested=sc.DataGroup()))
