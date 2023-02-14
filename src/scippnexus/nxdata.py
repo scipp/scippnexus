@@ -239,6 +239,12 @@ class NXdata(NXobject):
         for name in self:
             if (errors := self._strategy.coord_errors(self, name)) is not None:
                 skip += [errors]
+        for name in self:
+            if name in skip:
+                continue
+            if not isinstance(self._get_child(name), Field):
+                raise NexusStructureError(
+                    "Invalid NXdata: may not contain nested groups")
 
         for name, field in self[Field].items():
             if name in skip:

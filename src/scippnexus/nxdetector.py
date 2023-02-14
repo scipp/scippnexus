@@ -73,6 +73,10 @@ class _EventField:
         self._grouping = grouping
 
     @property
+    def name(self) -> str:
+        return self._nxevent_data.name
+
+    @property
     def attrs(self):
         return self._nxevent_data.attrs
 
@@ -175,16 +179,21 @@ class NXdetector(NXobject):
         return self._nxdata()._signal
 
     def _nxdata(self, use_event_signal=True) -> NXdata:
-        if use_event_signal and self.events is not None:
-            signal = _EventField(self.events, self._event_select,
-                                 **self._event_grouping)
+        events = self.events
+        if use_event_signal and events is not None:
+            signal = _EventField(events, self._event_select, **self._event_grouping)
         else:
             signal = None
-        return NXdata(
-            self._group,
-            strategy=NXdetectorStrategy,
-            signal_override=signal,
-            skip=self._nxevent_data_fields if self.events is not None else None)
+        skip = None
+        if events is not None:
+            if events.name == self.name:
+                skip = self._nxevent_data_fields
+            else:
+                skip = [events.name.split('/')[-1]]  # name of the subgroup
+        return NXdata(self._group,
+                      strategy=NXdetectorStrategy,
+                      signal_override=signal,
+                      skip=skip)
 
     @property
     def events(self) -> Union[None, NXevent_data]:

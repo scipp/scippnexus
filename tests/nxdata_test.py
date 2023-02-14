@@ -455,3 +455,13 @@ def test_legacy_axis_attrs_define_dim_names(nxroot):
     xx.attrs['axis'] = 1
     yy.attrs['axis'] = 2
     assert sc.identical(data[...], da)
+
+
+def test_nested_groups_trigger_fallback_to_load_as_data_group(nxroot):
+    da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
+    data = nxroot.create_class('data1', NXdata)
+    data.create_field('signal', da.data)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data.create_class('nested', NXdata)
+    assert sc.identical(data[...], sc.DataGroup(signal=da.data, nested=sc.DataGroup()))
