@@ -444,7 +444,7 @@ class NXobject:
         ...
 
     @overload
-    def __getitem__(self, name: Union[type, Tuple[type]]) -> Dict[str, 'NXobject']:
+    def __getitem__(self, name: Union[type, List[type]]) -> Dict[str, 'NXobject']:
         ...
 
     def __getitem__(self, name):
