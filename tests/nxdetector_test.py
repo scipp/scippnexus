@@ -3,7 +3,14 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from scippnexus import NexusStructureError, NXdetector, NXentry, NXevent_data, NXroot
+from scippnexus import (
+    NexusStructureError,
+    NXdetector,
+    NXentry,
+    NXevent_data,
+    NXoff_geometry,
+    NXroot,
+)
 
 
 @pytest.fixture()
@@ -304,3 +311,34 @@ def test_nxevent_data_selection_yields_correct_pulses(nxroot):
     assert np.array_equal(Load()['pulse', -2:-1], [2])
     assert np.array_equal(Load()['pulse', -2:], [2, 1])
     assert np.array_equal(Load()['pulse', :-2], [3, 0])
+
+
+def create_off_geometry_detector_numbers_1234(group, name):
+    off = group.create_class(name, NXoff_geometry)
+    # square with point in center
+    values = np.array([[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0], [0.5, 0.5, 0]])
+    off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
+    # triangles
+    off['winding_order'] = sc.array(dims=['_'],
+                                    values=[0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4],
+                                    unit=None)
+    off['faces'] = sc.array(dims=['_'], values=[0, 3, 6, 9], unit=None)
+    off['detector_faces'] = sc.array(dims=['_', 'dummy'],
+                                     values=[[0, 1], [1, 2], [2, 3], [3, 4]],
+                                     unit=None)
+
+
+def test_loads_data_with_coords_and_off_geometry(nxroot):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]]))
+    da.coords['detector_number'] = detector_numbers_xx_yy_1234()
+    da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_number', da.coords['detector_number'])
+    detector.create_field('xx', da.coords['xx'])
+    detector.create_field('data', da.data)
+    detector.attrs['axes'] = ['xx', 'yy']
+    create_off_geometry_detector_numbers_1234(detector, name='shape')
+    loaded = detector[...]
+    assert sc.identical(loaded.coords['shape'].bins.size(),
+                        sc.array(dims=da.dims, values=[[1, 1], [1, 1]], unit=None))

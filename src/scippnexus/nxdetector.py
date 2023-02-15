@@ -168,6 +168,13 @@ class NXdetector(NXobject):
         return self._signal.unit
 
     @property
+    def detector_number(self) -> Optional[Field]:
+        for key in self._detector_number_fields:
+            if key in self:
+                return key
+        return None
+
+    @property
     def _event_grouping(self) -> Union[None, Dict[str, Any]]:
         for key in self._detector_number_fields:
             if key in self:

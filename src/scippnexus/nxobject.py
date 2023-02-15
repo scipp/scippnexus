@@ -419,9 +419,13 @@ class NXobject:
             # loaded.
             if isinstance(t, str):
                 from .nexus_classes import NXtransformations
-                for name, group in self[NXtransformations].items():
-                    insert(name, group[()])
-
+                for key, group in self[NXtransformations].items():
+                    insert(key, group[()])
+        from .nxoff_geometry import NXoff_geometry, off_to_shape
+        for key, off in self[NXoff_geometry].items():
+            detector_number = getattr(self, 'detector_number', None)
+            detector_number = da.coords[detector_number]
+            da.coords[key] = off_to_shape(**off[()], detector_number=detector_number)
         return da
 
     def _get_children_by_nx_class(

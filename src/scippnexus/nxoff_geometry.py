@@ -5,14 +5,20 @@ from typing import Optional, Tuple, Union
 
 import scipp as sc
 
-from .nxobject import NXobject, ScippIndex
+from .nxobject import NXobject
 
 
-def off_to_shape(*,
-                 vertices: sc.Variable,
-                 winding_order: sc.Variable,
-                 faces: sc.Variable,
-                 detector_faces: Optional[sc.Variable] = None) -> sc.Variable:
+def off_to_shape(
+        *,
+        vertices: sc.Variable,
+        winding_order: sc.Variable,
+        faces: sc.Variable,
+        detector_faces: Optional[sc.Variable] = None,
+        detector_number: Optional[sc.Variable] = None
+) -> Union[sc.Variable, sc.DataArray]:
+    """
+    Convert OFF shape description to simpler shape representation.
+    """
     # TODO shape and dims should be:
     # [face] if no detector_faces.. or []? The latter! Wrap in scalar binned
     # [detector_number] otherwise (but must get name from parent?)
@@ -26,38 +32,27 @@ def off_to_shape(*,
     else:
         raise NotImplementedError("Conversion from OFF to shape not implemented for "
                                   "inconsistent number of vertices in faces.")
+    # TODO check that both or neither are None?
     if detector_faces is None:
         return sc.bins(begin=sc.index(0), dim=faces.dim, data=fvw)
     else:
-        shape_index = detector_faces['dummy', 0].copy()
-        detid = detector_faces['dummy', 1].copy()
+        shape_index = detector_faces['column', 0].copy()
+        detid = detector_faces['column', 1].copy()
         da = sc.DataArray(shape_index, coords={
             'detector_number': detid
-        }).group('detector_number')
+        }).group(detector_number.flatten(to='detector_number'))
         comps = da.bins.constituents
         comps['data'] = fvw[faces.dim, comps['data'].values]
-        return sc.DataArray(sc.bins(**comps), coords=da.coords)
+        return sc.bins(**comps).fold(dim='detector_number', sizes=detector_number.sizes)
 
 
 class NXoff_geometry(NXobject):
     _dims = {
-        'detector_faces': ('face', 'dummy'),
+        'detector_faces': ('face', 'column'),
         'vertices': ('vertex', ),
         'winding_order': ('winding_order', ),
         'faces': ('face', )
     }
-
-    @property
-    def dims(self) -> Tuple[str]:
-        if 'detector_faces' in self:
-            return 'TODO'
-        return ()
-
-    @property
-    def shape(self) -> Tuple[int]:
-        if 'detector_faces' in self:
-            return 'TODO'
-        return ()
 
     def _get_field_dims(self, name: str) -> Union[None, Tuple[str]]:
         return self._dims.get(name)
