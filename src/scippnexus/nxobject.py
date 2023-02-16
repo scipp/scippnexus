@@ -399,20 +399,14 @@ class NXobject:
                 container[name] = obj
 
         try:
+            from .nxcylindrical_geometry import NXcylindrical_geometry
+            from .nxoff_geometry import NXoff_geometry
             da = self._getitem(name)
-            from .nxoff_geometry import NXoff_geometry, off_to_shape
-
-            # TODO if loads as DataGroup (NXsample?), do we need to wrap in binned?
-            # cases:
-            # DataArray/DataGroup
-            # detector_numbers or not (never detector numbers in DataGroup case?)
-            # scalar shape
-            for key, off in self[NXoff_geometry].items():
-                if (detnum := getattr(self, 'detector_number', None)) is not None:
-                    detnum = da.coords[detnum]
-                    insert(da, key, off_to_shape(**off[()], detector_number=detnum))
-                else:
-                    da[key] = off_to_shape(**off[()])
+            for key, child in self[[NXcylindrical_geometry, NXoff_geometry]].items():
+                detector_number = getattr(self, 'detector_number', None)
+                if detector_number is not None:
+                    detector_number = da.coords[detector_number]
+                insert(da, key, child.load_as_array(detector_number=detector_number))
         except Exception as e:
             # If the child class cannot load this group, we fall back to returning the
             # underlying datasets in a DataGroup.

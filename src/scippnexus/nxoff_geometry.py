@@ -17,10 +17,6 @@ def off_to_shape(*,
     """
     Convert OFF shape description to simpler shape representation.
     """
-    # TODO shape and dims should be:
-    # [face] if no detector_faces.. or []? The latter! Wrap in scalar binned
-    # [detector_number] otherwise (but must get name from parent?)
-    # TODO select
     vw = vertices[winding_order.values]
     fvw = sc.bins(begin=faces, data=vw, dim=vw.dim)
     low = fvw.bins.size().min().value
@@ -30,8 +26,6 @@ def off_to_shape(*,
     else:
         raise NotImplementedError("Conversion from OFF to shape not implemented for "
                                   "inconsistent number of vertices in faces.")
-    # TODO check that both or neither are None?
-    # TODO no! may be single shape for all detectors! return scalar binned
     if detector_faces is None:  # if detector_number is not None, all have same shape
         return sc.bins(begin=sc.index(0), dim=faces.dim, data=fvw)
     if detector_number is None:
@@ -62,3 +56,7 @@ class NXoff_geometry(NXobject):
         if name == 'vertices':
             return sc.DType.vector3
         return None
+
+    def load_as_array(self,
+                      detector_number: Optional[sc.Variable] = None) -> sc.Variable:
+        return off_to_shape(**self[()], detector_number=detector_number)

@@ -51,5 +51,6 @@ class NXcylindrical_geometry(NXobject):
             return sc.DType.vector3
         return None
 
-    def as_array(self, detector_number: Optional[sc.Variable] = None) -> sc.Variable:
+    def load_as_array(self,
+                      detector_number: Optional[sc.Variable] = None) -> sc.Variable:
         return _parse(**self[()], parent_detector_number=detector_number)
