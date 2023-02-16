@@ -35,6 +35,7 @@ Features
 ~~~~~~~~
 
 * Improve handling of files with legacy ``signal`` and ``axis`` attributes, yielding better dim labels `#108 <https://github.com/scipp/scippnexus/pull/108>`_.
+* Improve loading and parsing of ``NXoff_geometry`` and ``NXcylindrical_geometry`` `#109 <https://github.com/scipp/scippnexus/pull/109>`_.
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
