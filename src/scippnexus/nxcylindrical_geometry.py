@@ -30,13 +30,16 @@ def _parse(*,
             "NXcylindrical_geometry contains mapping to `detector_number`.")
     # detector_number gives indices into cylinders, the naming in the NeXus
     # standard appears to be misleading
-    if parent_detector_number.size != detector_number.size:
+    if parent_detector_number.values.size != detector_number.values.size:
         raise NexusStructureError(
             "Number of detector numbers in NXcylindrical_geometry "
             "does not match the one given by the parent.")
     detecting_cylinders = ds['cylinder', detector_number.values]
     # One cylinder per detector
-    begin = sc.arange('dummy', parent_detector_number.size, unit=None, dtype='int64')
+    begin = sc.arange('dummy',
+                      parent_detector_number.values.size,
+                      unit=None,
+                      dtype='int64')
     end = begin + sc.index(1)
     shape = sc.bins(begin=begin, end=end, dim='cylinder', data=detecting_cylinders)
     return shape.fold(dim='dummy', sizes=parent_detector_number.sizes)

@@ -454,7 +454,6 @@ def test_cylindrical_geometry_with_detector_numbers(nxroot):
     loaded = detector[...]
     shape = loaded.coords['shape']
     assert shape.dims == detector_number.dims
-    print(shape.bins.size())
     for i in [0, 3]:
         assert sc.identical(
             shape.values[i],
