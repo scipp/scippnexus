@@ -390,8 +390,29 @@ class NXobject:
                              **self.child_params.get(name, {}))
             else:
                 return self._make(item)
+
+        def insert(container, name, obj):
+            if hasattr(container, 'coords'):
+                container.coords[name] = obj if isinstance(
+                    obj, sc.Variable) else sc.scalar(obj)
+            else:
+                container[name] = obj
+
         try:
             da = self._getitem(name)
+            from .nxoff_geometry import NXoff_geometry, off_to_shape
+
+            # TODO if loads as DataGroup (NXsample?), do we need to wrap in binned?
+            # cases:
+            # DataArray/DataGroup
+            # detector_numbers or not (never detector numbers in DataGroup case?)
+            # scalar shape
+            for key, off in self[NXoff_geometry].items():
+                if (detnum := getattr(self, 'detector_number', None)) is not None:
+                    detnum = da.coords[detnum]
+                    insert(da, key, off_to_shape(**off[()], detector_number=detnum))
+                else:
+                    da[key] = off_to_shape(**off[()])
         except Exception as e:
             # If the child class cannot load this group, we fall back to returning the
             # underlying datasets in a DataGroup.
@@ -404,15 +425,7 @@ class NXobject:
                 warnings.warn(msg)
             da = NXobject._getitem(self, name)
         if (t := self.depends_on) is not None:
-
-            def insert(name, obj):
-                if hasattr(da, 'coords'):
-                    da.coords[name] = obj if isinstance(obj,
-                                                        sc.Variable) else sc.scalar(obj)
-                else:
-                    da[name] = obj
-
-            insert('depends_on', t)
+            insert(da, 'depends_on', t)
             # If loading the transformation failed, 'depends_on' returns a string, the
             # path to the transformation. If this is a nested group, we load it here.
             # Note that this info is currently incomplete, since attributes are not
@@ -420,12 +433,7 @@ class NXobject:
             if isinstance(t, str):
                 from .nexus_classes import NXtransformations
                 for key, group in self[NXtransformations].items():
-                    insert(key, group[()])
-        from .nxoff_geometry import NXoff_geometry, off_to_shape
-        for key, off in self[NXoff_geometry].items():
-            detector_number = getattr(self, 'detector_number', None)
-            detector_number = da.coords[detector_number]
-            da.coords[key] = off_to_shape(**off[()], detector_number=detector_number)
+                    insert(da, key, group[()])
         return da
 
     def _get_children_by_nx_class(

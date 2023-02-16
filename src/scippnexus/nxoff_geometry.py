@@ -5,17 +5,15 @@ from typing import Optional, Tuple, Union
 
 import scipp as sc
 
-from .nxobject import NXobject
+from .nxobject import NexusStructureError, NXobject
 
 
-def off_to_shape(
-        *,
-        vertices: sc.Variable,
-        winding_order: sc.Variable,
-        faces: sc.Variable,
-        detector_faces: Optional[sc.Variable] = None,
-        detector_number: Optional[sc.Variable] = None
-) -> Union[sc.Variable, sc.DataArray]:
+def off_to_shape(*,
+                 vertices: sc.Variable,
+                 winding_order: sc.Variable,
+                 faces: sc.Variable,
+                 detector_faces: Optional[sc.Variable] = None,
+                 detector_number: Optional[sc.Variable] = None) -> sc.Variable:
     """
     Convert OFF shape description to simpler shape representation.
     """
@@ -33,17 +31,20 @@ def off_to_shape(
         raise NotImplementedError("Conversion from OFF to shape not implemented for "
                                   "inconsistent number of vertices in faces.")
     # TODO check that both or neither are None?
-    if detector_faces is None:
+    # TODO no! may be single shape for all detectors! return scalar binned
+    if detector_faces is None:  # if detector_number is not None, all have same shape
         return sc.bins(begin=sc.index(0), dim=faces.dim, data=fvw)
-    else:
-        shape_index = detector_faces['column', 0].copy()
-        detid = detector_faces['column', 1].copy()
-        da = sc.DataArray(shape_index, coords={
-            'detector_number': detid
-        }).group(detector_number.flatten(to='detector_number'))
-        comps = da.bins.constituents
-        comps['data'] = fvw[faces.dim, comps['data'].values]
-        return sc.bins(**comps).fold(dim='detector_number', sizes=detector_number.sizes)
+    if detector_number is None:
+        raise NexusStructureError("`detector_number` not given but NXoff_geometry "
+                                  "contains `detector_faces`.")
+    shape_index = detector_faces['column', 0].copy()
+    detid = detector_faces['column', 1].copy()
+    da = sc.DataArray(shape_index, coords={
+        'detector_number': detid
+    }).group(detector_number.flatten(to='detector_number'))
+    comps = da.bins.constituents
+    comps['data'] = fvw[faces.dim, comps['data'].values]
+    return sc.bins(**comps).fold(dim='detector_number', sizes=detector_number.sizes)
 
 
 class NXoff_geometry(NXobject):
