@@ -39,7 +39,7 @@ def _parse(*,
 class NXcylindrical_geometry(NXobject):
     _dims = {
         'vertices': ('vertex', ),
-        'detector_number': ('cylinder_index', ),
+        'detector_number': ('detector_number', ),
         'cylinders': ('cylinder', 'vertex_index')
     }
 
