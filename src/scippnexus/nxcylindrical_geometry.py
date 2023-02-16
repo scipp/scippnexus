@@ -13,12 +13,17 @@ def _parse(*,
            cylinders: sc.Variable,
            detector_number: Optional[sc.Variable] = None,
            parent_detector_number: Optional[sc.Variable] = None) -> sc.Variable:
-    cv = vertices[cylinders.values.ravel()]
-    cv = cv.fold(dim=vertices.dim, sizes=cylinders.sizes)
-    cv = cv.rename({cylinders.dims[-1]: vertices.dim})
+    face1_center = cylinders['vertex_index', 0]
+    face1_edge = cylinders['vertex_index', 1]
+    face2_center = cylinders['vertex_index', 2]
+    ds = sc.Dataset()
+    ds['face1_center'] = vertices[face1_center.values]
+    ds['face1_edge'] = vertices[face1_edge.values]
+    ds['face2_center'] = vertices[face2_center.values]
+    ds = ds.rename(**{vertices.dim: 'cylinder'})
     if detector_number is None:
         # All cylinders belong to the same shape
-        return sc.bins(begin=sc.index(0), dim='cylinder', data=cv)
+        return sc.bins(begin=sc.index(0), dim='cylinder', data=ds)
     if parent_detector_number is None:
         raise NexusStructureError(
             "`detector_number` not given, but "
@@ -29,11 +34,12 @@ def _parse(*,
         raise NexusStructureError(
             "Number of detector numbers in NXcylindrical_geometry "
             "does not match the one given by the parent.")
-    detecting_cylinders = cv['cylinder', detector_number.values]
+    detecting_cylinders = ds['cylinder', detector_number.values]
     # One cylinder per detector
     begin = sc.arange('dummy', parent_detector_number.size, unit=None, dtype='int64')
     end = begin + sc.index(1)
-    return sc.bins(begin=begin, end=end, dim='cylinder', data=detecting_cylinders)
+    shape = sc.bins(begin=begin, end=end, dim='cylinder', data=detecting_cylinders)
+    return shape.fold(dim='dummy', sizes=parent_detector_number.sizes)
 
 
 class NXcylindrical_geometry(NXobject):

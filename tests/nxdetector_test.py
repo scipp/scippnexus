@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
+import scippnexus as snx
 from scippnexus import (
     NexusStructureError,
     NXdetector,
@@ -360,7 +361,7 @@ def test_missing_detector_numbers_triggers_fallback_given_off_geometry_with_det_
     assert isinstance(detector[...], sc.DataGroup)
 
 
-def test_off_geometry_with_detector_faces_loaded_as_0d_with_multiple_faces(nxroot):
+def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nxroot):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
@@ -368,5 +369,111 @@ def test_off_geometry_with_detector_faces_loaded_as_0d_with_multiple_faces(nxroo
     create_off_geometry_detector_numbers_1234(detector,
                                               name='shape',
                                               detector_faces=False)
-    assert detector[...].coords['shape'].dims == ()
-    assert sc.identical(detector[...].coords['shape'].bins.size(), sc.index(4))
+    loaded = detector[...]
+    assert loaded.coords['shape'].dims == ()
+    assert sc.identical(loaded.coords['shape'].bins.size(), sc.index(4))
+
+
+def create_cylindrical_geometry_detector_numbers_1234(group: snx.NXobject,
+                                                      name: str,
+                                                      detector_numbers: bool = True):
+    shape = group.create_class(name, snx.NXcylindrical_geometry)
+    values = np.array([[0, 0, 0], [0, 1, 0], [3, 0, 0]])
+    shape['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
+    shape['cylinders'] = sc.array(dims=['_', 'vertex'],
+                                  values=[[0, 1, 2], [2, 1, 0]],
+                                  unit=None)
+    if detector_numbers:
+        shape['detector_number'] = sc.array(dims=['_'], values=[0, 1, 1, 0], unit=None)
+
+
+def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
+    var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('data', var)
+    detector.attrs['axes'] = ['xx', 'yy']
+    create_cylindrical_geometry_detector_numbers_1234(detector,
+                                                      name='shape',
+                                                      detector_numbers=False)
+    loaded = detector[...]
+    shape = loaded.coords['shape']
+    assert shape.dims == ()
+    assert sc.identical(shape.bins.size(), sc.index(2))
+    assert sc.identical(
+        shape.value,
+        sc.Dataset({
+            'face1_center':
+            sc.vectors(dims=['cylinder'], values=[[0, 0, 0], [3, 0, 0]], unit='m'),
+            'face1_edge':
+            sc.vectors(dims=['cylinder'], values=[[0, 1, 0], [0, 1, 0]], unit='m'),
+            'face2_center':
+            sc.vectors(dims=['cylinder'], values=[[3, 0, 0], [0, 0, 0]], unit='m'),
+        }))
+
+
+def test_cylindrical_geometry_with_missing_parent_detector_numbers_triggers_fallback(
+        nxroot):
+    var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('data', var)
+    detector.attrs['axes'] = ['xx', 'yy']
+    create_cylindrical_geometry_detector_numbers_1234(detector,
+                                                      name='shape',
+                                                      detector_numbers=True)
+    loaded = detector[...]
+    assert isinstance(loaded, sc.DataGroup)
+    assert isinstance(loaded['shape'], sc.DataGroup)
+
+
+def test_cylindrical_geometry_with_inconsistent_detector_numbers_triggers_fallback(
+        nxroot):
+    var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1], [3.3]])
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('data', var)
+    detector.attrs['axes'] = ['xx', 'yy']
+    detector.create_field('detector_numbers',
+                          sc.array(dims=var.dims, values=[[1], [2]], unit=None))
+    create_cylindrical_geometry_detector_numbers_1234(detector,
+                                                      name='shape',
+                                                      detector_numbers=True)
+    loaded = detector[...]
+    assert isinstance(loaded, sc.DataGroup)
+    assert isinstance(loaded['shape'], sc.DataGroup)
+
+
+def test_cylindrical_geometry_with_detector_numbers(nxroot):
+    var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('data', var)
+    detector.attrs['axes'] = ['xx', 'yy']
+    detector_number = sc.array(dims=var.dims, values=[[1, 2], [3, 4]], unit=None)
+    detector.create_field('detector_number', detector_number)
+    create_cylindrical_geometry_detector_numbers_1234(detector,
+                                                      name='shape',
+                                                      detector_numbers=True)
+    loaded = detector[...]
+    shape = loaded.coords['shape']
+    assert shape.dims == detector_number.dims
+    print(shape.bins.size())
+    for i in [0, 3]:
+        assert sc.identical(
+            shape.values[i],
+            sc.Dataset({
+                'face1_center':
+                sc.vectors(dims=['cylinder'], values=[[0, 0, 0]], unit='m'),
+                'face1_edge':
+                sc.vectors(dims=['cylinder'], values=[[0, 1, 0]], unit='m'),
+                'face2_center':
+                sc.vectors(dims=['cylinder'], values=[[3, 0, 0]], unit='m'),
+            }))
+    for i in [1, 2]:
+        assert sc.identical(
+            shape.values[i],
+            sc.Dataset({
+                'face1_center':
+                sc.vectors(dims=['cylinder'], values=[[3, 0, 0]], unit='m'),
+                'face1_edge':
+                sc.vectors(dims=['cylinder'], values=[[0, 1, 0]], unit='m'),
+                'face2_center':
+                sc.vectors(dims=['cylinder'], values=[[0, 0, 0]], unit='m'),
+            }))
