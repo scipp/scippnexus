@@ -402,10 +402,10 @@ class NXobject:
             from .nxcylindrical_geometry import NXcylindrical_geometry
             from .nxoff_geometry import NXoff_geometry
             da = self._getitem(name)
+            detector_number = getattr(self, 'detector_number', None)
+            if detector_number is not None:
+                detector_number = da.coords[detector_number]
             for key, child in self[[NXcylindrical_geometry, NXoff_geometry]].items():
-                detector_number = getattr(self, 'detector_number', None)
-                if detector_number is not None:
-                    detector_number = da.coords[detector_number]
                 insert(da, key, child.load_as_array(detector_number=detector_number))
         except Exception as e:
             # If the child class cannot load this group, we fall back to returning the
