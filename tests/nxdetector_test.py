@@ -347,8 +347,11 @@ def test_loads_data_with_coords_and_off_geometry(nxroot, detid_name):
     detector.attrs['axes'] = ['xx', 'yy']
     create_off_geometry_detector_numbers_1234(detector, name='shape')
     loaded = detector[...]
+    expected = snx.nxoff_geometry.off_to_shape(
+        **detector['shape'][()], detector_number=da.coords['detector_number'])
     assert sc.identical(loaded.coords['shape'].bins.size(),
                         sc.array(dims=da.dims, values=[[1, 1], [1, 1]], unit=None))
+    assert sc.identical(loaded.coords['shape'], expected)
 
 
 def test_missing_detector_numbers_triggers_fallback_given_off_geometry_with_det_faces(
