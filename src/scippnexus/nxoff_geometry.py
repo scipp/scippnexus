@@ -17,17 +17,23 @@ def off_to_shape(*,
     """
     Convert OFF shape description to simpler shape representation.
     """
+    # Vertices in winding order. This duplicates vertices if they are part of more than
+    # one faces.
     vw = vertices[winding_order.values]
+    # Same as above, grouped by face.
     fvw = sc.bins(begin=faces, data=vw, dim=vw.dim)
     low = fvw.bins.size().min().value
     high = fvw.bins.size().max().value
     if low == high:
-        fvw = vw.fold(dim=vertices.dim, sizes={faces.dim: -1, vertices.dim: low})
+        # Vertices in winding order, groupbed by face. Unlike `fvw` above we now know
+        # that each face has the same number of vertices, so we can fold instead of
+        # using binned data.
+        shapes = vw.fold(dim=vertices.dim, sizes={faces.dim: -1, vertices.dim: low})
     else:
         raise NotImplementedError("Conversion from OFF to shape not implemented for "
                                   "inconsistent number of vertices in faces.")
     if detector_faces is None:  # if detector_number is not None, all have same shape
-        return sc.bins(begin=sc.index(0), dim=faces.dim, data=fvw)
+        return sc.bins(begin=sc.index(0), dim=faces.dim, data=shapes)
     if detector_number is None:
         raise NexusStructureError("`detector_number` not given but NXoff_geometry "
                                   "contains `detector_faces`.")
@@ -37,7 +43,7 @@ def off_to_shape(*,
         'detector_number': detid
     }).group(detector_number.flatten(to='detector_number'))
     comps = da.bins.constituents
-    comps['data'] = fvw[faces.dim, comps['data'].values]
+    comps['data'] = shapes[faces.dim, comps['data'].values]
     return sc.bins(**comps).fold(dim='detector_number', sizes=detector_number.sizes)
 
 
