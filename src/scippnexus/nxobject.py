@@ -390,8 +390,10 @@ class NXobject:
                              **self.child_params.get(name, {}))
             else:
                 return self._make(item)
+
         try:
             da = self._getitem(name)
+            self._insert_leaf_properties(da)
         except Exception as e:
             # If the child class cannot load this group, we fall back to returning the
             # underlying datasets in a DataGroup.
@@ -403,26 +405,34 @@ class NXobject:
                     "Falling back to loading HDF5 group children as scipp.DataGroup.")
                 warnings.warn(msg)
             da = NXobject._getitem(self, name)
+        return da
+
+    def _insert_leaf_properties(self, container):
+        from .nxcylindrical_geometry import NXcylindrical_geometry
+        from .nxoff_geometry import NXoff_geometry
+
+        def insert(container, name, obj):
+            if hasattr(container, 'coords'):
+                container.coords[name] = obj if isinstance(
+                    obj, sc.Variable) else sc.scalar(obj)
+            else:
+                container[name] = obj
+
+        detector_number = getattr(self, 'detector_number', None)
+        if detector_number is not None:
+            detector_number = container.coords[detector_number]
+        for key, child in self[[NXcylindrical_geometry, NXoff_geometry]].items():
+            insert(container, key, child.load_as_array(detector_number=detector_number))
         if (t := self.depends_on) is not None:
-
-            def insert(name, obj):
-                if hasattr(da, 'coords'):
-                    da.coords[name] = obj if isinstance(obj,
-                                                        sc.Variable) else sc.scalar(obj)
-                else:
-                    da[name] = obj
-
-            insert('depends_on', t)
+            insert(container, 'depends_on', t)
             # If loading the transformation failed, 'depends_on' returns a string, the
             # path to the transformation. If this is a nested group, we load it here.
             # Note that this info is currently incomplete, since attributes are not
             # loaded.
             if isinstance(t, str):
                 from .nexus_classes import NXtransformations
-                for name, group in self[NXtransformations].items():
-                    insert(name, group[()])
-
-        return da
+                for key, group in self[NXtransformations].items():
+                    insert(container, key, group[()])
 
     def _get_children_by_nx_class(
             self, select: Union[type,
@@ -444,7 +454,7 @@ class NXobject:
         ...
 
     @overload
-    def __getitem__(self, name: Union[type, Tuple[type]]) -> Dict[str, 'NXobject']:
+    def __getitem__(self, name: Union[type, List[type]]) -> Dict[str, 'NXobject']:
         ...
 
     def __getitem__(self, name):

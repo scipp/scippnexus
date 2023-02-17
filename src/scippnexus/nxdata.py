@@ -10,7 +10,9 @@ import numpy as np
 import scipp as sc
 
 from ._common import to_child_select
+from .nxcylindrical_geometry import NXcylindrical_geometry
 from .nxobject import Field, NexusStructureError, NXobject, ScippIndex, asarray
+from .nxoff_geometry import NXoff_geometry
 from .nxtransformations import NXtransformations
 from .typing import H5Group
 
@@ -246,7 +248,8 @@ class NXdata(NXobject):
             # It is not entirely clear whether skipping NXtransformations is the right
             # solution. In principle NXobject will load them via the 'depends_on'
             # mechanism, so for valid files this should be sufficient.
-            if not isinstance(self._get_child(name), (Field, NXtransformations)):
+            allowed = (Field, NXtransformations, NXcylindrical_geometry, NXoff_geometry)
+            if not isinstance(self._get_child(name), allowed):
                 raise NexusStructureError(
                     "Invalid NXdata: may not contain nested groups")
 
