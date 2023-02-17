@@ -361,7 +361,9 @@ def test_missing_detector_numbers_triggers_fallback_given_off_geometry_with_det_
     detector.create_field('data', var)
     detector.attrs['axes'] = ['xx', 'yy']
     create_off_geometry_detector_numbers_1234(detector, name='shape')
-    assert isinstance(detector[...], sc.DataGroup)
+    loaded = detector[...]
+    assert isinstance(loaded, sc.DataGroup)
+    assert sc.identical(loaded['shape'], detector['shape'][()])
 
 
 def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nxroot):
