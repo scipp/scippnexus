@@ -391,22 +391,9 @@ class NXobject:
             else:
                 return self._make(item)
 
-        def insert(container, name, obj):
-            if hasattr(container, 'coords'):
-                container.coords[name] = obj if isinstance(
-                    obj, sc.Variable) else sc.scalar(obj)
-            else:
-                container[name] = obj
-
         try:
-            from .nxcylindrical_geometry import NXcylindrical_geometry
-            from .nxoff_geometry import NXoff_geometry
             da = self._getitem(name)
-            detector_number = getattr(self, 'detector_number', None)
-            if detector_number is not None:
-                detector_number = da.coords[detector_number]
-            for key, child in self[[NXcylindrical_geometry, NXoff_geometry]].items():
-                insert(da, key, child.load_as_array(detector_number=detector_number))
+            self._insert_leaf_properties(da)
         except Exception as e:
             # If the child class cannot load this group, we fall back to returning the
             # underlying datasets in a DataGroup.
@@ -418,8 +405,26 @@ class NXobject:
                     "Falling back to loading HDF5 group children as scipp.DataGroup.")
                 warnings.warn(msg)
             da = NXobject._getitem(self, name)
+        return da
+
+    def _insert_leaf_properties(self, container):
+        from .nxcylindrical_geometry import NXcylindrical_geometry
+        from .nxoff_geometry import NXoff_geometry
+
+        def insert(container, name, obj):
+            if hasattr(container, 'coords'):
+                container.coords[name] = obj if isinstance(
+                    obj, sc.Variable) else sc.scalar(obj)
+            else:
+                container[name] = obj
+
+        detector_number = getattr(self, 'detector_number', None)
+        if detector_number is not None:
+            detector_number = container.coords[detector_number]
+        for key, child in self[[NXcylindrical_geometry, NXoff_geometry]].items():
+            insert(container, key, child.load_as_array(detector_number=detector_number))
         if (t := self.depends_on) is not None:
-            insert(da, 'depends_on', t)
+            insert(container, 'depends_on', t)
             # If loading the transformation failed, 'depends_on' returns a string, the
             # path to the transformation. If this is a nested group, we load it here.
             # Note that this info is currently incomplete, since attributes are not
@@ -427,8 +432,7 @@ class NXobject:
             if isinstance(t, str):
                 from .nexus_classes import NXtransformations
                 for key, group in self[NXtransformations].items():
-                    insert(da, key, group[()])
-        return da
+                    insert(container, key, group[()])
 
     def _get_children_by_nx_class(
             self, select: Union[type,
