@@ -408,6 +408,7 @@ class NXobject:
         return da
 
     def _insert_leaf_properties(self, container):
+        from .nexus_classes import NXgeometry
         from .nxcylindrical_geometry import NXcylindrical_geometry
         from .nxoff_geometry import NXoff_geometry
 
@@ -423,6 +424,8 @@ class NXobject:
             detector_number = container.coords[detector_number]
         for key, child in self[[NXcylindrical_geometry, NXoff_geometry]].items():
             insert(container, key, child.load_as_array(detector_number=detector_number))
+        for key, child in self[NXgeometry].items():
+            insert(container, key, child[()])
         if (t := self.depends_on) is not None:
             insert(container, 'depends_on', t)
             # If loading the transformation failed, 'depends_on' returns a string, the
