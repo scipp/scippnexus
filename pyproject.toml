@@ -8,11 +8,14 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 
 [tool.pytest.ini_options]
-addopts = "-ra -v"
+addopts = "-ra -v --strict-markers -m 'not externalfile'"
 testpaths = "tests"
 filterwarnings = [
   "error",
   "ignore::UserWarning",
+]
+markers = [
+    "externalfile",
 ]
 
 [tool.bandit]
