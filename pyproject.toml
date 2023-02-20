@@ -8,6 +8,9 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 
 [tool.pytest.ini_options]
+# The custom `externalfile` marker runs tests that require passwordless
+# SSH access to login.esss.dk. We do not run it by default. Make sure to
+# setup keys in your SSH agent before running `pytest -m externalfile`.
 addopts = "-ra -v --strict-markers -m 'not externalfile'"
 testpaths = "tests"
 filterwarnings = [

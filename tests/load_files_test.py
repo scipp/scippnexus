@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-
 import pytest
 import scipp as sc
-from externalfile import get_path
 
 import scippnexus as snx
+
+externalfile = pytest.importorskip('externalfile')
 
 
 @pytest.mark.externalfile
@@ -17,6 +17,6 @@ import scippnexus as snx
     '2023/NMX_2e11-rechunk.h5',
 ])
 def test_files_load_as_data_groups(name):
-    with snx.File(get_path(name)) as f:
+    with snx.File(externalfile.get_path(name)) as f:
         dg = f[()]
     assert isinstance(dg, sc.DataGroup)
