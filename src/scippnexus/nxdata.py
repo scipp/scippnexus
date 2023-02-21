@@ -137,6 +137,9 @@ class NXdata(NXobject):
         if self._signal_override is not None:
             return self._signal_override
         if self._signal_name is not None:
+            if self._signal_name not in self:
+                raise NexusStructureError(
+                    "Signal field '{self._signal_name}' not found in group.")
             return self[self._signal_name]
         return None
 
