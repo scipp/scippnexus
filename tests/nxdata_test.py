@@ -476,5 +476,5 @@ def test_slicing_raises_given_invalid_index(nxroot):
     assert sc.identical(data[...], sc.DataArray(signal))
     with pytest.raises(IndexError):
         data['xx', 2]
-    with pytest.raises(IndexError):
+    with pytest.raises(sc.DimensionError):
         data['zz', 0]
