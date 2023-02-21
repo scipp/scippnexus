@@ -157,6 +157,7 @@ class NXdetector(NXobject):
         ]
         self._detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
         self._events = self._init_events()
+        self._nxdata = self._init_nxdata()
 
     @property
     def shape(self) -> List[int]:
@@ -186,9 +187,9 @@ class NXdetector(NXobject):
 
     @property
     def _signal(self) -> Union[Field, _EventField]:
-        return self._nxdata()._signal
+        return self._nxdata._signal
 
-    def _nxdata(self, use_event_signal=True) -> NXdata:
+    def _init_nxdata(self, use_event_signal=True) -> NXdata:
         events = self.events
         if use_event_signal and events is not None:
             signal = _EventField(events, self._event_select, **self._event_grouping)
@@ -245,14 +246,14 @@ class NXdetector(NXobject):
             if name in self._detector_number_fields:
                 # If there is a signal field in addition to the event data it can be
                 # used to define dimension labels
-                nxdata = self._nxdata(use_event_signal=False)
+                nxdata = self._init_nxdata(use_event_signal=False)
                 if nxdata._signal_name is not None:
                     return nxdata._get_field_dims(name)
                 # If grouping is 1-D then we use this name as the dim
                 if self._get_child(name).ndim == 1:
                     return [name]
                 return None
-        return self._nxdata()._get_field_dims(name)
+        return self._nxdata._get_field_dims(name)
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
-        return self._nxdata()._getitem(select)
+        return self._nxdata._getitem(select)

@@ -90,8 +90,9 @@ class NXdata(NXobject):
         super().__init__(group, definition=definition, strategy=strategy)
         self._signal_override = signal_override
         self._skip = skip if skip is not None else []
-        self._signal_name = self._strategy.signal(self)
-        self._errors_name = self._strategy.signal_errors(self)
+        self._signal_name = strategy.signal(self)
+        self._errors_name = strategy.signal_errors(self)
+        self._axes = strategy.axes(self)
         self._signal = self._init_signal()
 
     def _default_strategy(self):
@@ -104,7 +105,7 @@ class NXdata(NXobject):
     def _get_group_dims(self) -> Union[None, List[str]]:
         # Apparently it is not possible to define dim labels unless there are
         # corresponding coords. Special case of '.' entries means "no coord".
-        if (axes := self._strategy.axes(self)) is not None:
+        if (axes := self._axes) is not None:
             return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
         axes = []
         # Names of axes that have an "axis" attribute serve as dim labels in legacy case
@@ -143,7 +144,7 @@ class NXdata(NXobject):
 
     def _get_axes(self):
         """Return labels of named axes. Does not include default 'dim_{i}' names."""
-        if (axes := self._strategy.axes(self)) is not None:
+        if (axes := self._axes) is not None:
             # Unlike self.dims we *drop* entries that are '.'
             return [a for a in axes if a != '.']
         elif (signal := self.signal) is not None:
