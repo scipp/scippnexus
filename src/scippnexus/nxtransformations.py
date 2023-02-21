@@ -34,7 +34,7 @@ class NXtransformations(NXobject):
                                                           index=index)
                 for name, child in self.items()
             })
-        except sc.UnitError as e:
+        except (sc.DimensionError, sc.UnitError) as e:
             raise NexusStructureError(
                 f"Invalid transformation in NXtransformations: {e}") from e
 
