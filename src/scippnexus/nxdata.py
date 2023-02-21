@@ -90,13 +90,16 @@ class NXdata(NXobject):
         super().__init__(group, definition=definition, strategy=strategy)
         self._signal_override = signal_override
         self._skip = skip if skip is not None else []
+        self._signal_name = self._strategy.signal(self)
+        self._errors_name = self._strategy.signal_errors(self)
+        self._signal = self._init_signal()
 
     def _default_strategy(self):
         return NXdataStrategy
 
     @property
     def shape(self) -> List[int]:
-        return self._signal.shape
+        return self.signal.shape
 
     def _get_group_dims(self) -> Union[None, List[str]]:
         # Apparently it is not possible to define dim labels unless there are
@@ -118,29 +121,24 @@ class NXdata(NXobject):
             return d
         # Legacy NXdata defines axes not as group attribute, but attr on dataset.
         # This is handled by class Field.
-        return self._signal.dims
+        return self.signal.dims
 
     @property
     def unit(self) -> Union[sc.Unit, None]:
-        return self._signal.unit
+        return self.signal.unit
 
     @property
-    def _signal_name(self) -> str:
-        return self._strategy.signal(self)
+    def signal(self) -> Union[Field, '_EventField', None]:  # noqa: F821
+        return self._signal
 
-    @property
-    def _errors_name(self) -> Optional[str]:
-        return self._strategy.signal_errors(self)
-
-    @property
-    def _signal(self) -> Union[Field, '_EventField', None]:  # noqa: F821
+    def _init_signal(self) -> Union[Field, '_EventField', None]:  # noqa: F821
         if self._signal_override is not None:
             return self._signal_override
-        if self._signal_name is not None:
-            if self._signal_name not in self:
+        if (signal_name := self._signal_name) is not None:
+            if signal_name not in self:
                 raise NexusStructureError(
-                    f"Signal field '{self._signal_name}' not found in group.")
-            return self[self._signal_name]
+                    f"Signal field '{signal_name}' not found in group.")
+            return self[signal_name]
         return None
 
     def _get_axes(self):
@@ -148,7 +146,7 @@ class NXdata(NXobject):
         if (axes := self._strategy.axes(self)) is not None:
             # Unlike self.dims we *drop* entries that are '.'
             return [a for a in axes if a != '.']
-        elif (signal := self._signal) is not None:
+        elif (signal := self.signal) is not None:
             if (axes := signal.attrs.get('axes')) is not None:
                 return axes.split(',')
         return []
@@ -162,7 +160,7 @@ class NXdata(NXobject):
         if self.shape == shape:
             return self.dims
         lut = {}
-        if self._signal is not None:
+        if self.signal is not None:
             for d, s in zip(self.dims, self.shape):
                 if self.shape.count(s) == 1:
                     lut[s] = d
@@ -226,10 +224,9 @@ class NXdata(NXobject):
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         from .nexus_classes import NXgeometry
-        signal = self._signal
-        if signal is None:
+        if self.signal is None:
             raise NexusStructureError("No signal field found, cannot load group.")
-        signal = signal[select]
+        signal = self.signal[select]
         if self._errors_name is not None:
             stddevs = self[self._errors_name][select]
             # According to the standard, errors must have the same shape as the data.
