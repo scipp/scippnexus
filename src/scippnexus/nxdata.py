@@ -222,6 +222,7 @@ class NXdata(NXobject):
         return False
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
+        from .nexus_classes import NXgeometry
         signal = self._signal
         if signal is None:
             raise NexusStructureError("No signal field found, cannot load group")
@@ -248,7 +249,8 @@ class NXdata(NXobject):
             # It is not entirely clear whether skipping NXtransformations is the right
             # solution. In principle NXobject will load them via the 'depends_on'
             # mechanism, so for valid files this should be sufficient.
-            allowed = (Field, NXtransformations, NXcylindrical_geometry, NXoff_geometry)
+            allowed = (Field, NXtransformations, NXcylindrical_geometry, NXoff_geometry,
+                       NXgeometry)
             if not isinstance(self._get_child(name), allowed):
                 raise NexusStructureError(
                     "Invalid NXdata: may not contain nested groups")
