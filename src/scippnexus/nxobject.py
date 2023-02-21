@@ -394,7 +394,7 @@ class NXobject:
         try:
             da = self._getitem(name)
             self._insert_leaf_properties(da)
-        except Exception as e:
+        except NexusStructureError as e:
             # If the child class cannot load this group, we fall back to returning the
             # underlying datasets in a DataGroup.
             if type(self)._getitem == NXobject._getitem:

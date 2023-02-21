@@ -465,3 +465,16 @@ def test_nested_groups_trigger_fallback_to_load_as_data_group(nxroot):
     data.attrs['signal'] = 'signal'
     data.create_class('nested', NXdata)
     assert sc.identical(data[...], sc.DataGroup(signal=da.data, nested=sc.DataGroup()))
+
+
+def test_slicing_raises_given_invalid_index(nxroot):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
+    data = nxroot.create_class('data1', NXdata)
+    data.create_field('signal', signal)
+    data.attrs['axes'] = signal.dims
+    data.attrs['signal'] = 'signal'
+    assert sc.identical(data[...], sc.DataArray(signal))
+    with pytest.raises(IndexError):
+        data['xx', 2]
+    with pytest.raises(IndexError):
+        data['zz', 0]

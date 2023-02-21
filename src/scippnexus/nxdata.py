@@ -266,11 +266,15 @@ class NXdata(NXobject):
             if (error_name := self._strategy.coord_errors(self, name)) is not None:
                 stddevs = asarray(self[error_name][sel])
                 coord.variances = sc.pow(stddevs, sc.scalar(2)).values
-            if self._coord_to_attr(da, name, field):
-                # Like scipp, slicing turns coord into attr if slicing removes the
-                # dim corresponding to the coord.
-                da.attrs[name] = coord
-            else:
-                da.coords[name] = coord
+            try:
+                if self._coord_to_attr(da, name, field):
+                    # Like scipp, slicing turns coord into attr if slicing removes the
+                    # dim corresponding to the coord.
+                    da.attrs[name] = coord
+                else:
+                    da.coords[name] = coord
+            except sc.DimensionError as e:
+                raise NexusStructureError(
+                    "Field in NXdata incompatible with dims or shape of signal.") from e
 
         return da

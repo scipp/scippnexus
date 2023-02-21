@@ -121,7 +121,7 @@ class NXevent_data(NXobject):
         try:
             binned = sc.bins(data=events, dim=_event_dimension, begin=begins, end=ends)
         except IndexError as e:
-            raise IndexError(
+            raise NexusStructureError(
                 f"Invalid index in NXevent_data at {self.name}/event_index:\n{e}.")
 
         return sc.DataArray(data=binned, coords={'event_time_zero': event_time_zero})

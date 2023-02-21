@@ -9,10 +9,10 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .nxobject import Field, NXobject, ScippIndex
+from .nxobject import Field, NexusStructureError, NXobject, ScippIndex
 
 
-class TransformationError(Exception):
+class TransformationError(NexusStructureError):
     pass
 
 
