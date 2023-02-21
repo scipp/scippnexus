@@ -401,7 +401,7 @@ class NXobject:
                 raise
             else:
                 msg = (
-                    f"Failed to load {self.name} as {type(self).__name__}: {e}. "
+                    f"Failed to load {self.name} as {type(self).__name__}: {e} "
                     "Falling back to loading HDF5 group children as scipp.DataGroup.")
                 warnings.warn(msg)
             da = NXobject._getitem(self, name)
