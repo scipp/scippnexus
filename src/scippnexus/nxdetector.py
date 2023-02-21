@@ -156,6 +156,7 @@ class NXdetector(NXobject):
             'cue_timestamp_zero', 'cue_index', 'pulse_height'
         ]
         self._detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
+        self._events = self._init_events()
 
     @property
     def shape(self) -> List[int]:
@@ -206,6 +207,9 @@ class NXdetector(NXobject):
 
     @property
     def events(self) -> Union[None, NXevent_data]:
+        return self._events
+
+    def _init_events(self) -> Union[None, NXevent_data]:
         """Return the underlying NXevent_data group, None if not event data."""
         # The standard is unclear on whether the 'data' field may be NXevent_data or
         # whether the fields of NXevent_data should be stored directly within this
