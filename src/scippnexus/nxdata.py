@@ -278,6 +278,7 @@ class NXdata(NXobject):
                     da.coords[name] = coord
             except sc.DimensionError as e:
                 raise NexusStructureError(
-                    "Field in NXdata incompatible with dims or shape of signal.") from e
+                    f"Field in NXdata incompatible with dims or shape of signal: {e}"
+                ) from e
 
         return da
