@@ -40,7 +40,7 @@ class NXdataStrategy:
         for name in group.keys():
             # What is the meaning of the attribute value? It is undocumented, we simply
             # ignore it.
-            if 'signal' in group._get_child(name).attrs:
+            if 'signal' in group._group[name].attrs:
                 return name
         return None
 
