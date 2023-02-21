@@ -28,11 +28,15 @@ class NXtransformations(NXobject):
     """Group of transformations."""
 
     def _getitem(self, index: ScippIndex) -> sc.DataGroup:
-        return sc.DataGroup({
-            name: get_full_transformation_starting_at(Transformation(child),
-                                                      index=index)
-            for name, child in self.items()
-        })
+        try:
+            return sc.DataGroup({
+                name: get_full_transformation_starting_at(Transformation(child),
+                                                          index=index)
+                for name, child in self.items()
+            })
+        except sc.UnitError as e:
+            raise NexusStructureError(
+                f"Invalid transformation in NXtransformations: {e}") from e
 
 
 class Transformation:

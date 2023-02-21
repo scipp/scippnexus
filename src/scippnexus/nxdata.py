@@ -228,7 +228,7 @@ class NXdata(NXobject):
         from .nexus_classes import NXgeometry
         signal = self._signal
         if signal is None:
-            raise NexusStructureError("No signal field found, cannot load group")
+            raise NexusStructureError("No signal field found, cannot load group.")
         signal = signal[select]
         if self._errors_name is not None:
             stddevs = self[self._errors_name][select]
