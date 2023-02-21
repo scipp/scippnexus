@@ -21,6 +21,7 @@ test:
   requires:
     - pytest
   source_files:
+    - pyproject.toml
     - tests/
   commands:
     - python -m pytest tests
