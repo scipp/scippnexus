@@ -56,8 +56,8 @@ def _to_canonical_select(dims: List[str],
 
     def check_1d():
         if len(dims) != 1:
-            raise ValueError(f"Dataset has multiple dimensions {dims}, "
-                             "specify the dimension to index.")
+            raise sc.DimensionError(f"Dataset has multiple dimensions {dims}, "
+                                    "specify the dimension to index.")
 
     if select is Ellipsis:
         return {}
@@ -69,14 +69,14 @@ def _to_canonical_select(dims: List[str],
     if isinstance(select, tuple):
         check_1d()
         if len(select) != 1:
-            raise ValueError(f"Dataset has single dimension {dims}, "
-                             "but multiple indices {select} were specified.")
+            raise sc.DimensionError(f"Dataset has single dimension {dims}, "
+                                    "but multiple indices {select} were specified.")
         return {dims[0]: select[0]}
     elif isinstance(select, int) or isinstance(select, slice):
         check_1d()
         return {dims[0]: select}
     if not isinstance(select, dict):
-        raise ValueError(f"Cannot process index {select}.")
+        raise IndexError(f"Cannot process index {select}.")
     return select
 
 
@@ -88,7 +88,7 @@ def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, slice, tup
     index = [slice(None)] * len(dims)
     for key, sel in select.items():
         if key not in dims:
-            raise ValueError(
+            raise sc.DimensionError(
                 f"'{key}' used for indexing not found in dataset dims {dims}.")
         index[dims.index(key)] = sel
     if len(index) == 1:

@@ -17,5 +17,5 @@ class NXmonitor(NXdetector):
         # binning present in the file (in NXevent_data) is preserved.
         return {
             'grouping_key': 'event_time_zero',
-            'grouping': self.events['event_time_zero']
+            'grouping': self.events.get('event_time_zero')
         }

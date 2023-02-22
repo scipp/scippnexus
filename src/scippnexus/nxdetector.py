@@ -99,7 +99,9 @@ class _EventField:
         return self._nxevent_data.unit
 
     def __getitem__(self, select: ScippIndex) -> sc.DataArray:
-        event_data: sc.DataArray = self._nxevent_data[self._event_select]
+        event_data = self._nxevent_data[self._event_select]
+        if isinstance(event_data, sc.DataGroup):
+            raise NexusStructureError("Invalid NXevent_data in NXdetector.")
         if self._grouping is None:
             if select not in (Ellipsis, tuple(), slice(None)):
                 raise NexusStructureError(

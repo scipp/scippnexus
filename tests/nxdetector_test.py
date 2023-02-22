@@ -265,7 +265,7 @@ def test_loading_event_data_with_selection_and_automatic_detector_numbers_raises
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
     assert detector.dims == ['detector_number']
-    with pytest.raises(ValueError):
+    with pytest.raises(sc.DimensionError):
         detector['detector_number', 0]
 
 
