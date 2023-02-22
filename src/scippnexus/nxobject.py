@@ -8,6 +8,7 @@ import functools
 import inspect
 import re
 import warnings
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple, Union, overload
 
 import dateutil.parser
@@ -25,6 +26,31 @@ from ._hdf5_nexus import (
 from .typing import H5Dataset, H5Group, ScippIndex
 
 NXobjectIndex = Union[str, ScippIndex]
+
+
+@dataclass
+class DatasetInfo:
+    shape: Tuple[int]
+    attrs: Dict[str, Any]
+    value: H5Dataset
+
+    @staticmethod
+    def read(ds: H5Dataset) -> DatasetInfo:
+        return DatasetInfo(shape=ds.shape, attrs=dict(Attrs(ds.attrs)), value=ds)
+
+
+@dataclass
+class GroupInfo:
+    attrs: Dict[str, Any]
+    datasets: Dict[str, DatasetInfo]
+
+    @staticmethod
+    def read(group: H5Group) -> GroupInfo:
+        datasets = {
+            key: DatasetInfo.read(value)
+            for key, value in group.items() if is_dataset(value)
+        }
+        return GroupInfo(attrs=dict(Attrs(group.attrs)), datasets=datasets)
 
 
 def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
@@ -350,6 +376,8 @@ class NXobject:
             self._strategy = self._definition.make_strategy(self)
         if self._strategy is None:
             self._strategy = self._default_strategy()
+        self._group_info = GroupInfo.read(group)
+        #print(self._group_info)
 
     def _default_strategy(self):
         """

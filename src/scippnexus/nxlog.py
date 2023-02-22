@@ -13,17 +13,17 @@ from .nxobject import NXobject, ScippIndex
 class NXlogStrategy(NXdataStrategy):
 
     @staticmethod
-    def axes(group):
-        if (ax := NXdataStrategy.axes(group)) is not None:
+    def axes2(info):
+        if (ax := NXdataStrategy.axes2(info)) is not None:
             return ax
         # We get the shape from the original dataset, to make sure we do not squeeze
         # dimensions too early
-        child_dataset = group._get_child('value')._dataset
+        child_dataset = info.datasets['value'].value
         ndim = child_dataset.ndim
         shape = child_dataset.shape
         # The outermost axis in NXlog is pre-defined to 'time' (if present). Note
         # that this may be overridden by an `axes` attribute, if defined for the group.
-        if 'time' in group:
+        if 'time' in info.datasets:
             raw_axes = ['time'] + (['.'] * (ndim - 1))
         else:
             raw_axes = ['.'] * ndim
@@ -35,11 +35,15 @@ class NXlogStrategy(NXdataStrategy):
         return axes
 
     @staticmethod
-    def signal(group):
+    def signal2(info):
         # NXdata uses the 'signal' attribute to define the field name of the signal.
         # NXlog uses a "hard-coded" signal name 'value', without specifying the
         # attribute in the file, so we pass this explicitly to NXdata.
-        return group.attrs.get('signal', 'value')
+        signal_name = info.attrs.get('signal', 'value')
+        if (signal := info.datasets.get(signal_name)) is not None:
+            return signal_name, signal
+        else:
+            return None, None
 
 
 class NXlog(NXobject):

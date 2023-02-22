@@ -3,6 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import List, Optional, Union
 from warnings import warn
 
@@ -11,10 +12,178 @@ import scipp as sc
 
 from ._common import to_child_select
 from .nxcylindrical_geometry import NXcylindrical_geometry
-from .nxobject import Field, NexusStructureError, NXobject, ScippIndex, asarray
+from .nxobject import (
+    DatasetInfo,
+    Field,
+    GroupInfo,
+    NexusStructureError,
+    NXobject,
+    ScippIndex,
+    asarray,
+)
 from .nxoff_geometry import NXoff_geometry
 from .nxtransformations import NXtransformations
-from .typing import H5Group
+from .typing import H5Dataset, H5Group
+
+
+@dataclass
+class FieldInfo(DatasetInfo):
+    dims: Tuple[str]
+
+
+#    unit: Optional[sc.Unit]
+#    dtype: sc.DType
+
+
+def _guess_dims(dims, shape, field: DatasetInfo):
+    """Guess dims of non-signal dataset based on shape.
+
+    Does not check for potential bin-edge coord.
+    """
+    if shape == field.shape:
+        return dims
+    lut = {}
+    for d, s in zip(dims, shape):
+        if shape.count(s) == 1:
+            lut[s] = d
+    try:
+        return [lut[s] for s in field.shape]
+    except KeyError:
+        return None
+
+
+def _get_group_dims(self) -> Union[None, List[str]]:
+    # Apparently it is not possible to define dim labels unless there are
+    # corresponding coords. Special case of '.' entries means "no coord".
+    if (axes := self._strategy.axes(self)) is not None:
+        return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
+    axes = []
+    # Names of axes that have an "axis" attribute serve as dim labels in legacy case
+    for name, field in self._group.items():
+        if (axis := field.attrs.get('axis')) is not None:
+            axes.append((axis, name))
+    if axes:
+        return [x[1] for x in sorted(axes)]
+    return None
+
+
+def dims(self) -> List[str]:
+    if (d := self._get_group_dims()) is not None:
+        return d
+    # Legacy NXdata defines axes not as group attribute, but attr on dataset.
+    # This is handled by class Field.
+    return self._signal.dims
+
+
+def _get_axes(self):
+    """Return labels of named axes. Does not include default 'dim_{i}' names."""
+    if (axes := self._strategy.axes(self)) is not None:
+        # Unlike self.dims we *drop* entries that are '.'
+        return [a for a in axes if a != '.']
+    elif (signal := self._signal) is not None:
+        if (axes := signal.attrs.get('axes')) is not None:
+            return axes.split(',')
+    return []
+
+
+# Need:
+# signal
+# errors
+# dims
+# field dims
+# shape
+# field errors
+@dataclass
+class NXdataInfo:
+    signal_name: str
+    field_dims: Dict[str, Tuple[str]]
+    #dims: Tuple[str]
+    #shape: Tuple[int]
+    #unit:
+    #signal: Optional[H5Dataset] # or FieldInfo? or Field?
+    #signal_errors: Optional[H5Dataset]
+
+    @staticmethod
+    def from_group_info(info: GroupInfo, strategy) -> DataInfo:
+        # 1. Find signal
+        signal_name, signal = strategy.signal2(info)
+
+        # 2. Find group dim labels: newest to oldest:
+        # - group.axes
+        # - group.signal.axes
+        # - group field axis attrs
+        axes = strategy.axes2(info)
+        signal_axes = None if signal is None else signal.attrs.get('axes')
+
+        axis_index = {}
+        for name, dataset in info.datasets.items():
+            if (axis := dataset.attrs.get('axis')) is not None:
+                axis_index[name] = axes
+
+        # TODO consistent list/tuple
+        def _get_group_dims():
+            if axes is not None:
+                return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
+            if signal_axes is not None:
+                return tuple(signal_axes.split(','))
+            return [k for k, _ in sorted(axis_index.items(), key=lambda item: item[1])]
+
+        group_dims = _get_group_dims()
+        #print(f'{group_dims=}')
+
+        if axes is not None:
+            # Unlike self.dims we *drop* entries that are '.'
+            named_axes = [a for a in axes if a != '.']
+        elif signal_axes is not None:
+            named_axes = signal_axes.split(',')
+        else:
+            named_axes = []
+
+        # 3. Find field dims, create FieldInfo
+        # - {name}_indices
+        # - axis attr
+        # - signal/error
+        # - auxiliary_signal
+        # - name matching dims
+        # - guess
+
+        # - {name}_indices
+        indices_suffix = '_indices'
+        indices_attrs = [
+            key[:-len(indices_suffix)] for key in info.attrs.keys()
+            if key.endswith(indices_suffix)
+        ]
+
+        dims = np.array(group_dims)
+        dims_from_indices = {
+            key: list(dims[np.array(info.attrs[key + indices_suffix]).flatten()])
+            for key in indices_attrs
+        }
+
+        def get_dims(name, dataset):
+            # TODO signal and errors?
+            # TODO aux
+            if name in (signal_name, ):
+                return group_dims
+            if (dims := dims_from_indices.get(name)) is not None:
+                return dims
+            if (axis := axis_index.get(name)) is not None:
+                return signal_dims[axis - 1]
+            #if name in named_axes:
+            #    # If there are named axes then items of same name are "dimension
+            #    # coordinates", i.e., have a dim matching their name.
+            #    # However, if the item is not 1-D we need more labels. Try to use labels of
+            #    # signal if dimensionality matches.
+            #    if signal_name in self and self._get_child(name).ndim == len(
+            #            self.shape):
+            #        return self[self._signal_name].dims
+            #    return [name]
+            if signal is not None:
+                return _guess_dims(group_dims, signal.shape, dataset)
+
+        field_dims = {name: get_dims(name, ds) for name, ds in info.datasets.items()}
+
+        return NXdataInfo(signal_name=signal_name, field_dims=field_dims)
 
 
 class NXdataStrategy:
@@ -24,6 +193,25 @@ class NXdataStrategy:
     May be subclassed to customize behavior.
     """
     _error_suffixes = ['_errors', '_error']  # _error is the deprecated suffix
+
+    @staticmethod
+    def signal2(info: NXdataInfo) -> Optional[DatasetInfo]:
+        """Signal field info."""
+        if (name := info.attrs.get('signal')) is not None:
+            if (dataset := info.datasets.get(name)) is not None:
+                return name, dataset
+        # Legacy NXdata defines signal not as group attribute, but attr on dataset
+        for name, dataset in info.datasets.items():
+            # What is the meaning of the attribute value? It is undocumented, we simply
+            # ignore it.
+            if 'signal' in dataset.attrs:
+                return name, dataset
+        return None, None
+
+    @staticmethod
+    def axes2(info: NXdataInfo):
+        """Names of the axes (dimension labels)."""
+        return info.attrs.get('axes')
 
     @staticmethod
     def axes(group):
@@ -88,6 +276,8 @@ class NXdata(NXobject):
             Names of fields to skip when loading coords.
         """
         super().__init__(group, definition=definition, strategy=strategy)
+        self._info = NXdataInfo.from_group_info(info=self._group_info,
+                                                strategy=strategy)
         self._signal_override = signal_override
         self._skip = skip if skip is not None else []
 
@@ -126,6 +316,7 @@ class NXdata(NXobject):
 
     @property
     def _signal_name(self) -> str:
+        return self._info.signal_name
         return self._strategy.signal(self)
 
     @property
@@ -180,6 +371,7 @@ class NXdata(NXobject):
             return None
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
+        return self._info.field_dims[name]
         # Newly written files should always contain indices attributes, but the
         # standard recommends that readers should also make "best effort" guess
         # since legacy files do not set this attribute.

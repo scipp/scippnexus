@@ -15,6 +15,19 @@ def nxroot(request):
         yield root
 
 
+def test_nxdata_info(nxroot):
+    da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
+    da.coords['yy2'] = da.data['xx', 0]
+    data = nxroot.create_class('data1', NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data.attrs['yy2_indices'] = [1]
+    data.create_field('signal', da.data)
+    data.create_field('yy2', da.coords['yy2'])
+    data = nxroot['data1']
+    assert data._info == 1
+
+
 def test_without_coords(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
     data = nxroot.create_class('data1', NXdata)
