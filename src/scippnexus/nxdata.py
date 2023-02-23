@@ -118,7 +118,7 @@ class NXdataInfo:
         axis_index = {}
         for name, dataset in info.datasets.items():
             if (axis := dataset.attrs.get('axis')) is not None:
-                axis_index[name] = axes
+                axis_index[name] = axis
 
         # TODO consistent list/tuple
         def _get_group_dims():
@@ -126,7 +126,11 @@ class NXdataInfo:
                 return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
             if signal_axes is not None:
                 return tuple(signal_axes.split(','))
-            return [k for k, _ in sorted(axis_index.items(), key=lambda item: item[1])]
+            if axis_index:
+                return [
+                    k for k, _ in sorted(axis_index.items(), key=lambda item: item[1])
+                ]
+            return None
 
         group_dims = _get_group_dims()
         #print(f'{group_dims=}')
@@ -168,16 +172,15 @@ class NXdataInfo:
             if (dims := dims_from_indices.get(name)) is not None:
                 return dims
             if (axis := axis_index.get(name)) is not None:
-                return signal_dims[axis - 1]
-            #if name in named_axes:
-            #    # If there are named axes then items of same name are "dimension
-            #    # coordinates", i.e., have a dim matching their name.
-            #    # However, if the item is not 1-D we need more labels. Try to use labels of
-            #    # signal if dimensionality matches.
-            #    if signal_name in self and self._get_child(name).ndim == len(
-            #            self.shape):
-            #        return self[self._signal_name].dims
-            #    return [name]
+                return (group_dims[axis - 1], )
+            if name in named_axes:
+                # If there are named axes then items of same name are "dimension
+                # coordinates", i.e., have a dim matching their name.
+                # However, if the item is not 1-D we need more labels. Try to use labels of
+                # signal if dimensionality matches.
+                if signal is not None and len(dataset.shape) == len(signal.shape):
+                    return group_dims
+                return [name]
             if signal is not None:
                 return _guess_dims(group_dims, signal.shape, dataset)
 
@@ -277,7 +280,8 @@ class NXdata(NXobject):
         """
         super().__init__(group, definition=definition, strategy=strategy)
         self._info = NXdataInfo.from_group_info(info=self._group_info,
-                                                strategy=strategy)
+                                                strategy=self._strategy)
+        print(self._info)
         self._signal_override = signal_override
         self._skip = skip if skip is not None else []
 
