@@ -102,7 +102,7 @@ def test_nxlog_with_missing_value_triggers_fallback(nxroot):
         dims=['time'], unit='s', values=[4.4, 5.5, 6.6]).to(unit='ns', dtype='int64')
     log = nxroot['entry'].create_class('log', NXlog)
     log['time'] = time - sc.epoch(unit='ns')
-    loaded = log[()]
+    loaded = nxroot['entry']['log'][()]
     assert sc.identical(loaded, sc.DataGroup(time=time.rename(time='dim_0')))
 
 
@@ -450,7 +450,7 @@ def test_event_data_without_event_id_can_be_loaded(nxroot):
 def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot):
     monitor = nxroot['entry'].create_class('monitor', NXmonitor)
     create_event_data_without_event_id(monitor)
-    da = monitor[...]
+    da = nxroot['entry']['monitor'][...]
     assert len(da.bins.coords) == 1
     assert 'event_time_offset' in da.bins.coords
 

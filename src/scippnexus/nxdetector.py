@@ -23,6 +23,19 @@ from .nxobject import (
 class NXdetectorStrategy(NXdataStrategy):
 
     @staticmethod
+    def signal2(info):
+        # NXdata uses the 'signal' attribute to define the field name of the signal.
+        # NXdetector uses a "hard-coded" signal name 'data', without specifying the
+        # attribute in the file, so we pass this explicitly to NXdata.
+        # Note the special case of an NXevent_data subgroup named 'data', which we
+        # avoid by checking if 'data' is a dataset.
+        name, signal = NXdataStrategy.signal2(info)
+        if name is not None:
+            return name, signal
+        if (ds := info.datasets.get('data')) is not None:
+            return 'data', ds
+
+    @staticmethod
     def signal(group):
         # NXdata uses the 'signal' attribute to define the field name of the signal.
         # NXdetector uses a "hard-coded" signal name 'data', without specifying the

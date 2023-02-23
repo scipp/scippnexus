@@ -52,40 +52,6 @@ def _guess_dims(dims, shape, field: DatasetInfo):
         return None
 
 
-def _get_group_dims(self) -> Union[None, List[str]]:
-    # Apparently it is not possible to define dim labels unless there are
-    # corresponding coords. Special case of '.' entries means "no coord".
-    if (axes := self._strategy.axes(self)) is not None:
-        return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
-    axes = []
-    # Names of axes that have an "axis" attribute serve as dim labels in legacy case
-    for name, field in self._group.items():
-        if (axis := field.attrs.get('axis')) is not None:
-            axes.append((axis, name))
-    if axes:
-        return [x[1] for x in sorted(axes)]
-    return None
-
-
-def dims(self) -> List[str]:
-    if (d := self._get_group_dims()) is not None:
-        return d
-    # Legacy NXdata defines axes not as group attribute, but attr on dataset.
-    # This is handled by class Field.
-    return self._signal.dims
-
-
-def _get_axes(self):
-    """Return labels of named axes. Does not include default 'dim_{i}' names."""
-    if (axes := self._strategy.axes(self)) is not None:
-        # Unlike self.dims we *drop* entries that are '.'
-        return [a for a in axes if a != '.']
-    elif (signal := self._signal) is not None:
-        if (axes := signal.attrs.get('axes')) is not None:
-            return axes.split(',')
-    return []
-
-
 # Need:
 # signal
 # errors
@@ -104,9 +70,19 @@ class NXdataInfo:
     #signal_errors: Optional[H5Dataset]
 
     @staticmethod
-    def from_group_info(info: GroupInfo, strategy) -> DataInfo:
+    def from_group_info(
+            *,
+            info: GroupInfo,
+            signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
+            strategy) -> DataInfo:
         # 1. Find signal
-        signal_name, signal = strategy.signal2(info)
+        if signal_override is None:
+            signal_name, signal = strategy.signal2(info)
+        else:
+            print(f'override! {signal_override.dims}')
+            signal_name = None
+            # TODO ensure this is DatasetInfo?
+            signal = signal_override
 
         # 2. Find group dim labels: newest to oldest:
         # - group.axes
@@ -165,6 +141,9 @@ class NXdataInfo:
         }
 
         def get_dims(name, dataset):
+            # Newly written files should always contain indices attributes, but the
+            # standard recommends that readers should also make "best effort" guess
+            # since legacy files do not set this attribute.
             # TODO signal and errors?
             # TODO aux
             if name in (signal_name, ):
@@ -279,7 +258,9 @@ class NXdata(NXobject):
             Names of fields to skip when loading coords.
         """
         super().__init__(group, definition=definition, strategy=strategy)
+        # TODO This may raise, how to trigger fallback?
         self._info = NXdataInfo.from_group_info(info=self._group_info,
+                                                signal_override=signal_override,
                                                 strategy=self._strategy)
         print(self._info)
         self._signal_override = signal_override

@@ -28,6 +28,7 @@ def test_warns_if_no_data_found(nxroot):
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_numbers', detector_numbers)
+    detector = nxroot['detector0']
     with pytest.warns(UserWarning, match="Failed to load "):
         dg = detector[...]
     assert isinstance(dg, sc.DataGroup)
@@ -37,6 +38,7 @@ def test_can_load_fields_if_no_data_found(nxroot):
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_numbers', detector_numbers)
+    detector = nxroot['detector0']
     detector['detector_numbers'][...]
 
 
@@ -48,6 +50,7 @@ def test_finds_data_from_group_attr(nxroot):
     detector.create_field('detector_numbers', da.coords['detector_numbers'])
     detector.create_field('custom', da.data)
     detector.attrs['signal'] = 'custom'
+    detector = nxroot['detector0']
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 
@@ -57,12 +60,14 @@ def test_loads_events_when_data_and_events_found(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_number)
     detector.create_field('data', data)
+    detector = nxroot['detector0']
     assert detector[...].bins is None
     detector.create_field('event_id', sc.array(dims=[''], unit=None, values=[1]))
     detector.create_field('event_time_offset', sc.array(dims=[''], unit='s',
                                                         values=[1]))
     detector.create_field('event_time_zero', sc.array(dims=[''], unit='s', values=[1]))
     detector.create_field('event_index', sc.array(dims=[''], unit='None', values=[0]))
+    detector = nxroot['detector0']
     loaded = detector[...]
     assert loaded.bins is not None
     assert loaded.values[0].variances is None
@@ -78,6 +83,7 @@ def test_loads_data_without_coords(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_numbers', da.coords['detector_numbers'])
     detector.create_field('data', da.data)
+    detector = nxroot['detector0']
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 
@@ -89,6 +95,7 @@ def test_detector_number_key_alias(nxroot, detector_number_key):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field(detector_number_key, da.coords[detector_number_key])
     detector.create_field('data', da.data)
+    detector = nxroot['detector0']
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 
@@ -98,6 +105,7 @@ def test_select_events_raises_if_detector_contains_data(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_numbers', da.coords['detector_numbers'])
     detector.create_field('data', da.data)
+    detector = nxroot['detector0']
     with pytest.raises(NexusStructureError):
         detector.select_events
 
@@ -112,6 +120,7 @@ def test_loads_data_with_coords(nxroot):
     detector.create_field('xx', da.coords['xx'])
     detector.create_field('data', da.data)
     detector.attrs['axes'] = ['xx', '.']
+    detector = nxroot['detector0']
     assert sc.identical(detector[...], da.rename_dims({'yy': 'dim_1'}))
 
 
@@ -137,6 +146,7 @@ def test_slicing_works_as_in_scipp(nxroot):
     detector.create_field('data', da.data)
     detector.attrs['axes'] = ['xx', 'yy']
     detector.attrs['2d_edges_indices'] = [1, 0]
+    detector = nxroot['detector0']
     assert sc.identical(detector[...], da)
     assert sc.identical(detector['xx', 0], da['xx', 0])
     assert sc.identical(detector['xx', 1], da['xx', 1])
@@ -163,6 +173,7 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
     assert detector.dims == ('detector_number', )
     assert detector.shape == (4, )
     loaded = detector[...]
@@ -180,6 +191,7 @@ def test_loads_event_data_with_0d_detector_numbers(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', sc.index(1, dtype='int64'))
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
     assert detector.dims == ()
     assert detector.shape == ()
     loaded = detector[...]
@@ -190,6 +202,7 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
     assert detector.dims == ('dim_0', 'dim_1')
     assert detector.shape == (2, 2)
     loaded = detector[...]
@@ -205,6 +218,7 @@ def test_select_events_slices_underlying_event_data(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
     assert sc.identical(
         detector.select_events['pulse', :2][...].bins.size().data,
         sc.array(dims=['dim_0', 'dim_1'],
@@ -235,6 +249,7 @@ def test_select_events_slice_does_not_affect_original_detector(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
     detector.select_events['pulse', 0][...]
     assert sc.identical(
         detector[...].bins.size().data,
@@ -248,6 +263,7 @@ def test_loading_event_data_creates_automatic_detector_numbers_if_not_present_in
         nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
     assert detector.dims == ['detector_number']
     with pytest.raises(NexusStructureError):
         detector.shape
@@ -264,6 +280,7 @@ def test_loading_event_data_with_selection_and_automatic_detector_numbers_raises
         nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
     assert detector.dims == ['detector_number']
     with pytest.raises(sc.DimensionError):
         detector['detector_number', 0]
@@ -273,6 +290,7 @@ def test_loading_event_data_with_full_selection_and_automatic_detector_numbers_w
         nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
     assert detector.dims == ['detector_number']
     assert tuple(detector[...].shape) == (4, )
     assert tuple(detector[()].shape) == (4, )
@@ -283,12 +301,14 @@ def test_event_data_field_dims_labels(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
     assert detector['detector_number'].dims == ('detector_number', )
 
 
 def test_nxevent_data_selection_yields_correct_pulses(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = nxroot['detector0']
 
     class Load:
 
@@ -346,6 +366,7 @@ def test_loads_data_with_coords_and_off_geometry(nxroot, detid_name):
     detector.create_field('data', da.data)
     detector.attrs['axes'] = ['xx', 'yy']
     create_off_geometry_detector_numbers_1234(detector, name='shape')
+    detector = nxroot['detector0']
     loaded = detector[...]
     expected = snx.nxoff_geometry.off_to_shape(
         **detector['shape'][()], detector_number=da.coords['detector_number'])
@@ -361,6 +382,7 @@ def test_missing_detector_numbers_triggers_fallback_given_off_geometry_with_det_
     detector.create_field('data', var)
     detector.attrs['axes'] = ['xx', 'yy']
     create_off_geometry_detector_numbers_1234(detector, name='shape')
+    detector = nxroot['detector0']
     loaded = detector[...]
     assert isinstance(loaded, sc.DataGroup)
     assert sc.identical(loaded['shape'], detector['shape'][()])
@@ -374,6 +396,7 @@ def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nx
     create_off_geometry_detector_numbers_1234(detector,
                                               name='shape',
                                               detector_faces=False)
+    detector = nxroot['detector0']
     loaded = detector[...]
     assert loaded.coords['shape'].dims == ()
     assert sc.identical(loaded.coords['shape'].bins.size(), sc.index(4))
@@ -400,6 +423,7 @@ def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
     create_cylindrical_geometry_detector_numbers_1234(detector,
                                                       name='shape',
                                                       detector_numbers=False)
+    detector = nxroot['detector0']
     loaded = detector[...]
     shape = loaded.coords['shape']
     assert shape.dims == ()
@@ -425,6 +449,7 @@ def test_cylindrical_geometry_with_missing_parent_detector_numbers_triggers_fall
     create_cylindrical_geometry_detector_numbers_1234(detector,
                                                       name='shape',
                                                       detector_numbers=True)
+    detector = nxroot['detector0']
     loaded = detector[...]
     assert isinstance(loaded, sc.DataGroup)
     assert isinstance(loaded['shape'], sc.DataGroup)
@@ -441,6 +466,7 @@ def test_cylindrical_geometry_with_inconsistent_detector_numbers_triggers_fallba
     create_cylindrical_geometry_detector_numbers_1234(detector,
                                                       name='shape',
                                                       detector_numbers=True)
+    detector = nxroot['detector0']
     loaded = detector[...]
     assert isinstance(loaded, sc.DataGroup)
     assert isinstance(loaded['shape'], sc.DataGroup)
@@ -456,6 +482,7 @@ def test_cylindrical_geometry_with_detector_numbers(nxroot):
     create_cylindrical_geometry_detector_numbers_1234(detector,
                                                       name='shape',
                                                       detector_numbers=True)
+    detector = nxroot['detector0']
     loaded = detector[...]
     shape = loaded.coords['shape']
     assert shape.dims == detector_number.dims
