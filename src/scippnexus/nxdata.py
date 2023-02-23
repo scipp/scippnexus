@@ -15,24 +15,17 @@ from .nxcylindrical_geometry import NXcylindrical_geometry
 from .nxobject import (
     DatasetInfo,
     Field,
+    FieldInfo,
     GroupInfo,
     NexusStructureError,
     NXobject,
+    NXobjectInfo,
     ScippIndex,
     asarray,
 )
 from .nxoff_geometry import NXoff_geometry
 from .nxtransformations import NXtransformations
 from .typing import H5Dataset, H5Group
-
-
-@dataclass
-class FieldInfo(DatasetInfo):
-    dims: Tuple[str]
-
-
-#    unit: Optional[sc.Unit]
-#    dtype: sc.DType
 
 
 def _guess_dims(dims, shape, field: DatasetInfo):
@@ -160,7 +153,8 @@ class NXdataInfo:
                 if signal is not None and len(dataset.shape) == len(signal.shape):
                     return group_dims
                 return [name]
-            if signal is not None:
+            if signal is not None and group_dims is not None:
+                print(group_dims, signal.shape, dataset)
                 return _guess_dims(group_dims, signal.shape, dataset)
 
         field_dims = {name: get_dims(name, ds) for name, ds in info.datasets.items()}
@@ -259,15 +253,25 @@ class NXdata(NXobject):
         """
         super().__init__(group, definition=definition, strategy=strategy)
         # TODO This may raise, how to trigger fallback?
-        self._info = NXdataInfo.from_group_info(info=self._group_info,
-                                                signal_override=signal_override,
-                                                strategy=self._strategy)
-        print(self._info)
+        #self._info = NXdataInfo.from_group_info(info=self._group_info,
+        #                                        signal_override=signal_override,
+        #                                        strategy=self._strategy)
+        #print(self._info)
         self._signal_override = signal_override
         self._skip = skip if skip is not None else []
 
     def _default_strategy(self):
         return NXdataStrategy
+
+    def _make_class_info(self, info: GroupInfo) -> NXobjectInfo:
+        """Create info object for this NeXus class."""
+        di = NXdataInfo.from_group_info(info=info,
+                                        strategy=self._strategy)
+        #field_infos = {name: FieldInfo(dims=field_dims[name], value=info.datasets[name] for name in info.datasets}
+        fields = {name:Field(dataset=info.datasets[name].value, dims=di.field_dims[name], ancestor=self) for name in info.datasets}
+
+        fields = sc.DataGroup(fields)
+        return NXobjectInfo(children=fields)
 
     @property
     def shape(self) -> List[int]:
@@ -301,7 +305,7 @@ class NXdata(NXobject):
 
     @property
     def _signal_name(self) -> str:
-        return self._info.signal_name
+        #return self._info.signal_name
         return self._strategy.signal(self)
 
     @property
@@ -356,7 +360,7 @@ class NXdata(NXobject):
             return None
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
-        return self._info.field_dims[name]
+        #return self._info.field_dims[name]
         # Newly written files should always contain indices attributes, but the
         # standard recommends that readers should also make "best effort" guess
         # since legacy files do not set this attribute.
@@ -455,7 +459,8 @@ class NXdata(NXobject):
                     da.coords[name] = coord
             except sc.DimensionError as e:
                 raise NexusStructureError(
-                    f"Field in NXdata incompatible with dims or shape of signal: {e}"
+                    f"Field {name} in NXdata incompatible with dims "
+                    f"or shape of signal: {e}"
                 ) from e
 
         return da

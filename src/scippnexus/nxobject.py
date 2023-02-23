@@ -17,6 +17,7 @@ import numpy as np
 import scipp as sc
 
 from ._common import convert_time_to_datetime64, to_plain_index
+from ._common import to_child_select
 from ._hdf5_nexus import (
     _cset_to_encoding,
     _ensure_str,
@@ -358,6 +359,50 @@ class NXobjectStrategy:
         return True
 
 
+
+# Do we need this? Why not create fields directly?
+@dataclass
+class FieldInfo:
+    dims: Tuple[str]
+    value: H5Dataset
+#    shape: Tuple[int]
+#
+#    @classmethod
+#    def init(info: DatasetInfo, dims: Optional[Tuple[str]]) -> FieldInfo:
+#        # NeXus treats [] and [1] interchangeably. In general this is ill-defined, but
+#        # the best we can do appears to be squeezing unless the file provides names for
+#        # dimensions. The shape property of this class does thus not necessarily return
+#        # the same as the shape of the underlying dataset.
+#        if dims is not None:
+#            dims = tuple(dims)
+#            if len(dims) < len(info.shape):
+#                # The convention here is that the given dimensions apply to the shapes
+#                # starting from the left. So we only squeeze dimensions that are after
+#                # len(dims).
+#                shape = info.shape[:len(dims)] + tuple(
+#                    size for size in info.shape[len(dims):] if size != 1)
+#        else:
+#            shape = tuple(size for size in info.shape if size != 1)
+#            dims = tuple(f'dim_{i}' for i in range(len(shape)))
+#        return FieldInfo(dims=dims, shape=shape, value=info.value))
+#
+#    def make_field(self) -> Field:
+#        return Field(dataset=self.value, dims=self.dims, shape=self.shape)
+
+
+@dataclass
+class NXobjectInfo:
+    children: Dict[str, Any]
+
+    @staticmethod
+    def init(group: NXobject, info: GroupInfo):
+        def make_field(ds: DatasetInfo) -> Field:
+            return Field(dataset=ds.value, ancestor=group)
+        fields = sc.DataGroup(info.datasets).apply(make_field)
+        print(fields)
+        # TODO also groups
+        return NXobjectInfo(children=fields)
+
 class NXobject:
     """Base class for all NeXus groups.
     """
@@ -377,7 +422,12 @@ class NXobject:
         if self._strategy is None:
             self._strategy = self._default_strategy()
         self._group_info = GroupInfo.read(group)
+        self._info = self._make_class_info(self._group_info)
         #print(self._group_info)
+
+    def _make_class_info(self, info: GroupInfo) -> NXobjectInfo:
+        """Create info object for this NeXus class."""
+        return NXobjectInfo.init(group=self, info=info)
 
     def _default_strategy(self):
         """
@@ -392,6 +442,20 @@ class NXobject:
                                             NXobject)(group,
                                                       definition=self._definition)
         return group  # Return underlying (h5py) group
+
+    def _read_children(self, select: ScippIndex) -> sc.DataGroup:
+        # But how to handle groups?
+        children = self._info.children
+        dims = children.dims
+        dg = sc.DataGroup()
+        for name, child in children.items():
+            sel = to_child_select(dims,
+                                  child.dims,
+                                  select,
+                                  bin_edge_dim=None)
+            dg[name] = child[sel]
+        return dg
+
 
     def _get_child(
             self,
@@ -419,7 +483,9 @@ class NXobject:
             else:
                 return self._make(item)
 
+        select = name
         try:
+            print(self._read_children(select))
             da = self._getitem(name)
             self._insert_leaf_properties(da)
         except NexusStructureError as e:
@@ -523,6 +589,7 @@ class NXobject:
         return self._get_child(name, use_field_dims=True)
 
     def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]:
+        return self._read_children(index)
         include = getattr(self._strategy, 'include_child', lambda x: True)
         return sc.DataGroup(
             {name: child[index]
