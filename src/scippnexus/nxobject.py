@@ -16,8 +16,7 @@ import h5py
 import numpy as np
 import scipp as sc
 
-from ._common import convert_time_to_datetime64, to_plain_index
-from ._common import to_child_select
+from ._common import convert_time_to_datetime64, to_child_select, to_plain_index
 from ._hdf5_nexus import (
     _cset_to_encoding,
     _ensure_str,
@@ -41,9 +40,20 @@ class DatasetInfo:
 
 
 @dataclass
+class ProtoGroupInfo:
+    attrs: Dict[str, Any]
+    value: H5Group
+
+    @staticmethod
+    def read(group: H5Group) -> ProtoGroupInfo:
+        return ProtoGroupInfo(attrs=dict(Attrs(group.attrs)), value=group)
+
+
+@dataclass
 class GroupInfo:
     attrs: Dict[str, Any]
     datasets: Dict[str, DatasetInfo]
+    groups: Dict[str, ProtoGroupInfo]
 
     @staticmethod
     def read(group: H5Group) -> GroupInfo:
@@ -51,7 +61,13 @@ class GroupInfo:
             key: DatasetInfo.read(value)
             for key, value in group.items() if is_dataset(value)
         }
-        return GroupInfo(attrs=dict(Attrs(group.attrs)), datasets=datasets)
+        groups = {
+            key: ProtoGroupInfo.read(value)
+            for key, value in group.items() if not is_dataset(value)
+        }
+        return GroupInfo(attrs=dict(Attrs(group.attrs)),
+                         datasets=datasets,
+                         groups=groups)
 
 
 def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
@@ -359,12 +375,13 @@ class NXobjectStrategy:
         return True
 
 
-
 # Do we need this? Why not create fields directly?
 @dataclass
 class FieldInfo:
     dims: Tuple[str]
     value: H5Dataset
+
+
 #    shape: Tuple[int]
 #
 #    @classmethod
@@ -396,12 +413,17 @@ class NXobjectInfo:
 
     @staticmethod
     def init(group: NXobject, info: GroupInfo):
+
         def make_field(ds: DatasetInfo) -> Field:
             return Field(dataset=ds.value, ancestor=group)
+
         fields = sc.DataGroup(info.datasets).apply(make_field)
+        groups = info.groups
+        fields.update(groups)
         print(fields)
         # TODO also groups
         return NXobjectInfo(children=fields)
+
 
 class NXobject:
     """Base class for all NeXus groups.
@@ -429,6 +451,9 @@ class NXobject:
         """Create info object for this NeXus class."""
         return NXobjectInfo.init(group=self, info=info)
 
+    def _assemble(self, children: sc.DataGroup) -> sc.DataGroup:
+        return dg
+
     def _default_strategy(self):
         """
         Default strategy to use when none given and when the application definition
@@ -447,15 +472,17 @@ class NXobject:
         # But how to handle groups?
         children = self._info.children
         dims = children.dims
+        # TODO actualize subgroups first, so they can contribute dims?
         dg = sc.DataGroup()
         for name, child in children.items():
+            if isinstance(child, ProtoGroupInfo):
+                child = self[name]
             sel = to_child_select(dims,
-                                  child.dims,
+                                  getattr(child, 'dims', ()),
                                   select,
                                   bin_edge_dim=None)
             dg[name] = child[sel]
         return dg
-
 
     def _get_child(
             self,
@@ -485,7 +512,8 @@ class NXobject:
 
         select = name
         try:
-            print(self._read_children(select))
+            dg = self._read_children(select)
+            return self._assemble(dg)
             da = self._getitem(name)
             self._insert_leaf_properties(da)
         except NexusStructureError as e:

@@ -265,13 +265,20 @@ class NXdata(NXobject):
 
     def _make_class_info(self, info: GroupInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
-        di = NXdataInfo.from_group_info(info=info,
-                                        strategy=self._strategy)
+        di = NXdataInfo.from_group_info(info=info, strategy=self._strategy)
         #field_infos = {name: FieldInfo(dims=field_dims[name], value=info.datasets[name] for name in info.datasets}
-        fields = {name:Field(dataset=info.datasets[name].value, dims=di.field_dims[name], ancestor=self) for name in info.datasets}
+        fields = {
+            name: Field(dataset=info.datasets[name].value,
+                        dims=di.field_dims[name],
+                        ancestor=self)
+            for name in info.datasets
+        }
 
         fields = sc.DataGroup(fields)
-        return NXobjectInfo(children=fields)
+        fields.update(info.groups)
+        oi = NXobjectInfo(children=fields)
+        oi.signal_name = di.signal_name
+        return oi
 
     @property
     def shape(self) -> List[int]:
@@ -460,7 +467,12 @@ class NXdata(NXobject):
             except sc.DimensionError as e:
                 raise NexusStructureError(
                     f"Field {name} in NXdata incompatible with dims "
-                    f"or shape of signal: {e}"
-                ) from e
+                    f"or shape of signal: {e}") from e
 
         return da
+
+    def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
+        # TODO move value/variance handling into Field?
+        signal = children.pop(self._info.signal_name)
+        #signal_errors = children.pop(self._info.errors_name)
+        return sc.DataArray(data=signal, coords=children)
