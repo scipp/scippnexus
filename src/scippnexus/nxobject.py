@@ -242,7 +242,10 @@ class Field:
             self._dims = tuple(f'dim_{i}' for i in range(self.ndim))
 
     def _load_variances(self, var, index):
-        stddevs = sc.empty(dims=var.dims, shape=var.shape, dtype=var.dtype, unit=var.unit)
+        stddevs = sc.empty(dims=var.dims,
+                           shape=var.shape,
+                           dtype=var.dtype,
+                           unit=var.unit)
         try:
             self._errors.read_direct(stddevs.values, source_sel=index)
         except TypeError:
@@ -251,7 +254,7 @@ class Field:
         # This is not the case in all files we observed, is there any harm in
         # attempting a broadcast?
         var.variances = np.broadcast_to(sc.pow(stddevs, sc.scalar(2)).values,
-                                           shape=var.shape)
+                                        shape=var.shape)
 
     def __getitem__(self, select) -> Union[Any, sc.Variable]:
         """Load the field as a :py:class:`scipp.Variable` or Python object.
@@ -272,8 +275,11 @@ class Field:
                 dims.append(base_dims[i])
                 shape.append(len(range(*ind.indices(base_shape[i]))))
 
-        variable = sc.empty(dims=dims, shape=shape, dtype=self.dtype, unit=self.unit,
-                with_variances = self._errors is not None)
+        variable = sc.empty(dims=dims,
+                            shape=shape,
+                            dtype=self.dtype,
+                            unit=self.unit,
+                            with_variances=self._errors is not None)
 
         # If the variable is empty, return early
         if np.prod(shape) == 0:
@@ -482,7 +488,7 @@ class NXobject:
         return NXobjectInfo.init(group=self, info=info)
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataGroup:
-        return dg
+        return children
 
     def _default_strategy(self):
         """

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import scipp as sc
 
-from .nxdata import NXdata, NXdataStrategy, NXdataInfo
+from .nxdata import NXdata, NXdataInfo, NXdataStrategy
 from .nxevent_data import NXevent_data
 from .nxobject import (
     Field,
@@ -170,30 +170,30 @@ class NXdetector(NXobject):
             'cue_timestamp_zero', 'cue_index', 'pulse_height'
         ]
         self._detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
-        self._info = self._init_info(info=self._group_info)
-        print(f'{self._info=}')
+        #self._info = self._init_info(info=self._group_info)
+        #print(f'{self._info=}')
 
-    def _init_info(self, info):
-        info = NXdataInfo.from_group_info(info=info,
-                                          strategy=NXdetectorStrategy)
-        field_dims = info.field_dims
-        if self.events is not None:
-            for name in field_dims:
-                if name in self._nxevent_data_fields:
-                    # Event field is direct child of this class
-                    field_dims[name] = self.events._get_field_dims(name)
-                if name in self._detector_number_fields:
-                    # If there is a signal field in addition to the event data it can be
-                    # used to define dimension labels
-                    nxdata = self._nxdata(use_event_signal=False)
-                    if nxdata._signal_name is not None:
-                        field_dims[name] = nxdata._get_field_dims(name)
-                    # If grouping is 1-D then we use this name as the dim
-                    elif self._get_child(name).ndim == 1:
-                        field_dims[name] = [name]
-                    else:
-                        field_dims[name] = None
-        return info
+    #def _init_info(self, info):
+    #    info = NXdataInfo.from_group_info(info=info,
+    #                                      strategy=NXdetectorStrategy)
+    #    field_dims = info.field_dims
+    #    if self.events is not None:
+    #        for name in field_dims:
+    #            if name in self._nxevent_data_fields:
+    #                # Event field is direct child of this class
+    #                field_dims[name] = self.events._get_field_dims(name)
+    #            if name in self._detector_number_fields:
+    #                # If there is a signal field in addition to the event data it can be
+    #                # used to define dimension labels
+    #                nxdata = self._nxdata(use_event_signal=False)
+    #                if nxdata._signal_name is not None:
+    #                    field_dims[name] = nxdata._get_field_dims(name)
+    #                # If grouping is 1-D then we use this name as the dim
+    #                elif self._get_child(name).ndim == 1:
+    #                    field_dims[name] = [name]
+    #                else:
+    #                    field_dims[name] = None
+    #    return info
 
     @property
     def shape(self) -> List[int]:
