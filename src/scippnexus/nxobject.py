@@ -549,19 +549,20 @@ class NXobject:
         select = name
         try:
             dg = self._read_children(select)
-            return self._assemble(dg)
+            try:
+                return self._assemble(dg)
+            except Exception as e:
+                raise NexusStructureError(
+                    f"Failed to assemble {type(self).__name__}: {e}") from e
             da = self._getitem(name)
             self._insert_leaf_properties(da)
         except NexusStructureError as e:
             # If the child class cannot load this group, we fall back to returning the
             # underlying datasets in a DataGroup.
-            if type(self)._getitem == NXobject._getitem:
-                raise
-            else:
-                msg = (
-                    f"Failed to load {self.name} as {type(self).__name__}: {e} "
-                    "Falling back to loading HDF5 group children as scipp.DataGroup.")
-                warnings.warn(msg)
+            msg = (f"Failed to load {self.name} as {type(self).__name__}: {e} "
+                   "Falling back to loading HDF5 group children as scipp.DataGroup.")
+            warnings.warn(msg)
+            return dg
             da = NXobject._getitem(self, name)
         return da
 

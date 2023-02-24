@@ -477,11 +477,5 @@ class NXdata(NXobject):
         return da
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
-        # TODO move value/variance handling into Field?
-        # TODO move try/except into nxobject? Error message is generic
-        try:
-            signal = children.pop(self._info.signal_name)
-            #signal_errors = children.pop(self._info.errors_name)
-            return sc.DataArray(data=signal, coords=children)
-        except Exception as e:
-            raise NexusStructureError(f"Failed to assemble NXdata: {e}") from e
+        signal = children.pop(self._info.signal_name)
+        return sc.DataArray(data=signal, coords=children)
