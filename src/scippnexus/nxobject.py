@@ -1,6 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+"""
+Loading file contains is performed via NXobject, and proceeds in roughly 4 steps:
+
+1. Read HDF5 structure (non-recursively). This includes attributes and dataset shape.
+2. Build NeXus structure based on output of step 1. Subclasses of NXobject customize
+   this step.
+3a Turn info into Fields/NXobject (only on getitem, due to triggered recursion)
+3b Load the children (given by the output of previous) based on a selection.
+4. Assemble. Subclasses of NXobject customize this step.
+
+If step 4 fails then a scipp.DataGroup containing the loaded children is returned.
+"""
 from __future__ import annotations
 
 import datetime
@@ -197,6 +209,7 @@ class Field:
 
     def __init__(self,
                  dataset: H5Dataset,
+                 errors: Optional[H5Dataset] = None,
                  *,
                  ancestor,
                  dims=None,
@@ -204,6 +217,7 @@ class Field:
                  is_time=None):
         self._ancestor = ancestor  # Usually the parent, but may be grandparent, etc.
         self._dataset = dataset
+        self._errors = errors
         self._dtype = _dtype_from_dataset(dataset) if dtype is None else dtype
         self._shape = self._dataset.shape
         if self._dtype == sc.DType.vector3:
@@ -227,6 +241,18 @@ class Field:
             self._shape = tuple(size for size in self._shape if size != 1)
             self._dims = tuple(f'dim_{i}' for i in range(self.ndim))
 
+    def _load_variances(self, var, index):
+        stddevs = sc.empty(dims=var.dims, shape=var.shape, dtype=var.dtype, unit=var.unit)
+        try:
+            self._errors.read_direct(stddevs.values, source_sel=index)
+        except TypeError:
+            stddevs.values = self._errors[index].squeeze()
+        # According to the standard, errors must have the same shape as the data.
+        # This is not the case in all files we observed, is there any harm in
+        # attempting a broadcast?
+        var.variances = np.broadcast_to(sc.pow(stddevs, sc.scalar(2)).values,
+                                           shape=var.shape)
+
     def __getitem__(self, select) -> Union[Any, sc.Variable]:
         """Load the field as a :py:class:`scipp.Variable` or Python object.
 
@@ -246,7 +272,8 @@ class Field:
                 dims.append(base_dims[i])
                 shape.append(len(range(*ind.indices(base_shape[i]))))
 
-        variable = sc.empty(dims=dims, shape=shape, dtype=self.dtype, unit=self.unit)
+        variable = sc.empty(dims=dims, shape=shape, dtype=self.dtype, unit=self.unit,
+                with_variances = self._errors is not None)
 
         # If the variable is empty, return early
         if np.prod(shape) == 0:
@@ -273,6 +300,8 @@ class Field:
                 self._dataset.read_direct(variable.values, source_sel=index)
             except TypeError:
                 variable.values = self._dataset[index].squeeze()
+            if self._errors is not None:
+                self._load_variances(variable, index)
         else:
             variable.values = self._dataset[index]
         if _is_time(variable):
@@ -379,7 +408,8 @@ class NXobjectStrategy:
 @dataclass
 class FieldInfo:
     dims: Tuple[str]
-    value: H5Dataset
+    values: H5Dataset
+    errors: Optional[H5Dataset] = None
 
 
 #    shape: Tuple[int]

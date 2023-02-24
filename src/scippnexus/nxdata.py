@@ -55,7 +55,8 @@ def _guess_dims(dims, shape, field: DatasetInfo):
 @dataclass
 class NXdataInfo:
     signal_name: str
-    field_dims: Dict[str, Tuple[str]]
+    field_infos: Dict[str, FieldInfo]
+    #field_dims: Dict[str, Tuple[str]]
     #dims: Tuple[str]
     #shape: Tuple[int]
     #unit:
@@ -159,7 +160,16 @@ class NXdataInfo:
 
         field_dims = {name: get_dims(name, ds) for name, ds in info.datasets.items()}
 
-        return NXdataInfo(signal_name=signal_name, field_dims=field_dims)
+        field_infos = {
+            name: FieldInfo(dims=dims, values=info.datasets[name].value)
+            for name, dims in field_dims.items()
+        }
+
+        for name in field_dims:
+            if (errors := strategy.coord_errors(field_dims, name)) is not None:
+                field_infos[name].errors = field_infos.pop(errors).values
+
+        return NXdataInfo(signal_name=signal_name, field_infos=field_infos)
 
 
 class NXdataStrategy:
@@ -252,11 +262,6 @@ class NXdata(NXobject):
             Names of fields to skip when loading coords.
         """
         super().__init__(group, definition=definition, strategy=strategy)
-        # TODO This may raise, how to trigger fallback?
-        #self._info = NXdataInfo.from_group_info(info=self._group_info,
-        #                                        signal_override=signal_override,
-        #                                        strategy=self._strategy)
-        #print(self._info)
         self._signal_override = signal_override
         self._skip = skip if skip is not None else []
 
@@ -266,12 +271,12 @@ class NXdata(NXobject):
     def _make_class_info(self, info: GroupInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
         di = NXdataInfo.from_group_info(info=info, strategy=self._strategy)
-        #field_infos = {name: FieldInfo(dims=field_dims[name], value=info.datasets[name] for name in info.datasets}
         fields = {
-            name: Field(dataset=info.datasets[name].value,
-                        dims=di.field_dims[name],
+            name: Field(dataset=fi.values,
+                        errors=fi.errors,
+                        dims=fi.dims,
                         ancestor=self)
-            for name in info.datasets
+            for name, fi in di.field_infos.items()
         }
 
         fields = sc.DataGroup(fields)
@@ -473,6 +478,10 @@ class NXdata(NXobject):
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
         # TODO move value/variance handling into Field?
-        signal = children.pop(self._info.signal_name)
-        #signal_errors = children.pop(self._info.errors_name)
-        return sc.DataArray(data=signal, coords=children)
+        # TODO move try/except into nxobject? Error message is generic
+        try:
+            signal = children.pop(self._info.signal_name)
+            #signal_errors = children.pop(self._info.errors_name)
+            return sc.DataArray(data=signal, coords=children)
+        except Exception as e:
+            raise NexusStructureError(f"Failed to assemble NXdata: {e}") from e
