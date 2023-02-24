@@ -2,7 +2,6 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import h5py
-import numpy as np
 import pytest
 import scipp as sc
 
@@ -43,6 +42,14 @@ def test_bad_event_index_causes_load_as_DataGroup(nxroot):
     event_data['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 666])
     dg = nxroot['entry/events_0'][...]
     assert isinstance(dg, sc.DataGroup)
+
+
+def test_select_single_pulse_loads_as_0d(nxroot):
+    event_data = nxroot['entry'].create_class('events_0', NXevent_data)
+    create_event_data_ids_1234(event_data)
+    events = nxroot['entry/events_0']['pulse', 0]
+    assert events.sizes == {}
+    assert events.bins.size().value == 3
 
 
 def create_event_data_without_event_id(group):
