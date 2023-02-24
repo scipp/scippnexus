@@ -36,12 +36,20 @@ def test_negative_event_index_converted_to_num_event(nxroot):
 
 def test_bad_event_index_causes_load_as_DataGroup(nxroot):
     event_data = nxroot['entry'].create_class('events_0', NXevent_data)
-    event_data['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2])
-    event_data['event_time_offset'] = sc.array(dims=[''], unit='s', values=[0, 0, 0, 0])
-    event_data['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
-    event_data['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 666])
+    event_id = sc.array(dims=['event'], unit=None, values=[1, 2, 4, 1, 2, 2])
+    event_time_offset = sc.array(dims=['event'], unit='s', values=[0, 0, 0, 0, 0, 0])
+    event_time_zero = sc.array(dims=['pulse'], unit='s', values=[1, 2, 3, 4])
+    event_index = sc.array(dims=['pulse'], unit=None, values=[0, 3, 3, 666])
+    event_data['event_id'] = event_id
+    event_data['event_time_offset'] = event_time_offset
+    event_data['event_time_zero'] = event_time_zero
+    event_data['event_index'] = event_index
     dg = nxroot['entry/events_0'][...]
     assert isinstance(dg, sc.DataGroup)
+    assert dg['event_index'].sizes == {'pulse': 5}
+    assert sc.identical(dg['event_id'], event_id)
+    assert sc.identical(dg['event_time_zero'], event_time_zero)
+    assert sc.identical(dg['event_time_offset'], event_time_offset)
 
 
 def test_select_single_pulse_loads_as_0d(nxroot):

@@ -103,6 +103,8 @@ class NXevent_data(NXobject):
         # different institutions. We try to make sure here that it is what would be the
         # first index of the next pulse. In other words, ensure that event_index
         # includes the bin edge for the last pulse.
+        # TODO This could probably be simplified if we make use of the sc.bins feature
+        # to setup such 'ends' automatically if not provided. Affects also code above.
         if event_time_zero.ndim == 0:
             begins = event_index[_pulse_dimension, 0]
             ends = event_index[_pulse_dimension, 1]
