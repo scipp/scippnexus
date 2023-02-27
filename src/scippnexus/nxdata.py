@@ -103,7 +103,6 @@ class NXdataInfo:
             return None
 
         group_dims = _get_group_dims()
-        #print(f'{group_dims=}')
 
         if axes is not None:
             # Unlike self.dims we *drop* entries that are '.'
@@ -155,7 +154,6 @@ class NXdataInfo:
                     return group_dims
                 return [name]
             if signal is not None and group_dims is not None:
-                print(group_dims, signal.shape, dataset)
                 return _guess_dims(group_dims, signal.shape, dataset)
 
         field_dims = {name: get_dims(name, ds) for name, ds in info.datasets.items()}
@@ -301,7 +299,9 @@ class NXdata(NXobject):
             return d
         # Legacy NXdata defines axes not as group attribute, but attr on dataset.
         # This is handled by class Field.
-        return self._signal.dims
+        if (signal := self._signal) is not None:
+            return signal.dims
+        return ()
 
     @property
     def unit(self) -> Union[sc.Unit, None]:
@@ -318,14 +318,9 @@ class NXdata(NXobject):
 
     @property
     def _signal(self) -> Union[Field, '_EventField', None]:  # noqa: F821
-        if self._signal_override is not None:
-            return self._signal_override
-        if self._signal_name is not None:
-            if self._signal_name not in self:
-                raise NexusStructureError(
-                    f"Signal field '{self._signal_name}' not found in group.")
-            return self[self._signal_name]
-        return None
+        if self._info.signal_name is None:
+            return None
+        return self.get(self._info.signal_name)
 
     def _get_axes(self):
         """Return labels of named axes. Does not include default 'dim_{i}' names."""
