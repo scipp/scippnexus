@@ -469,5 +469,6 @@ class NXdata(NXobject):
         return da
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
+        children = sc.DataGroup(children)
         signal = children.pop(self._info.signal_name)
         return sc.DataArray(data=signal, coords=children)

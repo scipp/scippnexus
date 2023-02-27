@@ -63,7 +63,7 @@ class GroupInfo:
             return GroupInfo(nx_class=cls, group=group)
         return GroupInfo(group=group)
 
-    def build() -> NXobject:
+    def build(self) -> NXobject:
         return self.nx_class(self.group)
 
 
@@ -233,6 +233,7 @@ class Field:
         # the best we can do appears to be squeezing unless the file provides names for
         # dimensions. The shape property of this class does thus not necessarily return
         # the same as the shape of the underlying dataset.
+        # TODO Should this logic be in FieldInfo? Or in NXdataInfo?
         if dims is not None:
             self._dims = tuple(dims)
             if len(self._dims) < len(self._shape):
@@ -463,7 +464,8 @@ class NXobject:
             self._strategy = self._default_strategy()
         self._group_info = GroupContentInfo.read(group)
         self._info = self._make_class_info(self._group_info)
-        #print(self._group_info)
+        print(f'{self.name} {self._group_info}')
+        print(f'{self.name} {self._info}')
 
     def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
