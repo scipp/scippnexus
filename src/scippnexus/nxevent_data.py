@@ -8,6 +8,7 @@ import scipp as sc
 
 from ._common import to_plain_index
 from .nxobject import (
+    FieldInfo,
     GroupContentInfo,
     NexusStructureError,
     NXobject,
@@ -23,18 +24,18 @@ class NXevent_data(NXobject):
 
     def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
-        children = {}
-        # TODO This uses a legacy mechanism, rewrite!
-        for name in self:
-            children[name] = self[name]
+        children = {
+            name: FieldInfo(values=di.value, dims=self._get_field_dims(name))
+            for name, di in info.datasets.items()
+        }
         return NXobjectInfo(children=children)
 
-    def _read_children(self, select: ScippIndex) -> sc.DataGroup:
+    def _read_children(self, children, select: ScippIndex) -> sc.DataGroup:
         self._check_for_missing_fields()
         index = to_plain_index([_pulse_dimension], select)
 
         max_index = self.shape[0]
-        event_time_zero = self['event_time_zero'][index]
+        event_time_zero = children['event_time_zero'][index]
         if index is Ellipsis or index == tuple():
             last_loaded = False
         else:
@@ -51,9 +52,9 @@ class NXevent_data(NXobject):
                 last_loaded = True
             index = slice(start, stop, stride)
 
-        event_index = self['event_index'][index].values
+        event_index = children['event_index'][index].values
 
-        num_event = self["event_time_offset"].shape[0]
+        num_event = children["event_time_offset"].shape[0]
         # Some files contain uint64 "max" indices, which turn into negatives during
         # conversion to int64. This is a hack to get around this.
         event_index[event_index < 0] = num_event
@@ -64,13 +65,13 @@ class NXevent_data(NXobject):
         else:
             event_select = slice(None)
 
-        if (event_id := self.get('event_id')) is not None:
+        if (event_id := children.get('event_id')) is not None:
             event_id = event_id[event_select]
             if event_id.dtype not in [sc.DType.int32, sc.DType.int64]:
                 raise NexusStructureError(
                     "NXevent_data contains event_id field with non-integer values")
 
-        event_time_offset = self['event_time_offset'][event_select]
+        event_time_offset = children['event_time_offset'][event_select]
 
         if not last_loaded:
             event_index = np.append(event_index, num_event)
@@ -128,7 +129,7 @@ class NXevent_data(NXobject):
 
     @property
     def shape(self) -> List[int]:
-        return self['event_index'].shape
+        return self._info.children['event_index'].values.shape
 
     @property
     def dims(self) -> List[str]:
@@ -148,6 +149,6 @@ class NXevent_data(NXobject):
 
     def _check_for_missing_fields(self):
         for field in ("event_time_zero", "event_index", "event_time_offset"):
-            if field not in self:
+            if field not in self._info.children:
                 raise NexusStructureError(
                     f"Required field {field} not found in NXevent_data")

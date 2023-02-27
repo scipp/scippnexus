@@ -71,7 +71,7 @@ def create_event_data_without_event_id(group):
 def test_event_data_without_event_id_can_be_loaded(nxroot):
     event_data = nxroot['entry'].create_class('events_0', NXevent_data)
     create_event_data_without_event_id(event_data)
-    da = event_data[...]
+    da = nxroot['entry/events_0'][...]
     assert len(da.bins.coords) == 1
     assert 'event_time_offset' in da.bins.coords
 

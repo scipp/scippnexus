@@ -54,7 +54,7 @@ class DatasetInfo:
 @dataclass
 class GroupInfo:
     group: H5Group
-    nx_class: Optional[Type] = None
+    nx_class: Optional[type] = None
 
     @staticmethod
     def read(group: H5Group) -> GroupInfo:
@@ -418,8 +418,8 @@ class NXobjectStrategy:
 
 @dataclass
 class FieldInfo:
-    dims: Optional[Tuple[str]]
     values: H5Dataset
+    dims: Optional[Tuple[str]] = None
     errors: Optional[H5Dataset] = None
 
     def build(self, ancestor=None) -> Field:
@@ -427,31 +427,6 @@ class FieldInfo:
                      dataset=self.values,
                      errors=self.errors,
                      ancestor=ancestor)
-
-
-#    shape: Tuple[int]
-#
-#    @classmethod
-#    def init(info: DatasetInfo, dims: Optional[Tuple[str]]) -> FieldInfo:
-#        # NeXus treats [] and [1] interchangeably. In general this is ill-defined, but
-#        # the best we can do appears to be squeezing unless the file provides names for
-#        # dimensions. The shape property of this class does thus not necessarily return
-#        # the same as the shape of the underlying dataset.
-#        if dims is not None:
-#            dims = tuple(dims)
-#            if len(dims) < len(info.shape):
-#                # The convention here is that the given dimensions apply to the shapes
-#                # starting from the left. So we only squeeze dimensions that are after
-#                # len(dims).
-#                shape = info.shape[:len(dims)] + tuple(
-#                    size for size in info.shape[len(dims):] if size != 1)
-#        else:
-#            shape = tuple(size for size in info.shape if size != 1)
-#            dims = tuple(f'dim_{i}' for i in range(len(shape)))
-#        return FieldInfo(dims=dims, shape=shape, value=info.value))
-#
-#    def make_field(self) -> Field:
-#        return Field(dataset=self.value, dims=self.dims, shape=self.shape)
 
 
 @dataclass
@@ -511,19 +486,19 @@ class NXobject:
                                                       definition=self._definition)
         return group  # Return underlying (h5py) group
 
-    def _read_children(self, select: ScippIndex) -> sc.DataGroup:
+    def _build_children(self) -> sc.DataGroup:
         # TODO ancestor and definition handling?
-        children = {
+        return {
             name: child_info.build()
             for name, child_info in self._info.children.items()
         }
 
+    def _read_children(self, children: Dict[str, Union[Field, NXobject]],
+                       select: ScippIndex) -> sc.DataGroup:
         dims = sc.DataGroup(children).dims
         # TODO actualize subgroups first, so they can contribute dims?
         dg = sc.DataGroup()
         for name, child in children.items():
-            if isinstance(child, GroupInfo):
-                child = self[name]
             sel = to_child_select(dims,
                                   getattr(child, 'dims', ()),
                                   select,
@@ -559,7 +534,8 @@ class NXobject:
 
         select = name
         try:
-            dg = self._read_children(select)
+            children = self._build_children()
+            dg = self._read_children(children=children, select=select)
             try:
                 return self._assemble(dg)
             except Exception as e:
