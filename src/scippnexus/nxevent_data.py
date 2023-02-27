@@ -7,7 +7,13 @@ import numpy as np
 import scipp as sc
 
 from ._common import to_plain_index
-from .nxobject import GroupInfo, NexusStructureError, NXobject, NXobjectInfo, ScippIndex
+from .nxobject import (
+    GroupContentInfo,
+    NexusStructureError,
+    NXobject,
+    NXobjectInfo,
+    ScippIndex,
+)
 
 _event_dimension = "event"
 _pulse_dimension = "pulse"
@@ -15,7 +21,7 @@ _pulse_dimension = "pulse"
 
 class NXevent_data(NXobject):
 
-    def _make_class_info(self, info: GroupInfo) -> NXobjectInfo:
+    def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
         children = {}
         # TODO This uses a legacy mechanism, rewrite!

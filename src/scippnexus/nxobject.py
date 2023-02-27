@@ -62,13 +62,13 @@ class ProtoGroupInfo:
 
 
 @dataclass
-class GroupInfo:
+class GroupContentInfo:
     attrs: Dict[str, Any]
     datasets: Dict[str, DatasetInfo]
     groups: Dict[str, ProtoGroupInfo]
 
     @staticmethod
-    def read(group: H5Group) -> GroupInfo:
+    def read(group: H5Group) -> GroupContentInfo:
         datasets = {
             key: DatasetInfo.read(value)
             for key, value in group.items() if is_dataset(value)
@@ -77,9 +77,9 @@ class GroupInfo:
             key: ProtoGroupInfo.read(value)
             for key, value in group.items() if not is_dataset(value)
         }
-        return GroupInfo(attrs=dict(Attrs(group.attrs)),
-                         datasets=datasets,
-                         groups=groups)
+        return GroupContentInfo(attrs=dict(Attrs(group.attrs)),
+                                datasets=datasets,
+                                groups=groups)
 
 
 def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
@@ -417,6 +417,12 @@ class FieldInfo:
     values: H5Dataset
     errors: Optional[H5Dataset] = None
 
+    def build(self, ancestor) -> Field:
+        return Field(dims=self.dims,
+                     dataset=self.values,
+                     errors=self.errors,
+                     ancestor=ancestor)
+
 
 #    shape: Tuple[int]
 #
@@ -448,7 +454,7 @@ class NXobjectInfo:
     children: Dict[str, Any]
 
     @staticmethod
-    def init(group: NXobject, info: GroupInfo):
+    def init(group: NXobject, info: GroupContentInfo):
 
         def make_field(ds: DatasetInfo) -> Field:
             return Field(dataset=ds.value, ancestor=group)
@@ -456,8 +462,6 @@ class NXobjectInfo:
         fields = sc.DataGroup(info.datasets).apply(make_field)
         groups = info.groups
         fields.update(groups)
-        print(fields)
-        # TODO also groups
         return NXobjectInfo(children=fields)
 
 
@@ -479,11 +483,11 @@ class NXobject:
             self._strategy = self._definition.make_strategy(self)
         if self._strategy is None:
             self._strategy = self._default_strategy()
-        self._group_info = GroupInfo.read(group)
+        self._group_info = GroupContentInfo.read(group)
         self._info = self._make_class_info(self._group_info)
         #print(self._group_info)
 
-    def _make_class_info(self, info: GroupInfo) -> NXobjectInfo:
+    def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
         return NXobjectInfo.init(group=self, info=info)
 
@@ -554,7 +558,7 @@ class NXobject:
             except Exception as e:
                 raise NexusStructureError(
                     f"Failed to assemble {type(self).__name__}: {e}") from e
-            da = self._getitem(name)
+            # TODO ... handle via special fields?
             self._insert_leaf_properties(da)
         except NexusStructureError as e:
             # If the child class cannot load this group, we fall back to returning the
@@ -563,8 +567,6 @@ class NXobject:
                    "Falling back to loading HDF5 group children as scipp.DataGroup.")
             warnings.warn(msg)
             return dg
-            da = NXobject._getitem(self, name)
-        return da
 
     def _insert_leaf_properties(self, container):
         from .nexus_classes import NXgeometry

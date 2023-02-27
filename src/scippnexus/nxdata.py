@@ -16,7 +16,7 @@ from .nxobject import (
     DatasetInfo,
     Field,
     FieldInfo,
-    GroupInfo,
+    GroupContentInfo,
     NexusStructureError,
     NXobject,
     NXobjectInfo,
@@ -66,7 +66,7 @@ class NXdataInfo:
     @staticmethod
     def from_group_info(
             *,
-            info: GroupInfo,
+            info: GroupContentInfo,
             signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
             strategy) -> DataInfo:
         # 1. Find signal
@@ -268,16 +268,10 @@ class NXdata(NXobject):
     def _default_strategy(self):
         return NXdataStrategy
 
-    def _make_class_info(self, info: GroupInfo) -> NXobjectInfo:
+    def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
         di = NXdataInfo.from_group_info(info=info, strategy=self._strategy)
-        fields = {
-            name: Field(dataset=fi.values,
-                        errors=fi.errors,
-                        dims=fi.dims,
-                        ancestor=self)
-            for name, fi in di.field_infos.items()
-        }
+        fields = {name: fi.build(ancestor=self) for name, fi in di.field_infos.items()}
 
         fields = sc.DataGroup(fields)
         fields.update(info.groups)
