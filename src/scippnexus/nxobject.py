@@ -462,10 +462,13 @@ class NXobject:
             self._strategy = self._definition.make_strategy(self)
         if self._strategy is None:
             self._strategy = self._default_strategy()
-        self._group_info = GroupContentInfo.read(group)
-        self._info = self._make_class_info(self._group_info)
+        self._init_info()
         print(f'{self.name} {self._group_info}')
         print(f'{self.name} {self._info}')
+
+    def _init_info(self):
+        self._group_info = GroupContentInfo.read(self._group)
+        self._info = self._make_class_info(self._group_info)
 
     def rebuild(self) -> NXobject:
         return self._make(self._group)
@@ -722,6 +725,7 @@ class NXobject:
             dataset.attrs['units'] = str(data.unit)
         if data.dtype == sc.DType.datetime64:
             dataset.attrs['start'] = str(start.value)
+        self._init_info()
         return Field(dataset, dims=data.dims, ancestor=self)
 
     def create_class(self, name: str, nx_class: Union[str, type]) -> NXobject:
@@ -738,6 +742,7 @@ class NXobject:
         group = self._group.create_group(name)
         attr = nx_class if isinstance(nx_class, str) else nx_class.__name__
         group.attrs['NX_class'] = attr
+        self._init_info()
         return self._make(group)
 
     def __setitem__(self, name: str, value: Union[Field, NXobject, DimensionedArray]):
@@ -751,6 +756,7 @@ class NXobject:
             value.__write_to_nexus_group__(group)
         else:
             self.create_field(name, value)
+        self._init_info()
 
     def __getattr__(self, attr: str) -> Union[Any, 'NXobject']:
         nxclass = _nx_class_registry().get(f'NX{attr}')

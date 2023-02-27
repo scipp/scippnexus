@@ -11,18 +11,16 @@ def nxroot(request):
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         root = NXroot(f)
-        root.attrs['NX_class'] = 'NXroot'
         root.create_class('entry', NXentry)
-        yield root.rebuild()
+        yield root
 
 
 def test_without_coords(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
     data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
-    data = data.rebuild()
+    data.create_field('signal', signal)
     assert sc.identical(data[...], sc.DataArray(signal))
 
 
@@ -35,7 +33,6 @@ def test_with_coords_matching_axis_names(nxroot):
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field('xx', da.coords['xx'])
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -48,7 +45,6 @@ def test_guessed_dim_for_coord_not_matching_axis_name(nxroot):
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field('xx2', da.coords['xx2'])
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -65,7 +61,6 @@ def test_multiple_coords(nxroot):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -81,7 +76,6 @@ def test_slice_of_1d(nxroot):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('scalar', da.coords['scalar'])
-    data = data.rebuild()
     assert sc.identical(data['xx', :2], da['xx', :2])
     assert sc.identical(data[:2], da['xx', :2])
 
@@ -99,7 +93,6 @@ def test_slice_of_multiple_coords(nxroot):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
-    data = data.rebuild()
     assert sc.identical(data['xx', :2], da['xx', :2])
 
 
@@ -112,7 +105,6 @@ def test_guessed_dim_for_2d_coord_not_matching_axis_name(nxroot):
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field('xx2', da.coords['xx2'])
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -125,7 +117,6 @@ def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(nxroot):
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field('yy2', da.coords['yy2'])
-    data = data.rebuild()
     dg = data[...]
     assert isinstance(dg, sc.DataGroup)
     assert 'yy2' in dg
@@ -141,7 +132,6 @@ def test_guesses_transposed_dims_for_2d_coord(nxroot):
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field('xx2', da.coords['xx2'])
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -155,7 +145,6 @@ def test_indices_attribute_for_coord(nxroot, indices):
     data.attrs['yy2_indices'] = indices
     data.create_field('signal', da.data)
     data.create_field('yy2', da.coords['yy2'])
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -169,7 +158,6 @@ def test_indices_attribute_for_coord_with_nontrivial_slice(nxroot, indices):
     data.attrs['yy2_indices'] = indices
     data.create_field('signal', da.data)
     data.create_field('yy2', da.coords['yy2'])
-    data = data.rebuild()
     assert sc.identical(data['yy', :1], da['yy', :1])
 
 
@@ -182,7 +170,6 @@ def test_transpose_indices_attribute_for_coord(nxroot):
     data.attrs['xx2_indices'] = [1, 0]
     data.create_field('signal', da.data)
     data.create_field('xx2', da.coords['xx2'])
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -199,7 +186,6 @@ def test_auxiliary_signal_is_not_loaded_as_coord(nxroot):
     data.create_field('signal', da.data)
     data.create_field('xx', da.coords['xx'])
     del da.coords['xx']
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -216,7 +202,6 @@ def test_field_dims_match_NXdata_dims(nxroot):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
-    data = data.rebuild()
     assert sc.identical(data['xx', :2].data, data['signal1']['xx', :2])
     assert sc.identical(data['xx', :2].coords['xx'], data['xx']['xx', :2])
     assert sc.identical(data['xx', :2].coords['xx2'], data['xx2']['xx', :2])
@@ -236,7 +221,6 @@ def test_field_dims_match_NXdata_dims_when_selected_via_class_name(nxroot):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
-    data = data.rebuild()
     fields = data[Field]
     assert fields['signal1'].dims == ('xx', 'yy')
     assert fields['xx'].dims == ('xx', )
@@ -253,7 +237,6 @@ def test_uses_default_field_dims_if_inference_fails(nxroot):
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field('yy2', da.coords['yy2'])
-    data = data.rebuild()
     dg = data[()]
     assert sc.identical(dg['yy2'], da.coords['yy2'].rename(yy='dim_0'))
     assert sc.identical(data['yy2'][()], da.coords['yy2'].rename(yy='dim_0'))
@@ -263,8 +246,6 @@ def test_uses_default_field_dims_if_inference_fails(nxroot):
 def test_create_field_from_variable(nxroot, unit):
     var = sc.array(dims=['xx'], unit=unit, values=[3, 4])
     nxroot.create_field('field', var)
-    nxroot = nxroot.rebuild()
-    print(nxroot)
     loaded = nxroot['field'][...]
     # Nexus does not support storing dim labels
     assert sc.identical(loaded, var.rename(xx=loaded.dim))
@@ -274,7 +255,6 @@ def test_create_datetime_field_from_variable(nxroot):
     var = sc.datetime(np.datetime64('now'), unit='ns') + sc.arange(
         'time', 1, 4, dtype='int64', unit='ns')
     nxroot.create_field('field', var)
-    nxroot = nxroot.rebuild()
     loaded = nxroot['field'][...]
     # Nexus does not support storing dim labels
     assert sc.identical(loaded, var.rename(time=loaded.dim))
@@ -297,7 +277,6 @@ def test_field_matching_errors_regex_is_loaded_if_no_corresponding_value_field(
     data.attrs['signal'] = 'signal'
     data.create_field('signal', da.data)
     data.create_field(f'xx{errors_suffix}', da.coords[f'xx{errors_suffix}'])
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -327,7 +306,6 @@ def test_uncertainties_of_coords_are_loaded(nxroot, errors_suffix):
     data.create_field(f'xx2{errors_suffix}', sc.stddevs(da.coords['xx2']))
     data.create_field('scalar', sc.values(da.coords['scalar']))
     data.create_field(f'scalar{errors_suffix}', sc.stddevs(da.coords['scalar']))
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -339,7 +317,6 @@ def test_unnamed_extra_dims_of_coords_are_squeezed(nxroot):
     data.attrs['signal'] = 'signal'
     # shape=[1]
     data.create_field('scalar', sc.array(dims=['ignored'], values=[1.2]))
-    data = data.rebuild()
     loaded = data[...]
     assert sc.identical(loaded.coords['scalar'], sc.scalar(1.2))
     assert data['scalar'].ndim == 0
@@ -356,7 +333,6 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
     # shape=[2,1]
     xx = sc.array(dims=['xx', 'ignored'], values=[[1.1], [2.2]])
     data.create_field('xx', xx)
-    data = data.rebuild()
     loaded = data[...]
     assert sc.identical(loaded.coords['xx'], xx['ignored', 0])
     assert data['xx'].ndim == 1
@@ -367,10 +343,9 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
 def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
     data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
     data.attrs['axes'] = ['xx', 'yy']
     data.attrs['signal'] = 'signal'
-    data = data.rebuild()
+    data.create_field('signal', signal)
     loaded = data[...]
     assert sc.identical(loaded.data, signal)
     assert data['signal'].ndim == 2
@@ -380,9 +355,8 @@ def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
 def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
     data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
     data.attrs['signal'] = 'signal'
-    data = data.rebuild()
+    data.create_field('signal', signal)
     loaded = data[...]
     assert sc.identical(loaded.data, sc.scalar(1.1, unit='m'))
     assert data['signal'].ndim == 0
@@ -392,9 +366,8 @@ def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
 def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2]])
     data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
     data.attrs['signal'] = 'signal'
-    data = data.rebuild()
+    data.create_field('signal', signal)
     loaded = data[...]
     # Note that dimension gets renamed to `dim_0` since no axes are specified
     assert sc.identical(loaded.data,
@@ -407,10 +380,9 @@ def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
 def test_only_one_axis_specified_for_2d_field(nxroot):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
     data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
     data.attrs['axes'] = ['zz']
     data.attrs['signal'] = 'signal'
-    data = data.rebuild()
+    data.create_field('signal', signal)
     loaded = data[...]
     assert sc.identical(loaded.data, sc.array(dims=['zz'], unit='m', values=[1.1]))
 
@@ -429,7 +401,6 @@ def test_fields_with_datetime_attribute_are_loaded_as_datetime(nxroot):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
-    data = data.rebuild()
     assert sc.identical(data[...], da)
 
 
@@ -438,14 +409,13 @@ def test_slicing_with_bin_edge_coord_returns_bin_edges(nxroot):
     da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2, 0.3, 0.4])
     da.coords['xx2'] = sc.array(dims=['xx'], unit='m', values=[0.3, 0.4, 0.5, 0.6])
     data = nxroot.create_class('data1', NXdata)
-    data.create_field('xx', da.coords['xx'])
-    data.create_field('xx2', da.coords['xx2'])
-    data.create_field('data', da.data)
     data.attrs['signal'] = 'data'
     data.attrs['axes'] = ['xx']
     data.attrs['xx_indices'] = [0]
     data.attrs['xx2_indices'] = [0]
-    data = data.rebuild()
+    data.create_field('xx', da.coords['xx'])
+    data.create_field('xx2', da.coords['xx2'])
+    data.create_field('data', da.data)
     assert sc.identical(data[...], da)
     assert sc.identical(data['xx', 0], da['xx', 0])
     assert sc.identical(data['xx', 1], da['xx', 1])
@@ -497,7 +467,6 @@ def test_nested_groups_trigger_fallback_to_load_as_data_group(nxroot):
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.create_class('nested', NXdata)
-    data = data.rebuild()
     assert sc.identical(data[...], sc.DataGroup(signal=da.data, nested=sc.DataGroup()))
 
 
