@@ -2,12 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 
-from typing import List, Union
-
-import scipp as sc
-
 from .nxdata import NXdata, NXdataStrategy
-from .nxobject import NXobject, ScippIndex
 
 
 class NXlogStrategy(NXdataStrategy):
@@ -18,7 +13,10 @@ class NXlogStrategy(NXdataStrategy):
             return ax
         # We get the shape from the original dataset, to make sure we do not squeeze
         # dimensions too early
-        child_dataset = info.datasets['value'].value
+        value = info.datasets.get('value')
+        if value is None:
+            return ('time', )
+        child_dataset = value.value
         ndim = child_dataset.ndim
         shape = child_dataset.shape
         # The outermost axis in NXlog is pre-defined to 'time' (if present). Note
@@ -46,32 +44,11 @@ class NXlogStrategy(NXdataStrategy):
             return None, None
 
 
-class NXlog(NXobject):
+class NXlog(NXdata):
 
-    @property
-    def shape(self):
-        return self._nxbase.shape
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.child_params['time'] = {'is_time': True}
 
-    @property
-    def dims(self):
-        return self._nxbase.dims
-
-    @property
-    def unit(self):
-        return self._nxbase.unit
-
-    @property
-    def _nxbase(self) -> NXdata:
-        return NXdata(self._group,
-                      strategy=NXlogStrategy,
-                      skip=['cue_timestamp_zero', 'cue_index'])
-
-    def _getitem(self, select: ScippIndex) -> sc.DataArray:
-        base = self._nxbase
-        # Field loads datetime offset attributes automatically, but for NXlog this
-        # may apparently be omitted and must then interpreted as relative to epoch.
-        base.child_params['time'] = {'is_time': True}
-        return base[select]
-
-    def _get_field_dims(self, name: str) -> Union[None, List[str]]:
-        return self._nxbase._get_field_dims(name)
+    def _default_strategy(self):
+        return NXlogStrategy

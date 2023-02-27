@@ -154,7 +154,7 @@ class _EventField:
         return event_data.fold(dim='event_id', sizes=grouping.sizes)
 
 
-class NXdetector(NXobject):
+class NXdetector(NXdata):
     """A detector or detector bank providing an array of values or events.
 
     If the detector stores event data then the 'detector_number' field (if present)
@@ -163,7 +163,7 @@ class NXdetector(NXobject):
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs, strategy=NXdetectorStrategy)
         self._event_select = tuple()
         self._nxevent_data_fields = [
             'event_time_zero', 'event_index', 'event_time_offset', 'event_id',

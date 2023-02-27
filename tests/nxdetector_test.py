@@ -83,7 +83,6 @@ def test_loads_data_without_coords(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_numbers', da.coords['detector_numbers'])
     detector.create_field('data', da.data)
-    detector = nxroot['detector0']
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 

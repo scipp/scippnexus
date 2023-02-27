@@ -102,7 +102,7 @@ def test_nxlog_with_missing_value_triggers_fallback(nxroot):
         dims=['time'], unit='s', values=[4.4, 5.5, 6.6]).to(unit='ns', dtype='int64')
     log = nxroot['entry'].create_class('log', NXlog)
     log['time'] = time - sc.epoch(unit='ns')
-    loaded = nxroot['entry']['log'][()]
+    loaded = log[()]
     assert sc.identical(loaded, sc.DataGroup(time=time.rename(time='dim_0')))
 
 

@@ -423,11 +423,12 @@ class FieldInfo:
     dims: Optional[Tuple[str]] = None
     errors: Optional[H5Dataset] = None
 
-    def build(self, ancestor=None) -> Field:
+    def build(self, ancestor=None, **kwargs) -> Field:
         return Field(dims=self.dims,
                      dataset=self.values,
                      errors=self.errors,
-                     ancestor=ancestor)
+                     ancestor=ancestor,
+                     **kwargs)
 
 
 @dataclass
@@ -497,7 +498,7 @@ class NXobject:
     def _build_children(self) -> sc.DataGroup:
         # TODO ancestor and definition handling?
         return {
-            name: child_info.build()
+            name: child_info.build(**self.child_params.get(name, {}))
             for name, child_info in self._info.children.items()
         }
 
