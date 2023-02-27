@@ -467,6 +467,9 @@ class NXobject:
         print(f'{self.name} {self._group_info}')
         print(f'{self.name} {self._info}')
 
+    def rebuild(self) -> NXobject:
+        return self._make(self._group)
+
     def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
         return NXobjectInfo.init(info=info)
@@ -516,24 +519,9 @@ class NXobject:
         if name is None:
             raise KeyError("None is not a valid index")
         if isinstance(name, str):
-            item = self._group[name]
-            if is_dataset(item):
-                try:
-                    dims = self._get_field_dims(name) if use_field_dims else None
-                except Exception as e:
-                    msg = (f"Failed to determine axis names of {item.name}: {e}. "
-                           "Falling back to default dimension labels.")
-                    warnings.warn(msg)
-                    dims = None
-                dtype = self._get_field_dtype(name)
-                return Field(item,
-                             dims=dims,
-                             dtype=dtype,
-                             ancestor=self,
-                             **self.child_params.get(name, {}))
-            else:
-                return self._make(item)
-
+            # TODO warning about axis labels?
+            # TODO child_params
+            return self._info.children[name].build()
         select = name
         try:
             children = self._build_children()
@@ -544,7 +532,7 @@ class NXobject:
                 raise NexusStructureError(
                     f"Failed to assemble {type(self).__name__}: {e}") from e
             # TODO ... handle via special fields?
-            self._insert_leaf_properties(da)
+            # self._insert_leaf_properties(da)
         except NexusStructureError as e:
             # If the child class cannot load this group, we fall back to returning the
             # underlying datasets in a DataGroup.
