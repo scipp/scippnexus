@@ -113,10 +113,10 @@ def test_loads_data_with_coords(nxroot):
     da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
     da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
     detector = nxroot.create_class('detector0', NXdetector)
+    detector.attrs['axes'] = ['xx', '.']
     detector.create_field('detector_numbers', da.coords['detector_numbers'])
     detector.create_field('xx', da.coords['xx'])
     detector.create_field('data', da.data)
-    detector.attrs['axes'] = ['xx', '.']
     assert sc.identical(detector[...], da.rename_dims({'yy': 'dim_1'}))
 
 
@@ -195,6 +195,9 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    # Creating fields in the 'events' subgroup cannot update detector automatically.
+    # We therefore have to rebuild by hand.
+    detector = detector.rebuild()
     assert detector.dims == ('dim_0', 'dim_1')
     assert detector.shape == (2, 2)
     loaded = detector[...]

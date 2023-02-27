@@ -72,17 +72,18 @@ class NXdataInfo:
         # 1. Find signal
         if signal_override is None:
             signal_name, signal = strategy.signal2(info)
+            axes = strategy.axes2(info)
         else:
             print(f'override! {signal_override.dims}')
             signal_name = None
             # TODO ensure this is DatasetInfo?
             signal = signal_override
+            axes = signal.dims
 
         # 2. Find group dim labels: newest to oldest:
         # - group.axes
         # - group.signal.axes
         # - group field axis attrs
-        axes = strategy.axes2(info)
         signal_axes = None if signal is None else signal.attrs.get('axes')
 
         axis_index = {}
@@ -269,6 +270,7 @@ class NXdata(NXobject):
     def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
         di = NXdataInfo.from_group_info(info=info, strategy=self._strategy)
+        print(f'{di=}')
         fields = dict(di.field_infos)
         fields.update(info.groups)
         oi = NXobjectInfo(children=fields)
@@ -466,4 +468,6 @@ class NXdata(NXobject):
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
         children = sc.DataGroup(children)
         signal = children.pop(self._info.signal_name)
+        # TODO Better move to NXdetector? This is for event signal
+        signal = signal if isinstance(signal, sc.Variable) else signal.data
         return sc.DataArray(data=signal, coords=children)

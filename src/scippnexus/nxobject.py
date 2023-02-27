@@ -464,8 +464,8 @@ class NXobject:
         if self._strategy is None:
             self._strategy = self._default_strategy()
         self._init_info()
-        print(f'{self.name} {self._group_info}')
-        print(f'{self.name} {self._info}')
+        # print(f'{self.name} {self._group_info}')
+        # print(f'{self.name} {self._info}')
 
     def _init_info(self):
         self._group_info = GroupContentInfo.read(self._group)
@@ -530,6 +530,8 @@ class NXobject:
         try:
             children = self._build_children()
             dg = self._read_children(children=children, select=select)
+            print(f'hi {dg=}')
+            self._assemble(dg)
             try:
                 return self._assemble(dg)
             except Exception as e:
@@ -759,17 +761,17 @@ class NXobject:
             self.create_field(name, value)
         self._init_info()
 
-    def __getattr__(self, attr: str) -> Union[Any, 'NXobject']:
-        nxclass = _nx_class_registry().get(f'NX{attr}')
-        if nxclass is None:
-            raise AttributeError(f"'NXobject' object has no attribute {attr}")
-        matches = self[nxclass]
-        if len(matches) == 0:
-            raise NexusStructureError(f"No group with requested NX_class='{nxclass}'")
-        if len(matches) == 1:
-            return next(iter(matches.values()))
-        raise NexusStructureError(f"Multiple keys match {nxclass}, use obj[{nxclass}] "
-                                  f"to obtain all matches instead of obj.{attr}.")
+    # def __getattr__(self, attr: str) -> Union[Any, 'NXobject']:
+    #     nxclass = _nx_class_registry().get(f'NX{attr}')
+    #     if nxclass is None:
+    #         raise AttributeError(f"'NXobject' object has no attribute {attr}")
+    #     matches = self[nxclass]
+    #     if len(matches) == 0:
+    #         raise NexusStructureError(f"No group with requested NX_class='{nxclass}'")
+    #     if len(matches) == 1:
+    #         return next(iter(matches.values()))
+    #     raise NexusStructureError(f"Multiple keys match {nxclass}, use obj[{nxclass}] "
+    #                               f"to obtain all matches instead of obj.{attr}.")
 
     def __dir__(self):
         keys = super().__dir__()

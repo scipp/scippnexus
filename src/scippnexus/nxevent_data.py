@@ -21,13 +21,19 @@ _pulse_dimension = "pulse"
 
 
 class NXevent_data(NXobject):
+    _field_names = [
+        'event_time_zero', 'event_index', 'event_time_offset', 'event_id',
+        'cue_timestamp_zero', 'cue_index', 'pulse_height'
+    ]
 
-    def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
+    @staticmethod
+    def _make_class_info(info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
-        children = {
-            name: FieldInfo(values=di.value, dims=self._get_field_dims(name))
-            for name, di in info.datasets.items()
-        }
+        children = {}
+        for name in NXevent_data._field_names:
+            if (di := info.datasets.pop(name, None)) is not None:
+                children[name] = FieldInfo(values=di.value,
+                                           dims=NXevent_data._get_field_dims(name))
         return NXobjectInfo(children=children)
 
     def _read_children(self, children, select: ScippIndex) -> sc.DataGroup:
@@ -140,7 +146,8 @@ class NXevent_data(NXobject):
         # Binned data, bins do not have a unit
         return None
 
-    def _get_field_dims(self, name: str) -> Union[None, List[str]]:
+    @staticmethod
+    def _get_field_dims(name: str) -> Union[None, List[str]]:
         if name in ['event_time_zero', 'event_index']:
             return [_pulse_dimension]
         if name in ['event_time_offset', 'event_id']:

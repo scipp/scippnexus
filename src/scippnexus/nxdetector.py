@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from copy import copy
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import scipp as sc
@@ -67,6 +68,19 @@ class EventSelector:
         det = copy(self._detector)
         det._event_select = select
         return det
+
+
+@dataclass
+class EventFieldInfo:
+    event_data: NXevent_data
+    grouping_key: Optional[str] = 'detector_number'
+    grouping: Optional[Field] = None
+
+    def build(self) -> EventField:
+        return _EventField(nxevent_data=self.event_data,
+                           event_select=tuple(),
+                           grouping_key=self.grouping_key,
+                           grouping=self.grouping)
 
 
 class _EventField:
@@ -161,6 +175,7 @@ class NXdetector(NXdata):
     is used to map event do detector pixels. Otherwise this returns event data in the
     same format as NXevent_data.
     """
+    _detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, strategy=NXdetectorStrategy)
@@ -169,9 +184,58 @@ class NXdetector(NXdata):
             'event_time_zero', 'event_index', 'event_time_offset', 'event_id',
             'cue_timestamp_zero', 'cue_index', 'pulse_height'
         ]
-        self._detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
-        #self._info = self._init_info(info=self._group_info)
-        #print(f'{self._info=}')
+
+    def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
+        # TODO doesn't popping break fallback?
+        event_data = None
+        event_entries = []
+        for name in list(info.groups):
+            if info.groups[name].nx_class == NXevent_data:
+                event_entries.append(info.groups.pop(name))
+        if len(event_entries) > 1:
+            raise NexusStructureError("No unique NXevent_data entry in NXdetector. "
+                                      f"Found {len(event_entries)}.")
+        if len(event_entries) == 1:
+            # If there is also a signal dataset (not events) it will be ignored
+            # (except for possibly using it to deduce shape and dims).
+            event_data = event_entries[0].build()
+        # TODO
+        #if 'event_time_offset' in self:
+        #    # Consumes datasets from self
+        #    event_data = NXevent_data._make_class_info(info)
+        # parse Nexus:
+        # 1. find event data
+        # create NXevent_data, consuming dataset infos?
+        # 2. find grouping
+        #events = EventFieldInfo(event_data=info.groups.pop('events'))
+        info = super()._make_class_info(info=info)
+
+        if event_data is None:
+            event_field = None
+        else:
+            event_grouping = {}
+            for key in self._detector_number_fields:
+                if key in self:
+                    event_grouping = {
+                        'grouping_key': key,
+                        'grouping': info.children[key].build()
+                    }
+                    break
+
+            event_field = EventFieldInfo(event_data=event_data, **event_grouping)
+        #info = NXdataInfo.from_group_info(info=info, strategy=self._strategy, signal_override=event_field)
+        #info.children['events'] = events
+        # TODO need to set signal field info (not just name), and same in NXdata
+        # NXdata._signal should point to either FieldInfo or EventFieldInfo
+        print(f'{info=}')
+        if event_data is not None:
+            print(f'{event_data._info.children=}')
+        print(f'{event_field=}')
+        if event_field is not None:
+            info.children['events'] = event_field
+            info.signal_name = 'events'
+        print(f'{info=}')
+        return info
 
     #def _init_info(self, info):
     #    info = NXdataInfo.from_group_info(info=info,
@@ -196,18 +260,6 @@ class NXdetector(NXdata):
     #    return info
 
     @property
-    def shape(self) -> List[int]:
-        return self._signal.shape
-
-    @property
-    def dims(self) -> List[str]:
-        return self._signal.dims
-
-    @property
-    def unit(self) -> Union[sc.Unit, None]:
-        return self._signal.unit
-
-    @property
     def detector_number(self) -> Optional[Field]:
         for key in self._detector_number_fields:
             if key in self:
@@ -220,10 +272,6 @@ class NXdetector(NXdata):
             if key in self:
                 return {'grouping_key': key, 'grouping': self[key]}
         return {}
-
-    @property
-    def _signal(self) -> Union[Field, _EventField]:
-        return self._nxdata()._signal
 
     def _nxdata(self, use_event_signal=True) -> NXdata:
         events = self.events
