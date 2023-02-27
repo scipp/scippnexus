@@ -52,20 +52,26 @@ class DatasetInfo:
 
 
 @dataclass
-class ProtoGroupInfo:
-    attrs: Dict[str, Any]
-    value: H5Group
+class GroupInfo:
+    group: H5Group
+    nx_class: Optional[Type] = None
 
     @staticmethod
-    def read(group: H5Group) -> ProtoGroupInfo:
-        return ProtoGroupInfo(attrs=dict(Attrs(group.attrs)), value=group)
+    def read(group: H5Group) -> GroupInfo:
+        if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
+            cls = _nx_class_registry().get(nx_class, NXobject)
+            return GroupInfo(nx_class=cls, group=group)
+        return GroupInfo(group=group)
+
+    def build() -> NXobject:
+        return self.nx_class(self.group)
 
 
 @dataclass
 class GroupContentInfo:
     attrs: Dict[str, Any]
     datasets: Dict[str, DatasetInfo]
-    groups: Dict[str, ProtoGroupInfo]
+    groups: Dict[str, GroupInfo]
 
     @staticmethod
     def read(group: H5Group) -> GroupContentInfo:
@@ -74,7 +80,7 @@ class GroupContentInfo:
             for key, value in group.items() if is_dataset(value)
         }
         groups = {
-            key: ProtoGroupInfo.read(value)
+            key: GroupInfo.read(value)
             for key, value in group.items() if not is_dataset(value)
         }
         return GroupContentInfo(attrs=dict(Attrs(group.attrs)),
@@ -410,14 +416,13 @@ class NXobjectStrategy:
         return True
 
 
-# Do we need this? Why not create fields directly?
 @dataclass
 class FieldInfo:
-    dims: Tuple[str]
+    dims: Optional[Tuple[str]]
     values: H5Dataset
     errors: Optional[H5Dataset] = None
 
-    def build(self, ancestor) -> Field:
+    def build(self, ancestor=None) -> Field:
         return Field(dims=self.dims,
                      dataset=self.values,
                      errors=self.errors,
@@ -454,14 +459,12 @@ class NXobjectInfo:
     children: Dict[str, Any]
 
     @staticmethod
-    def init(group: NXobject, info: GroupContentInfo):
-
-        def make_field(ds: DatasetInfo) -> Field:
-            return Field(dataset=ds.value, ancestor=group)
-
-        fields = sc.DataGroup(info.datasets).apply(make_field)
-        groups = info.groups
-        fields.update(groups)
+    def init(info: GroupContentInfo):
+        fields = {
+            name: FieldInfo(values=di.value)
+            for name, di in info.datasets.items()
+        }
+        fields.update(info.groups)
         return NXobjectInfo(children=fields)
 
 
@@ -489,7 +492,7 @@ class NXobject:
 
     def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
-        return NXobjectInfo.init(group=self, info=info)
+        return NXobjectInfo.init(info=info)
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataGroup:
         return children
@@ -509,13 +512,17 @@ class NXobject:
         return group  # Return underlying (h5py) group
 
     def _read_children(self, select: ScippIndex) -> sc.DataGroup:
-        # But how to handle groups?
-        children = self._info.children
-        dims = children.dims
+        # TODO ancestor and definition handling?
+        children = {
+            name: child_info.build()
+            for name, child_info in self._info.children.items()
+        }
+
+        dims = sc.DataGroup(children).dims
         # TODO actualize subgroups first, so they can contribute dims?
         dg = sc.DataGroup()
         for name, child in children.items():
-            if isinstance(child, ProtoGroupInfo):
+            if isinstance(child, GroupInfo):
                 child = self[name]
             sel = to_child_select(dims,
                                   getattr(child, 'dims', ()),

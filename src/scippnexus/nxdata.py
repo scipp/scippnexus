@@ -271,9 +271,7 @@ class NXdata(NXobject):
     def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
         di = NXdataInfo.from_group_info(info=info, strategy=self._strategy)
-        fields = {name: fi.build(ancestor=self) for name, fi in di.field_infos.items()}
-
-        fields = sc.DataGroup(fields)
+        fields = dict(di.field_infos)
         fields.update(info.groups)
         oi = NXobjectInfo(children=fields)
         oi.signal_name = di.signal_name
