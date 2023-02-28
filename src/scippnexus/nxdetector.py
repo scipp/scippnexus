@@ -67,19 +67,24 @@ class EventSelector:
     def __getitem__(self, select: ScippIndex) -> NXdetector:
         """Return an NXdetector based on a selection (slice) of events."""
         det = copy(self._detector)
-        det._event_select = select
+        det._info = copy(det._info)
+        det._info.children = copy(det._info.children)
+        key = det._info.events
+        det._info.children[key] = copy(det._info.children[key])
+        det._info.children[key].event_select = select
         return det
 
 
 @dataclass
 class EventFieldInfo:
     event_data: NXevent_data
+    event_select: Optional[ScippIndex] = tuple()
     grouping_key: Optional[str] = 'detector_number'
     grouping: Optional[Field] = None
 
     def build(self) -> EventField:
         return _EventField(nxevent_data=self.event_data,
-                           event_select=tuple(),
+                           event_select=self.event_select,
                            grouping_key=self.grouping_key,
                            grouping=self.grouping)
 
@@ -253,6 +258,9 @@ class NXdetector(NXdata):
         if event_field is not None:
             info.children['events'] = event_field
             info.signal_name = 'events'
+            info.events = 'events'
+        else:
+            info.events = None
         #print(f'{info=}')
         return info
 
@@ -333,7 +341,7 @@ class NXdetector(NXdata):
         Return a proxy object for selecting a slice of the underlying NXevent_data
         group, while keeping wrapping the NXdetector.
         """
-        if self.events is None:
+        if self._info.events is None:
             raise NexusStructureError(
                 "Cannot select events in NXdetector not containing NXevent_data.")
         return EventSelector(self)
@@ -361,7 +369,8 @@ class NXdetector(NXdata):
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
         children = sc.DataGroup(children)
-        signal = children.pop(self._info.signal_name)
-        signal = signal if isinstance(signal, sc.Variable) else signal.data
-        print(signal)
+        if self._info.events is None:
+            signal = children.pop(self._info.signal_name)
+        else:
+            signal = children.pop(self._info.events).data
         return sc.DataArray(data=signal, coords=children)

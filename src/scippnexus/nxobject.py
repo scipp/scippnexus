@@ -535,8 +535,6 @@ class NXobject:
         try:
             children = self._build_children()
             dg = self._read_children(children=children, select=select)
-            print(f'hi {dg=}')
-            self._assemble(dg)
             try:
                 return self._assemble(dg)
             except Exception as e:

@@ -215,6 +215,7 @@ def test_select_events_slices_underlying_event_data(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = detector.rebuild()
     assert sc.identical(
         detector.select_events['pulse', :2][...].bins.size().data,
         sc.array(dims=['dim_0', 'dim_1'],
@@ -245,6 +246,7 @@ def test_select_events_slice_does_not_affect_original_detector(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = detector.rebuild()
     detector.select_events['pulse', 0][...]
     assert sc.identical(
         detector[...].bins.size().data,
