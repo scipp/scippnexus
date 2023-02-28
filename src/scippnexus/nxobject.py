@@ -421,10 +421,12 @@ class NXobjectStrategy:
 class FieldInfo:
     values: H5Dataset
     dims: Optional[Tuple[str]] = None
+    dtype: Optional[sc.DType] = None
     errors: Optional[H5Dataset] = None
 
     def build(self, ancestor=None, **kwargs) -> Field:
         return Field(dims=self.dims,
+                     dtype=self.dtype,
                      dataset=self.values,
                      errors=self.errors,
                      ancestor=ancestor,

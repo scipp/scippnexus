@@ -1,11 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Optional, Tuple, Union
+from typing import Optional
 
 import scipp as sc
 
-from .nxobject import NexusStructureError, NXobject
+from .nxobject import (
+    FieldInfo,
+    GroupContentInfo,
+    NexusStructureError,
+    NXobject,
+    NXobjectInfo,
+)
 
 
 def off_to_shape(*,
@@ -55,13 +61,15 @@ class NXoff_geometry(NXobject):
         'faces': ('face', )
     }
 
-    def _get_field_dims(self, name: str) -> Union[None, Tuple[str]]:
-        return self._dims.get(name)
-
-    def _get_field_dtype(self, name: str) -> Union[None, sc.DType]:
-        if name == 'vertices':
-            return sc.DType.vector3
-        return None
+    def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
+        fields = {
+            name: FieldInfo(values=di.value,
+                            dims=self._dims.get(name),
+                            dtype=sc.DType.vector3 if name == 'vertices' else None)
+            for name, di in info.datasets.items()
+        }
+        fields.update(info.groups)
+        return NXobjectInfo(children=fields)
 
     def load_as_array(self,
                       detector_number: Optional[sc.Variable] = None) -> sc.Variable:
