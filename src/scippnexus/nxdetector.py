@@ -366,11 +366,3 @@ class NXdetector(NXdata):
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         return self._nxdata()._getitem(select)
-
-    def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
-        children = sc.DataGroup(children)
-        if self._info.events is None:
-            signal = children.pop(self._info.signal_name)
-        else:
-            signal = children.pop(self._info.events).data
-        return sc.DataArray(data=signal, coords=children)

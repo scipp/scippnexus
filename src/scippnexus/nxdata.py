@@ -286,7 +286,9 @@ class NXdata(NXobject):
 
     @property
     def shape(self) -> List[int]:
-        return self._signal.shape
+        if (signal := self._signal) is not None:
+            return signal.shape
+        return ()
 
     def _get_group_dims(self) -> Union[None, List[str]]:
         # Apparently it is not possible to define dim labels unless there are
@@ -391,13 +393,6 @@ class NXdata(NXobject):
             return [name]
         return self._try_guess_dims(name)
 
-    def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
-        sizes = dict(zip(self.dims, self.shape))
-        for dim, size in zip(coord.dims, coord.shape):
-            if dim in sizes and sizes[dim] + 1 == size:
-                return dim
-        return None
-
     def _dim_of_coord(self, name: str, coord: Field) -> Union[None, str]:
         if len(coord.dims) == 1:
             return coord.dims[0]
@@ -475,4 +470,10 @@ class NXdata(NXobject):
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
         children = sc.DataGroup(children)
         signal = children.pop(self._info.signal_name)
-        return sc.DataArray(data=signal, coords=children)
+        signal = signal if isinstance(signal, sc.Variable) else signal.data
+        da = sc.DataArray(data=signal, coords=children)
+        for name in list(da.coords):
+            # TODO building again is inefficient!
+            if self._coord_to_attr(da, name, self._info.children[name].build()):
+                da.attrs[name] = da.coords.pop(name)
+        return da

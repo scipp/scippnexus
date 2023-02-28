@@ -502,6 +502,15 @@ class NXobject:
             for name, child_info in self._info.children.items()
         }
 
+    def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
+        if not (hasattr(self, 'dims') and hasattr(coord, 'dims')):
+            return None
+        sizes = dict(zip(self.dims, self.shape))
+        for dim, size in zip(coord.dims, coord.shape):
+            if dim in sizes and sizes[dim] + 1 == size:
+                return dim
+        return None
+
     def _read_children(self, children: Dict[str, Union[Field, NXobject]],
                        select: ScippIndex) -> sc.DataGroup:
         dims = sc.DataGroup(children).dims
@@ -511,7 +520,7 @@ class NXobject:
             sel = to_child_select(dims,
                                   getattr(child, 'dims', ()),
                                   select,
-                                  bin_edge_dim=None)
+                                  bin_edge_dim=self._bin_edge_dim(child))
             dg[name] = child[sel]
         return dg
 

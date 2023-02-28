@@ -302,6 +302,7 @@ def test_event_data_field_dims_labels(nxroot):
 def test_nxevent_data_selection_yields_correct_pulses(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = detector.rebuild()
 
     class Load:
 
