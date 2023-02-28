@@ -212,8 +212,9 @@ class NXdetector(NXdata):
         #events = EventFieldInfo(event_data=info.groups.pop('events'))
         fallback_dims = None
         for key in self._detector_number_fields:
-            if key in group_info.datasets:
-                fallback_dims = (key, )
+            if (grouping := group_info.datasets.get(key)) is not None:
+                if len(grouping.shape) == 1:
+                    fallback_dims = (key, )
                 break
         di = NXdataInfo.from_group_info(info=group_info,
                                         strategy=self._strategy,
