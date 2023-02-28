@@ -168,6 +168,7 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = detector.rebuild()
     assert detector.dims == ('detector_number', )
     assert detector.shape == (4, )
     loaded = detector[...]
@@ -185,6 +186,7 @@ def test_loads_event_data_with_0d_detector_numbers(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', sc.index(1, dtype='int64'))
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = detector.rebuild()
     assert detector.dims == ()
     assert detector.shape == ()
     loaded = detector[...]
@@ -291,6 +293,7 @@ def test_event_data_field_dims_labels(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    detector = detector.rebuild()
     assert detector['detector_number'].dims == ('detector_number', )
 
 

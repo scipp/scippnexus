@@ -67,6 +67,7 @@ class NXdataInfo:
     def from_group_info(
             *,
             info: GroupContentInfo,
+            fallback_dims: Optional[Tuple[str]] = None,
             signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
             strategy) -> DataInfo:
         # 1. Find signal
@@ -105,11 +106,17 @@ class NXdataInfo:
 
         group_dims = _get_group_dims()
 
+        if group_dims is None:
+            print('Fallback dims!')
+            group_dims = fallback_dims
+
         if axes is not None:
             # Unlike self.dims we *drop* entries that are '.'
             named_axes = [a for a in axes if a != '.']
         elif signal_axes is not None:
             named_axes = signal_axes.split(',')
+        elif fallback_dims is not None:
+            named_axes = fallback_dims
         else:
             named_axes = []
 
@@ -468,6 +475,4 @@ class NXdata(NXobject):
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
         children = sc.DataGroup(children)
         signal = children.pop(self._info.signal_name)
-        # TODO Better move to NXdetector? This is for event signal
-        signal = signal if isinstance(signal, sc.Variable) else signal.data
         return sc.DataArray(data=signal, coords=children)

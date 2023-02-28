@@ -525,6 +525,11 @@ class NXobject:
         if isinstance(name, str):
             # TODO warning about axis labels?
             # TODO child_params
+            # TODO I don't think this is the right solution. Since children may
+            # define _assemble, we cannot pretend things are flat, and other bits
+            # may become inaccessible, e.g., event data fields. At the same time,
+            # we would like to have errors and dims setup by the parent. How can
+            # the two be reconciled? Behave as if doing a fallback load?
             return self._info.children[name].build()
         select = name
         try:
