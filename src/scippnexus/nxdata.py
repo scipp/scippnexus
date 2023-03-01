@@ -45,30 +45,16 @@ def _guess_dims(dims, shape, field: DatasetInfo):
         return None
 
 
-# Need:
-# signal
-# errors
-# dims
-# field dims
-# shape
-# field errors
 @dataclass
 class NXdataInfo:
     signal_name: str
     field_infos: Dict[str, FieldInfo]
-    #field_dims: Dict[str, Tuple[str]]
-    #dims: Tuple[str]
-    #shape: Tuple[int]
-    #unit:
-    #signal: Optional[H5Dataset] # or FieldInfo? or Field?
-    #signal_errors: Optional[H5Dataset]
 
     @staticmethod
-    def from_group_info(
-            *,
-            info: GroupContentInfo,
-            fallback_dims: Optional[Tuple[str]] = None,
-            strategy) -> DataInfo:
+    def from_group_info(*,
+                        info: GroupContentInfo,
+                        fallback_dims: Optional[Tuple[str]] = None,
+                        strategy) -> DataInfo:
         # 1. Find signal
         signal_name, signal = strategy.signal2(info)
         axes = strategy.axes2(info)
@@ -77,6 +63,7 @@ class NXdataInfo:
         # - group.axes
         # - group.signal.axes
         # - group field axis attrs
+        # Names of axes that have an "axis" attribute serve as dim labels in legacy case
         signal_axes = None if signal is None else signal.attrs.get('axes')
 
         axis_index = {}
@@ -85,6 +72,8 @@ class NXdataInfo:
                 axis_index[name] = axis
 
         # TODO consistent list/tuple
+        # Apparently it is not possible to define dim labels unless there are
+        # corresponding coords. Special case of '.' entries means "no coord".
         def _get_group_dims():
             if axes is not None:
                 return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
@@ -112,14 +101,6 @@ class NXdataInfo:
             named_axes = []
 
         # 3. Find field dims, create FieldInfo
-        # - {name}_indices
-        # - axis attr
-        # - signal/error
-        # - auxiliary_signal
-        # - name matching dims
-        # - guess
-
-        # - {name}_indices
         indices_suffix = '_indices'
         indices_attrs = [
             key[:-len(indices_suffix)] for key in info.attrs.keys()
@@ -140,6 +121,10 @@ class NXdataInfo:
             # TODO aux
             if name in (signal_name, ):
                 return group_dims
+            # if name in [self._signal_name, self._errors_name]:
+            #     return self._get_group_dims()  # if None, field determines dims itself
+            # if name in list(self.attrs.get('auxiliary_signals', [])):
+            #     return self._try_guess_dims(name)
             if (dims := dims_from_indices.get(name)) is not None:
                 return dims
             if (axis := axis_index.get(name)) is not None:
@@ -240,22 +225,6 @@ class NXdataStrategy:
 
 class NXdata(NXobject):
 
-    def __init__(
-            self,
-            group: H5Group,
-            *,
-            definition=None,
-            strategy=None,
-            skip: List[str] = None):
-        """
-        Parameters
-        ----------
-        skip:
-            Names of fields to skip when loading coords.
-        """
-        super().__init__(group, definition=definition, strategy=strategy)
-        self._skip = skip if skip is not None else []
-
     def _default_strategy(self):
         return NXdataStrategy
 
@@ -267,20 +236,6 @@ class NXdata(NXobject):
         oi = NXobjectInfo(children=fields)
         oi.signal_name = di.signal_name
         return oi
-
-    def _get_group_dims(self) -> Union[None, List[str]]:
-        # Apparently it is not possible to define dim labels unless there are
-        # corresponding coords. Special case of '.' entries means "no coord".
-        if (axes := self._strategy.axes(self)) is not None:
-            return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
-        axes = []
-        # Names of axes that have an "axis" attribute serve as dim labels in legacy case
-        for name, field in self._group.items():
-            if (axis := field.attrs.get('axis')) is not None:
-                axes.append((axis, name))
-        if axes:
-            return [x[1] for x in sorted(axes)]
-        return None
 
     @property
     def sizes(self) -> Dict[str, Union[None, int]]:
@@ -303,21 +258,9 @@ class NXdata(NXobject):
     def dims(self) -> List[str]:
         return tuple(self.sizes.keys())
 
-    #    if (d := self._get_group_dims()) is not None:
-    #        return d
-    #    # Legacy NXdata defines axes not as group attribute, but attr on dataset.
-    #    # This is handled by class Field.
-    #    if (signal := self._signal) is not None:
-    #        return signal.dims
-    #    return ()
-
     @property
     def shape(self) -> List[int]:
         return tuple(self.sizes.values())
-
-    #    if (signal := self._signal) is not None:
-    #        return signal.shape
-    #    return ()
 
     @property
     def unit(self) -> Union[sc.Unit, None]:
@@ -338,66 +281,6 @@ class NXdata(NXobject):
             return None
         return self.get(self._info.signal_name)
 
-    def _get_axes(self):
-        """Return labels of named axes. Does not include default 'dim_{i}' names."""
-        if (axes := self._strategy.axes(self)) is not None:
-            # Unlike self.dims we *drop* entries that are '.'
-            return [a for a in axes if a != '.']
-        elif (signal := self._signal) is not None:
-            if (axes := signal.attrs.get('axes')) is not None:
-                return axes.split(',')
-        return []
-
-    def _guess_dims(self, name: str):
-        """Guess dims of non-signal dataset based on shape.
-
-        Does not check for potential bin-edge coord.
-        """
-        shape = self._get_child(name).shape
-        if self.shape == shape:
-            return self.dims
-        lut = {}
-        if self._signal is not None:
-            for d, s in zip(self.dims, self.shape):
-                if self.shape.count(s) == 1:
-                    lut[s] = d
-        try:
-            dims = [lut[s] for s in shape]
-        except KeyError:
-            raise NexusStructureError(
-                f"Could not determine axis indices for {self.name}/{name}")
-        return dims
-
-    def _try_guess_dims(self, name):
-        try:
-            return self._guess_dims(name)
-        except NexusStructureError:
-            return None
-
-    def _get_field_dims(self, name: str) -> Union[None, List[str]]:
-        #return self._info.field_dims[name]
-        # Newly written files should always contain indices attributes, but the
-        # standard recommends that readers should also make "best effort" guess
-        # since legacy files do not set this attribute.
-        if (indices := self.attrs.get(f'{name}_indices')) is not None:
-            return list(np.array(self.dims)[np.array(indices).flatten()])
-        if (axis := self._get_child(name).attrs.get('axis')) is not None:
-            return (self._get_group_dims()[axis - 1], )
-        if name in [self._signal_name, self._errors_name]:
-            return self._get_group_dims()  # if None, field determines dims itself
-        if name in list(self.attrs.get('auxiliary_signals', [])):
-            return self._try_guess_dims(name)
-        if name in self._get_axes():
-            # If there are named axes then items of same name are "dimension
-            # coordinates", i.e., have a dim matching their name.
-            # However, if the item is not 1-D we need more labels. Try to use labels of
-            # signal if dimensionality matches.
-            if self._signal_name in self and self._get_child(name).ndim == len(
-                    self.shape):
-                return self[self._signal_name].dims
-            return [name]
-        return self._try_guess_dims(name)
-
     def _dim_of_coord(self, name: str, coord: Field) -> Union[None, str]:
         if len(coord.dims) == 1:
             return coord.dims[0]
@@ -412,65 +295,6 @@ class NXdata(NXobject):
         if dim_of_coord not in da.dims:
             return True
         return False
-
-    def _getitem(self, select: ScippIndex) -> sc.DataArray:
-        from .nexus_classes import NXgeometry
-        signal = self._signal
-        if signal is None:
-            raise NexusStructureError("No signal field found, cannot load group.")
-        signal = signal[select]
-        if self._errors_name is not None:
-            stddevs = self[self._errors_name][select]
-            # According to the standard, errors must have the same shape as the data.
-            # This is not the case in all files we observed, is there any harm in
-            # attempting a broadcast?
-            signal.variances = np.broadcast_to(sc.pow(stddevs, sc.scalar(2)).values,
-                                               shape=signal.shape)
-
-        da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
-
-        skip = self._skip
-        skip += [self._signal_name, self._errors_name]
-        skip += list(self.attrs.get('auxiliary_signals', []))
-        for name in self:
-            if (errors := self._strategy.coord_errors(self, name)) is not None:
-                skip += [errors]
-        for name in self:
-            if name in skip:
-                continue
-            # It is not entirely clear whether skipping NXtransformations is the right
-            # solution. In principle NXobject will load them via the 'depends_on'
-            # mechanism, so for valid files this should be sufficient.
-            allowed = (Field, NXtransformations, NXcylindrical_geometry, NXoff_geometry,
-                       NXgeometry)
-            if not isinstance(self._get_child(name), allowed):
-                raise NexusStructureError(
-                    "Invalid NXdata: may not contain nested groups")
-
-        for name, field in self[Field].items():
-            if name in skip:
-                continue
-            sel = to_child_select(self.dims,
-                                  field.dims,
-                                  select,
-                                  bin_edge_dim=self._bin_edge_dim(field))
-            coord: sc.Variable = asarray(self[name][sel])
-            if (error_name := self._strategy.coord_errors(self, name)) is not None:
-                stddevs = asarray(self[error_name][sel])
-                coord.variances = sc.pow(stddevs, sc.scalar(2)).values
-            try:
-                if self._coord_to_attr(da, name, field):
-                    # Like scipp, slicing turns coord into attr if slicing removes the
-                    # dim corresponding to the coord.
-                    da.attrs[name] = coord
-                else:
-                    da.coords[name] = coord
-            except sc.DimensionError as e:
-                raise NexusStructureError(
-                    f"Field {name} in NXdata incompatible with dims "
-                    f"or shape of signal: {e}") from e
-
-        return da
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
         children = sc.DataGroup(children)
