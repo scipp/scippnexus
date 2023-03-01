@@ -68,17 +68,10 @@ class NXdataInfo:
             *,
             info: GroupContentInfo,
             fallback_dims: Optional[Tuple[str]] = None,
-            signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
             strategy) -> DataInfo:
         # 1. Find signal
-        if signal_override is None:
-            signal_name, signal = strategy.signal2(info)
-            axes = strategy.axes2(info)
-        else:
-            signal_name = None
-            # TODO ensure this is DatasetInfo?
-            signal = signal_override
-            axes = signal.dims
+        signal_name, signal = strategy.signal2(info)
+        axes = strategy.axes2(info)
 
         # 2. Find group dim labels: newest to oldest:
         # - group.axes
@@ -253,20 +246,14 @@ class NXdata(NXobject):
             *,
             definition=None,
             strategy=None,
-            signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
             skip: List[str] = None):
         """
         Parameters
         ----------
-        signal_override:
-            Field-like to use instead of trying to read signal from the file. This is
-            used when there is no signal or to provide a signal computed from
-            NXevent_data.
         skip:
             Names of fields to skip when loading coords.
         """
         super().__init__(group, definition=definition, strategy=strategy)
-        self._signal_override = signal_override
         self._skip = skip if skip is not None else []
 
     def _default_strategy(self):
