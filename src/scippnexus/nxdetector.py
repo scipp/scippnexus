@@ -50,128 +50,30 @@ class NXdetectorStrategy(NXdataStrategy):
         return 'data' if 'data' in group and is_dataset(group._group['data']) else None
 
 
-def group(da: sc.DataArray, groups: sc.Variable) -> sc.DataArray:
-    if hasattr(da, 'group'):
-        return da.group(groups)
+def group_events(*,
+                 event_data: sc.DataArray,
+                 grouping: Optional[sc.Variable] = None) -> sc.DataArray:
+    if isinstance(event_data, sc.DataGroup):
+        raise NexusStructureError("Invalid NXevent_data in NXdetector.")
+    if grouping is None:
+        event_id = 'event_id'
     else:
-        return sc.bin(da, groups=[groups])
-
-
-class EventSelector:
-    """A proxy object for creating an NXdetector based on a selection of events.
-    """
-
-    def __init__(self, detector):
-        self._detector = detector
-
-    def __getitem__(self, select: ScippIndex) -> NXdetector:
-        """Return an NXdetector based on a selection (slice) of events."""
-        det = copy(self._detector)
-        det._info = copy(det._info)
-        det._info.children = copy(det._info.children)
-        key = det._info.events
-        det._info.children[key] = copy(det._info.children[key])
-        det._info.children[key].event_select = select
-        return det
-
-
-@dataclass
-class EventFieldInfo:
-    event_data: NXevent_data
-    event_select: Optional[ScippIndex] = tuple()
-    grouping_key: Optional[str] = 'detector_number'
-    grouping: Optional[Field] = None
-
-    def build(self) -> EventField:
-        return _EventField(nxevent_data=self.event_data,
-                           event_select=self.event_select,
-                           grouping_key=self.grouping_key,
-                           grouping=self.grouping)
-
-
-class _EventField:
-    """Field-like wrapper of NXevent_data binned into pixels.
-
-    This has no equivalent in the NeXus format, but represents the conceptual
-    event-data "signal" dataset of an NXdetector.
-    """
-
-    def __init__(self,
-                 nxevent_data: NXevent_data,
-                 event_select: ScippIndex,
-                 grouping_key: Optional[str] = 'detector_number',
-                 grouping: Optional[Field] = None):
-        self._nxevent_data = nxevent_data
-        self._event_select = event_select
-        self._grouping_key = grouping_key
-        self._grouping = grouping
-
-    @property
-    def name(self) -> str:
-        return self._nxevent_data.name
-
-    @property
-    def attrs(self):
-        return self._nxevent_data.attrs
-
-    @property
-    def dims(self):
-        if self._grouping is None:
-            return [self._grouping_key]
-        return self._grouping.dims
-
-    @property
-    def shape(self):
-        if self._grouping is None:
-            raise NexusStructureError(
-                "Cannot get shape of NXdetector since no 'detector_number' "
-                "field found but detector contains event data.")
-        return self._grouping.shape
-
-    @property
-    def unit(self) -> None:
-        return self._nxevent_data.unit
-
-    def __getitem__(self, select: ScippIndex) -> sc.DataArray:
-        event_data = self._nxevent_data  #[self._event_select]
-        if isinstance(event_data, sc.DataGroup):
-            raise NexusStructureError("Invalid NXevent_data in NXdetector.")
-        if self._grouping is None:
-            if select not in (Ellipsis, tuple(), slice(None)):
-                raise NexusStructureError(
-                    "Cannot load slice of NXdetector since it contains event data "
-                    "but no 'detector_number' field, i.e., the shape is unknown. "
-                    "Use ellipsis or an empty tuple to load the full detector.")
-            # Ideally we would prefer to use np.unique, but a quick experiment shows
-            # that this can easily be 100x slower, so it is not an option. In
-            # practice most files have contiguous event_id values within a bank
-            # (NXevent_data).
-            id_min = event_data.bins.coords['event_id'].min()
-            id_max = event_data.bins.coords['event_id'].max()
-            grouping = sc.arange(dim=self._grouping_key,
-                                 unit=None,
-                                 start=id_min.value,
-                                 stop=id_max.value + 1,
-                                 dtype=id_min.dtype)
-        else:
-            grouping = asarray(self._grouping[select])
-            if (self._grouping_key in event_data.coords) and sc.identical(
-                    grouping, event_data.coords[self._grouping_key]):
-                return event_data
         # copy since sc.bin cannot deal with a non-contiguous view
         event_id = grouping.flatten(to='event_id').copy()
-        event_data.bins.coords['event_time_zero'] = sc.bins_like(
-            event_data, fill_value=event_data.coords['event_time_zero'])
-        # After loading raw NXevent_data it is guaranteed that the event table
-        # is contiguous and that there is no masking. We can therefore use the
-        # more efficient approach of binning from scratch instead of erasing the
-        # 'pulse' binning defined by NXevent_data.
-        event_data = group(event_data.bins.constituents['data'], groups=event_id)
-        if self._grouping is None:
-            event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
-        else:
-            del event_data.coords['event_id']
-        return event_data.fold(dim='event_id', sizes=grouping.sizes)
+    event_data.bins.coords['event_time_zero'] = sc.bins_like(
+        event_data, fill_value=event_data.coords['event_time_zero'])
+    # After loading raw NXevent_data it is guaranteed that the event table
+    # is contiguous and that there is no masking. We can therefore use the
+    # more efficient approach of binning from scratch instead of erasing the
+    # 'event_time_zero' binning defined by NXevent_data.
+    event_data = event_data.bins.constituents['data'].group(event_id)
+    #if self._grouping is None:
+    #    event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
+    #else:
+    #    del event_data.coords['event_id']
+    if grouping is None:
+        return event_data
+    return event_data.fold(dim='event_id', sizes=grouping.sizes)
 
 
 class NXdetector(NXdata):
@@ -357,10 +259,10 @@ def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
             grouping_key = key
             break
     grouping = dg.pop(grouping_key)
-    event_field = _EventField(events,
-                              event_select=...,
-                              grouping=grouping,
-                              grouping_key=grouping_key)
-    da = event_field[...]
+    #event_field = _EventField(events,
+    #                          event_select=...,
+    #                          grouping=grouping,
+    #                          grouping_key=grouping_key)
+    da = group_events(event_data=events, grouping=asarray(grouping))
     da.coords.update(dg)
     return da
