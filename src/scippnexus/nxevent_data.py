@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import List, Union
+from typing import Dict, List, Union
 
 import numpy as np
 import scipp as sc
@@ -17,7 +17,7 @@ from .nxobject import (
 )
 
 _event_dimension = "event"
-_pulse_dimension = "pulse"
+_pulse_dimension = "event_time_zero"
 
 
 class NXevent_data(NXobject):
@@ -140,6 +140,10 @@ class NXevent_data(NXobject):
     @property
     def dims(self) -> List[str]:
         return [_pulse_dimension]
+
+    @property
+    def sizes(self) -> Dict[str, int]:
+        return dict(zip(self.dims, self.shape))
 
     @property
     def unit(self) -> None:

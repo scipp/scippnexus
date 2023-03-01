@@ -472,7 +472,7 @@ class NXobject:
     def _init_info(self):
         self._group_info = GroupContentInfo.read(self._group)
         self._info = self._make_class_info(self._group_info)
-        print(f'{self.name=} {self._info}')
+        #print(f'{self.name=} {self._info}')
 
     def rebuild(self) -> NXobject:
         return self._make(self._group)
@@ -516,6 +516,9 @@ class NXobject:
 
     def _read_children(self, children: Dict[str, Union[Field, NXobject]],
                        select: ScippIndex) -> sc.DataGroup:
+        print(children.items())
+        if (events := children.get('events')) is not None:
+            print(events.dims)
         dims = sc.DataGroup(children).dims
         # TODO actualize subgroups first, so they can contribute dims?
         dg = sc.DataGroup()

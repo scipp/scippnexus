@@ -309,6 +309,7 @@ class NXdetector(NXdata):
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
         children = sc.DataGroup(children)
+        return children
         if self._info.event_entries:
             events = children.pop(self._info.event_entries[0])
             grouping_key = self._info.signal_name
@@ -340,3 +341,26 @@ class NXdetector(NXdata):
             # If there is also a signal dataset (not events) it will be ignored
             # (except for possibly using it to deduce shape and dims).
             event_data = event_entries[0].build()
+
+
+def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
+    for name, value in dg.items():
+        if isinstance(
+                value, sc.DataArray
+        ) and 'event_time_zero' in value.coords and value.bins is not None:
+            event_entry = name
+            break
+    events = dg.pop(event_entry)
+    grouping_key = None
+    for key in NXdetector._detector_number_fields:
+        if (grouping := dg.get(key)) is not None:
+            grouping_key = key
+            break
+    grouping = dg.pop(grouping_key)
+    event_field = _EventField(events,
+                              event_select=...,
+                              grouping=grouping,
+                              grouping_key=grouping_key)
+    da = event_field[...]
+    da.coords.update(dg)
+    return da

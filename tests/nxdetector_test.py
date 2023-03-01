@@ -172,6 +172,7 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     assert detector.dims == ('detector_number', )
     assert detector.shape == (4, )
     loaded = detector[...]
+    loaded = snx.nxdetector.group_events_by_detector_number(loaded)
     assert sc.identical(
         loaded.bins.size().data,
         sc.array(dims=['detector_number'],
@@ -190,6 +191,7 @@ def test_loads_event_data_with_0d_detector_numbers(nxroot):
     assert detector.dims == ()
     assert detector.shape == ()
     loaded = detector[...]
+    loaded = snx.nxdetector.group_events_by_detector_number(loaded)
     assert sc.identical(loaded.bins.size().data, sc.index(2, dtype='int64'))
 
 
@@ -203,6 +205,7 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     assert detector.dims == ('dim_0', 'dim_1')
     assert detector.shape == (2, 2)
     loaded = detector[...]
+    loaded = snx.nxdetector.group_events_by_detector_number(loaded)
     assert sc.identical(
         loaded.bins.size().data,
         sc.array(dims=['dim_0', 'dim_1'],
@@ -216,30 +219,23 @@ def test_select_events_slices_underlying_event_data(nxroot):
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
     detector = detector.rebuild()
+    dims = ['dim_0', 'dim_1']
+    da = snx.nxdetector.group_events_by_detector_number(detector['event_time_zero', :2])
     assert sc.identical(
-        detector.select_events['pulse', :2][...].bins.size().data,
-        sc.array(dims=['dim_0', 'dim_1'],
-                 unit=None,
-                 dtype='int64',
-                 values=[[1, 1], [0, 1]]))
+        da.bins.size().data,
+        sc.array(dims=dims, unit=None, dtype='int64', values=[[1, 1], [0, 1]]))
+    da = snx.nxdetector.group_events_by_detector_number(detector['event_time_zero', :3])
     assert sc.identical(
-        detector.select_events['pulse', :3][...].bins.size().data,
-        sc.array(dims=['dim_0', 'dim_1'],
-                 unit=None,
-                 dtype='int64',
-                 values=[[2, 2], [0, 1]]))
+        da.bins.size().data,
+        sc.array(dims=dims, unit=None, dtype='int64', values=[[2, 2], [0, 1]]))
+    da = snx.nxdetector.group_events_by_detector_number(detector['event_time_zero', 3])
     assert sc.identical(
-        detector.select_events['pulse', 3][...].bins.size().data,
-        sc.array(dims=['dim_0', 'dim_1'],
-                 unit=None,
-                 dtype='int64',
-                 values=[[0, 1], [0, 0]]))
+        da.bins.size().data,
+        sc.array(dims=dims, unit=None, dtype='int64', values=[[0, 1], [0, 0]]))
+    da = snx.nxdetector.group_events_by_detector_number(detector['event_time_zero', :])
     assert sc.identical(
-        detector.select_events[...][...].bins.size().data,
-        sc.array(dims=['dim_0', 'dim_1'],
-                 unit=None,
-                 dtype='int64',
-                 values=[[2, 3], [0, 1]]))
+        da.bins.size().data,
+        sc.array(dims=dims, unit=None, dtype='int64', values=[[2, 3], [0, 1]]))
 
 
 def test_select_events_slice_does_not_affect_original_detector(nxroot):
