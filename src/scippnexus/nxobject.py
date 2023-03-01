@@ -63,7 +63,7 @@ class GroupInfo:
             return GroupInfo(nx_class=cls, group=group)
         return GroupInfo(group=group)
 
-    def build(self) -> NXobject:
+    def build(self, ancestor=None) -> NXobject:
         return self.nx_class(self.group)
 
 
@@ -500,7 +500,7 @@ class NXobject:
     def _build_children(self) -> sc.DataGroup:
         # TODO ancestor and definition handling?
         return {
-            name: child_info.build(**self.child_params.get(name, {}))
+            name: child_info.build(ancestor=self, **self.child_params.get(name, {}))
             for name, child_info in self._info.children.items()
         }
 
@@ -541,7 +541,7 @@ class NXobject:
             # may become inaccessible, e.g., event data fields. At the same time,
             # we would like to have errors and dims setup by the parent. How can
             # the two be reconciled? Behave as if doing a fallback load?
-            return self._info.children[name].build()
+            return self._info.children[name].build(ancestor=self)
         select = name
         try:
             children = self._build_children()

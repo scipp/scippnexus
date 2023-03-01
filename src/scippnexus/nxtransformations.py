@@ -3,6 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import List, Optional, Union
 
 import numpy as np
@@ -24,8 +25,38 @@ def make_transformation(obj, /, path) -> Optional[Transformation]:
     return None  # end of chain
 
 
+# TODO inherit Field?
+# what about dims, unit, ...?
+class TransformationField:
+
+    def __init__(self, field: Union[Field, NXobject]):
+        self._field = field
+        self._transformation = Transformation(field)
+
+    @property
+    def attrs(self):
+        return self._field.attrs
+
+    def __getitem__(self, index: ScippIndex) -> Union[sc.Variable, sc.DataArray]:
+        return get_full_transformation_starting_at(self._transformation, index=index)
+
+
+@dataclass
+class TransformationFieldInfo:
+    field_info: Union[FieldInfo, GroupInfo]
+
+    def build(self, ancestor):
+        return TransformationField(self.field_info.build(ancestor=ancestor))
+
+
 class NXtransformations(NXobject):
     """Group of transformations."""
+
+    def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
+        info = super()._make_class_info(info=info)
+        for name, field in info.children.items():
+            info.children[name] = TransformationFieldInfo(field)
+        return info
 
     def _getitem(self, index: ScippIndex) -> sc.DataGroup:
         return sc.DataGroup({
@@ -38,7 +69,7 @@ class NXtransformations(NXobject):
 class Transformation:
 
     def __init__(self, obj: Union[Field, NXobject]):  # could be an NXlog
-        self._obj = obj
+        self._obj = obj._field if isinstance(obj, TransformationField) else obj
 
     @property
     def attrs(self):

@@ -277,7 +277,7 @@ class NXdata(NXobject):
     def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
         di = NXdataInfo.from_group_info(info=info, strategy=self._strategy)
-        print(f'{di=}')
+        #print(f'{di=}')
         fields = dict(di.field_infos)
         fields.update(info.groups)
         oi = NXobjectInfo(children=fields)

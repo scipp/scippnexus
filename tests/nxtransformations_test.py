@@ -258,7 +258,7 @@ def test_nxtransformations_group_two_independent_items(nxroot):
 
 
 def test_nxtransformations_group_single_chain(nxroot):
-    transformations = nxroot.create_class('transformations', NXtransformations)
+    transformations = nxroot['entry'].create_class('transformations', 'placeholder')
 
     value = sc.scalar(2.4, unit='mm')
     offset = sc.spatial.translation(value=[6, 2, 6], unit='mm')
@@ -272,11 +272,12 @@ def test_nxtransformations_group_single_chain(nxroot):
     t = value.to(unit='m') * vector
     write_translation(transformations, 't2', value, offset, vector)
     transformations['t2'].attrs['depends_on'] = 't1'
+    transformations.attrs['NX_class'] = 'NXtransformations'
     expected2 = (expected1 *
                  sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
                  sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
 
-    loaded = nxroot['transformations'][()]
+    loaded = nxroot['entry']['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
     assert sc.identical(loaded['t1'], expected1)
     assert sc.allclose(loaded['t2'], expected2)
