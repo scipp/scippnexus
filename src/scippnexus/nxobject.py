@@ -472,6 +472,7 @@ class NXobject:
     def _init_info(self):
         self._group_info = GroupContentInfo.read(self._group)
         self._info = self._make_class_info(self._group_info)
+        print(f'{self.name=} {self._info}')
 
     def rebuild(self) -> NXobject:
         return self._make(self._group)
@@ -543,6 +544,11 @@ class NXobject:
             # the two be reconciled? Behave as if doing a fallback load?
             return self._info.children[name].build(ancestor=self)
         select = name
+        # TMP
+        children = self._build_children()
+        dg = self._read_children(children=children, select=select)
+        return self._assemble(dg)
+        # end TMP
         try:
             children = self._build_children()
             dg = self._read_children(children=children, select=select)

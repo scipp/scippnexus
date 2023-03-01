@@ -197,6 +197,7 @@ def test_broken_time_dependent_transformation_returns_path_and_transformations(n
     value.attrs['offset'] = offset.values
     value.attrs['offset_units'] = str(offset.unit)
     value.attrs['vector'] = vector.value
+    detector = nxroot['detector_0']
 
     loaded = detector[()]
     assert sc.identical(loaded.coords['depends_on'],

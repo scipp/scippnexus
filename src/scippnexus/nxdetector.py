@@ -224,7 +224,6 @@ class NXdetector(NXdata):
         di = NXdataInfo.from_group_info(info=group_info,
                                         strategy=self._strategy,
                                         fallback_dims=fallback_dims)
-        print(di)
         fields = dict(di.field_infos)
         fields.update(group_info.groups)
         info = NXobjectInfo(children=fields)
@@ -239,7 +238,6 @@ class NXdetector(NXdata):
             for key in self._detector_number_fields:
                 if key in group_info.datasets:
                     #grouping = info.children[key].build()
-                    #print(f'{info.children[key]=}')
                     event_grouping = {
                         'grouping_key': key,
                         'grouping': info.children[key].build()

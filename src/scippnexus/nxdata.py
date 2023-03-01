@@ -75,7 +75,6 @@ class NXdataInfo:
             signal_name, signal = strategy.signal2(info)
             axes = strategy.axes2(info)
         else:
-            print(f'override! {signal_override.dims}')
             signal_name = None
             # TODO ensure this is DatasetInfo?
             signal = signal_override
@@ -107,7 +106,6 @@ class NXdataInfo:
         group_dims = _get_group_dims()
 
         if group_dims is None:
-            print('Fallback dims!')
             group_dims = fallback_dims
 
         if axes is not None:
@@ -277,7 +275,6 @@ class NXdata(NXobject):
     def _make_class_info(self, info: GroupContentInfo) -> NXobjectInfo:
         """Create info object for this NeXus class."""
         di = NXdataInfo.from_group_info(info=info, strategy=self._strategy)
-        #print(f'{di=}')
         fields = dict(di.field_infos)
         fields.update(info.groups)
         oi = NXobjectInfo(children=fields)
@@ -471,7 +468,10 @@ class NXdata(NXobject):
         children = sc.DataGroup(children)
         signal = children.pop(self._info.signal_name)
         signal = signal if isinstance(signal, sc.Variable) else signal.data
-        da = sc.DataArray(data=signal, coords=children)
+        coords = children
+        #coords = {name:asarray(child) for name, child in children.items()}
+        print(list(coords.items()))
+        da = sc.DataArray(data=signal, coords=coords)
         for name in list(da.coords):
             # TODO building again is inefficient!
             if self._coord_to_attr(da, name, self._info.children[name].build()):
