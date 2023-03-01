@@ -281,12 +281,6 @@ class NXdata(NXobject):
         oi.signal_name = di.signal_name
         return oi
 
-    #@property
-    #def shape(self) -> List[int]:
-    #    if (signal := self._signal) is not None:
-    #        return signal.shape
-    #    return ()
-
     def _get_group_dims(self) -> Union[None, List[str]]:
         # Apparently it is not possible to define dim labels unless there are
         # corresponding coords. Special case of '.' entries means "no coord".
@@ -301,15 +295,41 @@ class NXdata(NXobject):
             return [x[1] for x in sorted(axes)]
         return None
 
-    # TODO behave like DataGroup instead?
-    #@property
-    #def dims(self) -> List[str]:
+    @property
+    def sizes(self) -> Dict[str, Union[None, int]]:
+        base_sizes = super().sizes
+        if self._signal is None:
+            return base_sizes
+        # special handling to avoid getting 'None' in shape for bin-edge coords
+        sizes = self._signal.sizes
+        children = sc.DataGroup(self._build_children())
+        for child in children.values():
+            if hasattr(child, 'sizes'):
+                child_sizes = child.sizes
+                for dim, sz in sizes.items():
+                    if dim in child_sizes:
+                        if (child_sizes[dim] != sz) and (child_sizes[dim] != sz + 1):
+                            return base_sizes
+        return sizes
+
+    @property
+    def dims(self) -> List[str]:
+        return tuple(self.sizes.keys())
+
     #    if (d := self._get_group_dims()) is not None:
     #        return d
     #    # Legacy NXdata defines axes not as group attribute, but attr on dataset.
     #    # This is handled by class Field.
     #    if (signal := self._signal) is not None:
     #        return signal.dims
+    #    return ()
+
+    @property
+    def shape(self) -> List[int]:
+        return tuple(self.sizes.values())
+
+    #    if (signal := self._signal) is not None:
+    #        return signal.shape
     #    return ()
 
     @property
