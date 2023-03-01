@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -134,12 +134,14 @@ class NXevent_data(NXobject):
         return sc.DataArray(data=binned, coords={'event_time_zero': event_time_zero})
 
     @property
-    def shape(self) -> List[int]:
-        return self._info.children['event_index'].values.shape
+    def shape(self) -> Tuple[int]:
+        if (event_index := self._info.children.get('event_index')) is not None:
+                return event_index.values.shape
+        return ()
 
     @property
     def dims(self) -> List[str]:
-        return [_pulse_dimension]
+        return [_pulse_dimension][:len(self.shape)]
 
     @property
     def sizes(self) -> Dict[str, int]:

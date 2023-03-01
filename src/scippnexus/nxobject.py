@@ -525,16 +525,15 @@ class NXobject:
             return None
         sizes = dict(zip(self.dims, self.shape))
         for dim, size in zip(coord.dims, coord.shape):
-            if dim in sizes and sizes[dim] + 1 == size:
+            if (sz := sizes.get(dim)) is not None and sz + 1 == size:
                 return dim
         return None
 
     def _read_children(self, children: Dict[str, Union[Field, NXobject]],
                        select: ScippIndex) -> sc.DataGroup:
         print(children.items())
-        if (events := children.get('events')) is not None:
-            print(events.dims)
         dims = sc.DataGroup(children).dims
+        dims = self.dims
         # TODO actualize subgroups first, so they can contribute dims?
         dg = sc.DataGroup()
         for name, child in children.items():
