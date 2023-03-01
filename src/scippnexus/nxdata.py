@@ -468,7 +468,6 @@ class NXdata(NXobject):
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
         children = sc.DataGroup(children)
         signal = children.pop(self._info.signal_name)
-        signal = signal if isinstance(signal, sc.Variable) else signal.data
         coords = children
         #coords = {name:asarray(child) for name, child in children.items()}
         print(list(coords.items()))

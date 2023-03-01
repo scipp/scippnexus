@@ -110,10 +110,11 @@ class NXdetector(NXdata):
         fields = dict(di.field_infos)
         fields.update(group_info.groups)
         info = NXobjectInfo(children=fields)
-        if di.signal_name is None:
-            info.signal_name = grouping_key
-        else:
-            info.signal_name = di.signal_name
+        info.signal_name = di.signal_name
+        #if di.signal_name is None:
+        #    info.signal_name = grouping_key
+        #else:
+        #    info.signal_name = di.signal_name
 
         event_data = None
         event_entries = []
@@ -210,39 +211,7 @@ class NXdetector(NXdata):
         return self._nxdata()._getitem(select)
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
-        children = sc.DataGroup(children)
         return children
-        if self._info.event_entries:
-            events = children.pop(self._info.event_entries[0])
-            grouping_key = self._info.signal_name
-            grouping = children[grouping_key]
-            event_field = _EventField(events,
-                                      event_select=...,
-                                      grouping=grouping,
-                                      grouping_key=grouping_key)
-            print(event_field, grouping)
-            signal = event_field[...]
-        else:
-            signal = children.pop(self._info.signal_name)
-        print(signal)
-        signal = signal if isinstance(signal, sc.Variable) else signal.data
-        coords = children
-        coords = {name: asarray(child) for name, child in children.items()}
-        print(list(coords.items()))
-        da = sc.DataArray(data=signal, coords=coords)
-        for name in list(da.coords):
-            # TODO building again is inefficient!
-            if self._coord_to_attr(da, name, self._info.children[name].build()):
-                da.attrs[name] = da.coords.pop(name)
-        return da
-        # TODO Do not raise here... just change init!
-        if len(event_entries) > 1:
-            raise NexusStructureError("No unique NXevent_data entry in NXdetector. "
-                                      f"Found {len(event_entries)}.")
-        if len(event_entries) == 1:
-            # If there is also a signal dataset (not events) it will be ignored
-            # (except for possibly using it to deduce shape and dims).
-            event_data = event_entries[0].build()
 
 
 def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
@@ -259,10 +228,15 @@ def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
             grouping_key = key
             break
     grouping = None if grouping_key is None else asarray(dg.pop(grouping_key))
-    #event_field = _EventField(events,
-    #                          event_select=...,
-    #                          grouping=grouping,
-    #                          grouping_key=grouping_key)
     da = _group_events(event_data=events, grouping=grouping)
+    # TODO What about _coord_to_attr mapping as NXdata?
     da.coords.update(dg)
     return da
+    # TODO
+    if len(event_entries) > 1:
+        raise NexusStructureError("No unique NXevent_data entry in NXdetector. "
+                                  f"Found {len(event_entries)}.")
+    if len(event_entries) == 1:
+        # If there is also a signal dataset (not events) it will be ignored
+        # (except for possibly using it to deduce shape and dims).
+        event_data = event_entries[0].build()
