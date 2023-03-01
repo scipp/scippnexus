@@ -562,13 +562,13 @@ class NXobject:
             return self._info.children[name].build(ancestor=self)
         select = name
         # TMP
-        #children = self._build_children()
-        #dg = self._read_children(children=children, select=select)
+        children = self._build_children()
+        dg = self._read_children(children=children, select=select)
         #return self._assemble(dg)
         # end TMP
         try:
-            children = self._build_children()
-            dg = self._read_children(children=children, select=select)
+            #children = self._build_children()
+            #dg = self._read_children(children=children, select=select)
             try:
                 return self._assemble(dg)
             except Exception as e:
@@ -844,3 +844,43 @@ class NXroot(NXobject):
 def _nx_class_registry():
     from . import nexus_classes
     return dict(inspect.getmembers(nexus_classes, inspect.isclass))
+
+
+def is_off_geometry(dg: Any) -> bool:
+    return isinstance(dg, sc.DataGroup) and all(key in dg for key in ('vertices', 'winding_order', 'faces'))
+
+
+def extract_geometry(dg: sc.DataGroup, detector_number: Optional[str] = None) -> sc.DataArray:
+    from .nexus_classes import NXgeometry
+    from .nxcylindrical_geometry import NXcylindrical_geometry
+    from .nxoff_geometry import NXoff_geometry, off_to_shape
+
+    def insert(container, name, obj):
+        if hasattr(container, 'coords'):
+            container.coords[name] = obj if isinstance(
+                obj, sc.Variable) else sc.scalar(obj)
+        else:
+            container[name] = obj
+
+    geometry = {}
+    if detector_number is not None:
+        detector_number = dg[detector_number]
+    for name in list(dg):
+        if is_off_geometry(dg[name]):
+            geometry[name] = off_to_shape(**dg.pop(name), detector_number=detector_number)
+    return dg, geometry
+
+    for key, child in self[[NXcylindrical_geometry, NXoff_geometry]].items():
+        insert(container, key, child.load_as_array(detector_number=detector_number))
+    for key, child in self[NXgeometry].items():
+        insert(container, key, child[()])
+    if (t := self.depends_on) is not None:
+        insert(container, 'depends_on', t)
+        # If loading the transformation failed, 'depends_on' returns a string, the
+        # path to the transformation. If this is a nested group, we load it here.
+        # Note that this info is currently incomplete, since attributes are not
+        # loaded.
+        if isinstance(t, str):
+            from .nexus_classes import NXtransformations
+            for key, group in self[NXtransformations].items():
+                insert(container, key, group[()])

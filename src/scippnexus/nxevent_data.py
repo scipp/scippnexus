@@ -20,12 +20,12 @@ _event_dimension = "event"
 _pulse_dimension = "event_time_zero"
 
 
-
 def _check_for_missing_fields(fields):
     for field in ("event_time_zero", "event_index", "event_time_offset"):
         if field not in fields:
             raise NexusStructureError(
                 f"Required field {field} not found in NXevent_data")
+
 
 class NXevent_data(NXobject):
     _field_names = [
