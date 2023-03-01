@@ -500,6 +500,8 @@ class NXobject:
 
     @property
     def dims(self) -> List[str]:
+        # TODO this does not quite work for a "valid" NXdata with bin edge coords
+        # do we need to overload in NXdata?
         # TODO lazy populate self._children?
         return sc.DataGroup(self._build_children()).dims
 

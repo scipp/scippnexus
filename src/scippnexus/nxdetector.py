@@ -3,9 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-from copy import copy
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional
 
 import scipp as sc
 
@@ -13,10 +11,9 @@ from .nxdata import NXdata, NXdataInfo, NXdataStrategy
 from .nxevent_data import NXevent_data
 from .nxobject import (
     Field,
+    GroupContentInfo,
     NexusStructureError,
-    NXobject,
     NXobjectInfo,
-    ScippIndex,
     asarray,
     is_dataset,
 )
@@ -67,10 +64,10 @@ def _group_events(*,
     # more efficient approach of binning from scratch instead of erasing the
     # 'event_time_zero' binning defined by NXevent_data.
     event_data = event_data.bins.constituents['data'].group(event_id)
-    #if self._grouping is None:
-    #    event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
-    #else:
-    #    del event_data.coords['event_id']
+    # if self._grouping is None:
+    #     event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
+    # else:
+    #     del event_data.coords['event_id']
     if grouping is None:
         return event_data
     return event_data.fold(dim='event_id', sizes=grouping.sizes)
@@ -87,21 +84,12 @@ class NXdetector(NXdata):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, strategy=NXdetectorStrategy)
-        self._event_select = tuple()
-        self._nxevent_data_fields = [
-            'event_time_zero', 'event_index', 'event_time_offset', 'event_id',
-            'cue_timestamp_zero', 'cue_index', 'pulse_height'
-        ]
 
     def _make_class_info(self, group_info: GroupContentInfo) -> NXobjectInfo:
-        grouping_key = None
         fallback_dims = None
         for key in self._detector_number_fields:
             if (grouping := group_info.datasets.get(key)) is not None:
-                grouping_key = key
-                if len(grouping.shape) == 0:
-                    fallback_dims = ()
-                elif len(grouping.shape) == 1:
+                if len(grouping.shape) == 1:
                     fallback_dims = (key, )
                 break
         di = NXdataInfo.from_group_info(info=group_info,
@@ -116,17 +104,6 @@ class NXdetector(NXdata):
         #else:
         #    info.signal_name = di.signal_name
 
-        event_data = None
-        event_entries = []
-        for name in list(group_info.groups):
-            if group_info.groups[name].nx_class == NXevent_data:
-                event_entries.append(name)
-                #event_entries.append(group_info.groups[name])
-        info.event_entries = event_entries
-        # TODO
-        #if 'event_time_offset' in self:
-        #    # Consumes datasets from self
-        #    event_data = NXevent_data._make_class_info(info)
         return info
 
     @property
@@ -135,69 +112,6 @@ class NXdetector(NXdata):
             if key in self:
                 return key
         return None
-
-    @property
-    def _event_grouping(self) -> Union[None, Dict[str, Any]]:
-        for key in self._detector_number_fields:
-            if key in self:
-                return {'grouping_key': key, 'grouping': self[key]}
-        return {}
-
-    def _nxdata(self, use_event_signal=True) -> NXdata:
-        events = self.events
-        if use_event_signal and events is not None:
-            signal = _EventField(events, self._event_select, **self._event_grouping)
-        else:
-            signal = None
-        skip = None
-        if events is not None:
-            if events.name == self.name:
-                skip = self._nxevent_data_fields
-            else:
-                skip = [events.name.split('/')[-1]]  # name of the subgroup
-        return NXdata(self._group,
-                      strategy=NXdetectorStrategy,
-                      signal_override=signal,
-                      skip=skip)
-
-    @property
-    def events(self) -> Union[None, NXevent_data]:
-        """Return the underlying NXevent_data group, None if not event data."""
-        # The standard is unclear on whether the 'data' field may be NXevent_data or
-        # whether the fields of NXevent_data should be stored directly within this
-        # NXdetector. Both cases are observed in the wild.
-        event_entries = self[NXevent_data]
-        if len(event_entries) > 1:
-            raise NexusStructureError("No unique NXevent_data entry in NXdetector. "
-                                      f"Found {len(event_entries)}.")
-        if len(event_entries) == 1:
-            # If there is also a signal dataset (not events) it will be ignored
-            # (except for possibly using it to deduce shape and dims).
-            return next(iter(event_entries.values()))
-        if 'event_time_offset' in self:
-            return NXevent_data(self._group)
-        return None
-
-    def _get_field_dims(self, name: str) -> Union[None, List[str]]:
-        return self._info.field_dims[name]
-        if self.events is not None:
-            if name in self._nxevent_data_fields:
-                # Event field is direct child of this class
-                return self.events._get_field_dims(name)
-            if name in self._detector_number_fields:
-                # If there is a signal field in addition to the event data it can be
-                # used to define dimension labels
-                nxdata = self._nxdata(use_event_signal=False)
-                if nxdata._signal_name is not None:
-                    return nxdata._get_field_dims(name)
-                # If grouping is 1-D then we use this name as the dim
-                if self._get_child(name).ndim == 1:
-                    return [name]
-                return None
-        return self._nxdata()._get_field_dims(name)
-
-    def _getitem(self, select: ScippIndex) -> sc.DataArray:
-        return self._nxdata()._getitem(select)
 
 
 def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
@@ -219,10 +133,15 @@ def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
     da.coords.update(dg)
     return da
     # TODO
+    # The standard is unclear on whether the 'data' field may be NXevent_data or
+    # whether the fields of NXevent_data should be stored directly within this
+    # NXdetector. Both cases are observed in the wild.
     if len(event_entries) > 1:
         raise NexusStructureError("No unique NXevent_data entry in NXdetector. "
                                   f"Found {len(event_entries)}.")
     if len(event_entries) == 1:
         # If there is also a signal dataset (not events) it will be ignored
         # (except for possibly using it to deduce shape and dims).
-        event_data = event_entries[0].build()
+        return next(iter(event_entries.values()))
+    if 'event_time_offset' in self:
+        return NXevent_data(self._group)
