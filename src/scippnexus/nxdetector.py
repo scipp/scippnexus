@@ -50,9 +50,9 @@ class NXdetectorStrategy(NXdataStrategy):
         return 'data' if 'data' in group and is_dataset(group._group['data']) else None
 
 
-def group_events(*,
-                 event_data: sc.DataArray,
-                 grouping: Optional[sc.Variable] = None) -> sc.DataArray:
+def _group_events(*,
+                  event_data: sc.DataArray,
+                  grouping: Optional[sc.Variable] = None) -> sc.DataArray:
     if isinstance(event_data, sc.DataGroup):
         raise NexusStructureError("Invalid NXevent_data in NXdetector.")
     if grouping is None:
@@ -258,11 +258,11 @@ def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
         if (grouping := dg.get(key)) is not None:
             grouping_key = key
             break
-    grouping = dg.pop(grouping_key)
+    grouping = None if grouping_key is None else asarray(dg.pop(grouping_key))
     #event_field = _EventField(events,
     #                          event_select=...,
     #                          grouping=grouping,
     #                          grouping_key=grouping_key)
-    da = group_events(event_data=events, grouping=asarray(grouping))
+    da = _group_events(event_data=events, grouping=grouping)
     da.coords.update(dg)
     return da

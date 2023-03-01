@@ -238,20 +238,6 @@ def test_select_events_slices_underlying_event_data(nxroot):
         sc.array(dims=dims, unit=None, dtype='int64', values=[[2, 3], [0, 1]]))
 
 
-def test_select_events_slice_does_not_affect_original_detector(nxroot):
-    detector = nxroot.create_class('detector0', NXdetector)
-    detector.create_field('detector_number', detector_numbers_xx_yy_1234())
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
-    detector = detector.rebuild()
-    detector.select_events['pulse', 0][...]
-    assert sc.identical(
-        detector[...].bins.size().data,
-        sc.array(dims=['dim_0', 'dim_1'],
-                 unit=None,
-                 dtype='int64',
-                 values=[[2, 3], [0, 1]]))
-
-
 def test_loading_event_data_creates_automatic_detector_numbers_if_not_present_in_file(
         nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
@@ -281,9 +267,14 @@ def test_loading_event_data_with_full_selection_and_automatic_detector_numbers_w
         nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
-    assert detector.dims == ['detector_number']
-    assert tuple(detector[...].shape) == (4, )
-    assert tuple(detector[()].shape) == (4, )
+    detector = detector.rebuild()
+    assert detector.dims == ('event_time_zero', )
+    assert detector[...].sizes == {'event_time_zero': 4}
+    assert detector[()].sizes == {'event_time_zero': 4}
+    da = snx.nxdetector.group_events_by_detector_number(detector[...])
+    assert da.sizes == {'event_id': 3}
+    assert sc.identical(da.coords['event_id'],
+                        sc.array(dims=['event_id'], unit=None, values=[1, 2, 4]))
 
 
 def test_event_data_field_dims_labels(nxroot):

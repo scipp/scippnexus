@@ -281,11 +281,11 @@ class NXdata(NXobject):
         oi.signal_name = di.signal_name
         return oi
 
-    @property
-    def shape(self) -> List[int]:
-        if (signal := self._signal) is not None:
-            return signal.shape
-        return ()
+    #@property
+    #def shape(self) -> List[int]:
+    #    if (signal := self._signal) is not None:
+    #        return signal.shape
+    #    return ()
 
     def _get_group_dims(self) -> Union[None, List[str]]:
         # Apparently it is not possible to define dim labels unless there are
@@ -301,15 +301,16 @@ class NXdata(NXobject):
             return [x[1] for x in sorted(axes)]
         return None
 
-    @property
-    def dims(self) -> List[str]:
-        if (d := self._get_group_dims()) is not None:
-            return d
-        # Legacy NXdata defines axes not as group attribute, but attr on dataset.
-        # This is handled by class Field.
-        if (signal := self._signal) is not None:
-            return signal.dims
-        return ()
+    # TODO behave like DataGroup instead?
+    #@property
+    #def dims(self) -> List[str]:
+    #    if (d := self._get_group_dims()) is not None:
+    #        return d
+    #    # Legacy NXdata defines axes not as group attribute, but attr on dataset.
+    #    # This is handled by class Field.
+    #    if (signal := self._signal) is not None:
+    #        return signal.dims
+    #    return ()
 
     @property
     def unit(self) -> Union[sc.Unit, None]:

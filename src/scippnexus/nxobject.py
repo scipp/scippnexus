@@ -498,6 +498,19 @@ class NXobject:
                                                       definition=self._definition)
         return group  # Return underlying (h5py) group
 
+    @property
+    def dims(self) -> List[str]:
+        # TODO lazy populate self._children?
+        return sc.DataGroup(self._build_children()).dims
+
+    @property
+    def shape(self) -> List[str]:
+        return sc.DataGroup(self._build_children()).shape
+
+    @property
+    def sizes(self) -> List[str]:
+        return sc.DataGroup(self._build_children()).sizes
+
     def _build_children(self) -> sc.DataGroup:
         # TODO ancestor and definition handling?
         return {
