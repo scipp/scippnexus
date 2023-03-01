@@ -38,15 +38,15 @@ def test_bad_event_index_causes_load_as_DataGroup(nxroot):
     event_data = nxroot['entry'].create_class('events_0', NXevent_data)
     event_id = sc.array(dims=['event'], unit=None, values=[1, 2, 4, 1, 2, 2])
     event_time_offset = sc.array(dims=['event'], unit='s', values=[0, 0, 0, 0, 0, 0])
-    event_time_zero = sc.array(dims=['pulse'], unit='s', values=[1, 2, 3, 4])
-    event_index = sc.array(dims=['pulse'], unit=None, values=[0, 3, 3, 666])
+    event_time_zero = sc.array(dims=['event_time_zero'], unit='s', values=[1, 2, 3, 4])
+    event_index = sc.array(dims=['event_time_zero'], unit=None, values=[0, 3, 3, 666])
     event_data['event_id'] = event_id
     event_data['event_time_offset'] = event_time_offset
     event_data['event_time_zero'] = event_time_zero
     event_data['event_index'] = event_index
     dg = event_data[...]
     assert isinstance(dg, sc.DataGroup)
-    assert dg['event_index'].sizes == {'pulse': 5}
+    assert dg['event_index'].sizes == {'event_time_zero': 5}
     assert sc.identical(dg['event_id'], event_id)
     assert sc.identical(dg['event_time_zero'], event_time_zero)
     assert sc.identical(dg['event_time_offset'], event_time_offset)
@@ -55,7 +55,7 @@ def test_bad_event_index_causes_load_as_DataGroup(nxroot):
 def test_select_single_pulse_loads_as_0d(nxroot):
     event_data = nxroot['entry'].create_class('events_0', NXevent_data)
     create_event_data_ids_1234(event_data)
-    events = event_data['pulse', 0]
+    events = event_data['event_time_zero', 0]
     assert events.sizes == {}
     assert events.bins.size().value == 3
 
@@ -103,6 +103,6 @@ def test_field_dim_labels(nxroot):
     events['event_id'] = sc.arange('ignored', 2)
     event_data = events
     assert event_data['event_time_offset'].dims == ('event', )
-    assert event_data['event_time_zero'].dims == ('pulse', )
-    assert event_data['event_index'].dims == ('pulse', )
+    assert event_data['event_time_zero'].dims == ('event_time_zero', )
+    assert event_data['event_index'].dims == ('event_time_zero', )
     assert event_data['event_id'].dims == ('event', )
