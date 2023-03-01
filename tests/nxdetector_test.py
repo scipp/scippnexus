@@ -97,16 +97,6 @@ def test_detector_number_key_alias(nxroot, detector_number_key):
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 
-def test_select_events_raises_if_detector_contains_data(nxroot):
-    da = sc.DataArray(sc.array(dims=['xx', 'yy'], values=[[1.1, 2.2], [3.3, 4.4]]))
-    da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
-    detector = nxroot.create_class('detector0', NXdetector)
-    detector.create_field('detector_numbers', da.coords['detector_numbers'])
-    detector.create_field('data', da.data)
-    with pytest.raises(NexusStructureError):
-        detector.select_events
-
-
 def test_loads_data_with_coords(nxroot):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]]))
@@ -169,8 +159,7 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
     detector = detector.rebuild()
-    assert detector.dims == ('detector_number', )
-    assert detector.shape == (4, )
+    assert detector.sizes == {'event_time_zero': 4, 'detector_number': 4}
     loaded = detector[...]
     loaded = snx.nxdetector.group_events_by_detector_number(loaded)
     assert sc.identical(
@@ -188,8 +177,8 @@ def test_loads_event_data_with_0d_detector_numbers(nxroot):
     detector.create_field('detector_number', sc.index(1, dtype='int64'))
     create_event_data_ids_1234(detector.create_class('events', NXevent_data))
     detector = detector.rebuild()
-    assert detector.dims == ()
-    assert detector.shape == ()
+    assert detector.dims == ('event_time_zero', )
+    assert detector.shape == (4, )
     loaded = detector[...]
     loaded = snx.nxdetector.group_events_by_detector_number(loaded)
     assert sc.identical(loaded.bins.size().data, sc.index(2, dtype='int64'))
@@ -202,8 +191,7 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     # Creating fields in the 'events' subgroup cannot update detector automatically.
     # We therefore have to rebuild by hand.
     detector = detector.rebuild()
-    assert detector.dims == ('dim_0', 'dim_1')
-    assert detector.shape == (2, 2)
+    assert detector.sizes == {'event_time_zero': 4, 'dim_0': 2, 'dim_1': 2}
     loaded = detector[...]
     loaded = snx.nxdetector.group_events_by_detector_number(loaded)
     assert sc.identical(

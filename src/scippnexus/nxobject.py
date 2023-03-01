@@ -561,9 +561,9 @@ class NXobject:
             return self._info.children[name].build(ancestor=self)
         select = name
         # TMP
-        children = self._build_children()
-        dg = self._read_children(children=children, select=select)
-        return self._assemble(dg)
+        #children = self._build_children()
+        #dg = self._read_children(children=children, select=select)
+        #return self._assemble(dg)
         # end TMP
         try:
             children = self._build_children()

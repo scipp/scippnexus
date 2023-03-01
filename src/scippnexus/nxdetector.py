@@ -178,17 +178,6 @@ class NXdetector(NXdata):
             return NXevent_data(self._group)
         return None
 
-    @property
-    def select_events(self) -> EventSelector:
-        """
-        Return a proxy object for selecting a slice of the underlying NXevent_data
-        group, while keeping wrapping the NXdetector.
-        """
-        if self._info.events is None:
-            raise NexusStructureError(
-                "Cannot select events in NXdetector not containing NXevent_data.")
-        return EventSelector(self)
-
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
         return self._info.field_dims[name]
         if self.events is not None:
@@ -209,9 +198,6 @@ class NXdetector(NXdata):
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         return self._nxdata()._getitem(select)
-
-    def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
-        return children
 
 
 def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
