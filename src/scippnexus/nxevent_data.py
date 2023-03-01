@@ -20,6 +20,13 @@ _event_dimension = "event"
 _pulse_dimension = "event_time_zero"
 
 
+
+def _check_for_missing_fields(fields):
+    for field in ("event_time_zero", "event_index", "event_time_offset"):
+        if field not in fields:
+            raise NexusStructureError(
+                f"Required field {field} not found in NXevent_data")
+
 class NXevent_data(NXobject):
     _field_names = [
         'event_time_zero', 'event_index', 'event_time_offset', 'event_id',
@@ -37,8 +44,10 @@ class NXevent_data(NXobject):
         return NXobjectInfo(children=children)
 
     def _read_children(self, children, select: ScippIndex) -> sc.DataGroup:
-        self._check_for_missing_fields()
         index = to_plain_index([_pulse_dimension], select)
+
+        if not children:  # TODO Check that select is trivial?
+            return sc.DataGroup()
 
         max_index = self.shape[0]
         event_time_zero = children['event_time_zero'][index]
@@ -97,6 +106,7 @@ class NXevent_data(NXobject):
         return dg
 
     def _assemble(self, children: sc.DataGroup) -> sc.DataGroup:
+        _check_for_missing_fields(children)
         event_time_offset = children['event_time_offset']
         event_time_zero = children['event_time_zero']
         event_index = children['event_index']
@@ -136,7 +146,7 @@ class NXevent_data(NXobject):
     @property
     def shape(self) -> Tuple[int]:
         if (event_index := self._info.children.get('event_index')) is not None:
-                return event_index.values.shape
+            return event_index.values.shape
         return ()
 
     @property
@@ -159,9 +169,3 @@ class NXevent_data(NXobject):
         if name in ['event_time_offset', 'event_id']:
             return [_event_dimension]
         return None
-
-    def _check_for_missing_fields(self):
-        for field in ("event_time_zero", "event_index", "event_time_offset"):
-            if field not in self._info.children:
-                raise NexusStructureError(
-                    f"Required field {field} not found in NXevent_data")

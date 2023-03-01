@@ -25,28 +25,12 @@ def make_transformation(obj, /, path) -> Optional[Transformation]:
     return None  # end of chain
 
 
-# TODO inherit Field?
-# what about dims, unit, ...?
-class TransformationField:
-
-    def __init__(self, field: Union[Field, NXobject]):
-        self._field = field
-        self._transformation = Transformation(field)
-
-    @property
-    def attrs(self):
-        return self._field.attrs
-
-    def __getitem__(self, index: ScippIndex) -> Union[sc.Variable, sc.DataArray]:
-        return get_full_transformation_starting_at(self._transformation, index=index)
-
-
 @dataclass
 class TransformationFieldInfo:
     field_info: Union[FieldInfo, GroupInfo]
 
     def build(self, ancestor):
-        return TransformationField(self.field_info.build(ancestor=ancestor))
+        return Transformation(self.field_info.build(ancestor=ancestor))
 
 
 class NXtransformations(NXobject):
@@ -58,18 +42,14 @@ class NXtransformations(NXobject):
             info.children[name] = TransformationFieldInfo(field)
         return info
 
-    def _getitem(self, index: ScippIndex) -> sc.DataGroup:
-        return sc.DataGroup({
-            name: get_full_transformation_starting_at(Transformation(child),
-                                                      index=index)
-            for name, child in self.items()
-        })
+    def _assemble(self, children):
+        return children
 
 
 class Transformation:
 
     def __init__(self, obj: Union[Field, NXobject]):  # could be an NXlog
-        self._obj = obj._field if isinstance(obj, TransformationField) else obj
+        self._obj = obj
 
     @property
     def attrs(self):
