@@ -274,14 +274,16 @@ def test_nxtransformations_group_single_chain(nxroot):
     write_translation(transformations, 't2', value, offset, vector)
     transformations['t2'].attrs['depends_on'] = 't1'
     transformations.attrs['NX_class'] = 'NXtransformations'
-    expected2 = (expected1 *
-                 sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+    expected2 = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * \
+                sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m')
 
     loaded = nxroot['entry']['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
-    assert sc.identical(loaded['t1'], expected1)
-    assert sc.allclose(loaded['t2'], expected2)
+    assert sc.identical(loaded['t1'], sc.DataArray(expected1))
+    assert sc.identical(
+        loaded['t2'],
+        sc.DataArray(expected2,
+                     coords={'depends_on': sc.scalar(sc.DataArray(expected1))}))
 
 
 def test_slice_transformations(nxroot):

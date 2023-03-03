@@ -531,6 +531,8 @@ class NXobject:
 
     def _read_children(self, children: Dict[str, Union[Field, NXobject]],
                        select: ScippIndex) -> sc.DataGroup:
+        # TODO handle include/exclude
+        # include = getattr(self._strategy, 'include_child', lambda x: True)
         print(children.items())
         dims = sc.DataGroup(children).dims
         dims = self.dims
@@ -552,6 +554,15 @@ class NXobject:
         if name is None:
             raise KeyError("None is not a valid index")
         if isinstance(name, str):
+            if '/' in name:
+                obj = self._group[name]
+                parent = GroupInfo.read(group=obj.parent).build(ancestor=self)
+                return parent[name.split('/')[-1]]
+                if is_dataset(obj):
+                    # TODO dims, errors etc from parent!
+                    return FieldInfo(values=obj).build(ancestor=self)
+                else:
+                    return GroupInfo(group=obj).build(ancestor=self)
             # TODO warning about axis labels?
             # TODO child_params
             # TODO I don't think this is the right solution. Since children may
@@ -592,13 +603,6 @@ class NXobject:
         from .nxcylindrical_geometry import NXcylindrical_geometry
         from .nxoff_geometry import NXoff_geometry
 
-        #def insert(container, name, obj):
-        #    if hasattr(container, 'coords'):
-        #        container.coords[name] = obj if isinstance(
-        #            obj, sc.Variable) else sc.scalar(obj)
-        #    else:
-        #        container[name] = obj
-
         dg = sc.DataGroup(children)
         detector_number = getattr(self, 'detector_number', None)
         if detector_number is not None:
@@ -606,8 +610,8 @@ class NXobject:
         for key, child in self[[NXcylindrical_geometry, NXoff_geometry]].items():
             dg[key] = child.assemble_as_child(children[key],
                                               detector_number=detector_number)
-        #for key, child in self[NXgeometry].items():
-        #    insert(container, key, child[()])
+        for key in self[NXgeometry]:
+            dg[key] = sc.scalar(children[key])
         #if (t := self.depends_on) is not None:
         #    insert(container, 'depends_on', t)
         #    # If loading the transformation failed, 'depends_on' returns a string, the
@@ -677,22 +681,8 @@ class NXobject:
             return self._get_children_by_nx_class(name)
         return self._get_child(name, use_field_dims=True)
 
-    def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]:
-        return self._read_children(index)
-        include = getattr(self._strategy, 'include_child', lambda x: True)
-        return sc.DataGroup(
-            {name: child[index]
-             for name, child in self.items() if include(child)})
-
-    def _get_field_dims(self, name: str) -> Union[None, List[str]]:
-        """Subclasses should reimplement this to provide dimension labels for fields."""
-        return None
-
-    def _get_field_dtype(self, name: str) -> Union[None, sc.DType]:
-        """Subclasses should reimplement this to override the dtype for fields."""
-        return None
-
     def __contains__(self, name: str) -> bool:
+        return name in self._info.children
         return name in self._group
 
     def get(self, name: str, default=None) -> Union['NXobject', Field, sc.DataArray]:

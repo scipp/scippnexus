@@ -19,9 +19,9 @@ class TransformationError(NexusStructureError):
 
 def make_transformation(obj, /, path) -> Optional[Transformation]:
     if path.startswith('/'):
-        return Transformation(obj.file[path])
+        return obj.file[path]
     elif path != '.':
-        return Transformation(obj.parent[path])
+        return obj.parent[path]
     return None  # end of chain
 
 
@@ -108,7 +108,10 @@ class Transformation:
                 return t
             offset = sc.vector(value=offset.values, unit=offset.unit).to(unit='m')
             offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
-            return t * offset
+            da = sc.DataArray(t * offset)
+            if self.depends_on:
+                da.coords['depends_on'] = sc.scalar(self.depends_on[select])
+            return da
         except (sc.DimensionError, sc.UnitError) as e:
             raise NexusStructureError(
                 f"Invalid transformation in NXtransformations: {e}") from e

@@ -243,6 +243,8 @@ class NXdata(NXobject):
         if self._signal is None:
             return base_sizes
         # special handling to avoid getting 'None' in shape for bin-edge coords
+        # TODO this hides dims that are not in signal. Is that what we want?
+        # The fallback idms would then be inconsistent
         sizes = self._signal.sizes
         children = sc.DataGroup(self._build_children())
         for child in children.values():
