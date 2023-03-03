@@ -92,7 +92,6 @@ class Transformation:
             t = value * self.vector
             v = t if isinstance(t, sc.Variable) else t.data
             if transformation_type == 'translation':
-                v = v.to(unit='m', copy=False)
                 v = sc.spatial.translations(dims=v.dims, values=v.values, unit=v.unit)
             elif transformation_type == 'rotation':
                 v = sc.spatial.rotations_from_rotvecs(v)
@@ -106,7 +105,7 @@ class Transformation:
                 t.data = v
             if (offset := self.offset) is None:
                 return t
-            offset = sc.vector(value=offset.values, unit=offset.unit).to(unit='m')
+            offset = sc.vector(value=offset.values, unit=offset.unit).to(unit=v.unit)
             offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
             transform = t * offset
             if self.depends_on is not None:

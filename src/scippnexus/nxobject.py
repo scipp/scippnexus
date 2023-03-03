@@ -612,16 +612,22 @@ class NXobject:
                                               detector_number=detector_number)
         for key in self[NXgeometry]:
             dg[key] = sc.scalar(children[key])
-        #if (t := self.depends_on) is not None:
-        #    insert(container, 'depends_on', t)
-        #    # If loading the transformation failed, 'depends_on' returns a string, the
-        #    # path to the transformation. If this is a nested group, we load it here.
-        #    # Note that this info is currently incomplete, since attributes are not
-        #    # loaded.
-        #    if isinstance(t, str):
-        #        from .nexus_classes import NXtransformations
-        #        for key, group in self[NXtransformations].items():
-        #            insert(container, key, group[()])
+        if (t := self.depends_on) is not None:
+            print(f'{t=}')
+            dg['depends_on'] = sc.scalar(t[()])
+            from .nexus_classes import NXtransformations
+            for key in self[NXtransformations]:
+                del dg[key]
+            #insert(container, 'depends_on', t)
+            # If loading the transformation failed, 'depends_on' returns a string, the
+            # path to the transformation. If this is a nested group, we load it here.
+            # Note that this info is currently incomplete, since attributes are not
+            # loaded.
+            #if isinstance(t, str):
+            #    from .nexus_classes import NXtransformations
+            #    for key, group in self[NXtransformations].items():
+            #        insert(container, key, group[()])
+        print(f'{dg=}')
         return dg
 
     def _get_children_by_nx_class(
@@ -734,7 +740,12 @@ class NXobject:
     def depends_on(self) -> Union[sc.Variable, sc.DataArray, None]:
         if (depends_on := self.get('depends_on')) is not None:
             # Imported late to avoid cyclic import
-            from .nxtransformations import TransformationError, get_full_transformation
+            from .nxtransformations import (
+                TransformationError,
+                get_full_transformation,
+                make_transformation,
+            )
+            return make_transformation(self, depends_on[()])
             try:
                 return get_full_transformation(depends_on)
             except (NexusStructureError, TransformationError) as e:

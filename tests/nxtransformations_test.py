@@ -51,7 +51,7 @@ def test_Transformation_with_single_value(nxroot):
     value.attrs['vector'] = vector.value
 
     depends_on = detector['depends_on'][()]
-    t = nxtransformations.Transformation(nxroot[depends_on])
+    t = nxroot[depends_on]
     assert t.depends_on is None
     assert sc.identical(t.offset, offset)
     assert sc.identical(t.vector, vector)
@@ -76,10 +76,14 @@ def test_chain_with_single_values_and_different_unit(nxroot):
     value2.attrs['depends_on'] = '.'
     value2.attrs['transformation_type'] = 'translation'
     value2.attrs['vector'] = vector.value
+    t2 = value.to(unit='cm') * vector
+    detector = detector.rebuild()
 
-    expected = (sc.spatial.translations(dims=t.dims, values=2 * t.values, unit=t.unit) *
-                sc.spatial.translation(value=[0.001, 0.002, 0.003], unit='m'))
-    assert sc.identical(detector[...].coords['depends_on'], expected)
+    t1 = sc.spatial.translation(value=[1, 2, 3 + 6.5], unit='mm')
+    t2 = sc.spatial.translation(value=[0, 0, 0.65], unit='cm')
+    expected = sc.DataArray(t1, coords={'depends_on': sc.scalar(t2)})
+
+    assert sc.identical(detector[...].coords['depends_on'].value, expected)
 
 
 def test_Transformation_with_multiple_values(nxroot):
@@ -223,9 +227,9 @@ def test_nxtransformations_group_single_item(nxroot):
     value = sc.scalar(2.4, unit='mm')
     offset = sc.spatial.translation(value=[6, 2, 6], unit='mm')
     vector = sc.vector(value=[0, 1, 1])
-    t = value.to(unit='m') * vector
+    t = value * vector
     expected = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+                offset)
 
     transformations = nxroot.create_class('transformations', NXtransformations)
     write_translation(transformations, 't1', value, offset, vector)
@@ -241,16 +245,16 @@ def test_nxtransformations_group_two_independent_items(nxroot):
     value = sc.scalar(2.4, unit='mm')
     offset = sc.spatial.translation(value=[6, 2, 6], unit='mm')
     vector = sc.vector(value=[0, 1, 1])
-    t = value.to(unit='m') * vector
+    t = value * vector
     write_translation(transformations, 't1', value, offset, vector)
     expected1 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+                 offset)
 
     value = value * 0.1
-    t = value.to(unit='m') * vector
+    t = value * vector
     write_translation(transformations, 't2', value, offset, vector)
     expected2 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+                 offset)
 
     loaded = nxroot['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
@@ -264,18 +268,18 @@ def test_nxtransformations_group_single_chain(nxroot):
     value = sc.scalar(2.4, unit='mm')
     offset = sc.spatial.translation(value=[6, 2, 6], unit='mm')
     vector = sc.vector(value=[0, 1, 1])
-    t = value.to(unit='m') * vector
+    t = value * vector
     write_translation(transformations, 't1', value, offset, vector)
     expected1 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+                 offset)
 
     value = value * 0.1
-    t = value.to(unit='m') * vector
+    t = value * vector
     write_translation(transformations, 't2', value, offset, vector)
     transformations['t2'].attrs['depends_on'] = 't1'
     transformations.attrs['NX_class'] = 'NXtransformations'
-    expected2 = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * \
-                sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m')
+    expected2 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
+                 offset)
 
     loaded = nxroot['entry']['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}

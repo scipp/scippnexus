@@ -303,7 +303,6 @@ class NXdata(NXobject):
         signal = children.pop(self._info.signal_name)
         coords = children
         #coords = {name:asarray(child) for name, child in children.items()}
-        print(list(coords.items()))
         da = sc.DataArray(data=signal, coords=coords)
         for name in list(da.coords):
             # TODO building again is inefficient!
