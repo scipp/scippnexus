@@ -364,9 +364,6 @@ def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nx
                                               name='shape',
                                               detector_faces=False)
     loaded = detector[...]
-    print(loaded)
-    # TODO almost... but how can we now know the signal name, to convert it to a data array?
-    print(snx.nxobject.extract_geometry(loaded))
     assert loaded.coords['shape'].dims == ()
     assert sc.identical(loaded.coords['shape'].bins.size(), sc.index(4))
 

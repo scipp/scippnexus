@@ -114,6 +114,19 @@ class NXdetector(NXdata):
         return None
 
 
+#def _assemble(self, children: sc.DataGroup):
+#    processed = sc.DataGroup(children)
+#    detector_number = None
+#    for key in self._detector_number_fields:
+#        if key in self:
+#            detector_number = key
+#            break
+#    for name, child in children.items():
+#
+#
+#    return super()._assemble(processed)
+
+
 def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
     for name, value in dg.items():
         if isinstance(

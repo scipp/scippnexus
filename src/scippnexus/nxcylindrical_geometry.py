@@ -68,6 +68,21 @@ class NXcylindrical_geometry(NXobject):
         fields.update(info.groups)
         return NXobjectInfo(children=fields)
 
+    #def dims(self):
+    #    if hasattr(self.parent, 'detector_number'):  # and has detfaces dataset
+    #        return self.parent.detector_number.dims
+    #    return super().dims  # given by NXobject
+
+    #def _assemble(self, children: sc.DataGroup) -> sc.Variable:
+    #    return _parse(**children,
+    #                  parent_detector_number=getattr(self.parent, 'detector_number',
+    #                                                 None))
+
     def load_as_array(self,
                       detector_number: Optional[sc.Variable] = None) -> sc.Variable:
         return _parse(**self[()], parent_detector_number=detector_number)
+
+    @staticmethod
+    def assemble_as_child(children: sc.DataGroup,
+                          detector_number: Optional[sc.Variable] = None) -> sc.Variable:
+        return _parse(**children, parent_detector_number=detector_number)

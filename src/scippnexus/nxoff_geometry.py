@@ -74,3 +74,8 @@ class NXoff_geometry(NXobject):
     def load_as_array(self,
                       detector_number: Optional[sc.Variable] = None) -> sc.Variable:
         return off_to_shape(**self[()], detector_number=detector_number)
+
+    @staticmethod
+    def assemble_as_child(children: sc.DataGroup,
+                          detector_number: Optional[sc.Variable] = None) -> sc.Variable:
+        return off_to_shape(**children, detector_number=detector_number)
