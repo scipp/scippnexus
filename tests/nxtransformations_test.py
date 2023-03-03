@@ -40,9 +40,9 @@ def test_Transformation_with_single_value(nxroot):
     value = sc.scalar(6.5, unit='mm')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
     vector = sc.vector(value=[0, 0, 1])
-    t = value.to(unit='m') * vector
+    t = value * vector
     expected = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit)
-    expected = expected * sc.spatial.translation(value=[0.001, 0.002, 0.003], unit='m')
+    expected = expected * offset
     value = transformations.create_field('t1', value)
     value.attrs['depends_on'] = '.'
     value.attrs['transformation_type'] = 'translation'
@@ -109,7 +109,7 @@ def test_Transformation_with_multiple_values(nxroot):
     value.attrs['vector'] = vector.value
 
     depends_on = detector['depends_on'][()]
-    t = nxtransformations.Transformation(nxroot[depends_on])
+    t = nxroot[depends_on]
     assert t.depends_on is None
     assert sc.identical(t.offset, offset)
     assert sc.identical(t.vector, vector)
@@ -143,8 +143,10 @@ def test_chain_with_multiple_values(nxroot):
     value2.attrs['transformation_type'] = 'translation'
     value2.attrs['vector'] = vector.value
 
-    expected = t * (t * offset)
-    assert sc.identical(detector[...].coords['depends_on'].value, expected)
+    det = detector[...]
+    depends_on = det.coords['depends_on'].value
+    assert sc.identical(depends_on.drop_coords('depends_on'), t * offset)
+    assert sc.identical(depends_on.coords['depends_on'].value, t)
 
 
 def test_chain_with_multiple_values_and_different_time_unit(nxroot):
@@ -176,8 +178,11 @@ def test_chain_with_multiple_values_and_different_time_unit(nxroot):
     value2.attrs['transformation_type'] = 'translation'
     value2.attrs['vector'] = vector.value
 
-    expected = t * (t * offset)
-    assert sc.identical(detector[...].coords['depends_on'].value, expected)
+    det = detector[...]
+    depends_on = det.coords['depends_on'].value
+    assert sc.identical(depends_on.drop_coords('depends_on'), t * offset)
+    t.coords['time'] = t.coords['time'].to(unit='ms')
+    assert sc.identical(depends_on.coords['depends_on'].value, t)
 
 
 def test_broken_time_dependent_transformation_returns_path_and_transformations(nxroot):
