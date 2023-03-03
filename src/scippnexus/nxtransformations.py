@@ -108,10 +108,12 @@ class Transformation:
                 return t
             offset = sc.vector(value=offset.values, unit=offset.unit).to(unit='m')
             offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
-            da = sc.DataArray(t * offset)
-            if self.depends_on:
-                da.coords['depends_on'] = sc.scalar(self.depends_on[select])
-            return da
+            transform = t * offset
+            if self.depends_on is not None:
+                transform = transform if isinstance(
+                    transform, sc.DataArray) else sc.DataArray(transform)
+                transform.coords['depends_on'] = sc.scalar(self.depends_on[select])
+            return transform
         except (sc.DimensionError, sc.UnitError) as e:
             raise NexusStructureError(
                 f"Invalid transformation in NXtransformations: {e}") from e

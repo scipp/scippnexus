@@ -279,11 +279,10 @@ def test_nxtransformations_group_single_chain(nxroot):
 
     loaded = nxroot['entry']['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
-    assert sc.identical(loaded['t1'], sc.DataArray(expected1))
+    assert sc.identical(loaded['t1'], expected1)
     assert sc.identical(
         loaded['t2'],
-        sc.DataArray(expected2,
-                     coords={'depends_on': sc.scalar(sc.DataArray(expected1))}))
+        sc.DataArray(expected2, coords={'depends_on': sc.scalar(expected1)}))
 
 
 def test_slice_transformations(nxroot):
