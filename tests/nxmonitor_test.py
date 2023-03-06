@@ -2,6 +2,7 @@ import h5py
 import pytest
 import scipp as sc
 
+import scippnexus as snx
 from scippnexus import NXentry, NXevent_data, NXmonitor, NXroot
 
 

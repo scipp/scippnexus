@@ -301,10 +301,15 @@ class NXdata(NXobject):
     def _assemble(self, children: sc.DataGroup) -> sc.DataArray:
         children = sc.DataGroup(children)
         signal = children.pop(self._info.signal_name)
-        coords = children
         #coords = {name:asarray(child) for name, child in children.items()}
-        da = sc.DataArray(data=signal, coords=coords)
+        da = sc.DataArray(data=signal)
+        return self._add_coords(da, children)
+
+    def _add_coords(self, da: sc.DataArray, children: sc.DataGroup) -> sc.DataArray:
+        da.coords.update(children)
         for name in list(da.coords):
+            if name not in self:
+                continue
             # TODO building again is inefficient!
             if self._coord_to_attr(da, name, self._info.children[name].build()):
                 da.attrs[name] = da.coords.pop(name)

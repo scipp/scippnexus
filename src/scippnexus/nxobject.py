@@ -575,6 +575,7 @@ class NXobject:
         # TMP
         children = self._build_children()
         dg = self._read_children(children=children, select=select)
+        # return self._assemble(dg)
         # end TMP
         try:
             #children = self._build_children()
@@ -582,7 +583,8 @@ class NXobject:
             try:
                 dg = self._assemble_leaf_properties(dg)
             except Exception as e:
-                pass
+                raise NexusStructureError(
+                    f"Failed to assemble {type(self).__name__}: {e}") from e
             try:
                 return self._assemble(dg)
             except Exception as e:

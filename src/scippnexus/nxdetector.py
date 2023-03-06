@@ -113,27 +113,34 @@ class NXdetector(NXdata):
                 return key
         return None
 
+    def _assemble(self, children: sc.DataGroup):
+        # TODO What about dims?
+        if self._info.signal_name is None:
+            event_entries = _find_event_entries(children)
+            if len(event_entries) != 1:
+                raise NexusStructureError("Multiple event entries found.")
+            event_entry = children[event_entries[0]]
+            if 'event_id' in event_entry.bins.coords:
+                raise NexusStructureError("xxx")
+            children = sc.DataGroup(children)
+            da = children.pop(event_entries[0])
+            return self._add_coords(da, children)
 
-#def _assemble(self, children: sc.DataGroup):
-#    processed = sc.DataGroup(children)
-#    detector_number = None
-#    for key in self._detector_number_fields:
-#        if key in self:
-#            detector_number = key
-#            break
-#    for name, child in children.items():
-#
-#
-#    return super()._assemble(processed)
+        return super()._assemble(children)
 
 
-def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
+def _find_event_entries(dg: sc.DataGroup) -> List[str]:
+    event_entries = []
     for name, value in dg.items():
         if isinstance(
                 value, sc.DataArray
         ) and 'event_time_zero' in value.coords and value.bins is not None:
-            event_entry = name
-            break
+            event_entries.append(name)
+    return event_entries
+
+
+def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
+    event_entry = _find_event_entries(dg)[0]
     events = dg.pop(event_entry)
     grouping_key = None
     for key in NXdetector._detector_number_fields:
