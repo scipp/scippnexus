@@ -27,6 +27,8 @@ This is especially powerful since a number of concepts of Scipp map well to conc
 News
 ----
 
+- [March 2023] scippnexus-23.03.0 has been released.
+  This brings a number of improvements, including handling of legacy files and loading of geometry information.
 - [January 2023] scippnexus-23.01.0 has been released.
   This brings support for loading arbitrary groups as :class:`scipp.DataGroup`.
   Furthermore, errors are handled in a more transparent way:

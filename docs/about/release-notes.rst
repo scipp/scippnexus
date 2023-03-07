@@ -28,7 +28,7 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
-v23.02.0
+v23.03.0
 --------
 
 Features
