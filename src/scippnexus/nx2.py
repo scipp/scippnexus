@@ -417,6 +417,13 @@ class NXdata(NXobject):
             key: tuple(dims[np.array(indices).flatten()])
             for key, indices in indices_attrs.items()
         }
+        for name, dataset in group._group.items():
+            if name not in self._coord_dims:
+                # TODO handle squeezing
+                if dataset.shape == ():
+                    self._coord_dims[name] = ()
+                elif name in dims:
+                    self._coord_dims[name] = (name, )
 
     @property
     def sizes(self) -> Dict[str, int]:
@@ -450,3 +457,36 @@ class NXdata(NXobject):
 
 base_definitions = {}
 base_definitions['NXdata'] = NXdata
+
+
+def create_field(group: H5Group, name: str, data: DimensionedArray, **kwargs):
+    if not isinstance(data, sc.Variable):
+        return group.create_dataset(name, data=data, **kwargs)
+    values = data.values
+    if data.dtype == sc.DType.string:
+        values = np.array(data.values, dtype=object)
+    elif data.dtype == sc.DType.datetime64:
+        start = sc.epoch(unit=data.unit)
+        values = (data - start).values
+    dataset = group.create_dataset(name, data=values, **kwargs)
+    if data.unit is not None:
+        dataset.attrs['units'] = str(data.unit)
+    if data.dtype == sc.DType.datetime64:
+        dataset.attrs['start'] = str(start.value)
+
+
+def create_group(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Group:
+    """Create empty HDF5 group with given name and set the NX_class attribute.
+
+    Parameters
+    ----------
+    name:
+        Group name.
+    nx_class:
+        Nexus class, can be a valid string for the NX_class attribute, or a
+        subclass of NXobject, such as NXdata or NXlog.
+    """
+    group = group.create_group(name)
+    attr = nx_class if isinstance(nx_class, str) else nx_class.__name__
+    group.attrs['NX_class'] = attr
+    return group

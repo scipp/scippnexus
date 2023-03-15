@@ -3,7 +3,15 @@ import numpy as np
 import pytest
 import scipp as sc
 
+import scippnexus.nx2 as snx
 from scippnexus import Field, NXdata, NXentry, NXlog, NXroot
+
+
+@pytest.fixture()
+def h5root(request):
+    """Yield NXroot containing a single NXentry named 'entry'"""
+    with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
+        yield f
 
 
 @pytest.fixture()
@@ -15,25 +23,27 @@ def nxroot(request):
         yield root
 
 
-def test_without_coords(nxroot):
+def test_without_coords(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
-    data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
+    data = snx.create_group(h5root, 'data1', snx.NXdata)
+    snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
-    assert sc.identical(data[...], sc.DataArray(signal))
+    obj = snx.Group(data, definitions=snx.base_definitions)
+    assert sc.identical(obj[...], sc.DataArray(signal))
 
 
-def test_with_coords_matching_axis_names(nxroot):
+def test_with_coords_matching_axis_names(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['yy', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_group(h5root, 'data1', snx.NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('xx', da.coords['xx'])
-    assert sc.identical(data[...], da)
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    group = snx.Group(data, definitions=snx.base_definitions)
+    assert sc.identical(group[...], da)
 
 
 def test_guessed_dim_for_coord_not_matching_axis_name(nxroot):
