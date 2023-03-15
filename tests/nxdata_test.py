@@ -123,15 +123,16 @@ def test_guessed_dim_for_2d_coord_not_matching_axis_name(h5root):
     assert sc.identical(data[...], da)
 
 
-def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(nxroot):
+def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
     da.coords['yy2'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('yy2', da.coords['yy2'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'yy2', da.coords['yy2'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     dg = data[...]
     assert isinstance(dg, sc.DataGroup)
     assert 'yy2' in dg

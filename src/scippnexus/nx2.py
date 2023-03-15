@@ -388,7 +388,7 @@ class Group(Mapping):
         # TODO assemble geometry/transforms/events
         try:
             return self._nexus.assemble(dg)
-        except NexusStructureError as e:
+        except (sc.DimensionError, NexusStructureError) as e:
             return dg
 
     @cached_property
@@ -422,18 +422,43 @@ class NXdata(NXobject):
                 # TODO handle squeezing
                 if dataset.shape == ():
                     self._coord_dims[name] = ()
-                elif name in dims:
-                    self._coord_dims[name] = (name, )
-                elif dataset.shape == group._group[self._signal].shape:
-                    self._coord_dims[name] = self._dims
-                elif len(dataset.shape) == 1:
-                    self._coord_dims[name] = (dims[list(self.sizes.values()).index(
-                        dataset.shape[0])], )
+                elif (dims := self._guess_dims(name, dataset)) is not None:
+                    self._coord_dims[name] = dims
+                #elif name in dims:
+                #    self._coord_dims[name] = (name, )
+                #elif dataset.shape == group._group[self._signal].shape:
+                #    self._coord_dims[name] = self._dims
+                #elif len(dataset.shape) == 1:
+                #    self._coord_dims[name] = (dims[list(self.sizes.values()).index(
+                #        dataset.shape[0])], )
+
+    def _guess_dims(self, name: str, dataset: H5Dataset) -> Tuple[str, ...]:
+        """Guess dims of non-signal dataset based on shape.
+
+        Does not check for potential bin-edge coord.
+        """
+        shape = dataset.shape
+        if self.shape == shape:
+            return self._dims
+        lut = {}
+        if self._signal is not None:
+            for d, s in self.sizes.items():
+                if self.shape.count(s) == 1:
+                    lut[s] = d
+        try:
+            dims = tuple(lut[s] for s in shape)
+        except KeyError:
+            return None
+        return dims
+
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return self._group._group[self._signal].shape
 
     @property
     def sizes(self) -> Dict[str, int]:
         # TODO We should only do this if we know that assembly into DataArray is possible.
-        return dict(zip(self._dims, self._group._group[self._signal].shape))
+        return dict(zip(self._dims, self.shape))
 
     def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
         sizes = self.sizes
@@ -452,7 +477,9 @@ class NXdata(NXobject):
     def field_dims(self, name: str, dataset: H5Dataset) -> Tuple[str, ...]:
         if name == self._signal:
             return self._dims
-        return self._coord_dims[name]
+        if (dims := self._coord_dims.get(name)) is not None:
+            return dims
+        return super().field_dims(name, dataset)
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
         coords = sc.DataGroup(dg)
