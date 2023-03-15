@@ -25,7 +25,7 @@ def nxroot(request):
 
 def test_without_coords(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
-    data = snx.create_group(h5root, 'data1', snx.NXdata)
+    data = snx.create_class(h5root, 'data1', snx.NXdata)
     snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
@@ -37,7 +37,7 @@ def test_with_coords_matching_axis_names(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['yy', 0]
-    data = snx.create_group(h5root, 'data1', snx.NXdata)
+    data = snx.create_class(h5root, 'data1', snx.NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     snx.create_field(data, 'signal', da.data)
@@ -46,75 +46,80 @@ def test_with_coords_matching_axis_names(h5root):
     assert sc.identical(group[...], da)
 
 
-def test_guessed_dim_for_coord_not_matching_axis_name(nxroot):
+def test_guessed_dim_for_coord_not_matching_axis_name(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx2'] = da.data['yy', 1]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('xx2', da.coords['xx2'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
 
-def test_multiple_coords(nxroot):
+def test_multiple_coords(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('xx', da.coords['xx'])
-    data.create_field('xx2', da.coords['xx2'])
-    data.create_field('yy', da.coords['yy'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    snx.create_field(data, 'yy', da.coords['yy'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
 
-def test_slice_of_1d(nxroot):
+def test_slice_of_1d(h5root):
     da = sc.DataArray(sc.array(dims=['xx'], unit='m', values=[1, 2, 3]))
     da.coords['xx'] = da.data
     da.coords['xx2'] = da.data
     da.coords['scalar'] = sc.scalar(1.2)
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('xx', da.coords['xx'])
-    data.create_field('xx2', da.coords['xx2'])
-    data.create_field('scalar', da.coords['scalar'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    snx.create_field(data, 'scalar', da.coords['scalar'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data['xx', :2], da['xx', :2])
     assert sc.identical(data[:2], da['xx', :2])
 
 
-def test_slice_of_multiple_coords(nxroot):
+def test_slice_of_multiple_coords(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('xx', da.coords['xx'])
-    data.create_field('xx2', da.coords['xx2'])
-    data.create_field('yy', da.coords['yy'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    snx.create_field(data, 'yy', da.coords['yy'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data['xx', :2], da['xx', :2])
 
 
-def test_guessed_dim_for_2d_coord_not_matching_axis_name(nxroot):
+def test_guessed_dim_for_2d_coord_not_matching_axis_name(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx2'] = da.data
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('xx2', da.coords['xx2'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
 

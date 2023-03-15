@@ -58,7 +58,7 @@ def is_dataset(obj: Union[H5Group, H5Dataset]) -> bool:
 def _is_time(obj):
     if (unit := obj.unit) is None:
         return False
-    return unit.to_dict()['powers'] == {'time': 1}
+    return unit.to_dict().get('powers') == {'time': 1}
 
 
 def _as_datetime(obj: Any):
@@ -424,11 +424,16 @@ class NXdata(NXobject):
                     self._coord_dims[name] = ()
                 elif name in dims:
                     self._coord_dims[name] = (name, )
+                elif dataset.shape == group._group[self._signal].shape:
+                    self._coord_dims[name] = self._dims
+                elif len(dataset.shape) == 1:
+                    self._coord_dims[name] = (dims[list(self.sizes.values()).index(
+                        dataset.shape[0])], )
 
     @property
     def sizes(self) -> Dict[str, int]:
         # TODO We should only do this if we know that assembly into DataArray is possible.
-        return dict(zip(self._dims, self._group[self._signal].shape))
+        return dict(zip(self._dims, self._group._group[self._signal].shape))
 
     def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
         sizes = self.sizes
@@ -475,7 +480,7 @@ def create_field(group: H5Group, name: str, data: DimensionedArray, **kwargs):
         dataset.attrs['start'] = str(start.value)
 
 
-def create_group(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Group:
+def create_class(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Group:
     """Create empty HDF5 group with given name and set the NX_class attribute.
 
     Parameters
