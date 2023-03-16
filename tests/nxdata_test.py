@@ -410,45 +410,48 @@ def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(h5root):
     assert data['signal'].dims == ('dim_0', )
 
 
-def test_only_one_axis_specified_for_2d_field(nxroot):
+def test_only_one_axis_specified_for_2d_field(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
-    data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = ['zz']
     data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions)
     loaded = data[...]
     assert sc.identical(loaded.data, sc.array(dims=['zz'], unit='m', values=[1.1]))
 
 
-def test_fields_with_datetime_attribute_are_loaded_as_datetime(nxroot):
+def test_fields_with_datetime_attribute_are_loaded_as_datetime(h5root):
     da = sc.DataArray(
         sc.epoch(unit='s') +
         sc.array(dims=['xx', 'yy'], unit='s', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('xx', da.coords['xx'])
-    data.create_field('xx2', da.coords['xx2'])
-    data.create_field('yy', da.coords['yy'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    snx.create_field(data, 'yy', da.coords['yy'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
 
-def test_slicing_with_bin_edge_coord_returns_bin_edges(nxroot):
+def test_slicing_with_bin_edge_coord_returns_bin_edges(h5root):
     da = sc.DataArray(sc.array(dims=['xx'], unit='K', values=[1.1, 2.2, 3.3]))
     da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2, 0.3, 0.4])
     da.coords['xx2'] = sc.array(dims=['xx'], unit='m', values=[0.3, 0.4, 0.5, 0.6])
-    data = nxroot.create_class('data', NXdata)
-    data.create_field('xx', da.coords['xx'])
-    data.create_field('xx2', da.coords['xx2'])
-    data.create_field('data', da.data)
+    data = snx.create_class(h5root, 'data', NXdata)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    snx.create_field(data, 'data', da.data)
     data.attrs['signal'] = 'data'
     data.attrs['axes'] = ['xx']
     data.attrs['xx_indices'] = [0]
     data.attrs['xx2_indices'] = [0]
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
     assert sc.identical(data['xx', 0], da['xx', 0])
     assert sc.identical(data['xx', 1], da['xx', 1])

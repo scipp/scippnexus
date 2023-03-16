@@ -543,7 +543,6 @@ class NXdata(NXobject):
                 # The convention here is that the given dimensions apply to the shapes
                 # starting from the left. So we only squeeze dimensions that are after
                 # len(dims).
-                print(f'get_dims({name}) = {dims}')
                 shape = _squeeze_trailing(dims, field.dataset.shape)
                 field.sizes = dict(zip(dims, shape))
             else:
@@ -612,7 +611,32 @@ class NXdata(NXobject):
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
         coords = sc.DataGroup(dg)
         signal = coords.pop(self._signal_name)
-        return sc.DataArray(data=signal, coords=coords)
+        da = sc.DataArray(data=signal)
+        return self._add_coords(da, coords)
+
+    def _dim_of_coord(self, name: str, coord: sc.Variable) -> Union[None, str]:
+        if len(coord.dims) == 1:
+            return coord.dims[0]
+        if name in coord.dims and name in self.dims:
+            return name
+        return self._bin_edge_dim(coord)
+
+    def _coord_to_attr(self, da: sc.DataArray, name: str, coord: sc.Variable) -> bool:
+        dim_of_coord = self._dim_of_coord(name, coord)
+        if dim_of_coord is None:
+            return False
+        if dim_of_coord not in da.dims:
+            return True
+        return False
+
+    def _add_coords(self, da: sc.DataArray, coords: sc.DataGroup) -> sc.DataArray:
+        da.coords.update(coords)
+        for name, coord in coords.items():
+            #if name not in self:
+            #    continue
+            if self._coord_to_attr(da, name, coord):
+                da.attrs[name] = da.coords.pop(name)
+        return da
 
 
 def _squeeze_trailing(dims: Tuple[str, ...], shape: Tuple[int, ...]) -> Tuple[int, ...]:
