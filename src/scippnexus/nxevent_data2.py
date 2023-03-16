@@ -8,6 +8,7 @@ import scipp as sc
 
 from ._common import to_plain_index
 from .nx2 import (
+    Field,
     Group,
     H5Dataset,
     NexusStructureError,
@@ -65,7 +66,7 @@ class NXevent_data(NXobject):
     def sizes(self) -> Dict[str, int]:
         return dict(zip(self.dims, self.shape))
 
-    def field_dims(self, name: str, dataset: H5Dataset) -> Tuple[str, ...]:
+    def field_dims(self, name: str, field: Field) -> Tuple[str, ...]:
         if name in ['event_time_zero', 'event_index']:
             return (_pulse_dimension, )
         if name in ['event_time_offset', 'event_id']:

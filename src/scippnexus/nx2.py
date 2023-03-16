@@ -116,7 +116,7 @@ def _dtype_fromdataset(dataset: H5Dataset) -> sc.DType:
 @dataclass
 class Field:
     dataset: H5Dataset
-    dims: Optional[Tuple[str, ...]] = None
+    sizes: Optional[Dict[str, int]] = None
     dtype: Optional[sc.DType] = None
     errors: Optional[H5Dataset] = None
     _is_time: Optional[bool] = None
@@ -165,12 +165,12 @@ class Field:
     #        self._dims = tuple(f'dim_{i}' for i in range(self.ndim))
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return self.dataset.shape
+    def dims(self) -> Tuple[str]:
+        return tuple(self.sizes.keys())
 
     @property
-    def sizes(self) -> Dict[str, int]:
-        return {dim: size for dim, size in zip(self.dims, self.shape)}
+    def shape(self) -> Tuple[int, ...]:
+        return tuple(self.sizes.values())
 
     def _load_variances(self, var, index):
         stddevs = sc.empty(dims=var.dims,
@@ -289,21 +289,31 @@ class Field:
         return None
 
 
+def _squeezed_field_sizes(dataset: H5Dataset) -> Dict[str, int]:
+    shape = tuple(size for size in dataset.shape if size != 1)
+    return {f'dim_{i}': size for i, size in enumerate(shape)}
+
+
 class NXobject:
 
     def __init__(self, group: Group):
         self._group = group
+        for field in group._children.values():
+            if isinstance(field, Field):
+                field.sizes = _squeezed_field_sizes(field.dataset)
+                field.dtype = _dtype_fromdataset(field.dataset)
 
     @property
     def sizes(self) -> Dict[str, int]:
         # exclude geometry/tansform groups?
         return sc.DataGroup(self._group).sizes
 
-    def field_dims(self, name: str, dataset: H5Dataset) -> Tuple[str, ...]:
-        return tuple(f'dim_{i}' for i in range(len(dataset.shape)))
+    #def field_sizes(self, name: str, field: Field) -> Dict[str, int]:
+    #    shape = tuple(size for size in field.dataset.shape if size != 1)
+    #    return {f'dim_{i}': size for i, size in enumerate(shape)}
 
-    def field_dtype(self, name: str, dataset: H5Dataset) -> sc.dtype:
-        return _dtype_fromdataset(dataset)
+    #def field_dtype(self, name: str, dataset: H5Dataset) -> sc.dtype:
+    #    return _dtype_fromdataset(dataset)
 
     def index_child(self, child: Union[Field, Group], sel: ScippIndex) -> ScippIndex:
         # Note that this will be similar in NXdata, but there we need to handle
@@ -338,6 +348,10 @@ class Group(Mapping):
         # with 1000 subgroups.
         return dict(self._group.attrs) if self._group.attrs else dict()
 
+    # TODO
+    # should this by Dict[str, Union[H5Group, H5Dataset]]?
+    # then we can recreate Group on every access (in principle more repeated init,
+    # but maybe better since it "clears" the cache)?
     @cached_property
     def _children(self) -> Dict[str, Union[Field, Group]]:
         # split off special children here?
@@ -364,10 +378,13 @@ class Group(Mapping):
     def _nexus(self) -> NXobject:
         return self._definitions.get(self.attrs.get('NX_class'), NXobject)(self)
 
+    def _populate_fields(self) -> None:
+        _ = self._nexus
+
     def _populate_field(self, name: str, field: Field) -> None:
-        if field.dims is not None:
+        if field.sizes is not None:
             return
-        field.dims = self._nexus.field_dims(name, field.dataset)
+        field.sizes = self._nexus.field_sizes(name, field)
         field.dtype = self._nexus.field_dtype(name, field.dataset)
 
     def __len__(self) -> int:
@@ -380,7 +397,8 @@ class Group(Mapping):
         if isinstance(sel, str):
             child = self._children[sel]
             if isinstance(child, Field):
-                self._populate_field(sel, child)
+                self._populate_fields()
+                #self._populate_field(sel, child)
             return child
         # Here this is scipp.DataGroup. Child classes like NXdata may return DataArray.
         # (not scipp.DataArray, as that does not support lazy data)
@@ -400,22 +418,141 @@ class Group(Mapping):
         return tuple(self.sizes)
 
 
+def _guess_dims(dims, shape, dataset: H5Dataset):
+    """Guess dims of non-signal dataset based on shape.
+
+    Does not check for potential bin-edge coord.
+    """
+    if shape == dataset.shape:
+        return dims
+    lut = {}
+    for d, s in zip(dims, shape):
+        if shape.count(s) == 1:
+            lut[s] = d
+    try:
+        return [lut[s] for s in dataset.shape]
+    except KeyError:
+        return None
+
+
 class NXdata(NXobject):
 
     def __init__(self, group: Group):
         super().__init__(group)
+        self._valid = True
         # Must do full consistency check here, to define self.sizes:
         # - squeeze correctly
         # - check if coord dims are compatible with signal dims
         # - check if there is a signal
         # If not the case, fall back do DataGroup.sizes
         # Can we just set field dims here?
-        self._signal = group.attrs['signal']
-        if (axes := group.attrs.get('axes')) is not None:
-            self._dims = tuple(axes)
+        self._signal_name = None
+        self._signal = None
+        if (name := group.attrs.get('signal')) is not None:
+            self._signal_name = name
+            self._signal = group._children[name]
         else:
-            self._dims = tuple(super().field_sizes(self._signal,
-                                                   group._children[self._signal]))
+            # Legacy NXdata defines signal not as group attribute, but attr on dataset
+            for name, field in group._children.items():
+                # What is the meaning of the attribute value? It is undocumented, we simply
+                # ignore it.
+                if 'signal' in field.attrs:
+                    self._signal_name = name
+                    self._signal = group._children[name]
+                    break
+
+        axes = group.attrs.get('axes')
+        signal_axes = None if self._signal is None else self._signal.attrs.get('axes')
+
+        axis_index = {}
+        for name, field in group._children.items():
+            if (axis := field.attrs.get('axis')) is not None:
+                axis_index[name] = axis
+
+        # Apparently it is not possible to define dim labels unless there are
+        # corresponding coords. Special case of '.' entries means "no coord".
+        def _get_group_dims():
+            if axes is not None:
+                return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
+            if signal_axes is not None:
+                return tuple(signal_axes.split(','))
+            if axis_index:
+                return [
+                    k for k, _ in sorted(axis_index.items(), key=lambda item: item[1])
+                ]
+            return None
+
+        group_dims = _get_group_dims()
+
+        if self._signal is not None:
+            if group_dims is not None:
+                shape = self._signal.dataset.shape
+                shape = _squeeze_trailing(group_dims, shape)
+                self._signal.sizes = dict(zip(group_dims, shape))
+
+        # if group_dims is None:
+        #     group_dims = fallback_dims
+
+        if axes is not None:
+            # Unlike self.dims we *drop* entries that are '.'
+            named_axes = [a for a in axes if a != '.']
+        elif signal_axes is not None:
+            named_axes = signal_axes.split(',')
+        # elif fallback_dims is not None:
+        #     named_axes = fallback_dims
+        else:
+            named_axes = []
+
+        # 3. Find field dims
+        indices_suffix = '_indices'
+        indices_attrs = {
+            key[:-len(indices_suffix)]: attr
+            for key, attr in group.attrs.items() if key.endswith(indices_suffix)
+        }
+
+        dims = np.array(group_dims)
+        dims_from_indices = {
+            key: tuple(dims[np.array(indices).flatten()])
+            for key, indices in indices_attrs.items()
+        }
+
+        def get_dims(name, field):
+            # Newly written files should always contain indices attributes, but the
+            # standard recommends that readers should also make "best effort" guess
+            # since legacy files do not set this attribute.
+            # TODO signal and errors?
+            # TODO aux
+            if name in (self._signal_name, ):
+                return group_dims
+            # if name in [self._signal_name, self._errors_name]:
+            #     return self._get_group_dims()  # if None, field determines dims itself
+            # if name in list(self.attrs.get('auxiliary_signals', [])):
+            #     return self._try_guess_dims(name)
+            if (dims := dims_from_indices.get(name)) is not None:
+                return dims
+            if (axis := axis_index.get(name)) is not None:
+                return (group_dims[axis - 1], )
+            if name in named_axes:
+                # If there are named axes then items of same name are "dimension
+                # coordinates", i.e., have a dim matching their name.
+                # However, if the item is not 1-D we need more labels. Try to use labels of
+                # signal if dimensionality matches.
+                if self._signal is not None and len(field.dataset.shape) == len(
+                        self._signal.dataset.shape):
+                    return group_dims
+                return [name]
+            if self._signal is not None and group_dims is not None:
+                return _guess_dims(group_dims, self._signal.dataset.shape,
+                                   field.dataset)
+            self._valid = False
+
+        for name, field in group._children.items():
+            if (dims := get_dims(name, field)) is not None:
+                field.sizes = dict(zip(dims, field.dataset.shape))
+
+        return
+        ################
+
         indices_suffix = '_indices'
         indices_attrs = {
             key[:-len(indices_suffix)]: attr
@@ -455,33 +592,16 @@ class NXdata(NXobject):
                 #    self._coord_dims[name] = (dims[list(self.sizes.values()).index(
                 #        dataset.shape[0])], )
 
-    def _guess_dims(self, name: str, dataset: H5Dataset) -> Tuple[str, ...]:
-        """Guess dims of non-signal dataset based on shape.
-
-        Does not check for potential bin-edge coord.
-        """
-        shape = dataset.shape
-        if self.shape == shape:
-            return self._dims
-        lut = {}
-        if self._signal is not None:
-            for d, s in self.sizes.items():
-                if self.shape.count(s) == 1:
-                    lut[s] = d
-        try:
-            dims = tuple(lut[s] for s in shape)
-        except KeyError:
-            return None
-        return dims
-
     @property
     def shape(self) -> Tuple[int, ...]:
-        return self._group._group[self._signal].shape
+        return self._signal.shape
 
     @property
     def sizes(self) -> Dict[str, int]:
+        return self._signal.sizes
         # TODO We should only do this if we know that assembly into DataArray is possible.
-        return dict(zip(self._dims, self.shape)) if self._valid else super().sizes
+        return dict(zip(self._field_dims[self._signal_name],
+                        self.shape)) if self._valid else super().sizes
 
     def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
         sizes = self.sizes
@@ -497,17 +617,26 @@ class NXdata(NXobject):
                                     bin_edge_dim=self._bin_edge_dim(child))
         return child[child_sel]
 
-    def field_dims(self, name: str, dataset: H5Dataset) -> Tuple[str, ...]:
-        if name == self._signal:
-            return self._dims
-        if (dims := self._coord_dims.get(name)) is not None:
-            return dims
-        return super().field_dims(name, dataset)
+    def field_sizes(self, name: str, field: Field) -> Dict[str, int]:
+        dims = self._field_dims[name]
+        if dims is None:
+            dims = super().field_sizes(name, field)
+        shape = field.dataset.shape
+        if len(dims) < len(shape):
+            # The convention here is that the given dimensions apply to the shapes
+            # starting from the left. So we only squeeze dimensions that are after
+            # len(dims).
+            shape = _squeeze_trailing(dims, shape)
+        return dict(zip(dims, shape))
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
         coords = sc.DataGroup(dg)
-        signal = coords.pop(self._signal)
+        signal = coords.pop(self._signal_name)
         return sc.DataArray(data=signal, coords=coords)
+
+
+def _squeeze_trailing(dims: Tuple[str, ...], shape: Tuple[int, ...]) -> Tuple[int, ...]:
+    return shape[:len(dims)] + tuple(size for size in shape[len(dims):] if size != 1)
 
 
 base_definitions = {}

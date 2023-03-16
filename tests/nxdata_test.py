@@ -300,8 +300,8 @@ def test_field_matching_errors_regex_is_loaded_if_no_corresponding_value_field(
     data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    snx.create_field(data,'signal', da.data)
-    snx.create_field(data,f'xx{errors_suffix}', da.coords[f'xx{errors_suffix}'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, f'xx{errors_suffix}', da.coords[f'xx{errors_suffix}'])
     data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
@@ -370,34 +370,37 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(h5root):
     assert sc.identical(data['xx'][...], xx['ignored', 0])
 
 
-def test_dims_of_length_1_are_kept_when_axes_specified(nxroot):
+def test_dims_of_length_1_are_kept_when_axes_specified(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
-    data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = ['xx', 'yy']
     data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions)
     loaded = data[...]
     assert sc.identical(loaded.data, signal)
     assert data['signal'].ndim == 2
     assert data['signal'].shape == (1, 1)
 
 
-def test_dims_of_length_1_are_squeezed_when_no_axes_specified(nxroot):
+def test_dims_of_length_1_are_squeezed_when_no_axes_specified(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
-    data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', signal)
     data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions)
     loaded = data[...]
     assert sc.identical(loaded.data, sc.scalar(1.1, unit='m'))
     assert data['signal'].ndim == 0
     assert data['signal'].shape == ()
 
 
-def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(nxroot):
+def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2]])
-    data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', signal)
     data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions)
     loaded = data[...]
     # Note that dimension gets renamed to `dim_0` since no axes are specified
     assert sc.identical(loaded.data,
