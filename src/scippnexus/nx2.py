@@ -308,13 +308,6 @@ class NXobject:
         # exclude geometry/tansform groups?
         return sc.DataGroup(self._group).sizes
 
-    #def field_sizes(self, name: str, field: Field) -> Dict[str, int]:
-    #    shape = tuple(size for size in field.dataset.shape if size != 1)
-    #    return {f'dim_{i}': size for i, size in enumerate(shape)}
-
-    #def field_dtype(self, name: str, dataset: H5Dataset) -> sc.dtype:
-    #    return _dtype_fromdataset(dataset)
-
     def index_child(self, child: Union[Field, Group], sel: ScippIndex) -> ScippIndex:
         # Note that this will be similar in NXdata, but there we need to handle
         # bin edges as well.
@@ -544,11 +537,17 @@ class NXdata(NXobject):
             if self._signal is not None and group_dims is not None:
                 return _guess_dims(group_dims, self._signal.dataset.shape,
                                    field.dataset)
-            self._valid = False
 
         for name, field in group._children.items():
             if (dims := get_dims(name, field)) is not None:
-                field.sizes = dict(zip(dims, field.dataset.shape))
+                # The convention here is that the given dimensions apply to the shapes
+                # starting from the left. So we only squeeze dimensions that are after
+                # len(dims).
+                print(f'get_dims({name}) = {dims}')
+                shape = _squeeze_trailing(dims, field.dataset.shape)
+                field.sizes = dict(zip(dims, shape))
+            else:
+                self._valid = False
 
         return
         ################
@@ -593,15 +592,8 @@ class NXdata(NXobject):
                 #        dataset.shape[0])], )
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        return self._signal.shape
-
-    @property
     def sizes(self) -> Dict[str, int]:
-        return self._signal.sizes
-        # TODO We should only do this if we know that assembly into DataArray is possible.
-        return dict(zip(self._field_dims[self._signal_name],
-                        self.shape)) if self._valid else super().sizes
+        return self._signal.sizes if self._valid else super().sizes
 
     def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
         sizes = self.sizes
@@ -616,18 +608,6 @@ class NXdata(NXobject):
                                     sel,
                                     bin_edge_dim=self._bin_edge_dim(child))
         return child[child_sel]
-
-    def field_sizes(self, name: str, field: Field) -> Dict[str, int]:
-        dims = self._field_dims[name]
-        if dims is None:
-            dims = super().field_sizes(name, field)
-        shape = field.dataset.shape
-        if len(dims) < len(shape):
-            # The convention here is that the given dimensions apply to the shapes
-            # starting from the left. So we only squeeze dimensions that are after
-            # len(dims).
-            shape = _squeeze_trailing(dims, shape)
-        return dict(zip(dims, shape))
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
         coords = sc.DataGroup(dg)
