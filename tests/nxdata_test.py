@@ -460,22 +460,24 @@ def test_slicing_with_bin_edge_coord_returns_bin_edges(h5root):
     assert sc.identical(data['xx', 1:1], da['xx', 1:1])  # empty slice
 
 
-def test_legacy_signal_attr_is_used(nxroot):
+def test_legacy_signal_attr_is_used(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = signal.dims
-    field = data.create_field('mysig', signal)
+    field = snx.create_field(data, 'mysig', signal)
     field.attrs['signal'] = 1  # legacy way of defining signal
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], sc.DataArray(signal))
 
 
-def test_invalid_group_signal_attribute_is_ignored(nxroot):
+def test_invalid_group_signal_attribute_is_ignored(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
-    field = data.create_field('mysig', signal)
+    field = snx.create_field(data, 'mysig', signal)
     field.attrs['signal'] = 1  # legacy way of defining signal
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], sc.DataArray(signal))
 
 

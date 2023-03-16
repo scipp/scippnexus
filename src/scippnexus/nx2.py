@@ -441,7 +441,7 @@ class NXdata(NXobject):
         # Can we just set field dims here?
         self._signal_name = None
         self._signal = None
-        if (name := group.attrs.get('signal')) is not None:
+        if (name := group.attrs.get('signal')) is not None and name in group._children:
             self._signal_name = name
             self._signal = group._children[name]
         else:
@@ -647,7 +647,8 @@ base_definitions = {}
 base_definitions['NXdata'] = NXdata
 
 
-def create_field(group: H5Group, name: str, data: DimensionedArray, **kwargs):
+def create_field(group: H5Group, name: str, data: DimensionedArray,
+                 **kwargs) -> H5Dataset:
     if not isinstance(data, sc.Variable):
         return group.create_dataset(name, data=data, **kwargs)
     values = data.values
@@ -661,6 +662,7 @@ def create_field(group: H5Group, name: str, data: DimensionedArray, **kwargs):
         dataset.attrs['units'] = str(data.unit)
     if data.dtype == sc.DType.datetime64:
         dataset.attrs['start'] = str(start.value)
+    return dataset
 
 
 def create_class(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Group:
