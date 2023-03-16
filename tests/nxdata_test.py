@@ -133,59 +133,64 @@ def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(h5root):
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'yy2', da.coords['yy2'])
     data = snx.Group(data, definitions=snx.base_definitions)
+    assert set(data.dims) == {'dim_0', 'xx', 'yy'}
     dg = data[...]
     assert isinstance(dg, sc.DataGroup)
     assert 'yy2' in dg
     assert set(dg.dims) == {'dim_0', 'xx', 'yy'}
 
 
-def test_guesses_transposed_dims_for_2d_coord(nxroot):
+def test_guesses_transposed_dims_for_2d_coord(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx2'] = sc.transpose(da.data)
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('xx2', da.coords['xx2'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
 
 @pytest.mark.parametrize("indices", [1, [1]], ids=['int', 'list-of-int'])
-def test_indices_attribute_for_coord(nxroot, indices):
+def test_indices_attribute_for_coord(h5root, indices):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     da.coords['yy2'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.attrs['yy2_indices'] = indices
-    data.create_field('signal', da.data)
-    data.create_field('yy2', da.coords['yy2'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'yy2', da.coords['yy2'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
 
 @pytest.mark.parametrize("indices", [1, [1]], ids=['int', 'list-of-int'])
-def test_indices_attribute_for_coord_with_nontrivial_slice(nxroot, indices):
+def test_indices_attribute_for_coord_with_nontrivial_slice(h5root, indices):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     da.coords['yy2'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.attrs['yy2_indices'] = indices
-    data.create_field('signal', da.data)
-    data.create_field('yy2', da.coords['yy2'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'yy2', da.coords['yy2'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data['yy', :1], da['yy', :1])
 
 
-def test_transpose_indices_attribute_for_coord(nxroot):
+def test_transpose_indices_attribute_for_coord(h5root):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     da.coords['xx2'] = sc.transpose(da.data)
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.attrs['xx2_indices'] = [1, 0]
-    data.create_field('signal', da.data)
-    data.create_field('xx2', da.coords['xx2'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
 
@@ -205,19 +210,20 @@ def test_auxiliary_signal_is_not_loaded_as_coord(nxroot):
     assert sc.identical(data[...], da)
 
 
-def test_field_dims_match_NXdata_dims(nxroot):
+def test_field_dims_match_NXdata_dims(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal1'
-    data.create_field('signal1', da.data)
-    data.create_field('xx', da.coords['xx'])
-    data.create_field('xx2', da.coords['xx2'])
-    data.create_field('yy', da.coords['yy'])
+    snx.create_field(data, 'signal1', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    snx.create_field(data, 'yy', da.coords['yy'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data['xx', :2].data, data['signal1']['xx', :2])
     assert sc.identical(data['xx', :2].coords['xx'], data['xx']['xx', :2])
     assert sc.identical(data['xx', :2].coords['xx2'], data['xx2']['xx', :2])
@@ -244,34 +250,37 @@ def test_field_dims_match_NXdata_dims_when_selected_via_class_name(nxroot):
     assert fields['yy'].dims == ('yy', )
 
 
-def test_uses_default_field_dims_if_inference_fails(nxroot):
+def test_uses_default_field_dims_if_inference_fails(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['yy2'] = sc.arange('yy', 4)
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field('yy2', da.coords['yy2'])
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'yy2', da.coords['yy2'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     dg = data[()]
     assert sc.identical(dg['yy2'], da.coords['yy2'].rename(yy='dim_0'))
     assert sc.identical(data['yy2'][()], da.coords['yy2'].rename(yy='dim_0'))
 
 
 @pytest.mark.parametrize("unit", ['m', 's', None])
-def test_create_field_from_variable(nxroot, unit):
+def test_create_field_from_variable(h5root, unit):
     var = sc.array(dims=['xx'], unit=unit, values=[3, 4])
-    nxroot.create_field('field', var)
-    loaded = nxroot['field'][...]
+    snx.create_field(h5root, 'field', var)
+    group = snx.Group(h5root, definitions=snx.base_definitions)
+    loaded = group['field'][...]
     # Nexus does not support storing dim labels
     assert sc.identical(loaded, var.rename(xx=loaded.dim))
 
 
-def test_create_datetime_field_from_variable(nxroot):
+def test_create_datetime_field_from_variable(h5root):
     var = sc.datetime(np.datetime64('now'), unit='ns') + sc.arange(
         'time', 1, 4, dtype='int64', unit='ns')
-    nxroot.create_field('field', var)
-    loaded = nxroot['field'][...]
+    snx.create_field(h5root, 'field', var)
+    group = snx.Group(h5root, definitions=snx.base_definitions)
+    loaded = group['field'][...]
     # Nexus does not support storing dim labels
     assert sc.identical(loaded, var.rename(time=loaded.dim))
 
@@ -284,20 +293,21 @@ def test_create_class(nxroot, nx_class):
 
 @pytest.mark.parametrize("errors_suffix", ['_error', '_errors'])
 def test_field_matching_errors_regex_is_loaded_if_no_corresponding_value_field(
-        nxroot, errors_suffix):
+        h5root, errors_suffix):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords[f'xx{errors_suffix}'] = da.data['yy', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_field('signal', da.data)
-    data.create_field(f'xx{errors_suffix}', da.coords[f'xx{errors_suffix}'])
+    snx.create_field(data,'signal', da.data)
+    snx.create_field(data,f'xx{errors_suffix}', da.coords[f'xx{errors_suffix}'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
 
 @pytest.mark.parametrize("errors_suffix", ['_error', '_errors'])
-def test_uncertainties_of_coords_are_loaded(nxroot, errors_suffix):
+def test_uncertainties_of_coords_are_loaded(h5root, errors_suffix):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = sc.array(dims=['xx'],
@@ -311,28 +321,31 @@ def test_uncertainties_of_coords_are_loaded(nxroot, errors_suffix):
                                 variances=[4, 9],
                                 dtype='float64')
     da.coords['scalar'] = sc.scalar(value=1.2, variance=4.0, unit='K')
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     data.attrs['xx2_indices'] = 0
-    data.create_field('signal', da.data)
-    data.create_field('xx', sc.values(da.coords['xx']))
-    data.create_field(f'xx{errors_suffix}', sc.stddevs(da.coords['xx']))
-    data.create_field('xx2', sc.values(da.coords['xx2']))
-    data.create_field(f'xx2{errors_suffix}', sc.stddevs(da.coords['xx2']))
-    data.create_field('scalar', sc.values(da.coords['scalar']))
-    data.create_field(f'scalar{errors_suffix}', sc.stddevs(da.coords['scalar']))
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', sc.values(da.coords['xx']))
+    snx.create_field(data, f'xx{errors_suffix}', sc.stddevs(da.coords['xx']))
+    snx.create_field(data, 'xx2', sc.values(da.coords['xx2']))
+    snx.create_field(data, f'xx2{errors_suffix}', sc.stddevs(da.coords['xx2']))
+    snx.create_field(data, 'scalar', sc.values(da.coords['scalar']))
+    snx.create_field(data, f'scalar{errors_suffix}', sc.stddevs(da.coords['scalar']))
+    data = snx.Group(data, definitions=snx.base_definitions)
+    print(data[...], da)
     assert sc.identical(data[...], da)
 
 
-def test_unnamed_extra_dims_of_coords_are_squeezed(nxroot):
+def test_unnamed_extra_dims_of_coords_are_squeezed(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
-    data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
     # shape=[1]
-    data.create_field('scalar', sc.array(dims=['ignored'], values=[1.2]))
+    snx.create_field(data, 'scalar', sc.array(dims=['ignored'], values=[1.2]))
+    data = snx.Group(data, definitions=snx.base_definitions)
     loaded = data[...]
     assert sc.identical(loaded.coords['scalar'], sc.scalar(1.2))
     assert data['scalar'].ndim == 0
@@ -340,15 +353,16 @@ def test_unnamed_extra_dims_of_coords_are_squeezed(nxroot):
     assert sc.identical(data['scalar'][...], sc.scalar(1.2))
 
 
-def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(nxroot):
+def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(h5root):
     signal = sc.array(dims=['xx'], unit='m', values=[1.1, 2.2])
-    data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
     # shape=[2,1]
     xx = sc.array(dims=['xx', 'ignored'], values=[[1.1], [2.2]])
-    data.create_field('xx', xx)
+    snx.create_field(data, 'xx', xx)
+    data = snx.Group(data, definitions=snx.base_definitions)
     loaded = data[...]
     assert sc.identical(loaded.coords['xx'], xx['ignored', 0])
     assert data['xx'].ndim == 1

@@ -58,7 +58,7 @@ def is_dataset(obj: Union[H5Group, H5Dataset]) -> bool:
 def _is_time(obj):
     if (unit := obj.unit) is None:
         return False
-    return unit.to_dict().get('powers') == {'time': 1}
+    return unit.to_dict().get('powers') == {'s': 1}
 
 
 def _as_datetime(obj: Any):
@@ -350,14 +350,14 @@ class Group(Mapping):
             Field(obj) if is_dataset(obj) else Group(obj, definitions=self._definitions)
             for name, obj in self._group.items()
         }
-        suffix = '_errors'
-        field_with_errors = [name for name in items if f'{name}{suffix}' in items]
-        for name in field_with_errors:
-            values = items[name]
-            errors = items[f'{name}{suffix}']
-            if values.unit == errors.unit and values.shape == errors.shape:
-                values.errors = errors.dataset
-                del items[f'{name}{suffix}']
+        for suffix in ('_errors', '_error'):
+            field_with_errors = [name for name in items if f'{name}{suffix}' in items]
+            for name in field_with_errors:
+                values = items[name]
+                errors = items[f'{name}{suffix}']
+                if values.unit == errors.unit and values.dataset.shape == errors.dataset.shape:
+                    values.errors = errors.dataset
+                    del items[f'{name}{suffix}']
         return items
 
     @cached_property
@@ -404,8 +404,18 @@ class NXdata(NXobject):
 
     def __init__(self, group: Group):
         super().__init__(group)
+        # Must do full consistency check here, to define self.sizes:
+        # - squeeze correctly
+        # - check if coord dims are compatible with signal dims
+        # - check if there is a signal
+        # If not the case, fall back do DataGroup.sizes
+        # Can we just set field dims here?
         self._signal = group.attrs['signal']
-        self._dims = tuple(group.attrs['axes'])
+        if (axes := group.attrs.get('axes')) is not None:
+            self._dims = tuple(axes)
+        else:
+            self._dims = tuple(super().field_sizes(self._signal,
+                                                   group._children[self._signal]))
         indices_suffix = '_indices'
         indices_attrs = {
             key[:-len(indices_suffix)]: attr
@@ -417,13 +427,26 @@ class NXdata(NXobject):
             key: tuple(dims[np.array(indices).flatten()])
             for key, indices in indices_attrs.items()
         }
+        self._valid = True
         for name, dataset in group._group.items():
             if name not in self._coord_dims:
                 # TODO handle squeezing
                 if dataset.shape == ():
                     self._coord_dims[name] = ()
-                elif (dims := self._guess_dims(name, dataset)) is not None:
-                    self._coord_dims[name] = dims
+                elif name in self._dims:
+                    # If there are named axes then items of same name are "dimension
+                    # coordinates", i.e., have a dim matching their name.
+                    # However, if the item is not 1-D we need more labels. Try to use labels of
+                    # signal if dimensionality matches.
+                    if dataset.ndim == len(dims):
+                        self._coord_dims[name] = self._dims
+                    else:
+                        self._coord_dims[name] = (name, )
+                elif (field_dims := self._guess_dims(name, dataset)) is not None:
+                    self._coord_dims[name] = field_dims
+                else:
+                    self._valid = False
+
                 #elif name in dims:
                 #    self._coord_dims[name] = (name, )
                 #elif dataset.shape == group._group[self._signal].shape:
@@ -458,7 +481,7 @@ class NXdata(NXobject):
     @property
     def sizes(self) -> Dict[str, int]:
         # TODO We should only do this if we know that assembly into DataArray is possible.
-        return dict(zip(self._dims, self.shape))
+        return dict(zip(self._dims, self.shape)) if self._valid else super().sizes
 
     def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
         sizes = self.sizes
