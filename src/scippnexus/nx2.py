@@ -477,7 +477,9 @@ class NXdata(NXobject):
 
         group_dims = _get_group_dims()
 
-        if self._signal is not None:
+        if self._signal is None:
+            self._valid = False
+        else:
             if group_dims is not None:
                 shape = self._signal.dataset.shape
                 shape = _squeeze_trailing(group_dims, shape)
@@ -539,14 +541,21 @@ class NXdata(NXobject):
                                    field.dataset)
 
         for name, field in group._children.items():
-            if (dims := get_dims(name, field)) is not None:
+            if not isinstance(field, Field):
+                self._valid = False
+            elif (dims := get_dims(name, field)) is not None:
                 # The convention here is that the given dimensions apply to the shapes
                 # starting from the left. So we only squeeze dimensions that are after
                 # len(dims).
                 shape = _squeeze_trailing(dims, field.dataset.shape)
                 field.sizes = dict(zip(dims, shape))
-            else:
-                self._valid = False
+            elif self._valid:
+                s1 = self._signal.sizes
+                s2 = field.sizes
+                if not set(s2.keys()).issubset(set(s1.keys())):
+                    self._valid = False
+                elif any(s1[k] != s2[k] for k in s1.keys() & s2.keys()):
+                    self._valid = False
 
         return
         ################
@@ -595,6 +604,8 @@ class NXdata(NXobject):
         return self._signal.sizes if self._valid else super().sizes
 
     def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
+        if not isinstance(coord, Field):
+            return None
         sizes = self.sizes
         for dim, size in zip(coord.dims, coord.shape):
             if (sz := sizes.get(dim)) is not None and sz + 1 == size:
@@ -609,6 +620,8 @@ class NXdata(NXobject):
         return child[child_sel]
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
+        if not self._valid:
+            return super().assemble(dg)
         coords = sc.DataGroup(dg)
         signal = coords.pop(self._signal_name)
         da = sc.DataArray(data=signal)

@@ -481,36 +481,39 @@ def test_invalid_group_signal_attribute_is_ignored(h5root):
     assert sc.identical(data[...], sc.DataArray(signal))
 
 
-def test_legacy_axis_attrs_define_dim_names(nxroot):
+def test_legacy_axis_attrs_define_dim_names(h5root):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     da.coords['xx'] = da.data['yy', 0]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
-    signal = data.create_field('signal', da.data)
-    xx = data.create_field('xx', da.coords['xx'])
-    yy = data.create_field('yy', da.coords['yy'])
+    data = snx.create_class(h5root, 'data1', NXdata)
+    signal = snx.create_field(data, 'signal', da.data)
+    xx = snx.create_field(data, 'xx', da.coords['xx'])
+    yy = snx.create_field(data, 'yy', da.coords['yy'])
     signal.attrs['signal'] = 1
     xx.attrs['axis'] = 1
     yy.attrs['axis'] = 2
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], da)
 
 
-def test_nested_groups_trigger_fallback_to_load_as_data_group(nxroot):
+def test_nested_groups_trigger_fallback_to_load_as_data_group(h5root):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
-    data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', da.data)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', da.data)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
-    data.create_class('nested', NXdata)
+    snx.create_class(data, 'nested', NXdata)
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], sc.DataGroup(signal=da.data, nested=sc.DataGroup()))
 
 
-def test_slicing_raises_given_invalid_index(nxroot):
+def test_slicing_raises_given_invalid_index(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2], [3.3, 4.4]])
-    data = nxroot.create_class('data1', NXdata)
-    data.create_field('signal', signal)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions)
     assert sc.identical(data[...], sc.DataArray(signal))
     with pytest.raises(IndexError):
         data['xx', 2]
