@@ -40,6 +40,10 @@ from .typing import H5Dataset, H5Group, ScippIndex
 # - Non-legacy mode would make dim parsing simpler and faster?
 
 
+def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
+    return obj if isinstance(obj, sc.Variable) else sc.scalar(obj, unit=None)
+
+
 class NexusStructureError(Exception):
     """Invalid or unsupported class and field structure in Nexus.
     """
@@ -365,6 +369,7 @@ class Group(Mapping):
                 if values.unit == errors.unit and values.dataset.shape == errors.dataset.shape:
                     values.errors = errors.dataset
                     del items[f'{name}{suffix}']
+        items = {k: v for k, v in items.items() if not k.startswith('cue_')}
         return items
 
     @cached_property
@@ -430,7 +435,10 @@ def _guess_dims(dims, shape, dataset: H5Dataset):
 
 class NXdata(NXobject):
 
-    def __init__(self, group: Group):
+    def __init__(self,
+                 group: Group,
+                 fallback_dims: Optional[Tuple[str, ...]] = None,
+                 fallback_signal_name: Optional[str] = None):
         super().__init__(group)
         self._valid = True
         # Must do full consistency check here, to define self.sizes:
@@ -441,7 +449,9 @@ class NXdata(NXobject):
         # Can we just set field dims here?
         self._signal_name = None
         self._signal = None
-        if (name := group.attrs.get('signal')) is not None and name in group._children:
+        if (name := group.attrs.get(
+                'signal',
+                fallback_signal_name)) is not None and name in group._children:
             self._signal_name = name
             self._signal = group._children[name]
         else:
@@ -477,6 +487,9 @@ class NXdata(NXobject):
 
         group_dims = _get_group_dims()
 
+        if group_dims is None:
+            group_dims = fallback_dims
+
         if self._signal is None:
             self._valid = False
         else:
@@ -484,9 +497,6 @@ class NXdata(NXobject):
                 shape = self._signal.dataset.shape
                 shape = _squeeze_trailing(group_dims, shape)
                 self._signal.sizes = dict(zip(group_dims, shape))
-
-        # if group_dims is None:
-        #     group_dims = fallback_dims
 
         if axes is not None:
             # Unlike self.dims we *drop* entries that are '.'
@@ -625,6 +635,7 @@ class NXdata(NXobject):
         coords = sc.DataGroup(dg)
         signal = coords.pop(self._signal_name)
         da = sc.DataArray(data=signal)
+        coords = {name: asarray(coord) for name, coord in coords.items()}
         return self._add_coords(da, coords)
 
     def _dim_of_coord(self, name: str, coord: sc.Variable) -> Union[None, str]:
@@ -656,8 +667,17 @@ def _squeeze_trailing(dims: Tuple[str, ...], shape: Tuple[int, ...]) -> Tuple[in
     return shape[:len(dims)] + tuple(size for size in shape[len(dims):] if size != 1)
 
 
+class NXlog(NXdata):
+
+    def __init__(self, group: Group):
+        super().__init__(group, fallback_dims=('time', ), fallback_signal_name='value')
+        if (time := self._group._children.get('time')) is not None:
+            time._is_time = True
+
+
 base_definitions = {}
 base_definitions['NXdata'] = NXdata
+base_definitions['NXlog'] = NXlog
 
 
 def create_field(group: H5Group, name: str, data: DimensionedArray,

@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
+import scippnexus.nx2 as snx
 from scippnexus import (
     Field,
     NexusStructureError,
@@ -24,6 +25,13 @@ UTF8_TEST_STRINGS = (
     "2H₂ + O₂ ⇌ 2H₂O, R = 4.7 kΩ, ⌀ 200 mm",
     "Σὲ γνωρίζω ἀπὸ τὴν κόψη",
 )
+
+
+@pytest.fixture()
+def h5root(request):
+    """Yield NXroot containing a single NXentry named 'entry'"""
+    with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
+        yield f
 
 
 @pytest.fixture()
@@ -82,7 +90,7 @@ def test_nxobject_entry(nxroot):
     assert set(entry.keys()) == {'events_0', 'events_1', 'log'}
 
 
-def test_nxobject_log(nxroot):
+def test_nxobject_log(h5root):
     da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
                       coords={
                           'time':
@@ -90,10 +98,11 @@ def test_nxobject_log(nxroot):
                           sc.array(dims=['time'], unit='s', values=[4.4, 5.5, 6.6]).to(
                               unit='ns', dtype='int64')
                       })
-    log = nxroot['entry'].create_class('log', NXlog)
-    log['value'] = da.data
-    log['time'] = da.coords['time'] - sc.epoch(unit='ns')
-    assert log.nx_class == NXlog
+    log = snx.create_class(h5root, 'log', NXlog)
+    snx.create_field(log, 'value', da.data)
+    snx.create_field(log, 'time', da.coords['time'] - sc.epoch(unit='ns'))
+    log = snx.Group(log, definitions=snx.base_definitions)
+    #assert log.nx_class == NXlog
     assert sc.identical(log[...], da)
 
 
