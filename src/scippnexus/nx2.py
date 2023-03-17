@@ -307,7 +307,7 @@ class NXobject:
                 field.sizes = _squeezed_field_sizes(field.dataset)
                 field.dtype = _dtype_fromdataset(field.dataset)
 
-    @property
+    @cached_property
     def sizes(self) -> Dict[str, int]:
         # exclude geometry/tansform groups?
         return sc.DataGroup(self._group).sizes
@@ -609,7 +609,7 @@ class NXdata(NXobject):
                 #    self._coord_dims[name] = (dims[list(self.sizes.values()).index(
                 #        dataset.shape[0])], )
 
-    @property
+    @cached_property
     def sizes(self) -> Dict[str, int]:
         return self._signal.sizes if self._valid else super().sizes
 
