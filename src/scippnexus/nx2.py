@@ -400,8 +400,8 @@ class Group(Mapping):
         # Here this is scipp.DataGroup. Child classes like NXdata may return DataArray.
         # (not scipp.DataArray, as that does not support lazy data)
         dg = self._nexus.read_children(self, sel)
-        dg = self._nexus.pre_assemble(dg)
         try:
+            dg = self._nexus.pre_assemble(dg)
             return self._nexus.assemble(dg)
         except (sc.DimensionError, NexusStructureError):
             # TODO log warning
@@ -409,6 +409,9 @@ class Group(Mapping):
 
     # TODO It is not clear if we want to support these convenience methods
     def __setitem__(self, key, value):
+        return create_field(self._group, key, value)
+
+    def create_field(self, key: str, value: sc.Variable) -> H5Dataset:
         return create_field(self._group, key, value)
 
     def create_class(self, name, class_name: str) -> Group:

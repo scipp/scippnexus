@@ -10,7 +10,6 @@ from scippnexus import (
     NXdetector,
     NXentry,
     NXevent_data,
-    NXobject,
     NXoff_geometry,
     NXroot,
 )
@@ -25,6 +24,13 @@ def h5root(request):
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         yield f
+
+
+@pytest.fixture()
+def group(request):
+    """Yield NXroot containing a single NXentry named 'entry'"""
+    with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
+        yield make_group(f)
 
 
 @pytest.fixture()
@@ -353,31 +359,29 @@ def create_off_geometry_detector_numbers_1234(group: snx2.Group,
 
 @pytest.mark.parametrize('detid_name',
                          ['detector_number', 'pixel_id', 'spectrum_index'])
-def test_loads_data_with_coords_and_off_geometry(h5root, detid_name):
+def test_loads_data_with_coords_and_off_geometry(group, detid_name):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]]))
     da.coords['detector_number'] = detector_numbers_xx_yy_1234()
     da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
-    detector = snx2.create_class(h5root, 'detector0', NXdetector)
-    snx2.create_field(detector, detid_name, da.coords['detector_number'])
-    snx2.create_field(detector, 'xx', da.coords['xx'])
-    snx2.create_field(detector, 'data', da.data)
+    detector = group.create_class('detector0', NXdetector)
+    detector.create_field(detid_name, da.coords['detector_number'])
+    detector.create_field('xx', da.coords['xx'])
+    detector.create_field('data', da.data)
     detector.attrs['axes'] = ['xx', 'yy']
-    det = make_group(detector)
-    create_off_geometry_detector_numbers_1234(det, name='shape')
-    det = make_group(detector)
-    loaded = det[...]
+    create_off_geometry_detector_numbers_1234(detector, name='shape')
+    loaded = detector[...]
     expected = snx.nxoff_geometry.off_to_shape(
-        **det['shape'][()], detector_number=da.coords['detector_number'])
+        **detector['shape'][()], detector_number=da.coords['detector_number'])
     assert sc.identical(loaded.coords['shape'].bins.size(),
                         sc.array(dims=da.dims, values=[[1, 1], [1, 1]], unit=None))
     assert sc.identical(loaded.coords['shape'], expected)
 
 
 def test_missing_detector_numbers_triggers_fallback_given_off_geometry_with_det_faces(
-        nxroot):
+        group):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
-    detector = nxroot.create_class('detector0', NXdetector)
+    detector = group.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector.attrs['axes'] = ['xx', 'yy']
     create_off_geometry_detector_numbers_1234(detector, name='shape')
@@ -386,9 +390,9 @@ def test_missing_detector_numbers_triggers_fallback_given_off_geometry_with_det_
     assert sc.identical(loaded['shape'], detector['shape'][()])
 
 
-def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nxroot):
+def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(group):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
-    detector = nxroot.create_class('detector0', NXdetector)
+    detector = group.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector.attrs['axes'] = ['xx', 'yy']
     create_off_geometry_detector_numbers_1234(detector,
@@ -399,7 +403,7 @@ def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nx
     assert sc.identical(loaded.coords['shape'].bins.size(), sc.index(4))
 
 
-def create_cylindrical_geometry_detector_numbers_1234(group: snx.NXobject,
+def create_cylindrical_geometry_detector_numbers_1234(group: snx2.Group,
                                                       name: str,
                                                       detector_numbers: bool = True):
     shape = group.create_class(name, snx.NXcylindrical_geometry)
@@ -412,9 +416,9 @@ def create_cylindrical_geometry_detector_numbers_1234(group: snx.NXobject,
         shape['detector_number'] = sc.array(dims=['_'], values=[0, 1, 1, 0], unit=None)
 
 
-def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
+def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(group):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
-    detector = nxroot.create_class('detector0', NXdetector)
+    detector = group.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector.attrs['axes'] = ['xx', 'yy']
     create_cylindrical_geometry_detector_numbers_1234(detector,
@@ -437,9 +441,9 @@ def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
 
 
 def test_cylindrical_geometry_with_missing_parent_detector_numbers_triggers_fallback(
-        nxroot):
+        group):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
-    detector = nxroot.create_class('detector0', NXdetector)
+    detector = group.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector.attrs['axes'] = ['xx', 'yy']
     create_cylindrical_geometry_detector_numbers_1234(detector,
@@ -451,9 +455,9 @@ def test_cylindrical_geometry_with_missing_parent_detector_numbers_triggers_fall
 
 
 def test_cylindrical_geometry_with_inconsistent_detector_numbers_triggers_fallback(
-        nxroot):
+        group):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1], [3.3]])
-    detector = nxroot.create_class('detector0', NXdetector)
+    detector = group.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector.attrs['axes'] = ['xx', 'yy']
     detector.create_field('detector_numbers',
@@ -466,9 +470,9 @@ def test_cylindrical_geometry_with_inconsistent_detector_numbers_triggers_fallba
     assert isinstance(loaded['shape'], sc.DataGroup)
 
 
-def test_cylindrical_geometry_with_detector_numbers(nxroot):
+def test_cylindrical_geometry_with_detector_numbers(group):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
-    detector = nxroot.create_class('detector0', NXdetector)
+    detector = group.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector.attrs['axes'] = ['xx', 'yy']
     detector_number = sc.array(dims=var.dims, values=[[1, 2], [3, 4]], unit=None)
