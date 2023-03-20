@@ -302,10 +302,15 @@ class NXobject:
 
     def __init__(self, group: Group):
         self._group = group
-        for field in group._children.values():
+        self._special_fields = []
+        for name, field in group._children.items():
             if isinstance(field, Field):
                 field.sizes = _squeezed_field_sizes(field.dataset)
                 field.dtype = _dtype_fromdataset(field.dataset)
+            elif (nx_class := field.attrs.get('NX_class')) in [
+                    'NXoff_geometry',
+            ]:
+                self._special_fields.append(name)
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
@@ -322,6 +327,18 @@ class NXobject:
         return sc.DataGroup(
             {name: self.index_child(child, sel)
              for name, child in obj.items()})
+
+    @property
+    def detector_number(self) -> Optional[str]:
+        return None
+
+    def pre_assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
+        for name in self._special_fields:
+            from .nxoff_geometry import off_to_shape
+            detector_number = dg.get(self.detector_number)
+            dg[name] = off_to_shape(**dg[name], detector_number=detector_number)
+        #print(list(dg.items()))
+        return dg
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
         return dg
@@ -379,12 +396,6 @@ class Group(Mapping):
     def _populate_fields(self) -> None:
         _ = self._nexus
 
-    def _populate_field(self, name: str, field: Field) -> None:
-        if field.sizes is not None:
-            return
-        field.sizes = self._nexus.field_sizes(name, field)
-        field.dtype = self._nexus.field_dtype(name, field.dataset)
-
     def __len__(self) -> int:
         return len(self._children)
 
@@ -396,12 +407,11 @@ class Group(Mapping):
             child = self._children[sel]
             if isinstance(child, Field):
                 self._populate_fields()
-                #self._populate_field(sel, child)
             return child
         # Here this is scipp.DataGroup. Child classes like NXdata may return DataArray.
         # (not scipp.DataArray, as that does not support lazy data)
         dg = self._nexus.read_children(self, sel)
-        # TODO assemble geometry/transforms/events
+        dg = self._nexus.pre_assemble(dg)
         try:
             return self._nexus.assemble(dg)
         except (sc.DimensionError, NexusStructureError) as e:
@@ -552,7 +562,8 @@ class NXdata(NXobject):
 
         for name, field in group._children.items():
             if not isinstance(field, Field):
-                self._valid = False
+                if name not in self._special_fields:
+                    self._valid = False
             elif (dims := get_dims(name, field)) is not None:
                 # The convention here is that the given dimensions apply to the shapes
                 # starting from the left. So we only squeeze dimensions that are after
@@ -679,6 +690,12 @@ class NXdetector(NXdata):
 
     def __init__(self, group: Group):
         super().__init__(group, fallback_signal_name='data')
+
+    @property
+    def detector_number(self) -> Optional[str]:
+        for name in ['detector_number', 'pixel_id', 'spectrum_index']:
+            if name in self._group:
+                return name
 
 
 base_definitions = {}
