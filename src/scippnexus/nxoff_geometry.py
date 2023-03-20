@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Optional, Tuple, Union
+from typing import Optional
 
 import scipp as sc
 
@@ -59,17 +59,9 @@ class NXoff_geometry(NXobject):
         super().__init__(group)
         for name, field in group._children.items():
             if isinstance(field, Field):
-                field.sizes = dict(zip(self._get_field_dims(name), field.dataset.shape))
-                if (dtype := self._get_field_dtype(name)) is not None:
-                    field.dtype = dtype
-
-    def _get_field_dims(self, name: str) -> Union[None, Tuple[str]]:
-        return self._dims.get(name)
-
-    def _get_field_dtype(self, name: str) -> Union[None, sc.DType]:
-        if name == 'vertices':
-            return sc.DType.vector3
-        return None
+                field.sizes = dict(zip(self._dims.get(name), field.dataset.shape))
+                if name == 'vertices':
+                    field.dtype = sc.DType.vector3
 
     def load_as_array(self,
                       detector_number: Optional[sc.Variable] = None) -> sc.Variable:

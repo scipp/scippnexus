@@ -295,6 +295,7 @@ class NXobject:
                 field.dtype = _dtype_fromdataset(field.dataset)
             elif field.attrs.get('NX_class') in [
                     'NXoff_geometry',
+                    'NXcylindrical_geometry',
                     'NXgeometry',
             ]:
                 self._special_fields[name] = field
@@ -405,6 +406,17 @@ class Group(Mapping):
         except (sc.DimensionError, NexusStructureError):
             # TODO log warning
             return dg
+
+    # TODO It is not clear if we want to support these convenience methods
+    def __setitem__(self, key, value):
+        return create_field(self._group, key, value)
+
+    def create_class(self, name, class_name: str) -> Group:
+        return Group(create_class(self._group, name, class_name),
+                     definitions=self._definitions)
+
+    def rebuild(self) -> Group:
+        return Group(self._group, definitions=self._definitions)
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
