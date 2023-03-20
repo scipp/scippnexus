@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 
 import numpy as np
 import scipp as sc
@@ -10,7 +10,6 @@ from ._common import to_plain_index
 from .nx2 import (
     Field,
     Group,
-    H5Dataset,
     NexusStructureError,
     NXobject,
     ScippIndex,
@@ -28,29 +27,15 @@ def _check_for_missing_fields(fields):
                 f"Required field {field} not found in NXevent_data")
 
 
-class _NXevent_data(Group):
-    _field_names = [
-        'event_time_zero', 'event_index', 'event_time_offset', 'event_id',
-        'cue_timestamp_zero', 'cue_index', 'pulse_height'
-    ]
-
-    #@staticmethod
-    #def _make_class_info(info: GroupContentInfo) -> NXobjectInfo:
-    #    """Create info object for this NeXus class."""
-    #    children = {}
-    #    for name in NXevent_data._field_names:
-    #        if (di := info.datasets.pop(name, None)) is not None:
-    #            children[name] = FieldInfo(values=di.value,
-    #                                       dims=NXevent_data._get_field_dims(name))
-    #    return NXobjectInfo(children=children)
-
-    @property
-    def unit(self) -> None:
-        # Binned data, bins do not have a unit
-        return None
-
-
 class NXevent_data(NXobject):
+
+    def __init__(self, group: Group):
+        super().__init__(group)
+        for name, field in group._children.items():
+            if name in ['event_time_zero', 'event_index']:
+                field.sizes = {_pulse_dimension: field.dataset.shape[0]}
+            elif name in ['event_time_offset', 'event_id']:
+                field.sizes = {_event_dimension: field.dataset.shape[0]}
 
     @property
     def shape(self) -> Tuple[int]:
@@ -93,6 +78,8 @@ class NXevent_data(NXobject):
             start, stop, stride = index.indices(max_index)
             if stop + stride > max_index:
                 last_loaded = False
+            elif start == stop:
+                last_loaded = True
             else:
                 stop += stride
                 last_loaded = True
@@ -120,7 +107,7 @@ class NXevent_data(NXobject):
         event_time_offset = children['event_time_offset'][event_select]
 
         event_index = sc.array(dims=[_pulse_dimension],
-                               values=event_index,
+                               values=event_index[:-1] if last_loaded else event_index,
                                dtype=sc.DType.int64,
                                unit=None)
 
@@ -133,7 +120,7 @@ class NXevent_data(NXobject):
             dg['event_id'] = event_id
         return dg
 
-    def assemble(self, children: sc.DataGroup) -> sc.DataGroup:
+    def assemble(self, children: sc.DataGroup) -> sc.DataArray:
         _check_for_missing_fields(children)
         event_time_offset = children['event_time_offset']
         event_time_zero = children['event_time_zero']

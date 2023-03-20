@@ -403,7 +403,8 @@ class Group(Mapping):
         try:
             dg = self._nexus.pre_assemble(dg)
             return self._nexus.assemble(dg)
-        except (sc.DimensionError, NexusStructureError):
+        except (sc.DimensionError, NexusStructureError) as e:
+            print(e)
             # TODO log warning
             return dg
 
