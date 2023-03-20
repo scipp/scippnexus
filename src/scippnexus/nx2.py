@@ -9,7 +9,7 @@ import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Any, Dict, Iterator, Optional, Protocol, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Protocol, Tuple, Union
 
 import dateutil.parser
 import numpy as np
@@ -430,6 +430,10 @@ class Group(Mapping):
     def dims(self) -> Tuple[str, ...]:
         return tuple(self.sizes)
 
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return tuple(self.sizes.values())
+
 
 def _guess_dims(dims, shape, dataset: H5Dataset):
     """Guess dims of non-signal dataset based on shape.
@@ -518,8 +522,8 @@ class NXdata(NXobject):
             named_axes = [a for a in axes if a != '.']
         elif signal_axes is not None:
             named_axes = signal_axes.split(',')
-        # elif fallback_dims is not None:
-        #     named_axes = fallback_dims
+        elif fallback_dims is not None:
+            named_axes = fallback_dims
         else:
             named_axes = []
 
@@ -648,14 +652,15 @@ class NXlog(NXdata):
 
 
 class NXdetector(NXdata):
+    _detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
     def __init__(self, group: Group):
         super().__init__(group, fallback_signal_name='data')
 
     @property
     def detector_number(self) -> Optional[str]:
-        for name in ['detector_number', 'pixel_id', 'spectrum_index']:
-            if name in self._group:
+        for name in self._detector_number_fields:
+            if name in self._group._children:
                 return name
 
 
@@ -710,3 +715,54 @@ def create_class(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Gro
     attr = nx_class if isinstance(nx_class, str) else nx_class.__name__
     group.attrs['NX_class'] = attr
     return group
+
+
+def _group_events(*,
+                  event_data: sc.DataArray,
+                  grouping: Optional[sc.Variable] = None) -> sc.DataArray:
+    if isinstance(event_data, sc.DataGroup):
+        raise NexusStructureError("Invalid NXevent_data in NXdetector.")
+    if grouping is None:
+        event_id = 'event_id'
+    else:
+        # copy since sc.bin cannot deal with a non-contiguous view
+        event_id = grouping.flatten(to='event_id').copy()
+    event_data.bins.coords['event_time_zero'] = sc.bins_like(
+        event_data, fill_value=event_data.coords['event_time_zero'])
+    # After loading raw NXevent_data it is guaranteed that the event table
+    # is contiguous and that there is no masking. We can therefore use the
+    # more efficient approach of binning from scratch instead of erasing the
+    # 'event_time_zero' binning defined by NXevent_data.
+    event_data = event_data.bins.constituents['data'].group(event_id)
+    # if self._grouping is None:
+    #     event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
+    # else:
+    #     del event_data.coords['event_id']
+    if grouping is None:
+        return event_data
+    return event_data.fold(dim='event_id', sizes=grouping.sizes)
+
+
+def _find_event_entries(dg: sc.DataGroup) -> List[str]:
+    event_entries = []
+    for name, value in dg.items():
+        if isinstance(
+                value, sc.DataArray
+        ) and 'event_time_zero' in value.coords and value.bins is not None:
+            event_entries.append(name)
+    return event_entries
+
+
+def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
+    event_entry = _find_event_entries(dg)[0]
+    events = dg.pop(event_entry)
+    grouping_key = None
+    for key in NXdetector._detector_number_fields:
+        if (grouping := dg.get(key)) is not None:
+            grouping_key = key
+            break
+    grouping = None if grouping_key is None else asarray(dg.pop(grouping_key))
+    da = _group_events(event_data=events, grouping=grouping)
+    # TODO What about _coord_to_attr mapping as NXdata?
+    da.coords.update(dg)
+    return da

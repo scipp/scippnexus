@@ -102,7 +102,6 @@ def test_nxobject_log(h5root):
     snx.create_field(log, 'value', da.data)
     snx.create_field(log, 'time', da.coords['time'] - sc.epoch(unit='ns'))
     log = snx.Group(log, definitions=snx.base_definitions)
-    #assert log.nx_class == NXlog
     assert sc.identical(log[...], da)
 
 
@@ -115,7 +114,8 @@ def test_nxlog_with_missing_value_triggers_fallback(nxroot):
     assert sc.identical(loaded, sc.DataGroup(time=time.rename(time='dim_0')))
 
 
-def test_nxlog_length_1(nxroot):
+def test_nxlog_length_1(h5root):
+    nxroot = snx.Group(h5root, definitions=snx.base_definitions)
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1]),
         coords={
@@ -123,10 +123,10 @@ def test_nxlog_length_1(nxroot):
             sc.epoch(unit='ns') +
             sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
         })
-    log = nxroot['entry'].create_class('log', NXlog)
+    log = nxroot.create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
-    assert log.nx_class == NXlog
+    log = log.rebuild()
     assert sc.identical(log[...], da)
 
 
