@@ -655,10 +655,10 @@ class NXdata(NXobject):
 
     def _add_coords(self, da: sc.DataArray, coords: sc.DataGroup) -> sc.DataArray:
         da.coords.update(coords)
-        for name, coord in coords.items():
+        for name in coords:
             #if name not in self:
             #    continue
-            if self._coord_to_attr(da, name, coord):
+            if self._coord_to_attr(da, name, self._group[name]):
                 da.attrs[name] = da.coords.pop(name)
         return da
 
@@ -675,9 +675,16 @@ class NXlog(NXdata):
             time._is_time = True
 
 
+class NXdetector(NXdata):
+
+    def __init__(self, group: Group):
+        super().__init__(group, fallback_signal_name='data')
+
+
 base_definitions = {}
 base_definitions['NXdata'] = NXdata
 base_definitions['NXlog'] = NXlog
+base_definitions['NXdetector'] = NXdetector
 
 
 def create_field(group: H5Group, name: str, data: DimensionedArray,

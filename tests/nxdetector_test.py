@@ -4,6 +4,7 @@ import pytest
 import scipp as sc
 
 import scippnexus as snx
+import scippnexus.nx2 as snx2
 from scippnexus import (
     NexusStructureError,
     NXdetector,
@@ -13,6 +14,17 @@ from scippnexus import (
     NXoff_geometry,
     NXroot,
 )
+
+
+def make_group(group: h5py.Group) -> snx2.Group:
+    return snx2.Group(group, definitions=snx2.base_definitions)
+
+
+@pytest.fixture()
+def h5root(request):
+    """Yield NXroot containing a single NXentry named 'entry'"""
+    with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
+        yield f
 
 
 @pytest.fixture()
@@ -33,21 +45,23 @@ def test_warns_if_no_data_found(nxroot):
     assert isinstance(dg, sc.DataGroup)
 
 
-def test_can_load_fields_if_no_data_found(nxroot):
+def test_can_load_fields_if_no_data_found(h5root):
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
-    detector = nxroot.create_class('detector0', NXdetector)
-    detector.create_field('detector_numbers', detector_numbers)
+    detector = snx2.create_class(h5root, 'detector0', NXdetector)
+    snx2.create_field(detector, 'detector_numbers', detector_numbers)
     detector['detector_numbers'][...]
 
 
-def test_finds_data_from_group_attr(nxroot):
+def test_finds_data_from_group_attr(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]]))
     da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
-    detector = nxroot.create_class('detector0', NXdetector)
-    detector.create_field('detector_numbers', da.coords['detector_numbers'])
-    detector.create_field('custom', da.data)
+    detector = snx2.create_class(h5root, 'detector0', NXdetector)
+    snx2.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx2.create_field(detector, 'custom', da.data)
     detector.attrs['signal'] = 'custom'
+    detector = make_group(detector)
+    print(detector[...])
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 
@@ -72,23 +86,25 @@ def detector_numbers_xx_yy_1234():
     return sc.array(dims=['xx', 'yy'], unit=None, values=np.array([[1, 2], [3, 4]]))
 
 
-def test_loads_data_without_coords(nxroot):
+def test_loads_data_without_coords(h5root):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], values=[[1.1, 2.2], [3.3, 4.4]]))
     da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
-    detector = nxroot.create_class('detector0', NXdetector)
-    detector.create_field('detector_numbers', da.coords['detector_numbers'])
-    detector.create_field('data', da.data)
+    detector = snx2.create_class(h5root, 'detector0', NXdetector)
+    snx2.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx2.create_field(detector, 'data', da.data)
+    detector = make_group(detector)
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 
 @pytest.mark.parametrize('detector_number_key',
                          ['detector_number', 'pixel_id', 'spectrum_index'])
-def test_detector_number_key_alias(nxroot, detector_number_key):
+def test_detector_number_key_alias(h5root, detector_number_key):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], values=[[1.1, 2.2], [3.3, 4.4]]))
     da.coords[detector_number_key] = detector_numbers_xx_yy_1234()
-    detector = nxroot.create_class('detector0', NXdetector)
-    detector.create_field(detector_number_key, da.coords[detector_number_key])
-    detector.create_field('data', da.data)
+    detector = snx2.create_class(h5root, 'detector0', NXdetector)
+    snx2.create_field(detector, detector_number_key, da.coords[detector_number_key])
+    snx2.create_field(detector, 'data', da.data)
+    detector = make_group(detector)
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 
@@ -102,20 +118,21 @@ def test_select_events_raises_if_detector_contains_data(nxroot):
         detector.select_events
 
 
-def test_loads_data_with_coords(nxroot):
+def test_loads_data_with_coords(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]]))
     da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
     da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
-    detector = nxroot.create_class('detector0', NXdetector)
-    detector.create_field('detector_numbers', da.coords['detector_numbers'])
-    detector.create_field('xx', da.coords['xx'])
-    detector.create_field('data', da.data)
+    detector = snx2.create_class(h5root, 'detector0', NXdetector)
+    snx2.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx2.create_field(detector, 'xx', da.coords['xx'])
+    snx2.create_field(detector, 'data', da.data)
     detector.attrs['axes'] = ['xx', '.']
+    detector = make_group(detector)
     assert sc.identical(detector[...], da.rename_dims({'yy': 'dim_1'}))
 
 
-def test_slicing_works_as_in_scipp(nxroot):
+def test_slicing_works_as_in_scipp(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2, 3.3], [3.3, 4.4,
                                                                         5.5]]))
@@ -128,15 +145,16 @@ def test_slicing_works_as_in_scipp(nxroot):
     da.coords['2d_edges'] = sc.array(dims=['yy', 'xx'],
                                      unit='m',
                                      values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-    detector = nxroot.create_class('detector0', NXdetector)
-    detector.create_field('detector_numbers', da.coords['detector_numbers'])
-    detector.create_field('xx', da.coords['xx'])
-    detector.create_field('xx2', da.coords['xx2'])
-    detector.create_field('yy', da.coords['yy'])
-    detector.create_field('2d_edges', da.coords['2d_edges'])
-    detector.create_field('data', da.data)
+    detector = snx2.create_class(h5root, 'detector0', NXdetector)
+    snx2.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx2.create_field(detector, 'xx', da.coords['xx'])
+    snx2.create_field(detector, 'xx2', da.coords['xx2'])
+    snx2.create_field(detector, 'yy', da.coords['yy'])
+    snx2.create_field(detector, '2d_edges', da.coords['2d_edges'])
+    snx2.create_field(detector, 'data', da.data)
     detector.attrs['axes'] = ['xx', 'yy']
     detector.attrs['2d_edges_indices'] = [1, 0]
+    detector = make_group(detector)
     assert sc.identical(detector[...], da)
     assert sc.identical(detector['xx', 0], da['xx', 0])
     assert sc.identical(detector['xx', 1], da['xx', 1])
@@ -315,7 +333,7 @@ def test_nxevent_data_selection_yields_correct_pulses(nxroot):
     assert np.array_equal(Load()['pulse', :-2], [3, 0])
 
 
-def create_off_geometry_detector_numbers_1234(group: NXobject,
+def create_off_geometry_detector_numbers_1234(group: snx2.Group,
                                               name: str,
                                               detector_faces: bool = True):
     off = group.create_class(name, NXoff_geometry)
@@ -335,20 +353,22 @@ def create_off_geometry_detector_numbers_1234(group: NXobject,
 
 @pytest.mark.parametrize('detid_name',
                          ['detector_number', 'pixel_id', 'spectrum_index'])
-def test_loads_data_with_coords_and_off_geometry(nxroot, detid_name):
+def test_loads_data_with_coords_and_off_geometry(h5root, detid_name):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]]))
     da.coords['detector_number'] = detector_numbers_xx_yy_1234()
     da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
-    detector = nxroot.create_class('detector0', NXdetector)
-    detector.create_field(detid_name, da.coords['detector_number'])
-    detector.create_field('xx', da.coords['xx'])
-    detector.create_field('data', da.data)
+    detector = snx2.create_class(h5root, 'detector0', NXdetector)
+    snx2.create_field(detector, detid_name, da.coords['detector_number'])
+    snx2.create_field(detector, 'xx', da.coords['xx'])
+    snx2.create_field(detector, 'data', da.data)
     detector.attrs['axes'] = ['xx', 'yy']
-    create_off_geometry_detector_numbers_1234(detector, name='shape')
-    loaded = detector[...]
+    det = make_group(detector)
+    create_off_geometry_detector_numbers_1234(det, name='shape')
+    det = make_group(detector)
+    loaded = det[...]
     expected = snx.nxoff_geometry.off_to_shape(
-        **detector['shape'][()], detector_number=da.coords['detector_number'])
+        **det['shape'][()], detector_number=da.coords['detector_number'])
     assert sc.identical(loaded.coords['shape'].bins.size(),
                         sc.array(dims=da.dims, values=[[1, 1], [1, 1]], unit=None))
     assert sc.identical(loaded.coords['shape'], expected)

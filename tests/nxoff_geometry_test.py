@@ -3,21 +3,19 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from scippnexus import NexusStructureError, NXentry, NXoff_geometry, NXroot
-from scippnexus.nxoff_geometry import off_to_shape
+import scippnexus.nx2 as snx
+from scippnexus.nxoff_geometry import NXoff_geometry, off_to_shape
 
 
 @pytest.fixture()
-def nxroot(request):
+def group(request):
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
-        root = NXroot(f)
-        root.create_class('entry', NXentry)
-        yield root
+        yield snx.Group(f, definitions=snx.base_definitions)
 
 
-def test_vertices_loaded_as_vector3(nxroot):
-    shape = nxroot['entry'].create_class('shape', NXoff_geometry)
+def test_vertices_loaded_as_vector3(group):
+    shape = group.create_class('shape', NXoff_geometry)
     values = [[1, 2, 3], [4, 5, 6]]
     shape['vertices'] = sc.array(dims=['ignored', 'comp'], values=values, unit='mm')
     loaded = shape[()]
@@ -25,8 +23,8 @@ def test_vertices_loaded_as_vector3(nxroot):
                         sc.vectors(dims=['vertex'], values=values, unit='mm'))
 
 
-def test_field_properties(nxroot):
-    shape = nxroot['entry'].create_class('shape', NXoff_geometry)
+def test_field_properties(group):
+    shape = group.create_class('shape', NXoff_geometry)
     values = [[1, 2, 3], [4, 5, 6]]
     shape['vertices'] = sc.array(dims=['ignored', 'comp'], values=values, unit='m')
     shape['winding_order'] = sc.array(dims=['ignored'], values=[], unit=None)
@@ -39,8 +37,8 @@ def test_field_properties(nxroot):
     assert loaded['faces'].unit is None
 
 
-def test_off_to_shape_without_detector_faces_yields_scalar_shape_with_all_faces(nxroot):
-    off = nxroot['entry'].create_class('off', NXoff_geometry)
+def test_off_to_shape_without_detector_faces_yields_scalar_shape_with_all_faces(group):
+    off = group.create_class('off', NXoff_geometry)
     values = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
     off['winding_order'] = sc.array(dims=['_'], values=[0, 1, 2, 0, 2, 1], unit=None)
@@ -51,8 +49,8 @@ def test_off_to_shape_without_detector_faces_yields_scalar_shape_with_all_faces(
     assert sc.identical(shape.bins.size(), sc.index(2))
 
 
-def test_off_to_shape_raises_if_detector_faces_but_not_detector_numbers_given(nxroot):
-    off = nxroot['entry'].create_class('off', NXoff_geometry)
+def test_off_to_shape_raises_if_detector_faces_but_not_detector_numbers_given(group):
+    off = group.create_class('off', NXoff_geometry)
     values = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
     off['winding_order'] = sc.array(dims=['_'], values=[0, 1, 2, 0, 2, 1], unit=None)
@@ -63,12 +61,12 @@ def test_off_to_shape_raises_if_detector_faces_but_not_detector_numbers_given(nx
                                      values=[[0, det_num2], [1, det_num1]],
                                      unit=None)
     loaded = off[()]
-    with pytest.raises(NexusStructureError):
+    with pytest.raises(snx.NexusStructureError):
         off_to_shape(**loaded)
 
 
-def test_off_to_shape_with_single_detector_yields_1d_shape(nxroot):
-    off = nxroot['entry'].create_class('off', NXoff_geometry)
+def test_off_to_shape_with_single_detector_yields_1d_shape(group):
+    off = group.create_class('off', NXoff_geometry)
     values = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
     off['winding_order'] = sc.array(dims=['_'], values=[0, 1, 2, 0, 2, 1], unit=None)
@@ -93,8 +91,8 @@ def test_off_to_shape_with_single_detector_yields_1d_shape(nxroot):
                         sc.array(dims=['detector_number'], values=[2], unit=None))
 
 
-def test_off_to_shape_with_two_detectors_yields_1d_shape(nxroot):
-    off = nxroot['entry'].create_class('off', NXoff_geometry)
+def test_off_to_shape_with_two_detectors_yields_1d_shape(group):
+    off = group.create_class('off', NXoff_geometry)
     values = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
     off['winding_order'] = sc.array(dims=['_'], values=[0, 1, 2, 0, 2, 1], unit=None)
@@ -119,8 +117,8 @@ def test_off_to_shape_with_two_detectors_yields_1d_shape(nxroot):
                         sc.vectors(dims=['face', 'vertex'], values=[values], unit='m'))
 
 
-def test_off_to_shape_uses_order_of_provided_detector_number_param(nxroot):
-    off = nxroot['entry'].create_class('off', NXoff_geometry)
+def test_off_to_shape_uses_order_of_provided_detector_number_param(group):
+    off = group.create_class('off', NXoff_geometry)
     values = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
     off['winding_order'] = sc.array(dims=['_'], values=[0, 1, 2, 0, 2, 1], unit=None)

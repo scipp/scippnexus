@@ -5,7 +5,7 @@ from typing import Optional, Tuple, Union
 
 import scipp as sc
 
-from .nxobject import NexusStructureError, NXobject
+from .nx2 import Field, Group, NexusStructureError, NXobject, base_definitions
 
 
 def off_to_shape(*,
@@ -55,6 +55,14 @@ class NXoff_geometry(NXobject):
         'faces': ('face', )
     }
 
+    def __init__(self, group: Group):
+        super().__init__(group)
+        for name, field in group._children.items():
+            if isinstance(field, Field):
+                field.sizes = dict(zip(self._get_field_dims(name), field.dataset.shape))
+                if (dtype := self._get_field_dtype(name)) is not None:
+                    field.dtype = dtype
+
     def _get_field_dims(self, name: str) -> Union[None, Tuple[str]]:
         return self._dims.get(name)
 
@@ -66,3 +74,6 @@ class NXoff_geometry(NXobject):
     def load_as_array(self,
                       detector_number: Optional[sc.Variable] = None) -> sc.Variable:
         return off_to_shape(**self[()], detector_number=detector_number)
+
+
+base_definitions['NXoff_geometry'] = NXoff_geometry
