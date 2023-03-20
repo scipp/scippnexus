@@ -9,7 +9,7 @@ import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Any, Dict, Iterable, Iterator, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, Optional, Protocol, Tuple, Union
 
 import dateutil.parser
 import numpy as np
@@ -42,6 +42,27 @@ from .typing import H5Dataset, H5Group, ScippIndex
 
 def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
     return obj if isinstance(obj, sc.Variable) else sc.scalar(obj, unit=None)
+
+
+# TODO move into scipp
+class DimensionedArray(Protocol):
+    """
+    A multi-dimensional array with a unit and dimension labels.
+
+    Could be, e.g., a scipp.Variable or a dimple dataclass wrapping a numpy array.
+    """
+
+    @property
+    def values(self):
+        """Multi-dimensional array of values"""
+
+    @property
+    def unit(self):
+        """Physical unit of the values"""
+
+    @property
+    def dims(self) -> Tuple[str]:
+        """Dimension labels for the values"""
 
 
 class NexusStructureError(Exception):
@@ -132,41 +153,6 @@ class Field:
     @cached_property
     def attrs(self) -> Dict[str, Any]:
         return dict(self.dataset.attrs) if self.dataset.attrs else dict()
-
-    #def __init__(self,
-    #             dataset: H5Dataset,
-    #             errors: Optional[H5Dataset] = None,
-    #             *,
-    #             ancestor,
-    #             dims=None,
-    #             dtype: Optional[sc.DType] = None,
-    #             is_time=None):
-    #    self._ancestor = ancestor  # Usually the parent, but may be grandparent, etc.
-    #    self.dataset = dataset
-    #    self._errors = errors
-    #    self._dtype = _dtype_fromdataset(dataset) if dtype is None else dtype
-    #    self._shape = self.dataset.shape
-    #    if self._dtype == sc.DType.vector3:
-    #        self._shape = self._shape[:-1]
-    #    self._is_time = is_time
-    #    # NeXus treats [] and [1] interchangeably. In general this is ill-defined, but
-    #    # the best we can do appears to be squeezing unless the file provides names for
-    #    # dimensions. The shape property of this class does thus not necessarily return
-    #    # the same as the shape of the underlying dataset.
-    #    # TODO Should this logic be in FieldInfo? Or in NXdataInfo?
-    #    if dims is not None:
-    #        self._dims = tuple(dims)
-    #        if len(self._dims) < len(self._shape):
-    #            # The convention here is that the given dimensions apply to the shapes
-    #            # starting from the left. So we only squeeze dimensions that are after
-    #            # len(dims).
-    #            self._shape = self._shape[:len(self._dims)] + tuple(
-    #                size for size in self._shape[len(self._dims):] if size != 1)
-    #    elif (axes := self.attrs.get('axes')) is not None:
-    #        self._dims = tuple(axes.split(','))
-    #    else:
-    #        self._shape = tuple(size for size in self._shape if size != 1)
-    #        self._dims = tuple(f'dim_{i}' for i in range(self.ndim))
 
     @property
     def dims(self) -> Tuple[str]:
@@ -384,7 +370,8 @@ class Group(Mapping):
             for name in field_with_errors:
                 values = items[name]
                 errors = items[f'{name}{suffix}']
-                if values.unit == errors.unit and values.dataset.shape == errors.dataset.shape:
+                if (values.unit == errors.unit
+                        and values.dataset.shape == errors.dataset.shape):
                     values.errors = errors.dataset
                     del items[f'{name}{suffix}']
         items = {k: v for k, v in items.items() if not k.startswith('cue_')}
@@ -415,7 +402,8 @@ class Group(Mapping):
         dg = self._nexus.pre_assemble(dg)
         try:
             return self._nexus.assemble(dg)
-        except (sc.DimensionError, NexusStructureError) as e:
+        except (sc.DimensionError, NexusStructureError):
+            # TODO log warning
             return dg
 
     @cached_property
@@ -468,8 +456,8 @@ class NXdata(NXobject):
         else:
             # Legacy NXdata defines signal not as group attribute, but attr on dataset
             for name, field in group._children.items():
-                # What is the meaning of the attribute value? It is undocumented, we simply
-                # ignore it.
+                # What is the meaning of the attribute value? It is undocumented,
+                # we simply ignore it.
                 if 'signal' in field.attrs:
                     self._signal_name = name
                     self._signal = group._children[name]
@@ -551,8 +539,8 @@ class NXdata(NXobject):
             if name in named_axes:
                 # If there are named axes then items of same name are "dimension
                 # coordinates", i.e., have a dim matching their name.
-                # However, if the item is not 1-D we need more labels. Try to use labels of
-                # signal if dimensionality matches.
+                # However, if the item is not 1-D we need more labels. Try to use labels
+                # of signal if dimensionality matches.
                 if self._signal is not None and len(field.dataset.shape) == len(
                         self._signal.dataset.shape):
                     return group_dims
@@ -578,48 +566,6 @@ class NXdata(NXobject):
                     self._valid = False
                 elif any(s1[k] != s2[k] for k in s1.keys() & s2.keys()):
                     self._valid = False
-
-        return
-        ################
-
-        indices_suffix = '_indices'
-        indices_attrs = {
-            key[:-len(indices_suffix)]: attr
-            for key, attr in group.attrs.items() if key.endswith(indices_suffix)
-        }
-
-        dims = np.array(self._dims)
-        self._coord_dims = {
-            key: tuple(dims[np.array(indices).flatten()])
-            for key, indices in indices_attrs.items()
-        }
-        self._valid = True
-        for name, dataset in group._group.items():
-            if name not in self._coord_dims:
-                # TODO handle squeezing
-                if dataset.shape == ():
-                    self._coord_dims[name] = ()
-                elif name in self._dims:
-                    # If there are named axes then items of same name are "dimension
-                    # coordinates", i.e., have a dim matching their name.
-                    # However, if the item is not 1-D we need more labels. Try to use labels of
-                    # signal if dimensionality matches.
-                    if dataset.ndim == len(dims):
-                        self._coord_dims[name] = self._dims
-                    else:
-                        self._coord_dims[name] = (name, )
-                elif (field_dims := self._guess_dims(name, dataset)) is not None:
-                    self._coord_dims[name] = field_dims
-                else:
-                    self._valid = False
-
-                #elif name in dims:
-                #    self._coord_dims[name] = (name, )
-                #elif dataset.shape == group._group[self._signal].shape:
-                #    self._coord_dims[name] = self._dims
-                #elif len(dataset.shape) == 1:
-                #    self._coord_dims[name] = (dims[list(self.sizes.values()).index(
-                #        dataset.shape[0])], )
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
@@ -668,8 +614,6 @@ class NXdata(NXobject):
     def _add_coords(self, da: sc.DataArray, coords: sc.DataGroup) -> sc.DataArray:
         da.coords.update(coords)
         for name in coords:
-            #if name not in self:
-            #    continue
             if self._coord_to_attr(da, name, self._group[name]):
                 da.attrs[name] = da.coords.pop(name)
         return da
