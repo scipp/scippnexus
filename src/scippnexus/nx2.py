@@ -506,6 +506,13 @@ class NXdata(NXobject):
 
         group_dims = _get_group_dims()
 
+        # Reject fallback dims if they are not compatible with group dims
+        if fallback_dims is not None:
+            for field in group._children.values():
+                if len(fallback_dims) < len(field.shape):
+                    fallback_dims = None
+                    break
+
         if group_dims is None:
             group_dims = fallback_dims
 
@@ -564,7 +571,7 @@ class NXdata(NXobject):
                 if self._signal is not None and len(field.dataset.shape) == len(
                         self._signal.dataset.shape):
                     return group_dims
-                return [name]
+                return (name, )
             if self._signal is not None and group_dims is not None:
                 return _guess_dims(group_dims, self._signal.dataset.shape,
                                    field.dataset)
@@ -655,7 +662,9 @@ class NXdetector(NXdata):
     _detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
     def __init__(self, group: Group):
-        super().__init__(group, fallback_signal_name='data')
+        super().__init__(group,
+                         fallback_dims=('detector_number', ),
+                         fallback_signal_name='data')
 
     @property
     def detector_number(self) -> Optional[str]:
