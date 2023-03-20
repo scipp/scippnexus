@@ -302,15 +302,16 @@ class NXobject:
 
     def __init__(self, group: Group):
         self._group = group
-        self._special_fields = []
+        self._special_fields = {}
         for name, field in group._children.items():
             if isinstance(field, Field):
                 field.sizes = _squeezed_field_sizes(field.dataset)
                 field.dtype = _dtype_fromdataset(field.dataset)
-            elif (nx_class := field.attrs.get('NX_class')) in [
+            elif field.attrs.get('NX_class') in [
                     'NXoff_geometry',
+                    'NXgeometry',
             ]:
-                self._special_fields.append(name)
+                self._special_fields[name] = field
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
@@ -333,11 +334,11 @@ class NXobject:
         return None
 
     def pre_assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
-        for name in self._special_fields:
-            from .nxoff_geometry import off_to_shape
-            detector_number = dg.get(self.detector_number)
-            dg[name] = off_to_shape(**dg[name], detector_number=detector_number)
-        #print(list(dg.items()))
+        for name, field in self._special_fields.items():
+            det_num = self.detector_number
+            if det_num is not None:
+                det_num = dg[det_num]
+            dg[name] = field._nexus.assemble_as_child(dg[name], detector_number=det_num)
         return dg
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
@@ -698,10 +699,22 @@ class NXdetector(NXdata):
                 return name
 
 
+class NXgeometry(NXobject):
+
+    def __init__(self, group: Group):
+        super().__init__(group)
+
+    @staticmethod
+    def assemble_as_child(children: sc.DataGroup,
+                          detector_number: Optional[sc.Variable] = None) -> sc.Variable:
+        return sc.scalar(children)
+
+
 base_definitions = {}
 base_definitions['NXdata'] = NXdata
 base_definitions['NXlog'] = NXlog
 base_definitions['NXdetector'] = NXdetector
+base_definitions['NXgeometry'] = NXgeometry
 
 
 def create_field(group: H5Group, name: str, data: DimensionedArray,
