@@ -95,7 +95,6 @@ class Transformation:
             t = value * self.vector
             v = t if isinstance(t, sc.Variable) else t.data
             if transformation_type == 'translation':
-                v = v.to(unit='m', copy=False)
                 v = sc.spatial.translations(dims=v.dims, values=v.values, unit=v.unit)
             elif transformation_type == 'rotation':
                 v = sc.spatial.rotations_from_rotvecs(v)
@@ -111,6 +110,8 @@ class Transformation:
                 return t
             offset = sc.vector(value=offset.values, unit=offset.unit).to(unit='m')
             offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
+            if transformation_type == 'translation':
+                offset = offset.to(unit=t.unit, copy=False)
             return t * offset
         except (sc.DimensionError, sc.UnitError) as e:
             raise NexusStructureError(

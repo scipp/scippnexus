@@ -218,9 +218,9 @@ def test_nxtransformations_group_single_item(h5root):
     value = sc.scalar(2.4, unit='mm')
     offset = sc.spatial.translation(value=[6, 2, 6], unit='mm')
     vector = sc.vector(value=[0, 1, 1])
-    t = value.to(unit='m') * vector
+    t = value * vector
     expected = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+                offset)
 
     transformations = snx.create_class(h5root, 'transformations', NXtransformations)
     write_translation(transformations, 't1', value, offset, vector)
@@ -236,16 +236,16 @@ def test_nxtransformations_group_two_independent_items(h5root):
     value = sc.scalar(2.4, unit='mm')
     offset = sc.spatial.translation(value=[6, 2, 6], unit='mm')
     vector = sc.vector(value=[0, 1, 1])
-    t = value.to(unit='m') * vector
+    t = value * vector
     write_translation(transformations, 't1', value, offset, vector)
     expected1 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+                 offset)
 
     value = value * 0.1
-    t = value.to(unit='m') * vector
+    t = value * vector
     write_translation(transformations, 't2', value, offset, vector)
     expected2 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+                 offset)
 
     loaded = make_group(h5root)['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
@@ -259,17 +259,17 @@ def test_nxtransformations_group_single_chain(h5root):
     value = sc.scalar(2.4, unit='mm')
     offset = sc.spatial.translation(value=[6, 2, 6], unit='mm')
     vector = sc.vector(value=[0, 1, 1])
-    t = value.to(unit='m') * vector
+    t = value * vector
     write_translation(transformations, 't1', value, offset, vector)
     expected1 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+                 offset)
 
     value = value * 0.1
-    t = value.to(unit='m') * vector
+    t = value * vector
     write_translation(transformations, 't2', value, offset, vector)
     transformations['t2'].attrs['depends_on'] = 't1'
     expected2 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 sc.spatial.translation(value=[0.006, 0.002, 0.006], unit='m'))
+                 offset)
 
     loaded = make_group(h5root)['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
