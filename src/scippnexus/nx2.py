@@ -19,26 +19,6 @@ from ._common import convert_time_to_datetime64, to_child_select, to_plain_index
 from ._hdf5_nexus import _warn_latin1_decode
 from .typing import H5Dataset, H5Group, ScippIndex
 
-# What we know:
-# 1. We must not do a recursive read, or we will get in trouble for files with many
-#    entries. User may just want to access subgroup recursively.
-# 2. Some child access needs info from parent:
-#    - Field dims
-#    - NXevent_data
-#    - NXoff_geometry
-#    Maybe not... parent can modify dims/customize assembly
-# 3. Unless we read shape, attrs, children only once, we will suffer too much overhead.
-#    This includes dims/sizes computation.
-# 4. Must be able to load coord before loading rest, for label-based indexing
-
-# Desired behaviors:
-# - Field should encapsulate "errors" handling
-# - NXtransformations should load depends_on as chain (scalar variable with next)
-# - NXobject.__setitem__ to set `axes` and `name_indices` attributes?
-
-# Consider:
-# - Non-legacy mode would make dim parsing simpler and faster?
-
 
 def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
     return obj if isinstance(obj, sc.Variable) else sc.scalar(obj, unit=None)
@@ -415,6 +395,9 @@ class Group(Mapping):
 
     def __getitem__(self, sel) -> Union[Field, Group, sc.DataGroup]:
         if isinstance(sel, str):
+            # We cannot get the child directly from the HDF5 group, since we need to
+            # create the parent group, to ensure that fields get the correct properties
+            # such as sizes and dtype.
             if '/' in sel:
                 if sel.startswith('/'):
                     return Group(self._group.file,
@@ -428,8 +411,6 @@ class Group(Mapping):
                 from .nxtransformations import Transformation
                 return Transformation(child)
             return child
-            # Get child again, as it may have ben replaced by call to _populate_fields
-            return self._children[sel]
         # Here this is scipp.DataGroup. Child classes like NXdata may return DataArray.
         # (not scipp.DataArray, as that does not support lazy data)
         dg = self._nexus.read_children(self, sel)
