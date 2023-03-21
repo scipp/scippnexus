@@ -3,21 +3,13 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from ._common import to_child_select
-from .nx2 import (
-    Field,
-    Group,
-    NexusStructureError,
-    NXobject,
-    ScippIndex,
-    base_definitions,
-)
+from .nx2 import Field, NexusStructureError, NXobject, ScippIndex, base_definitions
 
 
 class TransformationError(NexusStructureError):
@@ -26,33 +18,32 @@ class TransformationError(NexusStructureError):
 
 def make_transformation(obj, /, path) -> Optional[Transformation]:
     if path.startswith('/'):
-        return Transformation(obj.file[path])
+        return obj.file[path]
     elif path != '.':
-        return Transformation(obj.parent[path])
+        return obj.parent[path]
     return None  # end of chain
 
 
 class NXtransformations(NXobject):
     """Group of transformations."""
 
-    def _getitem(self, index: ScippIndex) -> sc.DataGroup:
-        return sc.DataGroup({
-            name: get_full_transformation_starting_at(Transformation(child),
-                                                      index=index)
-            for name, child in self.items()
-        })
-
-    def index_child(self, child: Union[Field, Group], sel: ScippIndex) -> ScippIndex:
-        # Note that this will be similar in NXdata, but there we need to handle
-        # bin edges as well.
-        child_sel = to_child_select(self.sizes.keys(), child.dims, sel)
-        return Transformation(child)[child_sel]
-
 
 class Transformation:
 
     def __init__(self, obj: Union[Field, NXobject]):  # could be an NXlog
         self._obj = obj
+
+    @property
+    def sizes(self) -> dict:
+        return self._obj.sizes
+
+    @property
+    def dims(self) -> Tuple[str, ...]:
+        return self._obj.dims
+
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return self._obj.shape
 
     @property
     def attrs(self):
@@ -107,12 +98,18 @@ class Transformation:
             else:
                 t.data = v
             if (offset := self.offset) is None:
-                return t
-            offset = sc.vector(value=offset.values, unit=offset.unit).to(unit='m')
-            offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
-            if transformation_type == 'translation':
-                offset = offset.to(unit=t.unit, copy=False)
-            return t * offset
+                transform = t
+            else:
+                offset = sc.vector(value=offset.values, unit=offset.unit)
+                offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
+                if transformation_type == 'translation':
+                    offset = offset.to(unit=t.unit, copy=False)
+                transform = t * offset
+            if (depends_on := self.depends_on) is not None:
+                if not isinstance(transform, sc.DataArray):
+                    transform = sc.DataArray(transform)
+                transform.attrs['depends_on'] = sc.scalar(depends_on[select])
+            return transform
         except (sc.DimensionError, sc.UnitError) as e:
             raise NexusStructureError(
                 f"Invalid transformation in NXtransformations: {e}") from e

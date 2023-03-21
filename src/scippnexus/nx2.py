@@ -162,6 +162,11 @@ class Field:
     def shape(self) -> Tuple[int, ...]:
         return tuple(self.sizes.values())
 
+    @property
+    def parent(self) -> H5Group:
+        # TODO Get corrected definitions
+        return Group(self.dataset.parent, definitions=base_definitions)
+
     def _load_variances(self, var, index):
         stddevs = sc.empty(dims=var.dims,
                            shape=var.shape,
@@ -289,16 +294,21 @@ class NXobject:
     def __init__(self, group: Group):
         self._group = group
         self._special_fields = {}
+        self._transformations = {}
         for name, field in group._children.items():
             if isinstance(field, Field):
                 field.sizes = _squeezed_field_sizes(field.dataset)
                 field.dtype = _dtype_fromdataset(field.dataset)
-            elif field.attrs.get('NX_class') in [
-                    'NXoff_geometry',
-                    'NXcylindrical_geometry',
-                    'NXgeometry',
-            ]:
-                self._special_fields[name] = field
+            elif (nx_class := field.attrs.get('NX_class')) is not None:
+                if nx_class in [
+                        'NXoff_geometry',
+                        'NXcylindrical_geometry',
+                        'NXgeometry',
+                ]:
+                    self._special_fields[name] = field
+                elif nx_class == 'NXtransformations':
+                    self._special_fields[name] = field
+                    self._transformations[name] = field
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
@@ -322,18 +332,27 @@ class NXobject:
 
     def pre_assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
         for name, field in self._special_fields.items():
+            if name in self._transformations:
+                continue
             det_num = self.detector_number
             if det_num is not None:
                 det_num = dg[det_num]
             dg[name] = field._nexus.assemble_as_child(dg[name], detector_number=det_num)
+        if (depends_on := dg.get('depends_on')) is not None:
+            transform = self._group[depends_on]
+            # Avoid loading transform twice if it is a child of the same group
+            for name, transformations in self._transformations.items():
+                if transform.name.startswith(transformations.name):
+                    dg['depends_on'] = dg[name][depends_on.split('/')[-1]]
+                    break
+            else:
+                dg['depends_on'] = transform[()]
         return dg
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
         return dg
 
 
-# Group adds children/dims caching, removes __setitem__?
-# class Group(WriteableGroup):
 class Group(Mapping):
 
     def __init__(self,
@@ -350,17 +369,17 @@ class Group(Mapping):
         # with 1000 subgroups.
         return dict(self._group.attrs) if self._group.attrs else dict()
 
-    # TODO
-    # should this by Dict[str, Union[H5Group, H5Dataset]]?
-    # then we can recreate Group on every access (in principle more repeated init,
-    # but maybe better since it "clears" the cache)?
+    @property
+    def name(self) -> str:
+        return self._group.name
+
+    @property
+    def parent(self) -> Optional[Group]:
+        return Group(self._group.parent,
+                     definitions=self._definitions) if self._group.parent else None
+
     @cached_property
     def _children(self) -> Dict[str, Union[Field, Group]]:
-        # split off special children here?
-        # - depends_on
-        # - NXoff_geometry and NXcylindrical_geometry
-        # - legacy NXgeometry
-        # - NXtransformations
         items = {
             name:
             Field(obj) if is_dataset(obj) else Group(obj, definitions=self._definitions)
@@ -391,12 +410,26 @@ class Group(Mapping):
     def __iter__(self) -> Iterator[str]:
         return self._children.__iter__()
 
+    def _is_nxtransformations(self) -> bool:
+        return self.attrs.get('NX_class') == 'NXtransformations'
+
     def __getitem__(self, sel) -> Union[Field, Group, sc.DataGroup]:
         if isinstance(sel, str):
+            if '/' in sel:
+                if sel.startswith('/'):
+                    return Group(self._group.file,
+                                 definitions=self._definitions)[sel[1:]]
+                else:
+                    return self[sel.split('/')[0]][sel[sel.index('/') + 1:]]
             child = self._children[sel]
             if isinstance(child, Field):
                 self._populate_fields()
+            if self._is_nxtransformations():
+                from .nxtransformations import Transformation
+                return Transformation(child)
             return child
+            # Get child again, as it may have ben replaced by call to _populate_fields
+            return self._children[sel]
         # Here this is scipp.DataGroup. Child classes like NXdata may return DataArray.
         # (not scipp.DataArray, as that does not support lazy data)
         dg = self._nexus.read_children(self, sel)
