@@ -9,7 +9,15 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .nxobject import Field, NexusStructureError, NXobject, ScippIndex
+from ._common import to_child_select
+from .nx2 import (
+    Field,
+    Group,
+    NexusStructureError,
+    NXobject,
+    ScippIndex,
+    base_definitions,
+)
 
 
 class TransformationError(NexusStructureError):
@@ -33,6 +41,12 @@ class NXtransformations(NXobject):
                                                       index=index)
             for name, child in self.items()
         })
+
+    def index_child(self, child: Union[Field, Group], sel: ScippIndex) -> ScippIndex:
+        # Note that this will be similar in NXdata, but there we need to handle
+        # bin edges as well.
+        child_sel = to_child_select(self.sizes.keys(), child.dims, sel)
+        return Transformation(child)[child_sel]
 
 
 class Transformation:
@@ -180,3 +194,6 @@ def _get_transformations(transform: Transformation, *,
     # to deal with changing beamline components (e.g. pixel positions) during a
     # live data stream (see https://github.com/scipp/scippneutron/issues/76).
     return transformations
+
+
+base_definitions['NXtransformations'] = NXtransformations
