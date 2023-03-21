@@ -673,6 +673,13 @@ class NXdetector(NXdata):
                 return name
 
 
+class NXmonitor(NXdata):
+
+    # TODO should read axes of fallback signal?
+    def __init__(self, group: Group):
+        super().__init__(group, fallback_signal_name='data')
+
+
 class NXgeometry(NXobject):
 
     def __init__(self, group: Group):
@@ -689,6 +696,7 @@ base_definitions['NXdata'] = NXdata
 base_definitions['NXlog'] = NXlog
 base_definitions['NXdetector'] = NXdetector
 base_definitions['NXgeometry'] = NXgeometry
+base_definitions['NXmonitor'] = NXmonitor
 
 
 def create_field(group: H5Group, name: str, data: DimensionedArray,
