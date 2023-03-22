@@ -384,8 +384,8 @@ def test_dims_of_length_1_are_kept_when_axes_specified(h5root):
     assert data['signal'].shape == (1, 1)
 
 
-def test_dims_of_length_1_are_squeezed_when_no_axes_specified(h5root):
-    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
+def test_only_dim_of_length_1_is_squeezed_when_no_axes_specified(h5root):
+    signal = sc.array(dims=['xx'], unit='m', values=[1.1])
     data = snx.create_class(h5root, 'data1', NXdata)
     snx.create_field(data, 'signal', signal)
     data.attrs['signal'] = 'signal'
@@ -396,7 +396,20 @@ def test_dims_of_length_1_are_squeezed_when_no_axes_specified(h5root):
     assert data['signal'].shape == ()
 
 
-def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(h5root):
+def test_multi_dims_of_length_1_are_kept_when_no_axes_specified(h5root):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1]])
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', signal)
+    data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions)
+    loaded = data[...]
+    assert sc.identical(loaded.data,
+                        sc.array(dims=['dim_0', 'dim_1'], unit='m', values=[[1.1]]))
+    assert data['signal'].ndim == 2
+    assert data['signal'].shape == (1, 1)
+
+
+def test_one_dim_of_length_1_is_kept_when_no_axes_specified(h5root):
     signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.1, 2.2]])
     data = snx.create_class(h5root, 'data1', NXdata)
     snx.create_field(data, 'signal', signal)
@@ -404,11 +417,11 @@ def test_one_dim_of_length_1_is_squeezed_when_no_axes_specified(h5root):
     data = snx.Group(data, definitions=snx.base_definitions)
     loaded = data[...]
     # Note that dimension gets renamed to `dim_0` since no axes are specified
-    assert sc.identical(loaded.data,
-                        sc.array(dims=['dim_0'], unit='m', values=[1.1, 2.2]))
-    assert data['signal'].ndim == 1
-    assert data['signal'].shape == (2, )
-    assert data['signal'].dims == ('dim_0', )
+    assert sc.identical(
+        loaded.data, sc.array(dims=['dim_0', 'dim_1'], unit='m', values=[[1.1, 2.2]]))
+    assert data['signal'].ndim == 2
+    assert data['signal'].shape == (1, 2)
+    assert data['signal'].dims == ('dim_0', 'dim_1')
 
 
 def test_only_one_axis_specified_for_2d_field(h5root):
