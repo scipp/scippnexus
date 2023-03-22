@@ -1,9 +1,9 @@
 import h5py
 import pytest
 import scipp as sc
+from scipp.testing import assert_identical
 
-import scippnexus.nx2 as snx
-from scippnexus.nxevent_data2 import NXevent_data
+import scippnexus.v2 as snx
 
 
 @pytest.fixture()
@@ -52,14 +52,14 @@ def test_loads_event_data_in_current_group(group):
     assert monitor.dims == ('pulse', )
     assert monitor.shape == (4, )
     loaded = monitor[...]
-    assert sc.identical(
+    assert_identical(
         loaded.bins.size().data,
         sc.array(dims=['pulse'], unit=None, dtype='int64', values=[3, 0, 2, 1]))
 
 
 def test_loads_event_data_in_child_group(group):
     monitor = group.create_class('monitor1', snx.NXmonitor)
-    create_event_data_no_ids(monitor.create_class('events', NXevent_data))
+    create_event_data_no_ids(monitor.create_class('events', snx.NXevent_data))
     assert monitor.dims == ('event_time_zero', )
     assert monitor.shape == (4, )
     loaded = monitor[...]

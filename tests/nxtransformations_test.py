@@ -4,8 +4,8 @@ import pytest
 import scipp as sc
 from scipp.testing import assert_identical
 
-import scippnexus.nx2 as snx
-from scippnexus.nxtransformations import NXtransformations
+import scippnexus.v2 as snx
+from scippnexus.v2.nxtransformations import NXtransformations
 
 
 def make_group(group: h5py.Group) -> snx.Group:

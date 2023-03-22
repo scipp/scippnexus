@@ -3,8 +3,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-import scippnexus.nx2 as snx
-from scippnexus.nxevent_data2 import NXevent_data
+import scippnexus.v2 as snx
 
 
 @pytest.fixture()
@@ -17,8 +16,8 @@ def h5root(request):
 def test_does_not_see_changes(h5root):
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
-    signal = data['signal'] = np.arange(4)
-    coord = data['time'] = np.arange(4)
+    data['signal'] = np.arange(4)
+    data['time'] = np.arange(4)
     obj = snx.Group(entry)
     dg = obj[()]
     print(list(dg.items()))
@@ -77,7 +76,7 @@ def test_nx_class_attribute_sets_NXobject_subclass(h5root):
     events = entry.create_group('events')
     events.attrs['NX_class'] = 'NXevent_data'
     root = snx.Group(entry)
-    assert isinstance(root['events'], NXevent_data)
+    assert isinstance(root['events'], snx.NXevent_data)
 
 
 def test_read_empty_nxevent_data(h5root):
