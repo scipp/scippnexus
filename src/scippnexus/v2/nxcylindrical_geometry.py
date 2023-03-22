@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Optional, Tuple, Union
+from typing import Optional
 
 import scipp as sc
 
-from .nxobject import NexusStructureError, NXobject
+from .base import Field, Group, NexusStructureError, NXobject, base_definitions
 
 
 def _parse(*,
@@ -52,14 +52,22 @@ class NXcylindrical_geometry(NXobject):
         'cylinders': ('cylinder', 'vertex_index')
     }
 
-    def _get_field_dims(self, name: str) -> Union[None, Tuple[str]]:
-        return self._dims.get(name)
-
-    def _get_field_dtype(self, name: str) -> Union[None, sc.DType]:
-        if name == 'vertices':
-            return sc.DType.vector3
-        return None
+    def __init__(self, group: Group):
+        super().__init__(group)
+        for name, field in group._children.items():
+            if isinstance(field, Field):
+                field.sizes = dict(zip(self._dims.get(name), field.dataset.shape))
+                if name == 'vertices':
+                    field.dtype = sc.DType.vector3
 
     def load_as_array(self,
                       detector_number: Optional[sc.Variable] = None) -> sc.Variable:
         return _parse(**self[()], parent_detector_number=detector_number)
+
+    @staticmethod
+    def assemble_as_child(children: sc.DataGroup,
+                          detector_number: Optional[sc.Variable] = None) -> sc.Variable:
+        return _parse(**children, parent_detector_number=detector_number)
+
+
+base_definitions['NXcylindrical_geometry'] = NXcylindrical_geometry

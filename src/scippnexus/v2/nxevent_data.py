@@ -6,8 +6,8 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import scipp as sc
 
-from ._common import to_plain_index
-from .nx2 import (
+from .._common import to_plain_index
+from .base import (
     Field,
     Group,
     NexusStructureError,

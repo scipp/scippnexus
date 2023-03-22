@@ -5,9 +5,8 @@ import scipp as sc
 from scipp.testing import assert_identical
 
 import scippnexus as snx
-import scippnexus.nx2 as snx2
+import scippnexus.v2 as snx2
 from scippnexus import NexusStructureError, NXdetector, NXentry, NXoff_geometry, NXroot
-from scippnexus.nxevent_data2 import NXevent_data
 
 
 def make_group(group: h5py.Group) -> snx2.Group:
@@ -72,7 +71,7 @@ def test_loads_signal_and_events_when_both_found(group):
     detector = group.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_number)
     detector.create_field('data', data)
-    events = detector.create_class('events', NXevent_data)
+    events = detector.create_class('events', snx2.NXevent_data)
     events.create_field('event_id', sc.array(dims=[''], unit=None, values=[1]))
     events.create_field('event_time_offset', sc.array(dims=[''], unit='s', values=[1]))
     events.create_field('event_time_zero', sc.array(dims=[''], unit='s', values=[1]))
@@ -180,7 +179,7 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(gro
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = group.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    create_event_data_ids_1234(detector.create_class('events', snx2.NXevent_data))
     assert detector.sizes == {'detector_number': 4, 'event_time_zero': 4}
     loaded = detector[...]
     da = snx2.group_events_by_detector_number(loaded)
@@ -197,7 +196,7 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(gro
 def test_loads_event_data_with_0d_detector_numbers(group):
     detector = group.create_class('detector0', NXdetector)
     detector.create_field('detector_number', sc.index(1, dtype='int64'))
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    create_event_data_ids_1234(detector.create_class('events', snx2.NXevent_data))
     assert detector.dims == ('event_time_zero', )
     assert detector.shape == (4, )
     loaded = snx2.group_events_by_detector_number(detector[...])
@@ -207,7 +206,7 @@ def test_loads_event_data_with_0d_detector_numbers(group):
 def test_loads_event_data_with_2d_detector_numbers(group):
     detector = group.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    create_event_data_ids_1234(detector.create_class('events', snx2.NXevent_data))
     assert detector.sizes == {'dim_0': 2, 'dim_1': 2, 'event_time_zero': 4}
     loaded = snx2.group_events_by_detector_number(detector[...])
     assert sc.identical(
@@ -221,7 +220,7 @@ def test_loads_event_data_with_2d_detector_numbers(group):
 def test_select_events_slices_underlying_event_data(group):
     detector = group.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    create_event_data_ids_1234(detector.create_class('events', snx2.NXevent_data))
     da = snx2.group_events_by_detector_number(detector['event_time_zero', :2])
     assert sc.identical(
         da.bins.size().data,
@@ -255,7 +254,7 @@ def test_select_events_slices_underlying_event_data(group):
 def test_loading_event_data_creates_automatic_detector_numbers_if_not_present_in_file(
         group):
     detector = group.create_class('detector0', NXdetector)
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    create_event_data_ids_1234(detector.create_class('events', snx2.NXevent_data))
     assert detector.dims == ('event_time_zero', )
     loaded = detector[...]
     loaded = snx2.group_events_by_detector_number(loaded)
@@ -267,7 +266,7 @@ def test_loading_event_data_creates_automatic_detector_numbers_if_not_present_in
 def test_loading_event_data_with_det_selection_and_automatic_detector_numbers_raises(
         group):
     detector = group.create_class('detector0', NXdetector)
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    create_event_data_ids_1234(detector.create_class('events', snx2.NXevent_data))
     assert detector.dims == ('event_time_zero', )
     with pytest.raises(sc.DimensionError):
         detector['detector_number', 0]
@@ -276,7 +275,7 @@ def test_loading_event_data_with_det_selection_and_automatic_detector_numbers_ra
 def test_loading_event_data_with_full_selection_and_automatic_detector_numbers_works(
         group):
     detector = group.create_class('detector0', NXdetector)
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    create_event_data_ids_1234(detector.create_class('events', snx2.NXevent_data))
     assert detector.dims == ('event_time_zero', )
     assert tuple(detector[...].shape) == (4, )
     assert tuple(detector[()].shape) == (4, )
@@ -286,13 +285,13 @@ def test_event_data_field_dims_labels(group):
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = group.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    create_event_data_ids_1234(detector.create_class('events', snx2.NXevent_data))
     assert detector['detector_number'].dims == ('detector_number', )
 
 
 def test_nxevent_data_selection_yields_correct_pulses(group):
     detector = group.create_class('detector0', NXdetector)
-    create_event_data_ids_1234(detector.create_class('events', NXevent_data))
+    create_event_data_ids_1234(detector.create_class('events', snx2.NXevent_data))
 
     class Load:
 

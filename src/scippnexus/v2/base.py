@@ -15,9 +15,9 @@ import dateutil.parser
 import numpy as np
 import scipp as sc
 
-from ._common import convert_time_to_datetime64, to_child_select, to_plain_index
-from ._hdf5_nexus import _warn_latin1_decode
-from .typing import H5Dataset, H5Group, ScippIndex
+from .._common import convert_time_to_datetime64, to_child_select, to_plain_index
+from .._hdf5_nexus import _warn_latin1_decode
+from ..typing import H5Dataset, H5Group, ScippIndex
 
 
 def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:

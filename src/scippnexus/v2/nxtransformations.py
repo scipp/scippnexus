@@ -3,13 +3,13 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .nxobject import Field, NexusStructureError, NXobject, ScippIndex
+from .base import Field, NexusStructureError, NXobject, ScippIndex, base_definitions
 
 
 class TransformationError(NexusStructureError):
@@ -18,27 +18,32 @@ class TransformationError(NexusStructureError):
 
 def make_transformation(obj, /, path) -> Optional[Transformation]:
     if path.startswith('/'):
-        return Transformation(obj.file[path])
+        return obj.file[path]
     elif path != '.':
-        return Transformation(obj.parent[path])
+        return obj.parent[path]
     return None  # end of chain
 
 
 class NXtransformations(NXobject):
     """Group of transformations."""
 
-    def _getitem(self, index: ScippIndex) -> sc.DataGroup:
-        return sc.DataGroup({
-            name: get_full_transformation_starting_at(Transformation(child),
-                                                      index=index)
-            for name, child in self.items()
-        })
-
 
 class Transformation:
 
     def __init__(self, obj: Union[Field, NXobject]):  # could be an NXlog
         self._obj = obj
+
+    @property
+    def sizes(self) -> dict:
+        return self._obj.sizes
+
+    @property
+    def dims(self) -> Tuple[str, ...]:
+        return self._obj.dims
+
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return self._obj.shape
 
     @property
     def attrs(self):
@@ -81,7 +86,6 @@ class Transformation:
             t = value * self.vector
             v = t if isinstance(t, sc.Variable) else t.data
             if transformation_type == 'translation':
-                v = v.to(unit='m', copy=False)
                 v = sc.spatial.translations(dims=v.dims, values=v.values, unit=v.unit)
             elif transformation_type == 'rotation':
                 v = sc.spatial.rotations_from_rotvecs(v)
@@ -94,10 +98,18 @@ class Transformation:
             else:
                 t.data = v
             if (offset := self.offset) is None:
-                return t
-            offset = sc.vector(value=offset.values, unit=offset.unit).to(unit='m')
-            offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
-            return t * offset
+                transform = t
+            else:
+                offset = sc.vector(value=offset.values, unit=offset.unit)
+                offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
+                if transformation_type == 'translation':
+                    offset = offset.to(unit=t.unit, copy=False)
+                transform = t * offset
+            if (depends_on := self.depends_on) is not None:
+                if not isinstance(transform, sc.DataArray):
+                    transform = sc.DataArray(transform)
+                transform.attrs['depends_on'] = sc.scalar(depends_on[select])
+            return transform
         except (sc.DimensionError, sc.UnitError) as e:
             raise NexusStructureError(
                 f"Invalid transformation in NXtransformations: {e}") from e
@@ -180,3 +192,6 @@ def _get_transformations(transform: Transformation, *,
     # to deal with changing beamline components (e.g. pixel positions) during a
     # live data stream (see https://github.com/scipp/scippneutron/issues/76).
     return transformations
+
+
+base_definitions['NXtransformations'] = NXtransformations
