@@ -2,9 +2,10 @@ import h5py
 import numpy as np
 import pytest
 import scipp as sc
+from scipp.testing import assert_identical
 
 import scippnexus.v2 as snx
-from scippnexus.v2 import Field, NXdata, NXentry, NXlog, NXroot
+from scippnexus.v2 import Field, NXdata, NXentry, NXlog
 
 
 @pytest.fixture()
@@ -18,7 +19,7 @@ def h5root(request):
 def nxroot(request):
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
-        root = NXroot(f)
+        root = snx.Group(f)
         root.create_class('entry', NXentry)
         yield root
 
@@ -194,20 +195,20 @@ def test_transpose_indices_attribute_for_coord(h5root):
     assert sc.identical(data[...], da)
 
 
-def test_auxiliary_signal_is_not_loaded_as_coord(nxroot):
+def test_auxiliary_signal_causes_load_as_dataset(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     # We flag 'xx' as auxiliary_signal. It should thus not be loaded as a coord,
     # even though we create the field.
     data.attrs['auxiliary_signals'] = ['xx']
-    data.create_field('signal', da.data)
-    data.create_field('xx', da.coords['xx'])
-    del da.coords['xx']
-    assert sc.identical(data[...], da)
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    data = snx.Group(data, definitions=snx.base_definitions)
+    assert_identical(data[...], sc.Dataset({'signal': da.data, 'xx': da.coords['xx']}))
 
 
 def test_field_dims_match_NXdata_dims(h5root):

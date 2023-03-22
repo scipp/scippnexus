@@ -509,6 +509,7 @@ class NXdata(NXobject):
         # Can we just set field dims here?
         self._signal_name = None
         self._signal = None
+        self._aux_signals = group.attrs.get('auxiliary_signals', [])
         if (name := group.attrs.get(
                 'signal',
                 fallback_signal_name)) is not None and name in group._children:
@@ -595,8 +596,9 @@ class NXdata(NXobject):
                 return group_dims
             # if name in [self._signal_name, self._errors_name]:
             #     return self._get_group_dims()  # if None, field determines dims itself
-            # if name in list(self.attrs.get('auxiliary_signals', [])):
-            #     return self._try_guess_dims(name)
+            if name in self._aux_signals:
+                return _guess_dims(group_dims, self._signal.dataset.shape,
+                                   field.dataset)
             if (dims := dims_from_indices.get(name)) is not None:
                 return dims
             if (axis := axis_index.get(name)) is not None:
@@ -656,14 +658,21 @@ class NXdata(NXobject):
                                     bin_edge_dim=self._bin_edge_dim(child))
         return child[child_sel]
 
-    def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
+    def assemble(self,
+                 dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         if not self._valid:
             return super().assemble(dg)
+        aux = {name: dg.pop(name) for name in self._aux_signals}
         coords = sc.DataGroup(dg)
         signal = coords.pop(self._signal_name)
         da = sc.DataArray(data=signal)
         coords = {name: asarray(coord) for name, coord in coords.items()}
-        return self._add_coords(da, coords)
+        da = self._add_coords(da, coords)
+        if aux:
+            signals = {self._signal_name: da}
+            signals.update(aux)
+            return sc.Dataset(signals)
+        return da
 
     def _dim_of_coord(self, name: str, coord: sc.Variable) -> Union[None, str]:
         if len(coord.dims) == 1:
