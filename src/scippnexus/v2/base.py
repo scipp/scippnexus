@@ -292,6 +292,10 @@ class NXobject:
                     self._special_fields[name] = field
                     self._transformations[name] = field
 
+    @property
+    def unit(self) -> Union[None, sc.Unit]:
+        raise ValueError(f"Group-like {self._group.nx_class} has no well-defined unit")
+
     @cached_property
     def sizes(self) -> Dict[str, int]:
         # exclude geometry/tansform groups?
@@ -371,6 +375,10 @@ class Group(Mapping):
     @property
     def name(self) -> str:
         return self._group.name
+
+    @property
+    def unit(self) -> Optional[sc.Unit]:
+        return self._nexus.unit
 
     @property
     def parent(self) -> Optional[Group]:
@@ -628,6 +636,10 @@ class NXdata(NXobject):
     def sizes(self) -> Dict[str, int]:
         return self._signal.sizes if self._valid else super().sizes
 
+    @property
+    def unit(self) -> Union[None, sc.Unit]:
+        return self._signal.unit if self._valid else super().unit
+
     def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
         if not isinstance(coord, Field):
             return None
@@ -713,7 +725,6 @@ class NXdetector(NXdata):
 
 class NXmonitor(NXdata):
 
-    # TODO should read axes of fallback signal?
     def __init__(self, group: Group):
         super().__init__(group, fallback_signal_name='data')
 

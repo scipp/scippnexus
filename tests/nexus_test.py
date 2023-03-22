@@ -281,8 +281,8 @@ def test_field_dim_labels(nxroot):
     events['event_id'] = sc.arange('ignored', 2)
     event_data = nxroot['entry/events_0']
     assert event_data['event_time_offset'].dims == ('event', )
-    assert event_data['event_time_zero'].dims == ('pulse', )
-    assert event_data['event_index'].dims == ('pulse', )
+    assert event_data['event_time_zero'].dims == ('event_time_zero', )
+    assert event_data['event_index'].dims == ('event_time_zero', )
     assert event_data['event_id'].dims == ('event', )
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = sc.arange('ignored', 2)
@@ -346,7 +346,7 @@ def test_field_of_extended_ascii_in_ascii_encoded_dataset_is_loaded_correctly():
     string = b"run at rot=90" + bytes([0xb0])
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         f['title'] = np.array([string, string + b'x'])
-        title = NXroot(f)['title']
+        title = snx.Group(f)['title']
         assert sc.identical(
             title[...],
             sc.array(dims=['dim_0'], values=["run at rot=90°", "run at rot=90°x"]))
@@ -456,8 +456,7 @@ def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot):
     monitor = nxroot['entry'].create_class('monitor', NXmonitor)
     create_event_data_without_event_id(monitor)
     da = monitor[...]
-    assert len(da.bins.coords) == 1
-    assert 'event_time_offset' in da.bins.coords
+    assert 'event_time_offset' in da
 
 
 def test___getattr__for_unique_child_groups(nxroot):
