@@ -5,6 +5,7 @@ import h5py
 import numpy as np
 import pytest
 import scipp as sc
+from scipp.testing import assert_identical
 
 import scippnexus.v2 as snx
 from scippnexus.v2 import (
@@ -111,7 +112,8 @@ def test_nxlog_with_missing_value_triggers_fallback(nxroot):
     log = nxroot['entry'].create_class('log', NXlog)
     log['time'] = time - sc.epoch(unit='ns')
     loaded = log[()]
-    assert sc.identical(loaded, sc.DataGroup(time=time.rename(time='dim_0')))
+    # Fallback to DataGroup, but we still have partial info from NXlog: dim is time
+    assert_identical(loaded, sc.DataGroup(time=time))
 
 
 def test_nxlog_length_1(h5root):
@@ -130,20 +132,14 @@ def test_nxlog_length_1(h5root):
     assert sc.identical(log[...], da)
 
 
-def test_nxlog_length_1_two_dims_no_time_squeezes_all_dims(nxroot):
-    da = sc.DataArray(
-        sc.array(dims=['time', 'ignored'], values=[[1.1]]),
-        coords={
-            'time':
-            sc.epoch(unit='ns') +
-            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
-        })
+def test_nxlog_length_1_two_dims_no_time_defaults_inner_dim_name(nxroot):
+    var = sc.array(dims=['time', 'ignored'], values=[[1.1]])
     log = nxroot['entry'].create_class('log', NXlog)
-    log['value'] = da.data
-    assert sc.identical(log[...], sc.DataArray(sc.scalar(1.1)))
+    log['value'] = var
+    assert_identical(log[...], sc.DataArray(var.rename(ignored='dim_1')))
 
 
-def test_nxlog_length_1_two_dims_with_time_squeezes_inner_dim(nxroot):
+def test_nxlog_length_1_two_dims_with_time_defaults_inner_dim_name(nxroot):
     da = sc.DataArray(
         sc.array(dims=['time', 'ignored'], values=[[1.1]]),
         coords={
@@ -154,7 +150,7 @@ def test_nxlog_length_1_two_dims_with_time_squeezes_inner_dim(nxroot):
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
-    assert sc.identical(log[...], da['ignored', 0])
+    assert sc.identical(log[...], da.rename(ignored='dim_1'))
 
 
 def test_nxlog_axes_replaces_time_dim(nxroot):
@@ -186,7 +182,7 @@ def test_nxlog_three_dims_with_time_of_length_1(nxroot):
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
     loaded = log[...]
-    assert sc.identical(
+    assert_identical(
         loaded.data,
         sc.array(dims=['time', 'dim_1', 'dim_2'], values=np.arange(9.).reshape(1, 3,
                                                                                3)))
@@ -198,7 +194,7 @@ def test_nxlog_with_shape_0(nxroot):
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time']
-    assert sc.identical(log[...], da['ignored', 0])
+    assert sc.identical(log[...], da.rename(ignored='dim_1'))
 
 
 def test_nxobject_event_data(nxroot):

@@ -266,7 +266,8 @@ class Field:
 
 
 def _squeezed_field_sizes(dataset: H5Dataset) -> Dict[str, int]:
-    shape = tuple(size for size in dataset.shape if size != 1)
+    if (shape := dataset.shape) == (1, ):
+        return {}
     return {f'dim_{i}': size for i, size in enumerate(shape)}
 
 
@@ -538,22 +539,19 @@ class NXdata(NXobject):
 
         group_dims = _get_group_dims()
 
-        # Reject fallback dims if they are not compatible with group dims
-        if fallback_dims is not None:
-            for field in group._children.values():
-                if len(fallback_dims) < len(field.shape):
-                    fallback_dims = None
-                    break
-
-        if group_dims is None:
-            group_dims = fallback_dims
-
         if self._signal is None:
             self._valid = False
         else:
             if group_dims is not None:
                 shape = self._signal.dataset.shape
                 shape = _squeeze_trailing(group_dims, shape)
+                self._signal.sizes = dict(zip(group_dims, shape))
+            elif fallback_dims is not None:
+                shape = self._signal.dataset.shape
+                group_dims = [
+                    fallback_dims[i] if i < len(fallback_dims) else f'dim_{i}'
+                    for i in range(len(shape))
+                ]
                 self._signal.sizes = dict(zip(group_dims, shape))
 
         if axes is not None:
@@ -693,16 +691,24 @@ class NXlog(NXdata):
 class NXdetector(NXdata):
     _detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
+    @staticmethod
+    def _detector_number(group: Group) -> Optional[str]:
+        for name in NXdetector._detector_number_fields:
+            if name in group._children:
+                return name
+
     def __init__(self, group: Group):
+        fallback_dims = None
+        if (det_num_name := NXdetector._detector_number(group)) is not None:
+            if group._children[det_num_name].dataset.ndim == 1:
+                fallback_dims = ('detector_number', )
         super().__init__(group,
-                         fallback_dims=('detector_number', ),
+                         fallback_dims=fallback_dims,
                          fallback_signal_name='data')
 
     @property
     def detector_number(self) -> Optional[str]:
-        for name in self._detector_number_fields:
-            if name in self._group._children:
-                return name
+        return self._detector_number(self._group)
 
 
 class NXmonitor(NXdata):
