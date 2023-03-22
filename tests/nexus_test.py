@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 import scipp as sc
 
-import scippnexus.nx2 as snx
-from scippnexus import (
+import scippnexus.v2 as snx
+from scippnexus.v2 import (
     Field,
     NexusStructureError,
     NXdetector,
@@ -38,7 +38,7 @@ def h5root(request):
 def nxroot(request):
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
-        root = NXroot(f)
+        root = snx.Group(f, definitions=snx.base_definitions)
         root.create_class('entry', NXentry)
         yield root
 
@@ -61,7 +61,7 @@ def test_nxobject_create_class_with_string_nx_class(nxroot):
 def test_nxobject_items(nxroot):
     items = nxroot.items()
     assert len(items) == 1
-    name, entry = items[0]
+    name, entry = next(iter(items))
     assert name == 'entry'
     entry.create_class('monitor', NXmonitor)
     entry.create_class('log', NXlog)

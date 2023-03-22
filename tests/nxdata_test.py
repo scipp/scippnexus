@@ -3,8 +3,8 @@ import numpy as np
 import pytest
 import scipp as sc
 
-import scippnexus.nx2 as snx
-from scippnexus import Field, NXdata, NXentry, NXlog, NXroot
+import scippnexus.v2 as snx
+from scippnexus.v2 import Field, NXdata, NXentry, NXlog, NXroot
 
 
 @pytest.fixture()

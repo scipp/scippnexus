@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import datetime
+import inspect
 import re
 import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
-from functools import cached_property
+from functools import cached_property, lru_cache
 from typing import Any, Dict, Iterator, List, Optional, Protocol, Tuple, Union
 
 import dateutil.parser
@@ -333,6 +334,10 @@ class NXobject:
         return dg
 
 
+class NXroot(NXobject):
+    pass
+
+
 class Group(Mapping):
 
     def __init__(self,
@@ -340,6 +345,19 @@ class Group(Mapping):
                  definitions: Optional[Dict[str, NXobject]] = None):
         self._group = group
         self._definitions = {} if definitions is None else definitions
+
+    @property
+    def nx_class(self) -> Optional[type]:
+        """The value of the NX_class attribute of the group.
+
+        In case of the subclass NXroot this returns 'NXroot' even if the attribute
+        is not actually set. This is to support the majority of all legacy files, which
+        do not have this attribute.
+        """
+        if (nxclass := self.attrs.get('NX_class')) is not None:
+            return _nx_class_registry().get(nxclass)
+        if self.name == '/':
+            return NXroot
 
     @cached_property
     def attrs(self) -> Dict[str, Any]:
@@ -797,3 +815,9 @@ def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
     # TODO What about _coord_to_attr mapping as NXdata?
     da.coords.update(dg)
     return da
+
+
+@lru_cache()
+def _nx_class_registry():
+    from . import nexus_classes
+    return dict(inspect.getmembers(nexus_classes, inspect.isclass))

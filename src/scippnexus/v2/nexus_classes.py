@@ -5,7 +5,7 @@
 #from .nxlog import NXlog  # noqa F401
 #from .nxmonitor import NXmonitor  # noqa F401
 from .base import NXobject  # noqa F401
-from .base import NXdata, NXdetector, NXgeometry, NXlog, NXmonitor  # noqa F401
+from .base import NXdata, NXdetector, NXgeometry, NXlog, NXmonitor, NXroot  # noqa F401
 from .nxcylindrical_geometry import NXcylindrical_geometry  # noqa F401
 #from .nxdata import NXdata  # noqa F401
 #from .nxdetector import NXdetector  # noqa F401
