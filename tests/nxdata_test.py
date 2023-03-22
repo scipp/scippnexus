@@ -5,7 +5,7 @@ import scipp as sc
 from scipp.testing import assert_identical
 
 import scippnexus.v2 as snx
-from scippnexus.v2 import Field, NXdata, NXentry, NXlog
+from scippnexus.v2 import NXdata, NXlog
 
 
 @pytest.fixture()
@@ -20,7 +20,7 @@ def nxroot(request):
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         root = snx.Group(f)
-        root.create_class('entry', NXentry)
+        root.create_class('entry', snx.NXentry)
         yield root
 
 
@@ -244,7 +244,7 @@ def test_field_dims_match_NXdata_dims_when_selected_via_class_name(nxroot):
     data.create_field('xx', da.coords['xx'])
     data.create_field('xx2', da.coords['xx2'])
     data.create_field('yy', da.coords['yy'])
-    fields = data[Field]
+    fields = data[snx.Field]
     assert fields['signal1'].dims == ('xx', 'yy')
     assert fields['xx'].dims == ('xx', )
     assert fields['xx2'].dims == ('xx', )

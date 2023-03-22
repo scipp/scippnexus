@@ -420,6 +420,16 @@ class Group(Mapping):
     def _is_nxtransformations(self) -> bool:
         return self.attrs.get('NX_class') == 'NXtransformations'
 
+    def _get_children_by_nx_class(
+            self, select: Union[type, List[type]]) -> Dict[str, Union[NXobject, Field]]:
+        children = {}
+        select = tuple(select) if isinstance(select, list) else select
+        for key, child in self._children.items():
+            nx_class = Field if isinstance(child, Field) else child.nx_class
+            if issubclass(nx_class, select):
+                children[key] = self[key]
+        return children
+
     def __getitem__(self, sel) -> Union[Field, Group, sc.DataGroup]:
         if isinstance(sel, str):
             # We cannot get the child directly from the HDF5 group, since we need to
@@ -438,6 +448,13 @@ class Group(Mapping):
                 from .nxtransformations import Transformation
                 return Transformation(child)
             return child
+
+        def isclass(x):
+            return inspect.isclass(x) and issubclass(x, (Field, NXobject))
+
+        if isclass(sel) or (isinstance(sel, list) and len(sel)
+                            and all(isclass(x) for x in sel)):
+            return self._get_children_by_nx_class(sel)
         # Here this is scipp.DataGroup. Child classes like NXdata may return DataArray.
         # (not scipp.DataArray, as that does not support lazy data)
         dg = self._nexus.read_children(self, sel)
@@ -591,7 +608,6 @@ class NXdata(NXobject):
             # standard recommends that readers should also make "best effort" guess
             # since legacy files do not set this attribute.
             # TODO signal and errors?
-            # TODO aux
             if name in (self._signal_name, ):
                 return group_dims
             # if name in [self._signal_name, self._errors_name]:
