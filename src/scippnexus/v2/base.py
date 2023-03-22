@@ -122,6 +122,7 @@ def _dtype_fromdataset(dataset: H5Dataset) -> sc.DType:
 @dataclass
 class Field:
     dataset: H5Dataset
+    parent: Group
     sizes: Optional[Dict[str, int]] = None
     dtype: Optional[sc.DType] = None
     errors: Optional[H5Dataset] = None
@@ -143,10 +144,9 @@ class Field:
     def shape(self) -> Tuple[int, ...]:
         return tuple(self.sizes.values())
 
-    @property
-    def parent(self) -> H5Group:
-        # TODO Get corrected definitions
-        return Group(self.dataset.parent, definitions=base_definitions)
+    @cached_property
+    def file(self) -> Group:
+        return self.parent.file
 
     def _load_variances(self, var, index):
         stddevs = sc.empty(dims=var.dims,
@@ -347,9 +347,17 @@ class Group(Mapping):
 
     def __init__(self,
                  group: H5Group,
-                 definitions: Optional[Dict[str, NXobject]] = None):
+                 definitions: Optional[Dict[str, type]] = None,
+                 parent: Optional[Group] = None):
         self._group = group
         self._definitions = {} if definitions is None else definitions
+        if parent is None:
+            if group == group.parent:
+                self._parent = self
+            else:
+                self._parent = Group(group.parent, definitions=definitions)
+        else:
+            self._parent = parent
 
     @property
     def nx_class(self) -> Optional[type]:
@@ -382,14 +390,17 @@ class Group(Mapping):
 
     @property
     def parent(self) -> Optional[Group]:
-        return Group(self._group.parent,
-                     definitions=self._definitions) if self._group.parent else None
+        return self._parent
+
+    @cached_property
+    def file(self) -> Optional[Group]:
+        return self if self == self.parent else self.parent.file
 
     @cached_property
     def _children(self) -> Dict[str, Union[Field, Group]]:
         items = {
-            name:
-            Field(obj) if is_dataset(obj) else Group(obj, definitions=self._definitions)
+            name: Field(obj, parent=self) if is_dataset(obj) else Group(
+                obj, parent=self, definitions=self._definitions)
             for name, obj in self._group.items()
         }
         for suffix in ('_errors', '_error'):
@@ -417,6 +428,7 @@ class Group(Mapping):
     def __iter__(self) -> Iterator[str]:
         return self._children.__iter__()
 
+    @cached_property
     def _is_nxtransformations(self) -> bool:
         return self.attrs.get('NX_class') == 'NXtransformations'
 
@@ -437,14 +449,13 @@ class Group(Mapping):
             # such as sizes and dtype.
             if '/' in sel:
                 if sel.startswith('/'):
-                    return Group(self._group.file,
-                                 definitions=self._definitions)[sel[1:]]
+                    return self.file[sel[1:]]
                 else:
                     return self[sel.split('/')[0]][sel[sel.index('/') + 1:]]
             child = self._children[sel]
             if isinstance(child, Field):
                 self._populate_fields()
-            if self._is_nxtransformations():
+            if self._is_nxtransformations:
                 from .nxtransformations import Transformation
                 return Transformation(child)
             return child
@@ -475,10 +486,11 @@ class Group(Mapping):
 
     def create_class(self, name, class_name: str) -> Group:
         return Group(create_class(self._group, name, class_name),
-                     definitions=self._definitions)
+                     definitions=self._definitions,
+                     parent=self)
 
     def rebuild(self) -> Group:
-        return Group(self._group, definitions=self._definitions)
+        return Group(self._group, definitions=self._definitions, parent=self.parent)
 
     @cached_property
     def sizes(self) -> Dict[str, int]:

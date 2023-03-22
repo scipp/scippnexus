@@ -231,19 +231,20 @@ def test_field_dims_match_NXdata_dims(h5root):
     assert sc.identical(data['xx', :2].coords['yy'], data['yy'][:])
 
 
-def test_field_dims_match_NXdata_dims_when_selected_via_class_name(nxroot):
+def test_field_dims_match_NXdata_dims_when_selected_via_class_name(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
-    data = nxroot.create_class('data1', NXdata)
+    data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal1'
-    data.create_field('signal1', da.data)
-    data.create_field('xx', da.coords['xx'])
-    data.create_field('xx2', da.coords['xx2'])
-    data.create_field('yy', da.coords['yy'])
+    snx.create_field(data, 'signal1', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    snx.create_field(data, 'yy', da.coords['yy'])
+    data = snx.Group(data, definitions=snx.base_definitions)
     fields = data[snx.Field]
     assert fields['signal1'].dims == ('xx', 'yy')
     assert fields['xx'].dims == ('xx', )

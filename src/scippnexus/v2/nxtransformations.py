@@ -81,6 +81,7 @@ class Transformation:
         value = self._obj[select]
         try:
             if isinstance(value, sc.DataGroup):
+                return value
                 raise TransformationError(
                     f"Failed to load transformation at {self.name}.")
             t = value * self.vector
@@ -111,6 +112,7 @@ class Transformation:
                 transform.attrs['depends_on'] = sc.scalar(depends_on[select])
             return transform
         except (sc.DimensionError, sc.UnitError) as e:
+            return value
             raise NexusStructureError(
                 f"Invalid transformation in NXtransformations: {e}") from e
 
