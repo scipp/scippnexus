@@ -15,6 +15,7 @@ externalfile = pytest.importorskip('externalfile')
     '2023/DREAM_mccode.h5',
     '2023/LOKI_mcstas_nexus_geometry.nxs',
     '2023/NMX_2e11-rechunk.h5',
+    '2023/YMIR_038243_00010244.hdf',
 ])
 def test_files_load_as_data_groups(name):
     with snx.File(externalfile.get_path(name)) as f:
