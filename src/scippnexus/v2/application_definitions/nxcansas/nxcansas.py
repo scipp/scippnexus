@@ -5,8 +5,23 @@ from typing import Literal, Optional, Union
 
 import scipp as sc
 
-from ...typing import H5Group
-from ..base import Group, NXdata, NXobject, base_definitions, create_field
+from ....typing import H5Group
+from ...base import Group, NXdata, NXobject, base_definitions, create_field
+
+
+class SASentry:
+    nx_class = 'NXentry'
+
+    def __init__(self, *, title: str, run: Union[str, int]):
+        self.title = title
+        self.run = run
+
+    def __write_to_nexus_group__(self, group: H5Group):
+        group.attrs['canSAS_class'] = 'SASentry'
+        group.attrs['version'] = '1.0'
+        group.attrs['definition'] = 'NXcanSAS'
+        create_field(group, 'title', self.title)
+        create_field(group, 'run', self.run)
 
 
 class SASdata:
@@ -86,21 +101,6 @@ class _SAStransmission_spectrum(NXdata):
         super().__init__(group,
                          fallback_dims=(group.attrs.get('T_axes', 'lambda'), ),
                          fallback_signal_name='T')
-
-
-class SASentry:
-    nx_class = 'NXentry'
-
-    def __init__(self, *, title: str, run: Union[str, int]):
-        self.title = title
-        self.run = run
-
-    def __write_to_nexus_group__(self, group: H5Group):
-        group.attrs['canSAS_class'] = 'SASentry'
-        group.attrs['version'] = '1.0'
-        group.attrs['definition'] = 'NXcanSAS'
-        create_field(group, 'title', self.title)
-        create_field(group, 'run', self.run)
 
 
 class NXcanSAS:
