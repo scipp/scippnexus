@@ -191,7 +191,8 @@ def test_chain_with_multiple_values_and_different_time_unit(h5root):
     assert sc.identical(depends_on.value, expected)
 
 
-def test_broken_time_dependent_transformation_returns_path_and_transformations(h5root):
+def test_broken_time_dependent_transformation_returns_datagroup_but_sets_up_depends_on(
+        h5root):
     detector = create_detector(h5root)
     snx.create_field(detector, 'depends_on',
                      sc.scalar('/detector_0/transformations/t1'))
@@ -216,14 +217,15 @@ def test_broken_time_dependent_transformation_returns_path_and_transformations(h
 
     detector = make_group(detector)
     loaded = detector[()]
-    assert sc.identical(loaded.coords['depends_on'],
-                        sc.scalar('/detector_0/transformations/t1'))
     t = loaded.coords['transformations'].value
     assert isinstance(t, sc.DataGroup)
     # Due to the way NXtransformations works, vital information is stored in the
     # attributes. DataGroup does currently not support attributes, so this information
     # is mostly useless until that is addressed.
-    assert 't1' in t
+    t1 = t['t1']
+    assert isinstance(t1, sc.DataGroup)
+    assert t1.keys() == {'time', 'value'}
+    assert_identical(loaded.coords['depends_on'].value, t1)
 
 
 def write_translation(group, name: str, value: sc.Variable, offset: sc.Variable,

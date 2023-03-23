@@ -694,7 +694,6 @@ class NXdata(NXobject):
         coords = sc.DataGroup(dg)
         signal = coords.pop(self._signal_name)
         da = sc.DataArray(data=signal)
-        coords = {name: asarray(coord) for name, coord in coords.items()}
         da = self._add_coords(da, coords)
         if aux:
             signals = {self._signal_name: da}
@@ -718,10 +717,15 @@ class NXdata(NXobject):
         return False
 
     def _add_coords(self, da: sc.DataArray, coords: sc.DataGroup) -> sc.DataArray:
-        da.coords.update(coords)
-        for name in coords:
-            if self._coord_to_attr(da, name, self._group[name]):
-                da.attrs[name] = da.coords.pop(name)
+        for name, coord in coords.items():
+            if not isinstance(coord, sc.Variable):
+                da.coords[name] = sc.scalar(coord)
+            # We need the shape *before* slicing to determine dims, so we get the
+            # field from the group for the conditional.
+            elif self._coord_to_attr(da, name, self._group[name]):
+                da.attrs[name] = coord
+            else:
+                da.coords[name] = coord
         return da
 
 
