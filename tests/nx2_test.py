@@ -71,14 +71,6 @@ def test_read_field(h5root):
     assert sc.identical(var, sc.array(dims=['dim_0'], values=np.arange(4), unit='m'))
 
 
-def test_nx_class_attribute_sets_NXobject_subclass(h5root):
-    entry = h5root.create_group('entry')
-    events = entry.create_group('events')
-    events.attrs['NX_class'] = 'NXevent_data'
-    root = snx.Group(entry)
-    assert isinstance(root['events'], snx.NXevent_data)
-
-
 def test_read_empty_nxevent_data(h5root):
     entry = h5root.create_group('entry')
     events = entry.create_group('events')

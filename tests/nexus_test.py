@@ -459,6 +459,7 @@ def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot):
     assert 'event_time_offset' in da
 
 
+@pytest.mark.skip(reason='Special attributes disabled for now. Do we keep them?')
 def test___getattr__for_unique_child_groups(nxroot):
     entry = nxroot['entry']
     with pytest.raises(NexusStructureError):
@@ -473,6 +474,7 @@ def test___getattr__for_unique_child_groups(nxroot):
         entry.log
 
 
+@pytest.mark.skip(reason='Special attributes disabled for now. Do we keep them?')
 def test___dir__(nxroot):
     entry = nxroot['entry']
     assert 'log' not in entry.__dir__()

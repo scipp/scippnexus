@@ -25,5 +25,5 @@ from .base import (
     group_events_by_detector_number,
 )
 #from .definition import ApplicationDefinition, make_definition
-#from .file import File
+from .file import File
 from .nexus_classes import *

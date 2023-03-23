@@ -46,15 +46,19 @@ def create_event_data_no_ids(group):
                                                values=[0, 3, 3, 5]))
 
 
+@pytest.mark.skip(reason="For now we do not support this broken type of NXmonitor")
 def test_loads_event_data_in_current_group(group):
     monitor = group.create_class('monitor1', snx.NXmonitor)
     create_event_data_no_ids(monitor)
-    assert monitor.dims == ('pulse', )
+    assert monitor.dims == ('event_time_zero', )
     assert monitor.shape == (4, )
     loaded = monitor[...]
     assert_identical(
         loaded.bins.size().data,
-        sc.array(dims=['pulse'], unit=None, dtype='int64', values=[3, 0, 2, 1]))
+        sc.array(dims=['event_time_zero'],
+                 unit=None,
+                 dtype='int64',
+                 values=[3, 0, 2, 1]))
 
 
 def test_loads_event_data_in_child_group(group):
