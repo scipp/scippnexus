@@ -2,16 +2,16 @@ import h5py
 import pytest
 import scipp as sc
 
-from scippnexus import NXentry, NXroot
-from scippnexus.definitions.nxcansas import NXcanSAS, SASdata, SASentry
+import scippnexus.v2 as snx
+from scippnexus.v2.definitions.nxcansas import NXcanSAS, SASdata, SASentry
 
 
 @pytest.fixture()
 def nxroot():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
-        root = NXroot(f)
-        root.create_class('entry', NXentry)
+        root = snx.Group(f, definitions=snx.base_definitions)
+        root.create_class('entry', snx.NXentry)
         yield root
 
 

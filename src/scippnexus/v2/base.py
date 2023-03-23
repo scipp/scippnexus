@@ -479,7 +479,11 @@ class Group(Mapping):
 
     # TODO It is not clear if we want to support these convenience methods
     def __setitem__(self, key, value):
-        return create_field(self._group, key, value)
+        if hasattr(value, '__write_to_nexus_group__'):
+            group = create_class(self._group, key, nx_class=value.nx_class)
+            value.__write_to_nexus_group__(group)
+        else:
+            create_field(self._group, key, value)
 
     def create_field(self, key: str, value: sc.Variable) -> H5Dataset:
         return create_field(self._group, key, value)
