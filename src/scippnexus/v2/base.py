@@ -229,7 +229,7 @@ class Field:
                     variable,
                     start=starts[0],
                     scaling_factor=self.attrs.get('scaling_factor'))
-        if variable.ndim == 0 and variable.unit is None:
+        if variable.ndim == 0 and variable.unit is None and variable.fields is None:
             # Work around scipp/scipp#2815, and avoid returning NumPy bool
             if isinstance(variable.values, np.ndarray) and variable.dtype != 'bool':
                 return variable.values[()]
@@ -301,7 +301,9 @@ class NXobject:
         # exclude geometry/tansform groups?
         return sc.DataGroup(self._group).sizes
 
-    def index_child(self, child: Union[Field, Group], sel: ScippIndex) -> ScippIndex:
+    def index_child(
+            self, child: Union[Field, Group], sel: ScippIndex
+    ) -> Union[sc.Variable, sc.DataArray, sc.Dataset, sc.DataGroup]:
         # Note that this will be similar in NXdata, but there we need to handle
         # bin edges as well.
         child_sel = to_child_select(self.sizes.keys(), child.dims, sel)

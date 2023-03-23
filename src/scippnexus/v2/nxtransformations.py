@@ -82,8 +82,6 @@ class Transformation:
         try:
             if isinstance(value, sc.DataGroup):
                 return value
-                raise TransformationError(
-                    f"Failed to load transformation at {self.name}.")
             t = value * self.vector
             v = t if isinstance(t, sc.Variable) else t.data
             if transformation_type == 'translation':
@@ -111,10 +109,10 @@ class Transformation:
                     transform = sc.DataArray(transform)
                 transform.attrs['depends_on'] = sc.scalar(depends_on[select])
             return transform
-        except (sc.DimensionError, sc.UnitError, TransformationError) as e:
+        except (sc.DimensionError, sc.UnitError, TransformationError):
+            # TODO We should probably try to return some other data structure and
+            # also insert offset and other attributes.
             return value
-            raise NexusStructureError(
-                f"Invalid transformation in NXtransformations: {e}") from e
 
 
 def _interpolate_transform(transform, xnew):
