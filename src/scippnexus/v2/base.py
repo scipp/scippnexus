@@ -350,7 +350,7 @@ class Group(Mapping):
                  definitions: Optional[Dict[str, type]] = None,
                  parent: Optional[Group] = None):
         self._group = group
-        self._definitions = {} if definitions is None else definitions
+        self._definitions = DefinitionsDict() if definitions is None else definitions
         if parent is None:
             if group == group.parent:
                 self._parent = self
@@ -417,7 +417,7 @@ class Group(Mapping):
 
     @cached_property
     def _nexus(self) -> NXobject:
-        return self._definitions.get(self.attrs.get('NX_class'), NXobject)(self)
+        return self._definitions.get(self.attrs.get('NX_class'), group=self)(self)
 
     def _populate_fields(self) -> None:
         _ = self._nexus
@@ -785,7 +785,19 @@ class NXgeometry(NXobject):
         return sc.scalar(children)
 
 
-base_definitions = {}
+class DefinitionsDict:
+
+    def __init__(self):
+        self._definitions = {}
+
+    def __setitem__(self, nx_class: str, definition: type):
+        self._definitions[nx_class] = definition
+
+    def get(self, nx_class: str, group: Group) -> type:
+        return self._definitions.get(nx_class, NXobject)
+
+
+base_definitions = DefinitionsDict()
 base_definitions['NXdata'] = NXdata
 base_definitions['NXlog'] = NXlog
 base_definitions['NXdetector'] = NXdetector
