@@ -6,7 +6,8 @@ from typing import Literal, Optional, Union
 import scipp as sc
 
 from ....typing import H5Group
-from ...base import Group, NXdata, NXobject, base_definitions, create_field
+from ...base import Group, NXobject, base_definitions, create_field
+from ...nxdata import NXdata
 
 
 class SASentry:
