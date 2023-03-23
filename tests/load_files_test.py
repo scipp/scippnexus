@@ -3,7 +3,7 @@
 import pytest
 import scipp as sc
 
-import scippnexus as snx
+import scippnexus.v2 as snx
 
 externalfile = pytest.importorskip('externalfile')
 

@@ -19,7 +19,13 @@ def off_to_shape(*,
     """
     # Vertices in winding order. This duplicates vertices if they are part of more than
     # one faces.
-    vw = vertices[winding_order.values]
+    # TODO Should use this:
+    #     vw = vertices[winding_order.values]
+    # but NumPy is currently much faster.
+    # See https://github.com/scipp/scipp/issues/3044
+    vw = sc.vectors(dims=vertices.dims,
+                    values=vertices.values[winding_order.values],
+                    unit=vertices.unit)
     # Same as above, grouped by face.
     fvw = sc.bins(begin=faces, data=vw, dim=vw.dim)
     low = fvw.bins.size().min().value

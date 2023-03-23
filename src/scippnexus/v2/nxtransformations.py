@@ -111,7 +111,7 @@ class Transformation:
                     transform = sc.DataArray(transform)
                 transform.attrs['depends_on'] = sc.scalar(depends_on[select])
             return transform
-        except (sc.DimensionError, sc.UnitError) as e:
+        except (sc.DimensionError, sc.UnitError, TransformationError) as e:
             return value
             raise NexusStructureError(
                 f"Invalid transformation in NXtransformations: {e}") from e
