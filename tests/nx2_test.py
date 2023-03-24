@@ -20,7 +20,6 @@ def test_does_not_see_changes(h5root):
     data['time'] = np.arange(4)
     obj = snx.Group(entry)
     dg = obj[()]
-    print(list(dg.items()))
     assert obj.sizes == {'dim_0': 4}
     assert 'data' in dg
     entry.create_group('data2')
@@ -36,7 +35,6 @@ def test_read_recursive(h5root):
     data['time'].attrs['units'] = 's'
     obj = snx.Group(entry)
     dg = obj[()]
-    print(list(dg.items()))
     assert obj.sizes == {'dim_0': None}
     assert 'data' in dg
 

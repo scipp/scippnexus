@@ -335,7 +335,6 @@ def test_uncertainties_of_coords_are_loaded(h5root, errors_suffix):
     snx.create_field(data, 'scalar', sc.values(da.coords['scalar']))
     snx.create_field(data, f'scalar{errors_suffix}', sc.stddevs(da.coords['scalar']))
     data = snx.Group(data, definitions=snx.base_definitions)
-    print(data[...], da)
     assert sc.identical(data[...], da)
 
 

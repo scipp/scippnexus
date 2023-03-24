@@ -54,7 +54,6 @@ def test_finds_data_from_group_attr(h5root):
     snx.create_field(detector, 'custom', da.data)
     detector.attrs['signal'] = 'custom'
     detector = make_group(detector)
-    print(detector[...])
     assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
 
 
