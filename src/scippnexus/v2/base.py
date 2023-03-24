@@ -547,8 +547,8 @@ class Group(Mapping):
 
 class NXgeometry(NXobject):
 
-    def __init__(self, group: Group):
-        super().__init__(group)
+    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+        super().__init__(attrs=attrs, children=children)
 
     @staticmethod
     def assemble_as_child(children: sc.DataGroup,
