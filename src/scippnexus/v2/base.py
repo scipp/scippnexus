@@ -273,14 +273,24 @@ def _squeezed_field_sizes(dataset: H5Dataset) -> Dict[str, int]:
 
 class NXobject:
 
-    def __init__(self, group: Group):
-        self._group = group
+    def _init_field(self, field: Field):
+        field.sizes = _squeezed_field_sizes(field.dataset)
+        field.dtype = _dtype_fromdataset(field.dataset)
+
+    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+        from .nxtransformations import Transformation
+        self._attrs = attrs
+        self._children = children
         self._special_fields = {}
         self._transformations = {}
-        for name, field in group._children.items():
+        for name, field in children.items():
+            if name == 'depends_on':
+                self._special_fields[name] = field
             if isinstance(field, Field):
-                field.sizes = _squeezed_field_sizes(field.dataset)
-                field.dtype = _dtype_fromdataset(field.dataset)
+                self._init_field(field)
+            elif isinstance(field, Transformation):
+                if isinstance(field._obj, Field):
+                    self._init_field(field._obj)
             elif (nx_class := field.attrs.get('NX_class')) is not None:
                 if nx_class in [
                         'NXoff_geometry',
@@ -294,12 +304,13 @@ class NXobject:
 
     @property
     def unit(self) -> Union[None, sc.Unit]:
-        raise ValueError(f"Group-like {self._group.nx_class} has no well-defined unit")
+        raise ValueError(
+            f"Group-like {self._attrs.get('NX_class')} has no well-defined unit")
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
         # exclude geometry/tansform groups?
-        return sc.DataGroup(self._group).sizes
+        return sc.DataGroup(self._children).sizes
 
     def index_child(
             self, child: Union[Field, Group], sel: ScippIndex
@@ -320,6 +331,8 @@ class NXobject:
 
     def pre_assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
         for name, field in self._special_fields.items():
+            if name == 'depends_on':
+                continue
             if name in self._transformations:
                 continue
             det_num = self.detector_number
@@ -327,14 +340,15 @@ class NXobject:
                 det_num = dg[det_num]
             dg[name] = field._nexus.assemble_as_child(dg[name], detector_number=det_num)
         if (depends_on := dg.get('depends_on')) is not None:
-            transform = self._group[depends_on]
-            # Avoid loading transform twice if it is a child of the same group
-            for name, transformations in self._transformations.items():
-                if transform.name.startswith(transformations.name):
-                    dg['depends_on'] = dg[name][depends_on.split('/')[-1]]
-                    break
-            else:
-                dg['depends_on'] = transform[()]
+            dg['depends_on'] = sc.scalar(depends_on)
+        #    transform = self._children[depends_on]
+        #    # Avoid loading transform twice if it is a child of the same group
+        #    for name, transformations in self._transformations.items():
+        #        if transform.name.startswith(transformations.name):
+        #            dg['depends_on'] = dg[name][depends_on.split('/')[-1]]
+        #            break
+        #    else:
+        #        dg['depends_on'] = transform[()]
         return dg
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
@@ -400,11 +414,29 @@ class Group(Mapping):
 
     @cached_property
     def _children(self) -> Dict[str, Union[Field, Group]]:
-        items = {
-            name: Field(obj, parent=self) if is_dataset(obj) else Group(
-                obj, parent=self, definitions=self._definitions)
-            for name, obj in self._group.items()
-        }
+        # Transformations should be stored in NXtransformations, which is cumbersome
+        # to handle, since we need to check the parent of a transform to tell whether
+        # it is a transform. However, we can avoid this by simply treating everything
+        # referenced by a 'depends_on' field or attribute as a transform.
+        from .nxtransformations import Transformation
+
+        def _make_child(
+                name: str, obj: Union[H5Dataset,
+                                      H5Group]) -> Union[Transformation, Field, Group]:
+            if name == 'depends_on':
+                target = obj[()]
+                obj = obj.parent[target]
+                # TODO Bad, we are recreating the group
+                parent = Group(obj.parent, definitions=self._definitions)
+            else:
+                parent = self
+            if is_dataset(obj):
+                child = Field(obj, parent=parent)
+            else:
+                child = Group(obj, parent=parent, definitions=self._definitions)
+            return Transformation(child) if name == 'depends_on' else child
+
+        items = {name: _make_child(name, obj) for name, obj in self._group.items()}
         for suffix in ('_errors', '_error'):
             field_with_errors = [name for name in items if f'{name}{suffix}' in items]
             for name in field_with_errors:
@@ -419,7 +451,9 @@ class Group(Mapping):
 
     @cached_property
     def _nexus(self) -> NXobject:
-        return self._definitions.get(self.attrs.get('NX_class'), group=self)(self)
+        return self._definitions.get(self.attrs.get('NX_class'),
+                                     group=self)(attrs=self.attrs,
+                                                 children=self._children)
 
     def _populate_fields(self) -> None:
         _ = self._nexus
@@ -455,10 +489,10 @@ class Group(Mapping):
                 else:
                     return self[sel.split('/')[0]][sel[sel.index('/') + 1:]]
             child = self._children[sel]
-            if isinstance(child, Field):
+            from .nxtransformations import Transformation
+            if isinstance(child, (Field, Transformation)):
                 self._populate_fields()
             if self._is_nxtransformations:
-                from .nxtransformations import Transformation
                 return Transformation(child)
             return child
 

@@ -48,8 +48,7 @@ def test_Transformation_with_single_value(h5root):
     value.attrs['offset_units'] = str(offset.unit)
     value.attrs['vector'] = vector.value
 
-    depends_on = make_group(detector)['depends_on'][()]
-    t = make_group(h5root)[depends_on]
+    t = make_group(detector)['depends_on']
     assert t.depends_on is None
     assert sc.identical(t.offset, offset)
     assert sc.identical(t.vector, vector)
@@ -108,8 +107,7 @@ def test_Transformation_with_multiple_values(h5root):
     value.attrs['offset_units'] = str(offset.unit)
     value.attrs['vector'] = vector.value
 
-    depends_on = make_group(detector)['depends_on'][()]
-    t = make_group(h5root)[depends_on]
+    t = make_group(detector)['depends_on']
     assert t.depends_on is None
     assert sc.identical(t.offset, offset)
     assert sc.identical(t.vector, vector)

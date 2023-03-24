@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 
 import scipp as sc
 
@@ -52,9 +52,9 @@ class NXcylindrical_geometry(NXobject):
         'cylinders': ('cylinder', 'vertex_index')
     }
 
-    def __init__(self, group: Group):
-        super().__init__(group)
-        for name, field in group._children.items():
+    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+        super().__init__(attrs=attrs, children=children)
+        for name, field in children.items():
             if isinstance(field, Field):
                 field.sizes = dict(zip(self._dims.get(name), field.dataset.shape))
                 if name == 'vertices':

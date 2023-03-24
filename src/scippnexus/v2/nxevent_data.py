@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -30,9 +30,9 @@ def _check_for_missing_fields(fields):
 
 class NXevent_data(NXobject):
 
-    def __init__(self, group: Group):
-        super().__init__(group)
-        for name, field in group._children.items():
+    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+        super().__init__(attrs=attrs, children=children)
+        for name, field in children.items():
             if name in ['event_time_zero', 'event_index']:
                 field.sizes = {_pulse_dimension: field.dataset.shape[0]}
             elif name in ['event_time_offset', 'event_id']:
@@ -40,7 +40,7 @@ class NXevent_data(NXobject):
 
     @property
     def shape(self) -> Tuple[int]:
-        if (event_index := self._group.get('event_index')) is not None:
+        if (event_index := self._children.get('event_index')) is not None:
             return event_index.shape
         return ()
 
@@ -150,9 +150,8 @@ class NXevent_data(NXobject):
         try:
             binned = sc.bins(data=events, dim=_event_dimension, begin=begins)
         except IndexError as e:
-            raise NexusStructureError(
-                f"Invalid index in NXevent_data at {self._group.name}/event_index:\n{e}"
-            )
+            path = self._children['event_index'].name
+            raise NexusStructureError(f"Invalid index in NXevent_data at {path}:\n{e}")
 
         return sc.DataArray(data=binned, coords={'event_time_zero': event_time_zero})
 

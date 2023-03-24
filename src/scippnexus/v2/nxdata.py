@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -34,10 +34,11 @@ def _guess_dims(dims, shape, dataset: H5Dataset):
 class NXdata(NXobject):
 
     def __init__(self,
-                 group: Group,
+                 attrs: Dict[str, Any],
+                 children: Dict[str, Union[Field, Group]],
                  fallback_dims: Optional[Tuple[str, ...]] = None,
                  fallback_signal_name: Optional[str] = None):
-        super().__init__(group)
+        super().__init__(attrs=attrs, children=children)
         self._valid = True
         # Must do full consistency check here, to define self.sizes:
         # - squeeze correctly
@@ -47,27 +48,26 @@ class NXdata(NXobject):
         # Can we just set field dims here?
         self._signal_name = None
         self._signal = None
-        self._aux_signals = group.attrs.get('auxiliary_signals', [])
-        if (name := group.attrs.get(
-                'signal',
-                fallback_signal_name)) is not None and name in group._children:
+        self._aux_signals = attrs.get('auxiliary_signals', [])
+        if (name := attrs.get('signal',
+                              fallback_signal_name)) is not None and name in children:
             self._signal_name = name
-            self._signal = group._children[name]
+            self._signal = children[name]
         else:
             # Legacy NXdata defines signal not as group attribute, but attr on dataset
-            for name, field in group._children.items():
+            for name, field in children.items():
                 # What is the meaning of the attribute value? It is undocumented,
                 # we simply ignore it.
                 if 'signal' in field.attrs:
                     self._signal_name = name
-                    self._signal = group._children[name]
+                    self._signal = children[name]
                     break
 
-        axes = group.attrs.get('axes')
+        axes = attrs.get('axes')
         signal_axes = None if self._signal is None else self._signal.attrs.get('axes')
 
         axis_index = {}
-        for name, field in group._children.items():
+        for name, field in children.items():
             if (axis := field.attrs.get('axis')) is not None:
                 axis_index[name] = axis
 
@@ -115,7 +115,7 @@ class NXdata(NXobject):
         indices_suffix = '_indices'
         indices_attrs = {
             key[:-len(indices_suffix)]: attr
-            for key, attr in group.attrs.items() if key.endswith(indices_suffix)
+            for key, attr in attrs.items() if key.endswith(indices_suffix)
         }
 
         dims = np.array(group_dims)
@@ -153,7 +153,7 @@ class NXdata(NXobject):
                 return _guess_dims(group_dims, self._signal.dataset.shape,
                                    field.dataset)
 
-        for name, field in group._children.items():
+        for name, field in children.items():
             if not isinstance(field, Field):
                 if name not in self._special_fields:
                     self._valid = False
@@ -189,7 +189,7 @@ class NXdata(NXobject):
         return None
 
     def index_child(self, child: Union[Field, Group], sel: ScippIndex) -> ScippIndex:
-        child_sel = to_child_select(self._group.dims,
+        child_sel = to_child_select(tuple(self.sizes),
                                     child.dims,
                                     sel,
                                     bin_edge_dim=self._bin_edge_dim(child))
@@ -218,6 +218,8 @@ class NXdata(NXobject):
         return self._bin_edge_dim(coord)
 
     def _coord_to_attr(self, da: sc.DataArray, name: str, coord: sc.Variable) -> bool:
+        if name == 'depends_on':
+            return False
         dim_of_coord = self._dim_of_coord(name, coord)
         if dim_of_coord is None:
             return False
@@ -231,7 +233,7 @@ class NXdata(NXobject):
                 da.coords[name] = sc.scalar(coord)
             # We need the shape *before* slicing to determine dims, so we get the
             # field from the group for the conditional.
-            elif self._coord_to_attr(da, name, self._group[name]):
+            elif self._coord_to_attr(da, name, self._children[name]):
                 da.attrs[name] = coord
             else:
                 da.coords[name] = coord
@@ -244,9 +246,12 @@ def _squeeze_trailing(dims: Tuple[str, ...], shape: Tuple[int, ...]) -> Tuple[in
 
 class NXlog(NXdata):
 
-    def __init__(self, group: Group):
-        super().__init__(group, fallback_dims=('time', ), fallback_signal_name='value')
-        if (time := self._group._children.get('time')) is not None:
+    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+        super().__init__(attrs=attrs,
+                         children=children,
+                         fallback_dims=('time', ),
+                         fallback_signal_name='value')
+        if (time := children.get('time')) is not None:
             time._is_time = True
 
 
@@ -254,29 +259,30 @@ class NXdetector(NXdata):
     _detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
     @staticmethod
-    def _detector_number(group: Group) -> Optional[str]:
+    def _detector_number(children: Iterable[str]) -> Optional[str]:
         for name in NXdetector._detector_number_fields:
-            if name in group._children:
+            if name in children:
                 return name
 
-    def __init__(self, group: Group):
+    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         fallback_dims = None
-        if (det_num_name := NXdetector._detector_number(group)) is not None:
-            if group._children[det_num_name].dataset.ndim == 1:
+        if (det_num_name := NXdetector._detector_number(children)) is not None:
+            if children[det_num_name].dataset.ndim == 1:
                 fallback_dims = ('detector_number', )
-        super().__init__(group,
+        super().__init__(attrs=attrs,
+                         children=children,
                          fallback_dims=fallback_dims,
                          fallback_signal_name='data')
 
     @property
     def detector_number(self) -> Optional[str]:
-        return self._detector_number(self._group)
+        return self._detector_number(self._children)
 
 
 class NXmonitor(NXdata):
 
-    def __init__(self, group: Group):
-        super().__init__(group, fallback_signal_name='data')
+    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+        super().__init__(attrs=attrs, children=children, fallback_signal_name='data')
 
 
 def _group_events(*,

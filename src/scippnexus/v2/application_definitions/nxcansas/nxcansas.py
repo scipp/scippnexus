@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Literal, Optional, Union
+from typing import Any, Dict, Literal, Optional, Union
 
 import scipp as sc
 
 from ....typing import H5Group
-from ...base import Group, NXobject, base_definitions, create_field
+from ...base import Field, Group, NXobject, base_definitions, create_field
 from ...nxdata import NXdata
 
 
@@ -68,11 +68,14 @@ class SASdata:
 
 class _SASdata(NXdata):
 
-    def __init__(self, group: Group):
-        fallback_dims = group.attrs.get('I_axes')
+    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+        fallback_dims = attrs.get('I_axes')
         if fallback_dims is not None:
             fallback_dims = (fallback_dims, )
-        super().__init__(group, fallback_dims=fallback_dims, fallback_signal_name='I')
+        super().__init__(attrs=attrs,
+                         children=children,
+                         fallback_dims=fallback_dims,
+                         fallback_signal_name='I')
 
     # TODO Mechanism for custom error names
     @staticmethod
@@ -97,10 +100,11 @@ class _SASdata(NXdata):
 
 class _SAStransmission_spectrum(NXdata):
 
-    def __init__(self, group: Group):
+    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         # TODO A valid file should have T_axes, do we need to fallback?
-        super().__init__(group,
-                         fallback_dims=(group.attrs.get('T_axes', 'lambda'), ),
+        super().__init__(attrs=attrs,
+                         children=children,
+                         fallback_dims=(attrs.get('T_axes', 'lambda'), ),
                          fallback_signal_name='T')
 
 
