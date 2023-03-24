@@ -10,6 +10,7 @@ import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import cached_property, lru_cache
+from types import MappingProxyType
 from typing import Any, Dict, Iterator, List, Optional, Protocol, Tuple, Union
 
 import dateutil.parser
@@ -134,7 +135,8 @@ class Field:
 
     @cached_property
     def attrs(self) -> Dict[str, Any]:
-        return dict(self.dataset.attrs) if self.dataset.attrs else dict()
+        return MappingProxyType(
+            dict(self.dataset.attrs) if self.dataset.attrs else dict())
 
     @property
     def dims(self) -> Tuple[str]:
@@ -394,7 +396,8 @@ class Group(Mapping):
         # We may expected a per-subgroup overhead of 1 ms for reading attributes, so if
         # all we want is access one attribute, we may save, e.g., a second for a group
         # with 1000 subgroups.
-        return dict(self._group.attrs) if self._group.attrs else dict()
+        return MappingProxyType(
+            dict(self._group.attrs) if self._group.attrs else dict())
 
     @property
     def name(self) -> str:

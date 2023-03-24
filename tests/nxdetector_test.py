@@ -329,7 +329,7 @@ def test_loads_data_with_coords_and_off_geometry(nxroot, detid_name):
     detector.create_field(detid_name, da.coords['detector_number'])
     detector.create_field('xx', da.coords['xx'])
     detector.create_field('data', da.data)
-    detector.attrs['axes'] = ['xx', 'yy']
+    detector._group.attrs['axes'] = ['xx', 'yy']
     create_off_geometry_detector_numbers_1234(detector, name='shape')
     loaded = detector[...]
     expected = snx.nxoff_geometry.off_to_shape(
@@ -344,7 +344,7 @@ def test_missing_detector_numbers_triggers_fallback_given_off_geometry_with_det_
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
-    detector.attrs['axes'] = ['xx', 'yy']
+    detector._group.attrs['axes'] = ['xx', 'yy']
     create_off_geometry_detector_numbers_1234(detector, name='shape')
     loaded = detector[...]
     assert isinstance(loaded, sc.DataGroup)
@@ -355,7 +355,7 @@ def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nx
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
-    detector.attrs['axes'] = ['xx', 'yy']
+    detector._group.attrs['axes'] = ['xx', 'yy']
     create_off_geometry_detector_numbers_1234(detector,
                                               name='shape',
                                               detector_faces=False)
@@ -381,7 +381,7 @@ def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
-    detector.attrs['axes'] = ['xx', 'yy']
+    detector._group.attrs['axes'] = ['xx', 'yy']
     create_cylindrical_geometry_detector_numbers_1234(detector,
                                                       name='shape',
                                                       detector_numbers=False)
@@ -406,7 +406,7 @@ def test_cylindrical_geometry_with_missing_parent_detector_numbers_triggers_fall
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
-    detector.attrs['axes'] = ['xx', 'yy']
+    detector._group.attrs['axes'] = ['xx', 'yy']
     create_cylindrical_geometry_detector_numbers_1234(detector,
                                                       name='shape',
                                                       detector_numbers=True)
@@ -420,7 +420,7 @@ def test_cylindrical_geometry_with_inconsistent_detector_numbers_triggers_fallba
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1], [3.3]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
-    detector.attrs['axes'] = ['xx', 'yy']
+    detector._group.attrs['axes'] = ['xx', 'yy']
     detector.create_field('detector_numbers',
                           sc.array(dims=var.dims, values=[[1], [2]], unit=None))
     create_cylindrical_geometry_detector_numbers_1234(detector,
@@ -435,7 +435,7 @@ def test_cylindrical_geometry_with_detector_numbers(nxroot):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
-    detector.attrs['axes'] = ['xx', 'yy']
+    detector._group.attrs['axes'] = ['xx', 'yy']
     detector_number = sc.array(dims=var.dims, values=[[1, 2], [3, 4]], unit=None)
     detector.create_field('detector_number', detector_number)
     create_cylindrical_geometry_detector_numbers_1234(detector,
