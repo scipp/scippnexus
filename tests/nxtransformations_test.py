@@ -14,7 +14,7 @@ def make_group(group: h5py.Group) -> snx.Group:
 
 @pytest.fixture()
 def h5root(request):
-    """Yield NXroot containing a single NXentry named 'entry'"""
+    """Yield h5py root group (file)"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         yield f
 
