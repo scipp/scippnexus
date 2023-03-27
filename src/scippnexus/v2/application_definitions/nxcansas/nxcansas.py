@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Callable, Dict, Literal, Optional, Union
 
 import scipp as sc
 
@@ -110,13 +110,18 @@ class _SAStransmission_spectrum(NXdata):
 
 class NXcanSAS:
 
-    def get(self, key: type, group: Group) -> type:
-        if (cls := group.attrs.get('canSAS_class')) is not None:
-            if cls == 'SASdata':
-                return _SASdata
-            if cls == 'SAStransmission_spectrum':
-                return _SAStransmission_spectrum
-        return base_definitions.get(key, group)
+    def get(self, key: type, default: Callable) -> Callable:
+
+        def _definition_factory(attrs: Dict[str, Any],
+                                children: Dict[str, Union[Field, Group]]) -> NXobject:
+            if (cls := attrs.get('canSAS_class')) is not None:
+                if cls == 'SASdata':
+                    return _SASdata(attrs, children)
+                if cls == 'SAStransmission_spectrum':
+                    return _SAStransmission_spectrum(attrs, children)
+            return base_definitions.get(key, default)(attrs, children)
+
+        return _definition_factory
 
 
 definitions = NXcanSAS()

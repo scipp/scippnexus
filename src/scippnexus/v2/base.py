@@ -330,7 +330,7 @@ class NXobject:
         """
         # Note that this will be similar in NXdata, but there we need to handle
         # bin edges as well.
-        child_sel = to_child_select(self.sizes.keys(), child.dims, sel)
+        child_sel = to_child_select(tuple(self.sizes), child.dims, sel)
         return child[child_sel]
 
     def read_children(self, obj: Group, sel: ScippIndex) -> sc.DataGroup:
@@ -414,7 +414,7 @@ class Group(Mapping):
                  definitions: Optional[Dict[str, type]] = None,
                  parent: Optional[Group] = None):
         self._group = group
-        self._definitions = DefinitionsDict() if definitions is None else definitions
+        self._definitions = {} if definitions is None else definitions
         if parent is None:
             if group == group.parent:
                 self._parent = self
@@ -501,8 +501,8 @@ class Group(Mapping):
     @cached_property
     def _nexus(self) -> NXobject:
         return self._definitions.get(self.attrs.get('NX_class'),
-                                     group=self)(attrs=self.attrs,
-                                                 children=self._children)
+                                     NXobject)(attrs=self.attrs,
+                                               children=self._children)
 
     def _populate_fields(self) -> None:
         _ = self._nexus
@@ -646,17 +646,5 @@ def _nx_class_registry():
     return dict(inspect.getmembers(nexus_classes, inspect.isclass))
 
 
-class DefinitionsDict:
-
-    def __init__(self):
-        self._definitions = {}
-
-    def __setitem__(self, nx_class: str, definition: type):
-        self._definitions[nx_class] = definition
-
-    def get(self, nx_class: str, group: Group) -> type:
-        return self._definitions.get(nx_class, NXobject)
-
-
-base_definitions = DefinitionsDict()
+base_definitions = {}
 base_definitions['NXgeometry'] = NXgeometry
