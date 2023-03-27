@@ -306,7 +306,7 @@ class NXobject:
 
     @property
     def unit(self) -> Union[None, sc.Unit]:
-        raise ValueError(
+        raise AttributeError(
             f"Group-like {self._attrs.get('NX_class')} has no well-defined unit")
 
     @cached_property
@@ -317,12 +317,33 @@ class NXobject:
     def index_child(
             self, child: Union[Field, Group], sel: ScippIndex
     ) -> Union[sc.Variable, sc.DataArray, sc.Dataset, sc.DataGroup]:
+        """
+        When a Group is indexed, this method is called to index each child.
+
+        The main purpose of this is to translate the Group index to the child index.
+        Since the group dimensions (usually given by the signal) may be a superset of
+        the child dimensions, we need to translate the group index to a child index.
+
+        The default implementation assumes that the child shape is identical to the
+        group shape, for all child dims. Subclasses of NXobject, in particular NXdata,
+        override this method to handle bin edges.
+        """
         # Note that this will be similar in NXdata, but there we need to handle
         # bin edges as well.
         child_sel = to_child_select(self.sizes.keys(), child.dims, sel)
         return child[child_sel]
 
     def read_children(self, obj: Group, sel: ScippIndex) -> sc.DataGroup:
+        """
+        When a Group is indexed, this method is called to read all children.
+
+        The default implementation simply calls index_child on each child and returns
+        the result as a DataGroup.
+
+        Subclasses of NXobject, in particular NXevent_data, override this method to
+        to implement special logic for reading children with interdependencies, i.e.,
+        where reading each child in isolation is not possible.
+        """
         return sc.DataGroup(
             {name: self.index_child(child, sel)
              for name, child in obj.items()})
@@ -341,6 +362,10 @@ class NXobject:
             if det_num is not None:
                 det_num = dg[det_num]
             dg[name] = field._nexus.assemble_as_child(dg[name], detector_number=det_num)
+        # TODO Should we remove the NXtransformations group (if there is a depends_on)?
+        # For now it gets inserted as a DataGroup, or wrapped in a scalar coord in case
+        # of NXdata
+        # Would it be better to dereference the depends_on links only after loading?
         if (depends_on := dg.get('depends_on')) is not None:
             dg['depends_on'] = sc.scalar(depends_on)
         #    transform = self._children[depends_on]
@@ -362,6 +387,27 @@ class NXroot(NXobject):
 
 
 class Group(Mapping):
+    """
+    A group in a NeXus file.
+
+    This class is a wrapper around an h5py.Group object. It provides a dict-like
+    interface to the children of the group, and provides access to the attributes
+    of the group. The children are either Field or Group objects, depending on
+    whether the child is a dataset or a group, respectively.
+
+    The implementation of this class is unfortunately very complex, for several reasons:
+    1. NeXus requires "nonlocal" information for interpreting a field. For example,
+       NXdata attributes define which fields are the signal, and the names of the axes.
+       A field cannot be read without this information, in particular since we want to
+       support reading slices, using the Scipp dimension-label syntax.
+    2. The depend_on field and depends_on attributes in fields within NXtransformations
+       link to arbitrary other fields or groups in the same file. This interacts with
+       item 1.) and further complicates the logic.
+    3. HDF5 or h5py performance is not great, and we want to avoid reading the same
+       attrs or datasets multiple times. We can therefore not rely on "on-the-fly"
+       interpretation of the file, but need to cache information. An earlier version
+       of ScippNexus used such a mechanism without caching, which was very slow.
+    """
 
     def __init__(self,
                  group: H5Group,
