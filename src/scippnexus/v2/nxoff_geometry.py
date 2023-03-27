@@ -31,7 +31,7 @@ def off_to_shape(*,
     low = fvw.bins.size().min().value
     high = fvw.bins.size().max().value
     if low == high:
-        # Vertices in winding order, groupbed by face. Unlike `fvw` above we now know
+        # Vertices in winding order, grouped by face. Unlike `fvw` above we now know
         # that each face has the same number of vertices, so we can fold instead of
         # using binned data.
         shapes = vw.fold(dim=vertices.dim, sizes={faces.dim: -1, vertices.dim: low})

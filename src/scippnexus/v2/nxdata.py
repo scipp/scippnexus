@@ -155,6 +155,9 @@ class NXdata(NXobject):
 
         for name, field in children.items():
             if not isinstance(field, Field):
+                # If the NXdata contains subgroups we can generally not define valid
+                # sizes... except for some "special fields" that are transformed or
+                # wrapped into scalars.
                 if name not in self._special_fields:
                     self._valid = False
             elif (dims := get_dims(name, field)) is not None:

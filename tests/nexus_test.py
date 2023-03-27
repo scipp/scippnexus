@@ -128,7 +128,6 @@ def test_nxlog_length_1(h5root):
     log = nxroot.create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
-    log = log.rebuild()
     assert sc.identical(log[...], da)
 
 

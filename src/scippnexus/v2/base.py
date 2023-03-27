@@ -464,7 +464,7 @@ class Group(Mapping):
 
     @cached_property
     def file(self) -> Optional[Group]:
-        return self if self == self.parent else self.parent.file
+        return self if self is self.parent else self.parent.file
 
     @cached_property
     def _children(self) -> Dict[str, Union[Field, Group]]:
@@ -550,8 +550,7 @@ class Group(Mapping):
         if isclass(sel) or (isinstance(sel, list) and len(sel)
                             and all(isclass(x) for x in sel)):
             return self._get_children_by_nx_class(sel)
-        # Here this is scipp.DataGroup. Child classes like NXdata may return DataArray.
-        # (not scipp.DataArray, as that does not support lazy data)
+
         dg = self._nexus.read_children(self, sel)
         try:
             from .nxtransformations import maybe_transformation
@@ -578,9 +577,6 @@ class Group(Mapping):
         return Group(create_class(self._group, name, class_name),
                      definitions=self._definitions,
                      parent=self)
-
-    def rebuild(self) -> Group:
-        return Group(self._group, definitions=self._definitions, parent=self.parent)
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
