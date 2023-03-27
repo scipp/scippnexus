@@ -9,7 +9,14 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import Field, NexusStructureError, NXobject, ScippIndex, base_definitions
+from .base import (
+    Field,
+    Group,
+    NexusStructureError,
+    NXobject,
+    ScippIndex,
+    base_definitions,
+)
 
 
 class TransformationError(NexusStructureError):
@@ -79,6 +86,10 @@ class Transformation:
         # shape=[1] for single values. It is unclear how and if this could be
         # distinguished from a scan of length 1.
         value = self._obj[select]
+        return self.make_transformation(value, transformation_type, select)
+
+    def make_transformation(self, value: Union[sc.Variable, sc.DataArray],
+                            transformation_type: str, select: ScippIndex):
         try:
             if isinstance(value, sc.DataGroup):
                 return value
@@ -192,6 +203,23 @@ def _get_transformations(transform: Transformation, *,
     # to deal with changing beamline components (e.g. pixel positions) during a
     # live data stream (see https://github.com/scipp/scippneutron/issues/76).
     return transformations
+
+
+def maybe_transformation(
+        obj: Union[Field, Group], value: Union[sc.Variable, sc.DataArray, sc.DataGroup],
+        sel: ScippIndex) -> Union[sc.Variable, sc.DataArray, sc.DataGroup]:
+    """
+    Return a loaded field, possibly modified if it is a transformation.
+
+    Transformations are stored in NXtransformations groups. However, identifying
+    transformation fields in this way requires inspecting the parent group, which
+    is cumbersome to implement. Instead we use the presence of the attribute
+    'transformation_type' to identify transformation fields.
+    """
+    if (transformation_type := obj.attrs.get('transformation_type')) is not None:
+        from .nxtransformations import Transformation
+        return Transformation(obj).make_transformation(value, transformation_type, sel)
+    return value
 
 
 base_definitions['NXtransformations'] = NXtransformations

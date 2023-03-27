@@ -237,7 +237,8 @@ class Field:
                 return variable.values[()]
             else:
                 return variable.value
-        return variable
+        from .nxtransformations import maybe_transformation
+        return maybe_transformation(self, value=variable, sel=select)
 
     def __repr__(self) -> str:
         return f'<Nexus field "{self.dataset.name}">'
@@ -328,8 +329,6 @@ class NXobject:
         group shape, for all child dims. Subclasses of NXobject, in particular NXdata,
         override this method to handle bin edges.
         """
-        # Note that this will be similar in NXdata, but there we need to handle
-        # bin edges as well.
         child_sel = to_child_select(tuple(self.sizes), child.dims, sel)
         return child[child_sel]
 
@@ -519,10 +518,6 @@ class Group(Mapping):
     def __iter__(self) -> Iterator[str]:
         return self._children.__iter__()
 
-    @cached_property
-    def _is_nxtransformations(self) -> bool:
-        return self.attrs.get('NX_class') == 'NXtransformations'
-
     def _get_children_by_nx_class(
             self, select: Union[type, List[type]]) -> Dict[str, Union[NXobject, Field]]:
         children = {}
@@ -547,8 +542,6 @@ class Group(Mapping):
             from .nxtransformations import Transformation
             if isinstance(child, (Field, Transformation)):
                 self._populate_fields()
-            if self._is_nxtransformations:
-                return Transformation(child)
             return child
 
         def isclass(x):
@@ -561,8 +554,10 @@ class Group(Mapping):
         # (not scipp.DataArray, as that does not support lazy data)
         dg = self._nexus.read_children(self, sel)
         try:
+            from .nxtransformations import maybe_transformation
             dg = self._nexus.pre_assemble(dg)
-            return self._nexus.assemble(dg)
+            dg = self._nexus.assemble(dg)
+            return maybe_transformation(self, value=dg, sel=sel)
         except (sc.DimensionError, NexusStructureError) as e:
             print(e)
             # TODO log warning
