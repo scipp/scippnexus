@@ -352,6 +352,12 @@ class NXobject:
     def detector_number(self) -> Optional[str]:
         return None
 
+    def assemble_as_child(
+            self,
+            obj: sc.DataGroup,
+            detector_number: Optional[sc.Variable] = None) -> sc.DataGroup:
+        return obj
+
     def pre_assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
         for name, field in self._special_fields.items():
             if name == 'depends_on':
