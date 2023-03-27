@@ -9,14 +9,7 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import (
-    Field,
-    Group,
-    NexusStructureError,
-    NXobject,
-    ScippIndex,
-    base_definitions,
-)
+from .base import Field, Group, NexusStructureError, NXobject, ScippIndex
 
 
 class TransformationError(NexusStructureError):
@@ -211,15 +204,14 @@ def maybe_transformation(
     """
     Return a loaded field, possibly modified if it is a transformation.
 
-    Transformations are stored in NXtransformations groups. However, identifying
+    Transformations are usually stored in NXtransformations groups. However, identifying
     transformation fields in this way requires inspecting the parent group, which
-    is cumbersome to implement. Instead we use the presence of the attribute
-    'transformation_type' to identify transformation fields.
+    is cumbersome to implement. Furthermore, according to the NXdetector documentation
+    transformations are not necessarily placed inside NXtransformations.
+    Instead we use the presence of the attribute 'transformation_type' to identify
+    transformation fields.
     """
     if (transformation_type := obj.attrs.get('transformation_type')) is not None:
         from .nxtransformations import Transformation
         return Transformation(obj).make_transformation(value, transformation_type, sel)
     return value
-
-
-base_definitions['NXtransformations'] = NXtransformations

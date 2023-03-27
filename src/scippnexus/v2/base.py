@@ -291,9 +291,22 @@ class NXobject:
                 self._special_fields[name] = field
             if isinstance(field, Field):
                 self._init_field(field)
+            # TODO Consider simplifying a bunch of logic by not following depends_on
+            # chains. Instead provide post-processing function to resolve them. This
+            # will fail to resolve links that fall outside the loaded group, but that
+            # may be an acceptable limitation. Furthermore, resolving links may not
+            # possible in all cases anyway, e.g., when processing a new chunk from a
+            # Kafka stream.
             elif isinstance(field, Transformation):
                 if isinstance(field._obj, Field):
                     self._init_field(field._obj)
+            # TODO Some unfortunate logic that feels backwards: Certain subgroups have
+            # a special meaning, in that they are either describing a global property
+            # of the group, or a detector_number-dependent property. To determine valid
+            # dims and shape we must exclude those special groups. It would be nice to
+            # pass the detector_number from the parent, but at the point of NXobject
+            # creation for the child it has not been loaded yet. Is loading it twice
+            # acceptable? Or maybe it can be cached in the parent NXobject?
             elif (nx_class := field.attrs.get('NX_class')) is not None:
                 if nx_class in [
                         'NXoff_geometry',
@@ -358,6 +371,8 @@ class NXobject:
         return obj
 
     def pre_assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
+        # TODO See above regarding special child groups. Maybe there is a better
+        # mechanism?
         for name, field in self._special_fields.items():
             if name == 'depends_on':
                 continue
@@ -420,6 +435,8 @@ class Group(Mapping):
                  parent: Optional[Group] = None):
         self._group = group
         self._definitions = {} if definitions is None else definitions
+        # TODO The entire 'parent' mechanism exists only for resolving 'depends_on'
+        # chains. Consider removing it and instead resolving the chain on the fly.
         if parent is None:
             if group == group.parent:
                 self._parent = self
@@ -553,6 +570,9 @@ class Group(Mapping):
 
         dg = self._nexus.read_children(self, sel)
         try:
+            # For a time-dependent transformation in NXtransformations, and NXlog may
+            # take the place of the `value` field. In this case, we need to read the
+            # properties of the NXlog group to make the actual transformation.
             from .nxtransformations import maybe_transformation
             dg = self._nexus.pre_assemble(dg)
             dg = self._nexus.assemble(dg)
