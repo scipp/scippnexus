@@ -52,6 +52,11 @@ def report(error_id: int, name: str, message: str, level: Optional[int] = 0):
     print(f'SNX-{error_id:04d} level={level} {name}: {message}')
 
 
+def nx_class(group: h5py.Group) -> Optional[str]:
+    if (nx_class := group.attrs.get('NX_class')) is not None:
+        return nx_class if isinstance(nx_class, str) else nx_class.decode()
+
+
 def allow_int_without_unit(dataset: h5py.Dataset):
     name = dataset.name.split('/')[-1]
     if 'index' in name:
@@ -62,7 +67,7 @@ def allow_int_without_unit(dataset: h5py.Dataset):
         return True
     if name == 'detector_number':
         return True
-    parent_class = dataset.parent.attrs.get('NX_class')
+    parent_class = nx_class(dataset.parent)
     if parent_class == 'NXoff_geometry':
         return name in ['faces', 'winding_order', 'detector_faces']
     if parent_class == 'NXcylindrical_geometry':
@@ -80,9 +85,10 @@ def check_units(dataset: h5py.Dataset):
         if 'units' not in dataset.attrs:
             if integral:
                 if not allow_int_without_unit(dataset):
-                    return Status(dataset.name,
-                                  'Possibly units attribute for integral dataset',
-                                  level=1)
+                    return Status(
+                        dataset.name,
+                        'Possibly missing units attribute for integral dataset',
+                        level=1)
             else:
                 return Status(dataset.name,
                               'Missing units attribute for floating-point dataset')
@@ -102,7 +108,7 @@ def check_transformation_offset_units(dataset: h5py.Dataset):
 
 @dataset_check(5)
 def check_shape(dataset: h5py.Dataset):
-    parent_class = dataset.parent.attrs.get('NX_class')
+    parent_class = nx_class(dataset.parent)
     if parent_class == 'NXlog':
         if dataset.ndim > 1 and dataset.parent.attrs.get('axes') is None:
             return Status(
@@ -114,20 +120,30 @@ def check_shape(dataset: h5py.Dataset):
 @group_check(1)
 def check_deprecated_group(group: h5py.Group):
     deprecated = ['NXgeometry', 'NXshape', 'NXorientation', 'NXtranslation']
-    if (nx_class := group.attrs.get('NX_class')) is not None:
-        if nx_class in deprecated:
+    if (nxcls := nx_class(group)) is not None:
+        if nxcls in deprecated:
             return Status(group.name, f'{nx_class} is deprecated')
 
 
 @group_check(3)
 def check_depends_on(group: h5py.Group):
     for obj in group.values():
-        if (nx_class := obj.attrs.get('NX_class')) is not None:
-            if nx_class == 'NXtransformations' and 'depends_on' not in group:
+        if (nxcls := nx_class(obj)) is not None:
+            if nxcls == 'NXtransformations' and 'depends_on' not in group:
                 return Status(
                     group.name,
                     'Group contains NXtransformations but no `depends_on` entry point.',
                     level=1)
+
+
+@group_check(6)
+def check_nx_class(group: h5py.Group):
+    if 'NX_class' not in group.attrs:
+        return Status(group.name, 'Missing NX_class attribute')
+    if not isinstance((nxcls := group.attrs['NX_class']), str):
+        return Status(group.name,
+                      f'NX_class attribute is not a string but {type(nxcls)}',
+                      level=1)
 
 
 def check_dataset(dataset: h5py.Dataset):
