@@ -61,11 +61,7 @@ def allow_int_without_unit(dataset: h5py.Dataset):
     name = dataset.name.split('/')[-1]
     if 'index' in name:
         return True
-    if name == 'event_id':
-        return True
-    if name == 'event_index':
-        return True
-    if name == 'detector_number':
+    if name in ['event_id', 'event_index', 'detector_number']:
         return True
     parent_class = nx_class(dataset.parent)
     if parent_class == 'NXoff_geometry':
