@@ -299,26 +299,9 @@ class NXobject:
         self._children = children
         self._special_fields = {}
         self._transformations = {}
-        for name, field in children.items():
+        for field in children.values():
             if isinstance(field, Field):
                 self._init_field(field)
-            # TODO Some unfortunate logic that feels backwards: Certain subgroups have
-            # a special meaning, in that they are either describing a global property
-            # of the group, or a detector_number-dependent property. To determine valid
-            # dims and shape we must exclude those special groups. It would be nice to
-            # pass the detector_number from the parent, but at the point of NXobject
-            # creation for the child it has not been loaded yet. Is loading it twice
-            # acceptable? Or maybe it can be cached in the parent NXobject?
-            elif (nx_class := field.attrs.get('NX_class')) is not None:
-                if nx_class in [
-                        'NXoff_geometry',
-                        'NXcylindrical_geometry',
-                        'NXgeometry',
-                ]:
-                    self._special_fields[name] = field
-                elif nx_class == 'NXtransformations':
-                    self._special_fields[name] = field
-                    self._transformations[name] = field
 
     @property
     def unit(self) -> Union[None, sc.Unit]:
@@ -327,7 +310,6 @@ class NXobject:
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
-        # exclude geometry/tansform groups?
         return sc.DataGroup(self._children).sizes
 
     def index_child(
@@ -371,30 +353,6 @@ class NXobject:
             obj: sc.DataGroup,
             detector_number: Optional[sc.Variable] = None) -> sc.DataGroup:
         return obj
-
-    def pre_assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
-        # TODO See above regarding special child groups. Maybe there is a better
-        # mechanism?
-        for name, field in self._special_fields.items():
-            if name in self._transformations:
-                continue
-            det_num = self.detector_number
-            if det_num is not None:
-                det_num = dg[det_num]
-            dg[name] = field._nexus.assemble_as_child(dg[name], detector_number=det_num)
-        # TODO Should we remove the NXtransformations group (if there is a depends_on)?
-        # For now it gets inserted as a DataGroup, or wrapped in a scalar coord in case
-        # of NXdata
-        # Would it be better to dereference the depends_on links only after loading?
-        #    transform = self._children[depends_on]
-        #    # Avoid loading transform twice if it is a child of the same group
-        #    for name, transformations in self._transformations.items():
-        #        if transform.name.startswith(transformations.name):
-        #            dg['depends_on'] = dg[name][depends_on.split('/')[-1]]
-        #            break
-        #    else:
-        #        dg['depends_on'] = transform[()]
-        return dg
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
         return dg
@@ -545,7 +503,6 @@ class Group(Mapping):
             # take the place of the `value` field. In this case, we need to read the
             # properties of the NXlog group to make the actual transformation.
             from .nxtransformations import maybe_transformation
-            dg = self._nexus.pre_assemble(dg)
             dg = self._nexus.assemble(dg)
             return maybe_transformation(self, value=dg, sel=sel)
         except (sc.DimensionError, NexusStructureError) as e:

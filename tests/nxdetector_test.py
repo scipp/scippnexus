@@ -302,20 +302,26 @@ def test_nxevent_data_selection_yields_correct_pulses(nxroot):
 
 def create_off_geometry_detector_numbers_1234(group: snx.Group,
                                               name: str,
-                                              detector_faces: bool = True):
+                                              detector_faces: bool = True
+                                              ) -> sc.DataGroup:
+    dg = sc.DataGroup()
     off = group.create_class(name, NXoff_geometry)
     # square with point in center
     values = np.array([[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0], [0.5, 0.5, 0]])
-    off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
+    dg['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
     # triangles
-    off['winding_order'] = sc.array(dims=['_'],
-                                    values=[0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4],
-                                    unit=None)
-    off['faces'] = sc.array(dims=['_'], values=[0, 3, 6, 9], unit=None)
+    dg['winding_order'] = sc.array(dims=['winding_order'],
+                                   values=[0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4],
+                                   unit=None)
+    dg['faces'] = sc.array(dims=['face'], values=[0, 3, 6, 9], unit=None)
     if detector_faces:
-        off['detector_faces'] = sc.array(dims=['_', 'dummy'],
-                                         values=[[0, 1], [1, 2], [2, 3], [3, 4]],
-                                         unit=None)
+        dg['detector_faces'] = sc.array(dims=['face', 'face_index|detector_number'],
+                                        values=[[0, 1], [1, 2], [2, 3], [3, 4]],
+                                        unit=None)
+    for name, var in dg.items():
+        off[name] = var
+    dg['vertices'] = sc.vectors(dims=['vertex'], values=values, unit='m')
+    return dg
 
 
 @pytest.mark.parametrize('detid_name',
@@ -330,25 +336,20 @@ def test_loads_data_with_coords_and_off_geometry(nxroot, detid_name):
     detector.create_field('xx', da.coords['xx'])
     detector.create_field('data', da.data)
     detector._group.attrs['axes'] = ['xx', 'yy']
-    create_off_geometry_detector_numbers_1234(detector, name='shape')
+    expected = create_off_geometry_detector_numbers_1234(detector, name='shape')
     loaded = detector[...]
-    expected = snx.nxoff_geometry.off_to_shape(
-        **detector['shape'][()], detector_number=da.coords['detector_number'])
-    assert sc.identical(loaded.coords['shape'].bins.size(),
-                        sc.array(dims=da.dims, values=[[1, 1], [1, 1]], unit=None))
-    assert sc.identical(loaded.coords['shape'], expected)
+    assert_identical(loaded.coords['shape'].value, expected)
 
 
-def test_missing_detector_numbers_triggers_fallback_given_off_geometry_with_det_faces(
+def test_missing_detector_numbers_given_off_geometry_with_det_faces_loads_as_usual(
         nxroot):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector._group.attrs['axes'] = ['xx', 'yy']
-    create_off_geometry_detector_numbers_1234(detector, name='shape')
+    expected = create_off_geometry_detector_numbers_1234(detector, name='shape')
     loaded = detector[...]
-    assert isinstance(loaded, sc.DataGroup)
-    assert sc.identical(loaded['shape'], detector['shape'][()])
+    assert_identical(loaded.coords['shape'].value, expected)
 
 
 def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nxroot):
@@ -356,25 +357,34 @@ def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nx
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector._group.attrs['axes'] = ['xx', 'yy']
-    create_off_geometry_detector_numbers_1234(detector,
-                                              name='shape',
-                                              detector_faces=False)
+    expected = create_off_geometry_detector_numbers_1234(detector,
+                                                         name='shape',
+                                                         detector_faces=False)
     loaded = detector[...]
-    assert loaded.coords['shape'].dims == ()
-    assert sc.identical(loaded.coords['shape'].bins.size(), sc.index(4))
+    assert_identical(loaded.coords['shape'].value, expected)
+    shape = snx.NXoff_geometry.assemble_as_child(loaded.coords['shape'].value)
+    assert sc.identical(shape.bins.size(), sc.index(4))
 
 
 def create_cylindrical_geometry_detector_numbers_1234(group: snx.Group,
                                                       name: str,
-                                                      detector_numbers: bool = True):
+                                                      detector_numbers: bool = True
+                                                      ) -> sc.DataGroup:
     shape = group.create_class(name, snx.NXcylindrical_geometry)
     values = np.array([[0, 0, 0], [0, 1, 0], [3, 0, 0]])
-    shape['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
-    shape['cylinders'] = sc.array(dims=['_', 'vertex'],
-                                  values=[[0, 1, 2], [2, 1, 0]],
-                                  unit=None)
+    dg = sc.DataGroup()
+    dg['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
+    dg['cylinders'] = sc.array(dims=['cylinder', 'vertex_index'],
+                               values=[[0, 1, 2], [2, 1, 0]],
+                               unit=None)
     if detector_numbers:
-        shape['detector_number'] = sc.array(dims=['_'], values=[0, 1, 1, 0], unit=None)
+        dg['detector_number'] = sc.array(dims=['detector_number'],
+                                         values=[0, 1, 1, 0],
+                                         unit=None)
+    for name, var in dg.items():
+        shape[name] = var
+    dg['vertices'] = sc.vectors(dims=['vertex'], values=values, unit='m')
+    return dg
 
 
 def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
@@ -382,11 +392,12 @@ def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector._group.attrs['axes'] = ['xx', 'yy']
-    create_cylindrical_geometry_detector_numbers_1234(detector,
-                                                      name='shape',
-                                                      detector_numbers=False)
+    expected = create_cylindrical_geometry_detector_numbers_1234(detector,
+                                                                 name='shape',
+                                                                 detector_numbers=False)
     loaded = detector[...]
-    shape = loaded.coords['shape']
+    assert_identical(loaded.coords['shape'].value, expected)
+    shape = snx.NXcylindrical_geometry.assemble_as_child(loaded.coords['shape'].value)
     assert shape.dims == ()
     assert sc.identical(shape.bins.size(), sc.index(2))
     assert sc.identical(
@@ -401,34 +412,35 @@ def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
         }))
 
 
-def test_cylindrical_geometry_with_missing_parent_detector_numbers_triggers_fallback(
+def test_cylindrical_geometry_with_missing_parent_detector_numbers_loads_as_usual(
         nxroot):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector._group.attrs['axes'] = ['xx', 'yy']
-    create_cylindrical_geometry_detector_numbers_1234(detector,
-                                                      name='shape',
-                                                      detector_numbers=True)
+    expected = create_cylindrical_geometry_detector_numbers_1234(detector,
+                                                                 name='shape',
+                                                                 detector_numbers=True)
     loaded = detector[...]
-    assert isinstance(loaded, sc.DataGroup)
-    assert isinstance(loaded['shape'], sc.DataGroup)
+    assert_identical(loaded.coords['shape'].value, expected)
 
 
-def test_cylindrical_geometry_with_inconsistent_detector_numbers_triggers_fallback(
-        nxroot):
+def test_cylindrical_geometry_with_inconsistent_detector_numbers_loads_as_usual(nxroot):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1], [3.3]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
     detector._group.attrs['axes'] = ['xx', 'yy']
-    detector.create_field('detector_numbers',
+    detector.create_field('detector_number',
                           sc.array(dims=var.dims, values=[[1], [2]], unit=None))
-    create_cylindrical_geometry_detector_numbers_1234(detector,
-                                                      name='shape',
-                                                      detector_numbers=True)
+    expected = create_cylindrical_geometry_detector_numbers_1234(detector,
+                                                                 name='shape',
+                                                                 detector_numbers=True)
     loaded = detector[...]
-    assert isinstance(loaded, sc.DataGroup)
-    assert isinstance(loaded['shape'], sc.DataGroup)
+    assert_identical(loaded.coords['shape'].value, expected)
+    detector_number = loaded.coords['detector_number']
+    with pytest.raises(snx.NexusStructureError):
+        snx.NXcylindrical_geometry.assemble_as_child(loaded.coords['shape'].value,
+                                                     detector_number=detector_number)
 
 
 def test_cylindrical_geometry_with_detector_numbers(nxroot):
@@ -438,11 +450,13 @@ def test_cylindrical_geometry_with_detector_numbers(nxroot):
     detector._group.attrs['axes'] = ['xx', 'yy']
     detector_number = sc.array(dims=var.dims, values=[[1, 2], [3, 4]], unit=None)
     detector.create_field('detector_number', detector_number)
-    create_cylindrical_geometry_detector_numbers_1234(detector,
-                                                      name='shape',
-                                                      detector_numbers=True)
+    expected = create_cylindrical_geometry_detector_numbers_1234(detector,
+                                                                 name='shape',
+                                                                 detector_numbers=True)
     loaded = detector[...]
-    shape = loaded.coords['shape']
+    assert_identical(loaded.coords['shape'].value, expected)
+    shape = snx.NXcylindrical_geometry.assemble_as_child(
+        loaded.coords['shape'].value, detector_number=loaded.coords['detector_number'])
     assert shape.dims == detector_number.dims
     for i in [0, 3]:
         assert sc.identical(

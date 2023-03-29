@@ -43,8 +43,8 @@ def off_to_shape(*,
     if detector_number is None:
         raise NexusStructureError("`detector_number` not given but NXoff_geometry "
                                   "contains `detector_faces`.")
-    shape_index = detector_faces['column', 0].copy()
-    detid = detector_faces['column', 1].copy()
+    shape_index = detector_faces['face_index|detector_number', 0].copy()
+    detid = detector_faces['face_index|detector_number', 1].copy()
     da = sc.DataArray(shape_index, coords={
         'detector_number': detid
     }).group(detector_number.flatten(to='detector_number'))
@@ -55,7 +55,7 @@ def off_to_shape(*,
 
 class NXoff_geometry(NXobject):
     _dims = {
-        'detector_faces': ('face', 'column'),
+        'detector_faces': ('face', 'face_index|detector_number'),
         'vertices': ('vertex', ),
         'winding_order': ('winding_order', ),
         'faces': ('face', )

@@ -156,17 +156,14 @@ class NXdata(NXobject):
         for name, field in children.items():
             if not isinstance(field, Field):
                 # If the NXdata contains subgroups we can generally not define valid
-                # sizes... except for some "special fields" that are transformed or
-                # wrapped into scalars.
-                # TODO Another option would be to accept subgroups as they are, but
-                # ignore their dims, as the will be wrapped in a scalar variable.
-                # TODO From a usability point of view, wrapping things in scalar is
-                # quite bad. For example, it removes the useful visualization as a
-                # nested DataGroup. Would it be worth considering returning the NXdata
-                # as a datagroup in all cases, but make the signal (and its axes) a
-                # nested DataArray? However, this is special to NXtransformations, so
-                # maybe we should not change the overall logic just for this case.
-                if name not in self._special_fields:
+                # sizes... except for some non-signal "special fields" that return
+                # a DataGroup that will be wrapped in a scalar Variable.
+                if field.attrs.get('NX_class') not in [
+                        'NXoff_geometry',
+                        'NXcylindrical_geometry',
+                        'NXgeometry',
+                        'NXtransformations',
+                ]:
                     self._valid = False
             elif (dims := get_dims(name, field)) is not None:
                 # The convention here is that the given dimensions apply to the shapes
