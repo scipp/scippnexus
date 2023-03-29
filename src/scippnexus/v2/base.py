@@ -427,21 +427,9 @@ class Group(Mapping):
        of ScippNexus used such a mechanism without caching, which was very slow.
     """
 
-    def __init__(self,
-                 group: H5Group,
-                 definitions: Optional[Dict[str, type]] = None,
-                 parent: Optional[Group] = None):
+    def __init__(self, group: H5Group, definitions: Optional[Dict[str, type]] = None):
         self._group = group
         self._definitions = {} if definitions is None else definitions
-        # TODO The entire 'parent' mechanism exists only for resolving 'depends_on'
-        # chains. Consider removing it and instead resolving the chain on the fly.
-        if parent is None:
-            if group == group.parent:
-                self._parent = self
-            else:
-                self._parent = Group(group.parent, definitions=definitions)
-        else:
-            self._parent = parent
 
     @property
     def nx_class(self) -> Optional[type]:
@@ -474,23 +462,22 @@ class Group(Mapping):
         return self._nexus.unit
 
     @property
-    def parent(self) -> Optional[Group]:
-        return self._parent
+    def parent(self) -> Group:
+        return Group(self._group.parent, definitions=self._definitions)
 
     @cached_property
-    def file(self) -> Optional[Group]:
-        return self if self is self.parent else self.parent.file
+    def file(self) -> Group:
+        return Group(self._group.file, definitions=self._definitions)
 
     @cached_property
     def _children(self) -> Dict[str, Union[Field, Group]]:
 
         def _make_child(name: str, obj: Union[H5Dataset,
                                               H5Group]) -> Union[Field, Group]:
-            parent = self
             if is_dataset(obj):
-                return Field(obj, parent=parent)
+                return Field(obj, parent=self)
             else:
-                return Group(obj, parent=parent, definitions=self._definitions)
+                return Group(obj, definitions=self._definitions)
 
         items = {name: _make_child(name, obj) for name, obj in self._group.items()}
         for suffix in ('_errors', '_error'):
@@ -579,8 +566,7 @@ class Group(Mapping):
 
     def create_class(self, name, class_name: str) -> Group:
         return Group(create_class(self._group, name, class_name),
-                     definitions=self._definitions,
-                     parent=self)
+                     definitions=self._definitions)
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
