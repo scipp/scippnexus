@@ -297,8 +297,6 @@ class NXobject:
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         self._attrs = attrs
         self._children = children
-        self._special_fields = {}
-        self._transformations = {}
         for field in children.values():
             if isinstance(field, Field):
                 self._init_field(field)
@@ -344,17 +342,8 @@ class NXobject:
             {name: self.index_child(child, sel)
              for name, child in obj.items()})
 
-    @property
-    def detector_number(self) -> Optional[str]:
-        return None
-
-    def assemble_as_child(
-            self,
-            obj: sc.DataGroup,
-            detector_number: Optional[sc.Variable] = None) -> sc.DataGroup:
-        return obj
-
-    def assemble(self, dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray]:
+    def assemble(self,
+                 dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         return dg
 
 
@@ -430,14 +419,13 @@ class Group(Mapping):
     @cached_property
     def _children(self) -> Dict[str, Union[Field, Group]]:
 
-        def _make_child(name: str, obj: Union[H5Dataset,
-                                              H5Group]) -> Union[Field, Group]:
+        def _make_child(obj: Union[H5Dataset, H5Group]) -> Union[Field, Group]:
             if is_dataset(obj):
                 return Field(obj, parent=self)
             else:
                 return Group(obj, definitions=self._definitions)
 
-        items = {name: _make_child(name, obj) for name, obj in self._group.items()}
+        items = {name: _make_child(obj) for name, obj in self._group.items()}
         for suffix in ('_errors', '_error'):
             field_with_errors = [name for name in items if f'{name}{suffix}' in items]
             for name in field_with_errors:

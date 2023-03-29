@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -13,7 +13,6 @@ from .base import (
     NexusStructureError,
     NXobject,
     ScippIndex,
-    asarray,
     base_definitions,
 )
 
@@ -154,35 +153,6 @@ class NXevent_data(NXobject):
             raise NexusStructureError(f"Invalid index in NXevent_data at {path}:\n{e}")
 
         return sc.DataArray(data=binned, coords={'event_time_zero': event_time_zero})
-
-    # TODO now unused
-    @staticmethod
-    def assemble_as_child(
-            event_data: sc.DataArray,
-            detector_number: Optional[sc.Variable] = None) -> sc.DataArray:
-        grouping = asarray(detector_number)
-
-        if isinstance(event_data, sc.DataGroup):
-            raise NexusStructureError("Invalid NXevent_data in NXdetector.")
-        if grouping is None:
-            event_id = 'event_id'
-        else:
-            # copy since sc.bin cannot deal with a non-contiguous view
-            event_id = grouping.flatten(to='event_id').copy()
-        event_data.bins.coords['event_time_zero'] = sc.bins_like(
-            event_data, fill_value=event_data.coords['event_time_zero'])
-        # After loading raw NXevent_data it is guaranteed that the event table
-        # is contiguous and that there is no masking. We can therefore use the
-        # more efficient approach of binning from scratch instead of erasing the
-        # 'pulse' binning defined by NXevent_data.
-        event_data = event_data.bins.constituents['data'].group(event_id)
-        # if self._grouping is None:
-        #     event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
-        # else:
-        #     del event_data.coords['event_id']
-        if grouping is None:
-            return event_data
-        return event_data.fold(dim='event_id', sizes=grouping.sizes)
 
 
 base_definitions['NXevent_data'] = NXevent_data
