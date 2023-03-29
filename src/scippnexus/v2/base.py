@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import datetime
 import inspect
+import os
 import re
 import warnings
 from collections.abc import Mapping
@@ -24,6 +25,16 @@ from ..typing import H5Dataset, H5Group, ScippIndex
 
 def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
     return obj if isinstance(obj, sc.Variable) else sc.scalar(obj, unit=None)
+
+
+def depends_on_to_relative_path(depends_on: str, parent_path: str) -> str:
+    """Replace depends_on paths with relative paths.
+
+    After loading we will generally not have the same root so absolute paths
+    cannot be resolved after loading."""
+    if depends_on.startswith('/'):
+        return os.path.relpath(depends_on, parent_path)
+    return depends_on
 
 
 # TODO move into scipp
@@ -201,6 +212,9 @@ class Field:
                 strings = self.dataset.asstr(encoding='latin-1')[index]
                 _warn_latin1_decode(self.dataset, strings, str(e))
             variable.values = np.asarray(strings).flatten()
+            if self.dataset.name.endswith('depends_on') and variable.ndim == 0:
+                variable.value = depends_on_to_relative_path(variable.value,
+                                                             self.dataset.parent.name)
         elif variable.values.flags["C_CONTIGUOUS"]:
             # On versions of h5py prior to 3.2, a TypeError occurs in some cases
             # where h5py cannot broadcast data with e.g. shape (20, 1) to a buffer
@@ -281,25 +295,13 @@ class NXobject:
         field.dtype = _dtype_fromdataset(field.dataset)
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
-        from .nxtransformations import Transformation
         self._attrs = attrs
         self._children = children
         self._special_fields = {}
         self._transformations = {}
         for name, field in children.items():
-            if name == 'depends_on':
-                self._special_fields[name] = field
             if isinstance(field, Field):
                 self._init_field(field)
-            # TODO Consider simplifying a bunch of logic by not following depends_on
-            # chains. Instead provide post-processing function to resolve them. This
-            # will fail to resolve links that fall outside the loaded group, but that
-            # may be an acceptable limitation. Furthermore, resolving links may not
-            # possible in all cases anyway, e.g., when processing a new chunk from a
-            # Kafka stream.
-            elif isinstance(field, Transformation):
-                if isinstance(field._obj, Field):
-                    self._init_field(field._obj)
             # TODO Some unfortunate logic that feels backwards: Certain subgroups have
             # a special meaning, in that they are either describing a global property
             # of the group, or a detector_number-dependent property. To determine valid
@@ -374,8 +376,6 @@ class NXobject:
         # TODO See above regarding special child groups. Maybe there is a better
         # mechanism?
         for name, field in self._special_fields.items():
-            if name == 'depends_on':
-                continue
             if name in self._transformations:
                 continue
             det_num = self.detector_number
@@ -386,8 +386,6 @@ class NXobject:
         # For now it gets inserted as a DataGroup, or wrapped in a scalar coord in case
         # of NXdata
         # Would it be better to dereference the depends_on links only after loading?
-        if (depends_on := dg.get('depends_on')) is not None:
-            dg['depends_on'] = sc.scalar(depends_on)
         #    transform = self._children[depends_on]
         #    # Avoid loading transform twice if it is a child of the same group
         #    for name, transformations in self._transformations.items():
@@ -485,27 +483,14 @@ class Group(Mapping):
 
     @cached_property
     def _children(self) -> Dict[str, Union[Field, Group]]:
-        # Transformations should be stored in NXtransformations, which is cumbersome
-        # to handle, since we need to check the parent of a transform to tell whether
-        # it is a transform. However, we can avoid this by simply treating everything
-        # referenced by a 'depends_on' field or attribute as a transform.
-        from .nxtransformations import Transformation
 
-        def _make_child(
-                name: str, obj: Union[H5Dataset,
-                                      H5Group]) -> Union[Transformation, Field, Group]:
-            if name == 'depends_on':
-                target = obj[()]
-                obj = obj.parent[target]
-                # TODO Bad, we are recreating the group
-                parent = Group(obj.parent, definitions=self._definitions)
-            else:
-                parent = self
+        def _make_child(name: str, obj: Union[H5Dataset,
+                                              H5Group]) -> Union[Field, Group]:
+            parent = self
             if is_dataset(obj):
-                child = Field(obj, parent=parent)
+                return Field(obj, parent=parent)
             else:
-                child = Group(obj, parent=parent, definitions=self._definitions)
-            return Transformation(child) if name == 'depends_on' else child
+                return Group(obj, parent=parent, definitions=self._definitions)
 
         items = {name: _make_child(name, obj) for name, obj in self._group.items()}
         for suffix in ('_errors', '_error'):
@@ -556,8 +541,7 @@ class Group(Mapping):
                 else:
                     return self[sel.split('/')[0]][sel[sel.index('/') + 1:]]
             child = self._children[sel]
-            from .nxtransformations import Transformation
-            if isinstance(child, (Field, Transformation)):
+            if isinstance(child, Field):
                 self._populate_fields()
             return child
 

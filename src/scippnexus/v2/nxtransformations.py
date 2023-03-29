@@ -9,7 +9,14 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import Field, Group, NexusStructureError, NXobject, ScippIndex
+from .base import (
+    Field,
+    Group,
+    NexusStructureError,
+    NXobject,
+    ScippIndex,
+    depends_on_to_relative_path,
+)
 
 
 class TransformationError(NexusStructureError):
@@ -108,10 +115,11 @@ class Transformation:
                 if transformation_type == 'translation':
                     offset = offset.to(unit=t.unit, copy=False)
                 transform = t * offset
-            if (depends_on := self.depends_on) is not None:
+            if (depends_on := self.attrs.get('depends_on')) is not None:
                 if not isinstance(transform, sc.DataArray):
                     transform = sc.DataArray(transform)
-                transform.attrs['depends_on'] = sc.scalar(depends_on[select])
+                transform.attrs['depends_on'] = sc.scalar(
+                    depends_on_to_relative_path(depends_on, self._obj.parent.name))
             return transform
         except (sc.DimensionError, sc.UnitError, TransformationError):
             # TODO We should probably try to return some other data structure and
