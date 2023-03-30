@@ -40,12 +40,6 @@ class NXdata(NXobject):
                  fallback_signal_name: Optional[str] = None):
         super().__init__(attrs=attrs, children=children)
         self._valid = True
-        # Must do full consistency check here, to define self.sizes:
-        # - squeeze correctly
-        # - check if coord dims are compatible with signal dims
-        # - check if there is a signal
-        # If not the case, fall back do DataGroup.sizes
-        # Can we just set field dims here?
         self._signal_name = None
         self._signal = None
         self._aux_signals = attrs.get('auxiliary_signals', [])
@@ -56,32 +50,34 @@ class NXdata(NXobject):
         else:
             # Legacy NXdata defines signal not as group attribute, but attr on dataset
             for name, field in children.items():
-                # What is the meaning of the attribute value? It is undocumented,
-                # we simply ignore it.
+                # We ignore the signal value. Usually it is 1, but apparently one could
+                # multiple signals. We do not support this, since it is legacy anyway.
                 if 'signal' in field.attrs:
                     self._signal_name = name
                     self._signal = children[name]
                     break
 
+        # Latest way of defining axes
         axes = attrs.get('axes')
+        # Older way of defining axes
         signal_axes = None if self._signal is None else self._signal.attrs.get('axes')
-
+        # Another old way of defining axes
         axis_index = {}
         for name, field in children.items():
             if (axis := field.attrs.get('axis')) is not None:
                 axis_index[name] = axis
 
-        # Apparently it is not possible to define dim labels unless there are
-        # corresponding coords. Special case of '.' entries means "no coord".
-        def _get_group_dims():
+        def _get_group_dims() -> Optional[Tuple[str, ...]]:
+            """Try three ways of defining group dimensions."""
+            # Apparently it is not possible to define dim labels unless there are
+            # corresponding coords. Special case of '.' entries means "no coord".
             if axes is not None:
-                return [f'dim_{i}' if a == '.' else a for i, a in enumerate(axes)]
+                return tuple(f'dim_{i}' if a == '.' else a for i, a in enumerate(axes))
             if signal_axes is not None:
                 return tuple(signal_axes.split(','))
             if axis_index:
-                return [
-                    k for k, _ in sorted(axis_index.items(), key=lambda item: item[1])
-                ]
+                return tuple(
+                    k for k, _ in sorted(axis_index.items(), key=lambda item: item[1]))
             return None
 
         group_dims = _get_group_dims()
@@ -91,6 +87,7 @@ class NXdata(NXobject):
         else:
             if group_dims is not None:
                 shape = self._signal.dataset.shape
+                # If we have explicit group dims, we can drop trailing 1s.
                 shape = _squeeze_trailing(group_dims, shape)
                 self._signal.sizes = dict(zip(group_dims, shape))
             elif fallback_dims is not None:
@@ -103,15 +100,14 @@ class NXdata(NXobject):
 
         if axes is not None:
             # Unlike self.dims we *drop* entries that are '.'
-            named_axes = [a for a in axes if a != '.']
+            named_axes = tuple(a for a in axes if a != '.')
         elif signal_axes is not None:
             named_axes = signal_axes.split(',')
         elif fallback_dims is not None:
             named_axes = fallback_dims
         else:
-            named_axes = []
+            named_axes = ()
 
-        # 3. Find field dims
         indices_suffix = '_indices'
         indices_attrs = {
             key[:-len(indices_suffix)]: attr
@@ -128,16 +124,15 @@ class NXdata(NXobject):
             # Newly written files should always contain indices attributes, but the
             # standard recommends that readers should also make "best effort" guess
             # since legacy files do not set this attribute.
-            # TODO signal and errors?
             if name in (self._signal_name, ):
                 return group_dims
-            # if name in [self._signal_name, self._errors_name]:
-            #     return self._get_group_dims()  # if None, field determines dims itself
             if name in self._aux_signals:
                 return _guess_dims(group_dims, self._signal.dataset.shape,
                                    field.dataset)
+            # Latest way of defining dims
             if (dims := dims_from_indices.get(name)) is not None:
                 return dims
+            # Older way of defining dims via axis attribute
             if (axis := axis_index.get(name)) is not None:
                 return (group_dims[axis - 1], )
             if name in named_axes:
@@ -197,6 +192,7 @@ class NXdata(NXobject):
         return None
 
     def index_child(self, child: Union[Field, Group], sel: ScippIndex) -> ScippIndex:
+        """Same as NXobject.index_child but also handles bin edges."""
         child_sel = to_child_select(tuple(self.sizes),
                                     child.dims,
                                     sel,
@@ -236,6 +232,8 @@ class NXdata(NXobject):
         return False
 
     def _add_coords(self, da: sc.DataArray, coords: sc.DataGroup) -> sc.DataArray:
+        """Add coords to data array, converting to attrs in the same way as slicing
+        scipp.DataArray would."""
         for name, coord in coords.items():
             if not isinstance(coord, sc.Variable):
                 da.coords[name] = sc.scalar(coord)
