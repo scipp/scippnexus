@@ -28,7 +28,6 @@ def nxroot(request):
         yield root
 
 
-@pytest.mark.skip(reason="Warnings system not implemented yet.")
 def test_warns_if_no_data_found(nxroot):
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)

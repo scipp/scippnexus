@@ -12,7 +12,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import cached_property, lru_cache
 from types import MappingProxyType
-from typing import Any, Dict, Iterator, List, Optional, Protocol, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Protocol, Tuple, Union, overload
 
 import dateutil.parser
 import numpy as np
@@ -146,6 +146,9 @@ class Field:
 
     @cached_property
     def attrs(self) -> Dict[str, Any]:
+        """The attributes of the dataset.
+
+        Cannot be used for writing attributes, since they are cached for performance."""
         return MappingProxyType(
             dict(self.dataset.attrs) if self.dataset.attrs else dict())
 
@@ -324,6 +327,8 @@ class NXobject:
         group shape, for all child dims. Subclasses of NXobject, in particular NXdata,
         override this method to handle bin edges.
         """
+        # TODO Could avoid determining sizes if sel is trivial. Merge with
+        # NXdata.index_child?
         child_sel = to_child_select(tuple(self.sizes), child.dims, sel)
         return child[child_sel]
 
@@ -344,6 +349,15 @@ class NXobject:
 
     def assemble(self,
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+        """
+        When a Group is indexed, this method is called to assemble the read children
+        into the result object.
+
+        The default implementation simply returns the DataGroup.
+
+        Subclasses of NXobject, in particular NXdata, override this method to return
+        an object with more semantics such as a DataArray or Dataset.
+        """
         return dg
 
 
@@ -359,20 +373,18 @@ class Group(Mapping):
     interface to the children of the group, and provides access to the attributes
     of the group. The children are either Field or Group objects, depending on
     whether the child is a dataset or a group, respectively.
-
-    The implementation of this class is unfortunately very complex, for several reasons:
-    1. NeXus requires "nonlocal" information for interpreting a field. For example,
-       NXdata attributes define which fields are the signal, and the names of the axes.
-       A field cannot be read without this information, in particular since we want to
-       support reading slices, using the Scipp dimension-label syntax.
-    2. The depend_on field and depends_on attributes in fields within NXtransformations
-       link to arbitrary other fields or groups in the same file. This interacts with
-       item 1.) and further complicates the logic.
-    3. HDF5 or h5py performance is not great, and we want to avoid reading the same
-       attrs or datasets multiple times. We can therefore not rely on "on-the-fly"
-       interpretation of the file, but need to cache information. An earlier version
-       of ScippNexus used such a mechanism without caching, which was very slow.
     """
+
+    # The implementation of this class is unfortunately relatively complex:
+
+    # 1. NeXus requires "nonlocal" information for interpreting a field. For example,
+    #    NXdata attributes define which fields are the signal, and the names of axes.
+    #    A field cannot be read without this information, in particular since we want to
+    #    support reading slices, using the Scipp dimension-label syntax.
+    # 2. HDF5 or h5py performance is not great, and we want to avoid reading the same
+    #    attrs or datasets multiple times. We can therefore not rely on "on-the-fly"
+    #    interpretation of the file, but need to cache information. An earlier version
+    #    of ScippNexus used such a mechanism without caching, which was very slow.
 
     def __init__(self, group: H5Group, definitions: Optional[Dict[str, type]] = None):
         self._group = group
@@ -382,7 +394,7 @@ class Group(Mapping):
     def nx_class(self) -> Optional[type]:
         """The value of the NX_class attribute of the group.
 
-        In case of the subclass NXroot this returns 'NXroot' even if the attribute
+        In case of the subclass NXroot this returns :py:class:`NXroot` even if the attr
         is not actually set. This is to support the majority of all legacy files, which
         do not have this attribute.
         """
@@ -393,10 +405,13 @@ class Group(Mapping):
 
     @cached_property
     def attrs(self) -> Dict[str, Any]:
+        """The attributes of the group.
+
+        Cannot be used for writing attributes, since they are cached for performance."""
         # Attrs are not read until needed, to avoid reading all attrs for all subgroups.
         # We may expected a per-subgroup overhead of 1 ms for reading attributes, so if
-        # all we want is access one attribute, we may save, e.g., a second for a group
-        # with 1000 subgroups.
+        # all we want is access one subgroup, we may save, e.g., a second for a group
+        # with 1000 subgroups (or subfields).
         return MappingProxyType(
             dict(self._group.attrs) if self._group.attrs else dict())
 
@@ -418,6 +433,7 @@ class Group(Mapping):
 
     @cached_property
     def _children(self) -> Dict[str, Union[Field, Group]]:
+        """Cached children of the group."""
 
         def _make_child(obj: Union[H5Dataset, H5Group]) -> Union[Field, Group]:
             if is_dataset(obj):
@@ -440,11 +456,26 @@ class Group(Mapping):
 
     @cached_property
     def _nexus(self) -> NXobject:
+        """Instance of the NXobject subclass corresponding to the NX_class attribute.
+
+        This is used to determine dims, unit, and other attributes of the group and its
+        children, as well as defining how children will be read and assembled into the
+        result object when the group is indexed.
+        """
         return self._definitions.get(self.attrs.get('NX_class'),
                                      NXobject)(attrs=self.attrs,
                                                children=self._children)
 
     def _populate_fields(self) -> None:
+        """Populate the fields of the group.
+
+        Fields are not populated until needed, to avoid reading field and group
+        properties for all subgroups. However, when any field is read we must in
+        general parse all the field and group properties, since for classes such
+        as NXdata the properties of any field may indirectly depend on the properties
+        of any other field. For example, field attributes may define which fields are
+        axes, and dim labels of other fields can be defined by the names of the axes.
+        """
         _ = self._nexus
 
     def __len__(self) -> int:
@@ -463,7 +494,44 @@ class Group(Mapping):
                 children[key] = self[key]
         return children
 
-    def __getitem__(self, sel) -> Union[Field, Group, sc.DataGroup]:
+    @overload
+    def __getitem__(self, sel: str) -> Union[Group, Field]:
+        ...
+
+    @overload
+    def __getitem__(self,
+                    sel: ScippIndex) -> Union[sc.DataArray, sc.DataGroup, sc.Dataset]:
+        ...
+
+    @overload
+    def __getitem__(self, sel: Union[type, List[type]]) -> Dict[str, NXobject]:
+        ...
+
+    def __getitem__(self, sel):
+        """
+        Get a child group or child dataset, a selection of child groups, or load and
+        return the current group.
+
+        Three cases are supported:
+
+        - String name: The child group or child dataset of that name is returned.
+        - Class such as ``NXdata`` or ``NXlog``: A dict containing all direct children
+          with a matching ``NX_class`` attribute are returned. Also accepts a tuple of
+          classes. ``Field`` selects all child fields, i.e., all datasets but not
+          groups.
+        - Scipp-style index: Load the specified slice of the current group, returning
+          a :class:`scipp.DataArray` or :class:`scipp.DataGroup`.
+
+        Parameters
+        ----------
+        name:
+            Child name, class, or index.
+
+        Returns
+        -------
+        :
+            Field, group, dict of fields, or loaded data.
+        """
         if isinstance(sel, str):
             # We cannot get the child directly from the HDF5 group, since we need to
             # create the parent group, to ensure that fields get the correct properties
@@ -487,19 +555,25 @@ class Group(Mapping):
 
         dg = self._nexus.read_children(self, sel)
         try:
-            # For a time-dependent transformation in NXtransformations, and NXlog may
-            # take the place of the `value` field. In this case, we need to read the
-            # properties of the NXlog group to make the actual transformation.
-            from .nxtransformations import maybe_transformation
             dg = self._nexus.assemble(dg)
-            return maybe_transformation(self, value=dg, sel=sel)
         except (sc.DimensionError, NexusStructureError) as e:
-            print(e)
-            # TODO log warning
-            return dg
+            self._warn_fallback(e)
+        # For a time-dependent transformation in NXtransformations, and NXlog may
+        # take the place of the `value` field. In this case, we need to read the
+        # properties of the NXlog group to make the actual transformation.
+        from .nxtransformations import maybe_transformation
+        return maybe_transformation(self, value=dg, sel=sel)
 
-    # TODO It is not clear if we want to support these convenience methods
+    def _warn_fallback(self, e: Exception) -> None:
+        msg = (f"Failed to load {self.name} as {type(self._nexus).__name__}: {e} "
+               "Falling back to loading HDF5 group children as scipp.DataGroup.")
+        warnings.warn(msg)
+
     def __setitem__(self, key, value):
+        """Set a child group or child dataset.
+
+        Note that due to the caching mechanisms in this class, reading the group
+        or its children may not reflect the changes made by this method."""
         if hasattr(value, '__write_to_nexus_group__'):
             group = create_class(self._group, key, nx_class=value.nx_class)
             value.__write_to_nexus_group__(group)
@@ -507,9 +581,26 @@ class Group(Mapping):
             create_field(self._group, key, value)
 
     def create_field(self, key: str, value: sc.Variable) -> H5Dataset:
+        """Create a child dataset with given name and value.
+
+        Note that due to the caching mechanisms in this class, reading the group
+        or its children may not reflect the changes made by this method."""
         return create_field(self._group, key, value)
 
-    def create_class(self, name, class_name: str) -> Group:
+    def create_class(self, name: str, class_name: str) -> Group:
+        """Create empty HDF5 group with given name and set the NX_class attribute.
+
+        Note that due to the caching mechanisms in this class, reading the group
+        or its children may not reflect the changes made by this method.
+
+        Parameters
+        ----------
+        name:
+            Group name.
+        nx_class:
+            Nexus class, can be a valid string for the NX_class attribute, or a
+            subclass of NXobject, such as NXdata or NXlog.
+        """
         return Group(create_class(self._group, name, class_name),
                      definitions=self._definitions)
 

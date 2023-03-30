@@ -206,7 +206,7 @@ class NXdata(NXobject):
     def assemble(self,
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         if not self._valid:
-            return super().assemble(dg)
+            raise NexusStructureError("Could not determine signal field or dimensions.")
         aux = {name: dg.pop(name) for name in self._aux_signals}
         coords = sc.DataGroup(dg)
         signal = coords.pop(self._signal_name)
