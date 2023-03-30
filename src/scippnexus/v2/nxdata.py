@@ -308,10 +308,6 @@ def _group_events(*,
     # more efficient approach of binning from scratch instead of erasing the
     # 'event_time_zero' binning defined by NXevent_data.
     event_data = event_data.bins.constituents['data'].group(event_id)
-    # if self._grouping is None:
-    #     event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
-    # else:
-    #     del event_data.coords['event_id']
     if grouping is None:
         return event_data
     return event_data.fold(dim='event_id', sizes=grouping.sizes)
@@ -327,19 +323,25 @@ def _find_event_entries(dg: sc.DataGroup) -> List[str]:
     return event_entries
 
 
-def group_events_by_detector_number(dg: sc.DataGroup) -> sc.DataArray:
-    event_entry = _find_event_entries(dg)[0]
-    events = dg.pop(event_entry)
+def group_events_by_detector_number(
+        dg: sc.DataGroup) -> Union[sc.DataArray, sc.Dataset]:
     grouping_key = None
     for key in NXdetector._detector_number_fields:
         if (grouping := dg.get(key)) is not None:
             grouping_key = key
             break
     grouping = None if grouping_key is None else asarray(dg.pop(grouping_key))
-    da = _group_events(event_data=events, grouping=grouping)
-    # TODO What about _coord_to_attr mapping as NXdata?
-    da.coords.update(dg)
-    return da
+    grouped_events = sc.DataGroup()
+    for event_entry in _find_event_entries(dg):
+        events = dg.pop(event_entry)
+        grouped_events[event_entry] = _group_events(event_data=events,
+                                                    grouping=grouping)
+    if len(grouped_events) == 1:
+        out = next(iter(grouped_events.values()))
+    else:
+        out = sc.Dataset(grouped_events)
+    out.coords.update(dg)
+    return out
 
 
 base_definitions['NXdata'] = NXdata
