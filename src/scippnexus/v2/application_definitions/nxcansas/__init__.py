@@ -6,4 +6,4 @@
 
 from .nxcansas import SASdata, SASentry, definitions
 
-__all__ = [definitions, SASentry, SASdata]
+__all__ = ['definitions', 'SASentry', 'SASdata']

@@ -7,7 +7,7 @@ import scipp as sc
 
 from .base import Field, Group, NXobject, ScippIndex, base_definitions
 
-_matrix_units = dict(zip(['orientation_matrix', 'ub_matrix'], ['one', '1/Angstrom']))
+_matrix_units = {'orientation_matrix': 'one', 'ub_matrix': '1/Angstrom'}
 
 
 def _fix_unit(name, value):
