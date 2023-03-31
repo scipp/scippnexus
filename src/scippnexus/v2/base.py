@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import datetime
 import inspect
-import os
+import posixpath
 import re
 import warnings
 from collections.abc import Mapping
@@ -33,7 +33,7 @@ def depends_on_to_relative_path(depends_on: str, parent_path: str) -> str:
     After loading we will generally not have the same root so absolute paths
     cannot be resolved after loading."""
     if depends_on.startswith('/'):
-        return os.path.relpath(depends_on, parent_path)
+        return posixpath.relpath(depends_on, parent_path)
     return depends_on
 
 
