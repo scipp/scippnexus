@@ -11,7 +11,14 @@ import scipp as sc
 
 from .._common import to_child_select
 from ..typing import H5Dataset, ScippIndex
-from .base import Field, Group, NexusStructureError, NXobject, asarray, base_definitions
+from .base import (
+    Field,
+    Group,
+    NexusStructureError,
+    NXobject,
+    asvariable,
+    base_definitions,
+)
 
 
 def _guess_dims(dims, shape, dataset: H5Dataset):
@@ -330,7 +337,7 @@ def group_events_by_detector_number(
         if (grouping := dg.get(key)) is not None:
             grouping_key = key
             break
-    grouping = None if grouping_key is None else asarray(dg.pop(grouping_key))
+    grouping = None if grouping_key is None else asvariable(dg.pop(grouping_key))
     grouped_events = sc.DataGroup()
     for event_entry in _find_event_entries(dg):
         events = dg.pop(event_entry)

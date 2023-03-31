@@ -23,7 +23,7 @@ from .._hdf5_nexus import _warn_latin1_decode
 from ..typing import H5Dataset, H5Group, ScippIndex
 
 
-def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
+def asvariable(obj: Union[Any, sc.Variable]) -> sc.Variable:
     return obj if isinstance(obj, sc.Variable) else sc.scalar(obj, unit=None)
 
 
