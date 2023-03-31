@@ -42,7 +42,7 @@ class DimensionedArray(Protocol):
     """
     A multi-dimensional array with a unit and dimension labels.
 
-    Could be, e.g., a scipp.Variable or a dimple dataclass wrapping a numpy array.
+    Could be, e.g., a scipp.Variable or a simple dataclass wrapping a numpy array.
     """
 
     @property
@@ -133,19 +133,19 @@ def _dtype_fromdataset(dataset: H5Dataset) -> sc.DType:
 
 @dataclass
 class Field:
+    """NeXus field.
+
+    In HDF5 fields are represented as dataset.
+    """
     dataset: H5Dataset
     parent: Group
     sizes: Optional[Dict[str, int]] = None
     dtype: Optional[sc.DType] = None
     errors: Optional[H5Dataset] = None
     _is_time: Optional[bool] = None
-    """NeXus field.
-
-    In HDF5 fields are represented as dataset.
-    """
 
     @cached_property
-    def attrs(self) -> Dict[str, Any]:
+    def attrs(self) -> Mapping[str, Any]:
         """The attributes of the dataset.
 
         Cannot be used for writing attributes, since they are cached for performance."""
@@ -153,7 +153,7 @@ class Field:
             dict(self.dataset.attrs) if self.dataset.attrs else dict())
 
     @property
-    def dims(self) -> Tuple[str]:
+    def dims(self) -> Tuple[str, ...]:
         return tuple(self.sizes.keys())
 
     @property
@@ -179,7 +179,7 @@ class Field:
         var.variances = np.broadcast_to(sc.pow(stddevs, sc.scalar(2)).values,
                                         shape=var.shape)
 
-    def __getitem__(self, select) -> Union[Any, sc.Variable]:
+    def __getitem__(self, select: ScippIndex) -> Union[Any, sc.Variable]:
         """Load the field as a :py:class:`scipp.Variable` or Python object.
 
         If the shape is empty and no unit is given this returns a Python object, such
@@ -298,6 +298,8 @@ class NXobject:
         field.dtype = _dtype_fromdataset(field.dataset)
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+        """Subclasses should call this in their __init__ method, or ensure that they
+        initialize the fields in `children` with the correct sizes and dtypes."""
         self._attrs = attrs
         self._children = children
         for field in children.values():
@@ -442,16 +444,17 @@ class Group(Mapping):
                 return Group(obj, definitions=self._definitions)
 
         items = {name: _make_child(obj) for name, obj in self._group.items()}
+        items = {k: v for k, v in items.items() if not k.startswith('cue_')}
         for suffix in ('_errors', '_error'):
             field_with_errors = [name for name in items if f'{name}{suffix}' in items]
             for name in field_with_errors:
                 values = items[name]
                 errors = items[f'{name}{suffix}']
-                if (values.unit == errors.unit
+                if (isinstance(values, Field) and isinstance(errors, Field)
+                        and values.unit == errors.unit
                         and values.dataset.shape == errors.dataset.shape):
                     values.errors = errors.dataset
                     del items[f'{name}{suffix}']
-        items = {k: v for k, v in items.items() if not k.startswith('cue_')}
         return items
 
     @cached_property
@@ -540,7 +543,8 @@ class Group(Mapping):
                 if sel.startswith('/'):
                     return self.file[sel[1:]]
                 else:
-                    return self[sel.split('/')[0]][sel[sel.index('/') + 1:]]
+                    grp, path = sel.split('/', 1)
+                    return self[grp][path]
             child = self._children[sel]
             if isinstance(child, Field):
                 self._populate_fields()
@@ -558,7 +562,7 @@ class Group(Mapping):
             dg = self._nexus.assemble(dg)
         except (sc.DimensionError, NexusStructureError) as e:
             self._warn_fallback(e)
-        # For a time-dependent transformation in NXtransformations, and NXlog may
+        # For a time-dependent transformation in NXtransformations, an NXlog may
         # take the place of the `value` field. In this case, we need to read the
         # properties of the NXlog group to make the actual transformation.
         from .nxtransformations import maybe_transformation
@@ -617,18 +621,7 @@ class Group(Mapping):
         return tuple(self.sizes.values())
 
 
-class NXgeometry(NXobject):
-
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
-        super().__init__(attrs=attrs, children=children)
-
-    @staticmethod
-    def assemble_as_child(children: sc.DataGroup,
-                          detector_number: Optional[sc.Variable] = None) -> sc.Variable:
-        return sc.scalar(children)
-
-
-def create_field(group: H5Group, name: str, data: DimensionedArray,
+def create_field(group: H5Group, name: str, data: Union[np.ndarray, DimensionedArray],
                  **kwargs) -> H5Dataset:
     if not isinstance(data, sc.Variable):
         return group.create_dataset(name, data=data, **kwargs)
@@ -670,4 +663,3 @@ def _nx_class_registry():
 
 
 base_definitions = {}
-base_definitions['NXgeometry'] = NXgeometry
