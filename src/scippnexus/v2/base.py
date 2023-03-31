@@ -391,6 +391,8 @@ class Group(Mapping):
     def __init__(self, group: H5Group, definitions: Optional[Dict[str, type]] = None):
         self._group = group
         self._definitions = {} if definitions is None else definitions
+        self._lazy_children = None
+        self._lazy_nexus = None
 
     @property
     def nx_class(self) -> Optional[type]:
@@ -433,9 +435,14 @@ class Group(Mapping):
     def file(self) -> Group:
         return Group(self._group.file, definitions=self._definitions)
 
-    @cached_property
+    @property
     def _children(self) -> Dict[str, Union[Field, Group]]:
-        """Cached children of the group."""
+        """Lazily initialized children of the group."""
+        if self._lazy_children is None:
+            self._lazy_children = self._read_children()
+        return self._lazy_children
+
+    def _read_children(self) -> Dict[str, Union[Field, Group]]:
 
         def _make_child(obj: Union[H5Dataset, H5Group]) -> Union[Field, Group]:
             if is_dataset(obj):
@@ -457,17 +464,19 @@ class Group(Mapping):
                     del items[f'{name}{suffix}']
         return items
 
-    @cached_property
+    @property
     def _nexus(self) -> NXobject:
         """Instance of the NXobject subclass corresponding to the NX_class attribute.
 
         This is used to determine dims, unit, and other attributes of the group and its
         children, as well as defining how children will be read and assembled into the
         result object when the group is indexed.
+
+        Lazily initialized since the NXobject subclass init can be costly.
         """
-        return self._definitions.get(self.attrs.get('NX_class'),
-                                     NXobject)(attrs=self.attrs,
-                                               children=self._children)
+        if self._lazy_nexus is None:
+            self._populate_fields()
+        return self._lazy_nexus
 
     def _populate_fields(self) -> None:
         """Populate the fields of the group.
@@ -479,7 +488,9 @@ class Group(Mapping):
         of any other field. For example, field attributes may define which fields are
         axes, and dim labels of other fields can be defined by the names of the axes.
         """
-        _ = self._nexus
+        self._lazy_nexus = self._definitions.get(self.attrs.get('NX_class'),
+                                                 NXobject)(attrs=self.attrs,
+                                                           children=self._children)
 
     def __len__(self) -> int:
         return len(self._children)
