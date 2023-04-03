@@ -56,6 +56,32 @@ def test_Transformation_with_single_value(h5root):
     assert_identical(t, expected)
 
 
+def test_time_independent_Transformation_with_length_0(h5root):
+    detector = create_detector(h5root)
+    snx.create_field(detector, 'depends_on',
+                     sc.scalar('/detector_0/transformations/t1'))
+    transformations = snx.create_class(detector, 'transformations', NXtransformations)
+    value = sc.array(dims=['dim_0'], values=[], unit='mm')
+    offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
+    vector = sc.vector(value=[0, 0, 1])
+    t = value * vector
+    expected = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit)
+    expected = expected * offset
+    value = snx.create_field(transformations, 't1', value)
+    value.attrs['depends_on'] = '.'
+    value.attrs['transformation_type'] = 'translation'
+    value.attrs['offset'] = offset.values
+    value.attrs['offset_units'] = str(offset.unit)
+    value.attrs['vector'] = vector.value
+
+    expected = sc.DataArray(data=expected, attrs={'depends_on': sc.scalar('.')})
+    detector = make_group(detector)
+    depends_on = detector['depends_on'][()]
+    assert depends_on == 'transformations/t1'
+    t = detector[depends_on][()]
+    assert_identical(t, expected)
+
+
 def test_depends_on_absolute_path_to_sibling_group_resolved_to_relative_path(h5root):
     det1 = snx.create_class(h5root, 'det1', NXtransformations)
     snx.create_field(det1, 'depends_on', sc.scalar('/det2/transformations/t1'))

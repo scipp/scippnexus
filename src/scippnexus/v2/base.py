@@ -184,6 +184,7 @@ class Field:
         If the shape is empty and no unit is given this returns a Python object, such
         as a string or integer. Otherwise a :py:class:`scipp.Variable` is returned.
         """
+        from .nxtransformations import maybe_transformation
         index = to_plain_index(self.dims, select)
         if isinstance(index, (int, slice)):
             index = (index, )
@@ -205,7 +206,8 @@ class Field:
 
         # If the variable is empty, return early
         if np.prod(shape) == 0:
-            return self._maybe_datetime(variable)
+            variable = self._maybe_datetime(variable)
+            return maybe_transformation(self, value=variable, sel=select)
 
         if self.dtype == sc.DType.string:
             try:
@@ -242,7 +244,6 @@ class Field:
             else:
                 return variable.value
         variable = self._maybe_datetime(variable)
-        from .nxtransformations import maybe_transformation
         return maybe_transformation(self, value=variable, sel=select)
 
     def _maybe_datetime(self, variable: sc.Variable) -> sc.Variable:
