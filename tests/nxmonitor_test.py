@@ -46,7 +46,6 @@ def create_event_data_no_ids(group):
                                                values=[0, 3, 3, 5]))
 
 
-@pytest.mark.skip(reason="For now we do not support this broken type of NXmonitor")
 def test_loads_event_data_in_current_group(group):
     monitor = group.create_class('monitor1', snx.NXmonitor)
     create_event_data_no_ids(monitor)

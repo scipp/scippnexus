@@ -13,6 +13,7 @@ from .._common import convert_time_to_datetime64, to_child_select
 from ..typing import H5Dataset, ScippIndex
 from .base import Group, NexusStructureError, NXobject, asvariable, base_definitions
 from .field import Field
+from .nxevent_data import NXevent_data
 
 
 def _guess_dims(dims, shape, dataset: H5Dataset):
@@ -373,7 +374,17 @@ def group_events_by_detector_number(
     return out
 
 
+def nxmonitor_factory(attrs: Dict[str, Any],
+                      children: Dict[str, Union[Field, Group]]) -> NXobject:
+    if ('signal' not in attrs and 'data' not in children
+            and all(name in children for name in NXevent_data.mandatory_fields)):
+        # NXevent_data fields embedded in NXmonitor. This is not probably not
+        # really valid NeXus, but it is used in practice.
+        return NXevent_data(attrs=attrs, children=children)
+    return NXmonitor(attrs=attrs, children=children)
+
+
 base_definitions['NXdata'] = NXdata
 base_definitions['NXlog'] = NXlog
 base_definitions['NXdetector'] = NXdetector
-base_definitions['NXmonitor'] = NXmonitor
+base_definitions['NXmonitor'] = nxmonitor_factory
