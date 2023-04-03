@@ -635,7 +635,7 @@ class Group(Mapping):
         return tuple(self.sizes.values())
 
 
-def create_field(group: H5Group, name: str, data: Union[np.ndarray, DimensionedArray],
+def create_field(group: H5Group, name: str, data: Union[np.ndarray, sc.Variable],
                  **kwargs) -> H5Dataset:
     if not isinstance(data, sc.Variable):
         return group.create_dataset(name, data=data, **kwargs)
