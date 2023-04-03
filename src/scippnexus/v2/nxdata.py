@@ -322,8 +322,6 @@ class NXmonitor(NXdata):
 def _group_events(*,
                   event_data: sc.DataArray,
                   grouping: Optional[sc.Variable] = None) -> sc.DataArray:
-    if isinstance(event_data, sc.DataGroup):
-        raise NexusStructureError("Invalid NXevent_data in NXdetector.")
     if grouping is None:
         event_id = 'event_id'
     else:
