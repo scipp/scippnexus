@@ -29,6 +29,9 @@ def error_reporter(error_id: int, register=None):
                 report(error_id, status.name, status.message, status.level)
 
         if register is not None:
+            if error_id in _used_ids:
+                raise RuntimeError(f'Error ID {error_id} already used')
+            _used_ids.add(error_id)
             register.append(func)
 
         return func
@@ -36,6 +39,7 @@ def error_reporter(error_id: int, register=None):
     return decorator
 
 
+_used_ids = set()
 _dataset_checks = []
 _group_checks = []
 
