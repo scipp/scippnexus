@@ -5,7 +5,8 @@ from typing import Any, Dict, Union
 
 import scipp as sc
 
-from .base import Field, Group, NXobject, ScippIndex, base_definitions
+from .base import Group, NXobject, ScippIndex, base_definitions
+from .field import Field
 
 _matrix_units = {'orientation_matrix': 'one', 'ub_matrix': '1/Angstrom'}
 

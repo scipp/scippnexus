@@ -5,7 +5,8 @@ from typing import Any, Dict, Optional, Union
 
 import scipp as sc
 
-from .base import Field, Group, NexusStructureError, NXobject, base_definitions
+from .base import Group, NexusStructureError, NXobject, base_definitions
+from .field import Field
 
 
 def off_to_shape(*,

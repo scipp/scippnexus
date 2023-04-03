@@ -9,7 +9,6 @@ from scipp.testing import assert_identical
 
 import scippnexus.v2 as snx
 from scippnexus.v2 import (
-    Field,
     NexusStructureError,
     NXdetector,
     NXentry,
@@ -242,8 +241,8 @@ def test_nxobject_getitem_by_class_get_fields(nxroot):
     nxroot['entry'].create_class('events_0', NXevent_data)
     nxroot['entry']['field1'] = sc.arange('event', 4.0, unit='ns')
     nxroot['entry']['field2'] = sc.arange('event', 2.0, unit='ns')
-    assert list(nxroot[Field]) == []
-    assert set(nxroot['entry'][Field]) == {'field1', 'field2'}
+    assert list(nxroot[snx.Field]) == []
+    assert set(nxroot['entry'][snx.Field]) == {'field1', 'field2'}
 
 
 def test_nxobject_getitem_by_class_list(nxroot):
@@ -253,14 +252,14 @@ def test_nxobject_getitem_by_class_list(nxroot):
     nxroot['entry']['field1'] = sc.arange('event', 4.0, unit='ns')
     assert set(nxroot['entry'][[NXlog,
                                 NXevent_data]]) == {'log', 'events_0', 'events_1'}
-    assert set(nxroot['entry'][[NXlog, Field]]) == {'log', 'field1'}
+    assert set(nxroot['entry'][[NXlog, snx.Field]]) == {'log', 'field1'}
 
 
 def test_nxobject_dataset_items_are_returned_as_Field(nxroot):
     events = nxroot['entry'].create_class('events_0', NXevent_data)
     events['event_time_offset'] = sc.arange('event', 5)
     field = nxroot['entry/events_0/event_time_offset']
-    assert isinstance(field, Field)
+    assert isinstance(field, snx.Field)
 
 
 def test_field_properties(nxroot):

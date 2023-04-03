@@ -11,14 +11,8 @@ import scipp as sc
 
 from .._common import convert_time_to_datetime64, to_child_select
 from ..typing import H5Dataset, ScippIndex
-from .base import (
-    Field,
-    Group,
-    NexusStructureError,
-    NXobject,
-    asvariable,
-    base_definitions,
-)
+from .base import Group, NexusStructureError, NXobject, asvariable, base_definitions
+from .field import Field
 
 
 def _guess_dims(dims, shape, dataset: H5Dataset):

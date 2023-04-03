@@ -7,14 +7,8 @@ import numpy as np
 import scipp as sc
 
 from .._common import to_plain_index
-from .base import (
-    Field,
-    Group,
-    NexusStructureError,
-    NXobject,
-    ScippIndex,
-    base_definitions,
-)
+from .base import Group, NexusStructureError, NXobject, ScippIndex, base_definitions
+from .field import Field
 
 _event_dimension = "event"
 _pulse_dimension = "event_time_zero"

@@ -9,14 +9,8 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import (
-    Field,
-    Group,
-    NexusStructureError,
-    NXobject,
-    ScippIndex,
-    depends_on_to_relative_path,
-)
+from .base import Group, NexusStructureError, NXobject, ScippIndex
+from .field import Field, depends_on_to_relative_path
 
 
 class TransformationError(NexusStructureError):

@@ -12,7 +12,6 @@ except importlib.metadata.PackageNotFoundError:
 
 from .. import typing
 from .base import (
-    Field,
     Group,
     NexusStructureError,
     NXobject,
@@ -20,6 +19,7 @@ from .base import (
     create_class,
     create_field,
 )
+from .field import Field
 from .file import File
 from .nexus_classes import *
 from .nxdata import group_events_by_detector_number
