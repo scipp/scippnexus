@@ -18,6 +18,8 @@ from scippnexus._common import convert_time_to_datetime64, to_plain_index
 from scippnexus._hdf5_nexus import _warn_latin1_decode
 from scippnexus.typing import H5Dataset, ScippIndex
 
+from .attrs import Attrs
+
 if TYPE_CHECKING:
     from .base import Group
 
@@ -86,8 +88,7 @@ class Field:
     def attrs(self) -> Dict[str, Any]:
         """The attributes of the dataset.
         Cannot be used for writing attributes, since they are cached for performance."""
-        return MappingProxyType(
-            dict(self.dataset.attrs) if self.dataset.attrs else dict())
+        return MappingProxyType(Attrs(self.dataset.attrs))
 
     @property
     def dims(self) -> Tuple[str, ...]:

@@ -15,6 +15,7 @@ import scipp as sc
 
 from .._common import to_child_select
 from ..typing import H5Dataset, H5Group, ScippIndex
+from .attrs import Attrs
 from .field import Field
 
 
@@ -187,8 +188,7 @@ class Group(Mapping):
         # We may expected a per-subgroup overhead of 1 ms for reading attributes, so if
         # all we want is access one subgroup, we may save, e.g., a second for a group
         # with 1000 subgroups (or subfields).
-        return MappingProxyType(
-            dict(self._group.attrs) if self._group.attrs else dict())
+        return MappingProxyType(Attrs(self._group.attrs))
 
     @property
     def name(self) -> str:
@@ -433,7 +433,7 @@ def create_class(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Gro
         subclass of NXobject, such as NXdata or NXlog.
     """
     group = group.create_group(name)
-    attr = nx_class if isinstance(nx_class, str) else nx_class.__name__
+    attr = nx_class if isinstance(nx_class, (str, bytes)) else nx_class.__name__
     group.attrs['NX_class'] = attr
     return group
 

@@ -90,6 +90,15 @@ def test_nxobject_entry(nxroot):
     assert set(entry.keys()) == {'events_0', 'events_1', 'log'}
 
 
+def test_nx_class_can_be_bytes(h5root):
+    log = h5root.create_group('log')
+    attr = np.chararray((), itemsize=5)
+    attr[()] = b'NXlog'
+    log.attrs['NX_class'] = attr
+    group = snx.Group(log, definitions=snx.base_definitions)
+    assert group.nx_class == NXlog
+
+
 def test_nxobject_log(h5root):
     da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
                       coords={
