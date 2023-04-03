@@ -46,7 +46,7 @@ class NXdata(NXobject):
                  fallback_dims: Optional[Tuple[str, ...]] = None,
                  fallback_signal_name: Optional[str] = None):
         super().__init__(attrs=attrs, children=children)
-        self._valid = True
+        self._valid = True  # True if the children can be assembled
         self._signal_name = None
         self._signal = None
         self._aux_signals = attrs.get('auxiliary_signals', [])
@@ -131,17 +131,17 @@ class NXdata(NXobject):
             # Newly written files should always contain indices attributes, but the
             # standard recommends that readers should also make "best effort" guess
             # since legacy files do not set this attribute.
-            if name in (self._signal_name, ):
+            if name == self._signal_name:
                 return group_dims
-            if name in self._aux_signals:
-                return _guess_dims(group_dims, self._signal.dataset.shape,
-                                   field.dataset)
             # Latest way of defining dims
             if (dims := dims_from_indices.get(name)) is not None:
                 return dims
             # Older way of defining dims via axis attribute
             if (axis := axis_index.get(name)) is not None:
                 return (group_dims[axis - 1], )
+            if name in self._aux_signals:
+                return _guess_dims(group_dims, self._signal.dataset.shape,
+                                   field.dataset)
             if name in named_axes:
                 # If there are named axes then items of same name are "dimension
                 # coordinates", i.e., have a dim matching their name.
@@ -189,7 +189,7 @@ class NXdata(NXobject):
     def unit(self) -> Union[None, sc.Unit]:
         return self._signal.unit if self._valid else super().unit
 
-    def _bin_edge_dim(self, coord: Field) -> Union[None, str]:
+    def _bin_edge_dim(self, coord: Union[Any, Field]) -> Union[None, str]:
         if not isinstance(coord, Field):
             return None
         sizes = self.sizes
@@ -210,9 +210,10 @@ class NXdata(NXobject):
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         if not self._valid:
             raise NexusStructureError("Could not determine signal field or dimensions.")
+        dg = dg.copy()
         aux = {name: dg.pop(name) for name in self._aux_signals}
-        coords = sc.DataGroup(dg)
-        signal = coords.pop(self._signal_name)
+        signal = dg.pop(self._signal_name)
+        coords = dg
         da = sc.DataArray(data=signal)
         da = self._add_coords(da, coords)
         if aux:
@@ -338,6 +339,7 @@ def _find_event_entries(dg: sc.DataGroup) -> List[str]:
 
 def group_events_by_detector_number(
         dg: sc.DataGroup) -> Union[sc.DataArray, sc.Dataset]:
+    dg = dg.copy()
     grouping_key = None
     for key in NXdetector._detector_number_fields:
         if (grouping := dg.get(key)) is not None:

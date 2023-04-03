@@ -58,34 +58,13 @@ class NXevent_data(NXobject):
             return (_event_dimension, )
         return None
 
-    def read_children(self, obj: Group, select: ScippIndex) -> sc.DataGroup:
-        children = obj
-        index = to_plain_index([_pulse_dimension], select)
-
+    def read_children(self, children: Group, select: ScippIndex) -> sc.DataGroup:
         if not children:  # TODO Check that select is trivial?
             return sc.DataGroup()
 
-        max_index = self.shape[0]
+        index = to_plain_index([_pulse_dimension], select)
         event_time_zero = children['event_time_zero'][index]
-        if index is Ellipsis or index == tuple():
-            last_loaded = False
-        else:
-            if isinstance(index, int):
-                start, stop, _ = slice(index, None).indices(max_index)
-                if start == stop:
-                    raise IndexError('Index {start} is out of range')
-                index = slice(start, start + 1)
-            start, stop, stride = index.indices(max_index)
-            if stop + stride > max_index:
-                last_loaded = False
-            elif start == stop:
-                last_loaded = True
-            else:
-                stop += stride
-                last_loaded = True
-            index = slice(start, stop, stride)
-
-        event_index = children['event_index'][index].values
+        last_loaded, event_index = self._get_event_index(children, index)
 
         num_event = children["event_time_offset"].shape[0]
         # Some files contain uint64 "max" indices, which turn into negatives during
@@ -119,6 +98,29 @@ class NXevent_data(NXobject):
         if event_id is not None:
             dg['event_id'] = event_id
         return dg
+
+    def _get_event_index(self, children: sc.DataGroup, index):
+        max_index = self.shape[0]
+        if index is Ellipsis or index == tuple():
+            last_loaded = False
+        else:
+            if isinstance(index, int):
+                start, stop, _ = slice(index, None).indices(max_index)
+                if start == stop:
+                    raise IndexError(f'Index {start} is out of range')
+                index = slice(start, start + 1)
+            start, stop, stride = index.indices(max_index)
+            if stop + stride > max_index:
+                last_loaded = False
+            elif start == stop:
+                last_loaded = True
+            else:
+                stop += stride
+                last_loaded = True
+            index = slice(start, stop, stride)
+
+        event_index = children['event_index'][index].values
+        return last_loaded, event_index
 
     def assemble(self, children: sc.DataGroup) -> sc.DataArray:
         _check_for_missing_fields(children)
