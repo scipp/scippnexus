@@ -44,8 +44,40 @@ class NXdata(NXobject):
         self._signal_name = None
         self._signal = None
         self._aux_signals = attrs.get('auxiliary_signals', [])
-        if (name := attrs.get('signal',
-                              fallback_signal_name)) is not None and name in children:
+
+        self._init_signal(name=attrs.get('signal', fallback_signal_name),
+                          children=children)
+        self._init_axes(attrs=attrs, children=children)
+        self._init_group_dims(attrs=attrs, fallback_dims=fallback_dims)
+
+        for name, field in children.items():
+            if not isinstance(field, Field):
+                # If the NXdata contains subgroups we can generally not define valid
+                # sizes... except for some non-signal "special fields" that return
+                # a DataGroup that will be wrapped in a scalar Variable.
+                if field.attrs.get('NX_class') not in [
+                        'NXoff_geometry',
+                        'NXcylindrical_geometry',
+                        'NXgeometry',
+                        'NXtransformations',
+                ]:
+                    self._valid = False
+            elif (dims := self._get_dims(name, field)) is not None:
+                # The convention here is that the given dimensions apply to the shapes
+                # starting from the left. So we only squeeze dimensions that are after
+                # len(dims).
+                shape = _squeeze_trailing(dims, field.dataset.shape)
+                field.sizes = dict(zip(dims, shape))
+            elif self._valid:
+                s1 = self._signal.sizes
+                s2 = field.sizes
+                if not set(s2.keys()).issubset(set(s1.keys())):
+                    self._valid = False
+                elif any(s1[k] != s2[k] for k in s1.keys() & s2.keys()):
+                    self._valid = False
+
+    def _init_signal(self, name: Optional[str], children):
+        if name is not None and name in children:
             self._signal_name = name
             self._signal = children[name]
         else:
@@ -58,7 +90,50 @@ class NXdata(NXobject):
                     self._signal = children[name]
                     break
 
-        self._init_axes(attrs=attrs, children=children)
+    def _init_axes(self, attrs: Dict[str, Any], children: Dict[str, Union[Field,
+                                                                          Group]]):
+        # Latest way of defining axes
+        self._axes = attrs.get('axes')
+        # Older way of defining axes
+        self._signal_axes = None if self._signal is None else self._signal.attrs.get(
+            'axes')
+        if self._signal_axes is not None:
+            self._signal_axes = tuple(self._signal_axes.split(','))
+        # Another old way of defining axes
+        self._axis_index = {}
+        for name, field in children.items():
+            if (axis := field.attrs.get('axis')) is not None:
+                self._axis_index[name] = axis
+
+    def _get_named_axes(self, fallback_dims) -> Tuple[str, ...]:
+        if self._axes is not None:
+            # Unlike self.dims we *drop* entries that are '.'
+            return tuple(a for a in self._axes if a != '.')
+        elif self._signal_axes is not None:
+            return self._signal_axes
+        elif fallback_dims is not None:
+            return fallback_dims
+        else:
+            return ()
+
+    def _get_group_dims(self) -> Optional[Tuple[str, ...]]:
+        """Try three ways of defining group dimensions."""
+        # Apparently it is not possible to define dim labels unless there are
+        # corresponding coords. Special case of '.' entries means "no coord".
+        if self._axes is not None:
+            return tuple(f'dim_{i}' if a == '.' else a
+                         for i, a in enumerate(self._axes))
+        if self._signal_axes is not None:
+            return self._signal_axes
+        if self._axis_index:
+            return tuple(
+                k
+                for k, _ in sorted(self._axis_index.items(), key=lambda item: item[1]))
+        return None
+
+    def _init_group_dims(self,
+                         attrs: Dict[str, Any],
+                         fallback_dims: Optional[Tuple[str, ...]] = None):
         group_dims = self._get_group_dims()
 
         if self._signal is None:
@@ -91,71 +166,6 @@ class NXdata(NXobject):
             key: tuple(dims[np.array(indices).flatten()])
             for key, indices in indices_attrs.items()
         }
-
-        for name, field in children.items():
-            if not isinstance(field, Field):
-                # If the NXdata contains subgroups we can generally not define valid
-                # sizes... except for some non-signal "special fields" that return
-                # a DataGroup that will be wrapped in a scalar Variable.
-                if field.attrs.get('NX_class') not in [
-                        'NXoff_geometry',
-                        'NXcylindrical_geometry',
-                        'NXgeometry',
-                        'NXtransformations',
-                ]:
-                    self._valid = False
-            elif (dims := self._get_dims(name, field)) is not None:
-                # The convention here is that the given dimensions apply to the shapes
-                # starting from the left. So we only squeeze dimensions that are after
-                # len(dims).
-                shape = _squeeze_trailing(dims, field.dataset.shape)
-                field.sizes = dict(zip(dims, shape))
-            elif self._valid:
-                s1 = self._signal.sizes
-                s2 = field.sizes
-                if not set(s2.keys()).issubset(set(s1.keys())):
-                    self._valid = False
-                elif any(s1[k] != s2[k] for k in s1.keys() & s2.keys()):
-                    self._valid = False
-
-    def _get_named_axes(self, fallback_dims) -> Tuple[str, ...]:
-        if self._axes is not None:
-            # Unlike self.dims we *drop* entries that are '.'
-            return tuple(a for a in self._axes if a != '.')
-        elif self._signal_axes is not None:
-            return self._signal_axes.split(',')
-        elif fallback_dims is not None:
-            return fallback_dims
-        else:
-            return ()
-
-    def _init_axes(self, attrs: Dict[str, Any], children: Dict[str, Union[Field,
-                                                                          Group]]):
-        # Latest way of defining axes
-        self._axes = attrs.get('axes')
-        # Older way of defining axes
-        self._signal_axes = None if self._signal is None else self._signal.attrs.get(
-            'axes')
-        # Another old way of defining axes
-        self._axis_index = {}
-        for name, field in children.items():
-            if (axis := field.attrs.get('axis')) is not None:
-                self._axis_index[name] = axis
-
-    def _get_group_dims(self) -> Optional[Tuple[str, ...]]:
-        """Try three ways of defining group dimensions."""
-        # Apparently it is not possible to define dim labels unless there are
-        # corresponding coords. Special case of '.' entries means "no coord".
-        if self._axes is not None:
-            return tuple(f'dim_{i}' if a == '.' else a
-                         for i, a in enumerate(self._axes))
-        if self._signal_axes is not None:
-            return tuple(self._signal_axes.split(','))
-        if self._axis_index:
-            return tuple(
-                k
-                for k, _ in sorted(self._axis_index.items(), key=lambda item: item[1]))
-        return None
 
     def _get_dims(self, name, field):
         # Newly written files should always contain indices attributes, but the
