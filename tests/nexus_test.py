@@ -299,6 +299,25 @@ def test_field_unit_is_none_if_no_units_attribute(nxroot):
     assert field.unit is None
 
 
+def test_field_errors_with_same_unit_handles_them_with_value(nxroot):
+    entry = nxroot.create_class('group', snx.NXentry)
+    entry['value'] = sc.array(dims=['ignored'], values=[10.0], unit='m')
+    entry['value_errors'] = sc.array(dims=['ignored'], values=[2.0], unit='m')
+    value = nxroot['group']['value'][()]
+    assert_identical(value, sc.scalar(value=10.0, variance=4.0, unit='m'))
+
+
+def test_field_errors_with_different_unit_handles_them_individually(nxroot):
+    entry = nxroot.create_class('group', snx.NXentry)
+    entry['value'] = sc.array(dims=['ignored'], values=[10.0], unit='m')
+    entry['value_errors'] = sc.array(dims=['ignored'], values=[200.0], unit='cm')
+    value = nxroot['group']['value'][()]
+    assert_identical(value, sc.scalar(value=10.0, unit='m'))
+    assert 'value_errors' in nxroot['group']
+    errors = nxroot['group']['value_errors'][()]
+    assert_identical(errors, sc.scalar(value=200.0, unit='cm'))
+
+
 @pytest.mark.parametrize('value,type_', [(1.2, np.float32), (123, np.int32),
                                          ('abc', str), (True, bool)])
 def test_field_is_returned_as_python_object_if_shape_empty_and_no_unit(
