@@ -142,7 +142,6 @@ class Field:
     sizes: Optional[Dict[str, int]] = None
     dtype: Optional[sc.DType] = None
     errors: Optional[H5Dataset] = None
-    _is_time: Optional[bool] = None
 
     @cached_property
     def attrs(self) -> Mapping[str, Any]:
@@ -241,8 +240,6 @@ class Field:
             for name in self.attrs:
                 if (dt := _as_datetime(self.attrs[name])) is not None:
                     starts.append(dt)
-            if self._is_time and len(starts) == 0:
-                starts.append(sc.epoch(unit=self.unit))
             if len(starts) == 1:
                 variable = convert_time_to_datetime64(
                     variable,

@@ -193,7 +193,8 @@ def test_nxlog_with_shape_0(nxroot):
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time']
-    assert sc.identical(log[...], da.rename(ignored='dim_1'))
+    da.coords['time'] = sc.datetimes(dims=['time'], values=[], unit='ns')
+    assert_identical(log[...], da.rename(ignored='dim_1'))
 
 
 def test_nxobject_event_data(nxroot):

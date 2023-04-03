@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 import scipp as sc
 
-from .._common import to_child_select
+from .._common import convert_time_to_datetime64, to_child_select
 from ..typing import H5Dataset, ScippIndex
 from .base import (
     Field,
@@ -264,8 +264,14 @@ class NXlog(NXdata):
                          children=children,
                          fallback_dims=('time', ),
                          fallback_signal_name='value')
-        if (time := children.get('time')) is not None:
-            time._is_time = True
+
+    def assemble(self,
+                 dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+        if (time := dg.get('time')) is not None:
+            if time.dtype != sc.DType.datetime64:
+                dg['time'] = convert_time_to_datetime64(time,
+                                                        start=sc.epoch(unit=time.unit))
+        return super().assemble(dg)
 
 
 class NXdetector(NXdata):
