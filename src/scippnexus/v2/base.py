@@ -8,7 +8,7 @@ import warnings
 from collections.abc import Mapping
 from functools import cached_property, lru_cache
 from types import MappingProxyType
-from typing import Any, Dict, Iterator, List, Optional, Protocol, Tuple, Union, overload
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, overload
 
 import numpy as np
 import scipp as sc
@@ -20,27 +20,6 @@ from .field import Field
 
 def asvariable(obj: Union[Any, sc.Variable]) -> sc.Variable:
     return obj if isinstance(obj, sc.Variable) else sc.scalar(obj, unit=None)
-
-
-# TODO move into scipp
-class DimensionedArray(Protocol):
-    """
-    A multi-dimensional array with a unit and dimension labels.
-
-    Could be, e.g., a scipp.Variable or a simple dataclass wrapping a numpy array.
-    """
-
-    @property
-    def values(self):
-        """Multi-dimensional array of values"""
-
-    @property
-    def unit(self):
-        """Physical unit of the values"""
-
-    @property
-    def dims(self) -> Tuple[str]:
-        """Dimension labels for the values"""
 
 
 class NexusStructureError(Exception):
