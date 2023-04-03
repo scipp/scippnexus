@@ -17,7 +17,7 @@ import numpy as np
 class Status:
     name: str
     message: str
-    level: Optional[int] = 0
+    level: int = 0
 
 
 def error_reporter(error_id: int, register=None):
