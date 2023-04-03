@@ -409,6 +409,13 @@ def test_loads_bare_timestamps_if_multiple_candidate_datetime_offsets_found(nxro
     assert sc.identical(nxroot['mytime'][...], offsets.rename(ignored='dim_0'))
 
 
+def test_length_0_field_with_datetime_attribute_loaded_as_datetime(nxroot):
+    nxroot['mytime'] = sc.arange('ignored', 0, unit='ms')
+    nxroot['mytime'].dataset.attrs['start_time'] = '2022-12-12T12:13:14'
+    assert_identical(nxroot['mytime'][...],
+                     sc.datetimes(dims=['dim_0'], unit='ms', values=[]))
+
+
 def create_event_data_ids_1234(group):
     group['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2])
     group['event_time_offset'] = sc.array(dims=[''],

@@ -205,7 +205,7 @@ class Field:
 
         # If the variable is empty, return early
         if np.prod(shape) == 0:
-            return variable
+            return self._maybe_datetime(variable)
 
         if self.dtype == sc.DType.string:
             try:
@@ -235,6 +235,17 @@ class Field:
                 self._load_variances(variable, index)
         else:
             variable.values = self.dataset[index]
+        if variable.ndim == 0 and variable.unit is None and variable.fields is None:
+            # Work around scipp/scipp#2815, and avoid returning NumPy bool
+            if isinstance(variable.values, np.ndarray) and variable.dtype != 'bool':
+                return variable.values[()]
+            else:
+                return variable.value
+        variable = self._maybe_datetime(variable)
+        from .nxtransformations import maybe_transformation
+        return maybe_transformation(self, value=variable, sel=select)
+
+    def _maybe_datetime(self, variable: sc.Variable) -> sc.Variable:
         if _is_time(variable):
             starts = []
             for name in self.attrs:
@@ -245,14 +256,8 @@ class Field:
                     variable,
                     start=starts[0],
                     scaling_factor=self.attrs.get('scaling_factor'))
-        if variable.ndim == 0 and variable.unit is None and variable.fields is None:
-            # Work around scipp/scipp#2815, and avoid returning NumPy bool
-            if isinstance(variable.values, np.ndarray) and variable.dtype != 'bool':
-                return variable.values[()]
-            else:
-                return variable.value
-        from .nxtransformations import maybe_transformation
-        return maybe_transformation(self, value=variable, sel=select)
+
+        return variable
 
     def __repr__(self) -> str:
         return f'<Nexus field "{self.dataset.name}">'
