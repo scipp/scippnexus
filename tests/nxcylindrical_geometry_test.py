@@ -6,7 +6,7 @@ import scippnexus.v2 as snx
 
 
 @pytest.fixture()
-def nxroot(request):
+def nxroot():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         root = snx.Group(f, snx.base_definitions)

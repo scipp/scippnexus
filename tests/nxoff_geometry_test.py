@@ -8,7 +8,7 @@ from scippnexus.v2.nxoff_geometry import NXoff_geometry, off_to_shape
 
 
 @pytest.fixture()
-def group(request):
+def group():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         yield snx.Group(f, definitions=snx.base_definitions)
