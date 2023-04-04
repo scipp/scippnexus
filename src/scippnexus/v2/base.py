@@ -251,8 +251,7 @@ class Group(Mapping):
 
         Lazily initialized since the NXobject subclass init can be costly.
         """
-        if self._lazy_nexus is None:
-            self._populate_fields()
+        self._populate_fields()
         return self._lazy_nexus
 
     def _populate_fields(self) -> None:
@@ -265,6 +264,8 @@ class Group(Mapping):
         of any other field. For example, field attributes may define which fields are
         axes, and dim labels of other fields can be defined by the names of the axes.
         """
+        if self._lazy_nexus is not None:
+            return
         self._lazy_nexus = self._definitions.get(self.attrs.get('NX_class'),
                                                  NXobject)(attrs=self.attrs,
                                                            children=self._children)
