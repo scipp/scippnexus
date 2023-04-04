@@ -28,12 +28,11 @@ def nxroot():
         yield root
 
 
-def test_warns_if_no_data_found(nxroot):
+def test_returns_as_datagroup_if_no_signal_found(nxroot):
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_numbers', detector_numbers)
-    with pytest.warns(UserWarning, match="Failed to load "):
-        dg = detector[...]
+    dg = detector[...]
     assert isinstance(dg, sc.DataGroup)
 
 
