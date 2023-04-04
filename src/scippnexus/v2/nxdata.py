@@ -295,8 +295,8 @@ class NXlog(NXdata):
         return super().assemble(dg)
 
 
-def _fallback_signal_or_embedded_nxevent_data(
-        children: Dict[str, Union[Field, Group]]) -> str:
+def _find_embedded_nxevent_data(
+        children: Dict[str, Union[Field, Group]]) -> Optional[Group]:
     if all(name in children for name in NXevent_data.mandatory_fields):
         parent = children['event_index'].parent._group
         event_group = Group(parent,
@@ -304,15 +304,10 @@ def _fallback_signal_or_embedded_nxevent_data(
                                 'NXmonitor': NXevent_data,
                                 'NXdetector': NXevent_data
                             })
-        event_name = 'events'
-        if event_name in children:
-            event_name = uuid.uuid4().hex
-        children[event_name] = event_group
         for name in list(children):
             if name in NXevent_data.handled_fields:
                 del children[name]
-        return event_name
-    return 'data'
+        return event_group
 
 
 class NXdetector(NXdata):
@@ -329,11 +324,34 @@ class NXdetector(NXdata):
         if (det_num_name := NXdetector._detector_number(children)) is not None:
             if children[det_num_name].dataset.ndim == 1:
                 fallback_dims = ('detector_number', )
-        signal = _fallback_signal_or_embedded_nxevent_data(children)
+        self._embedded_events = _find_embedded_nxevent_data(children)
         super().__init__(attrs=attrs,
                          children=children,
                          fallback_dims=fallback_dims,
-                         fallback_signal_name=signal)
+                         fallback_signal_name='data')
+
+    def assemble(self,
+                 dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+        if self._valid:
+            obj = super().assemble(dg)
+        else:
+            obj = NXobject.assemble(self, dg)
+        if self._embedded_events is None:
+            return obj
+        # If events are embedded we are currently not including them in the `sizes`,
+        # so indexing is not possible. We could extend this in the future.
+        events = self._embedded_events[()]
+        if isinstance(events, sc.DataGroup):
+            if isinstance(obj, sc.DataArray):
+                return sc.DataGroup({self._signal_name: obj, 'events': events})
+            else:
+                obj.update(events)
+                return obj
+        if isinstance(obj, sc.DataArray):
+            return sc.Dataset({self._signal_name: obj, 'events': events})
+        else:
+            obj[uuid.uuid4().hex if 'events' in obj else 'events'] = events
+            return obj
 
     @property
     def detector_number(self) -> Optional[str]:
@@ -343,7 +361,11 @@ class NXdetector(NXdata):
 class NXmonitor(NXdata):
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
-        signal = _fallback_signal_or_embedded_nxevent_data(children)
+        if (event_group := _find_embedded_nxevent_data(children)) is not None:
+            signal = uuid.uuid4().hex if 'events' in children else 'events'
+            children[signal] = event_group
+        else:
+            signal = 'data'
         super().__init__(attrs=attrs, children=children, fallback_signal_name=signal)
 
 
