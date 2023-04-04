@@ -23,6 +23,7 @@ def _check_for_missing_fields(fields):
 
 class NXevent_data(NXobject):
     mandatory_fields = ("event_time_zero", "event_index", "event_time_offset")
+    handled_fields = mandatory_fields + ("event_id", )
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         super().__init__(attrs=attrs, children=children)

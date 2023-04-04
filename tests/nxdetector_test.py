@@ -72,6 +72,23 @@ def test_loads_signal_and_events_when_both_found(nxroot):
     assert loaded['events'].bins is not None
 
 
+def test_loads_embedded_events_as_subgroup(nxroot):
+    detector_number = sc.array(dims=[''], unit=None, values=np.array([1, 2]))
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_number', detector_number)
+    detector.create_field('event_id', sc.array(dims=[''], unit=None, values=[1]))
+    detector.create_field('event_time_offset', sc.array(dims=[''], unit='s',
+                                                        values=[1]))
+    detector.create_field('event_time_zero', sc.array(dims=[''], unit='s', values=[1]))
+    detector.create_field('event_index', sc.array(dims=[''], unit='None', values=[0]))
+    loaded = detector[...]
+    assert_identical(loaded['detector_number'],
+                     detector_number.rename({'': 'detector_number'}))
+    assert loaded['events'].bins is not None
+    event_data = snx.group_events_by_detector_number(loaded)
+    assert event_data.sizes == {'detector_number': 2}
+
+
 def detector_numbers_xx_yy_1234():
     return sc.array(dims=['xx', 'yy'], unit=None, values=np.array([[1, 2], [3, 4]]))
 

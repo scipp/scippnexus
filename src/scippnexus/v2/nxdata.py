@@ -3,6 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
+import uuid
 from functools import cached_property
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -192,7 +193,7 @@ class NXdata(NXobject):
             # coordinates", i.e., have a dim matching their name.
             # However, if the item is not 1-D we need more labels. Try to use labels
             # of signal if dimensionality matches.
-            if self._signal is not None and len(field.dataset.shape) == len(
+            if isinstance(self._signal, Field) and len(field.dataset.shape) == len(
                     self._signal.dataset.shape):
                 return self._group_dims
             return (name, )
@@ -294,6 +295,26 @@ class NXlog(NXdata):
         return super().assemble(dg)
 
 
+def _fallback_signal_or_embedded_nxevent_data(
+        children: Dict[str, Union[Field, Group]]) -> str:
+    if all(name in children for name in NXevent_data.mandatory_fields):
+        parent = children['event_index'].parent._group
+        event_group = Group(parent,
+                            definitions={
+                                'NXmonitor': NXevent_data,
+                                'NXdetector': NXevent_data
+                            })
+        event_name = 'events'
+        if event_name in children:
+            event_name = uuid.uuid4().hex
+        children[event_name] = event_group
+        for name in list(children):
+            if name in NXevent_data.handled_fields:
+                del children[name]
+        return event_name
+    return 'data'
+
+
 class NXdetector(NXdata):
     _detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
@@ -308,10 +329,11 @@ class NXdetector(NXdata):
         if (det_num_name := NXdetector._detector_number(children)) is not None:
             if children[det_num_name].dataset.ndim == 1:
                 fallback_dims = ('detector_number', )
+        signal = _fallback_signal_or_embedded_nxevent_data(children)
         super().__init__(attrs=attrs,
                          children=children,
                          fallback_dims=fallback_dims,
-                         fallback_signal_name='data')
+                         fallback_signal_name=signal)
 
     @property
     def detector_number(self) -> Optional[str]:
@@ -321,16 +343,7 @@ class NXdetector(NXdata):
 class NXmonitor(NXdata):
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
-        if all(name in children for name in NXevent_data.mandatory_fields):
-            parent = children['event_index'].parent._group
-            event_group = Group(parent, definitions={'NXmonitor': NXevent_data})
-            children['events'] = event_group
-            for name in list(children):
-                if name.startswith('event_'):
-                    del children[name]
-            signal = 'events'
-        else:
-            signal = 'data'
+        signal = _fallback_signal_or_embedded_nxevent_data(children)
         super().__init__(attrs=attrs, children=children, fallback_signal_name=signal)
 
 
