@@ -72,7 +72,7 @@ def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot):
     monitor = nxroot['entry'].create_class('monitor', snx.NXmonitor)
     create_event_data_without_event_id(monitor)
     da = monitor[...]
-    assert 'event_time_offset' in da
+    assert 'event_time_offset' in da.bins.coords
 
 
 def test_read_empty_nxevent_data(h5root):

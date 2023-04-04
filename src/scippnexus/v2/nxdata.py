@@ -13,6 +13,7 @@ from .._common import convert_time_to_datetime64, to_child_select
 from ..typing import H5Dataset, ScippIndex
 from .base import Group, NexusStructureError, NXobject, asvariable, base_definitions
 from .field import Field
+from .nxevent_data import NXevent_data
 
 
 def _guess_dims(dims, shape, dataset: H5Dataset):
@@ -55,6 +56,8 @@ class NXdata(NXobject):
                 # If the NXdata contains subgroups we can generally not define valid
                 # sizes... except for some non-signal "special fields" that return
                 # a DataGroup that will be wrapped in a scalar Variable.
+                if name == self._signal_name:
+                    continue
                 if field.attrs.get('NX_class') not in [
                         'NXoff_geometry',
                         'NXcylindrical_geometry',
@@ -144,6 +147,8 @@ class NXdata(NXobject):
                 # If we have explicit group dims, we can drop trailing 1s.
                 shape = _squeeze_trailing(group_dims, shape)
                 self._signal.sizes = dict(zip(group_dims, shape))
+            elif isinstance(self._signal, Group):
+                group_dims = self._signal.dims
             elif fallback_dims is not None:
                 shape = self._signal.dataset.shape
                 group_dims = [
@@ -228,7 +233,7 @@ class NXdata(NXobject):
         aux = {name: dg.pop(name) for name in self._aux_signals}
         signal = dg.pop(self._signal_name)
         coords = dg
-        da = sc.DataArray(data=signal)
+        da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
         da = self._add_coords(da, coords)
         if aux:
             signals = {self._signal_name: da}
@@ -316,7 +321,17 @@ class NXdetector(NXdata):
 class NXmonitor(NXdata):
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
-        super().__init__(attrs=attrs, children=children, fallback_signal_name='data')
+        if all(name in children for name in NXevent_data.mandatory_fields):
+            parent = children['event_index'].parent._group
+            event_group = Group(parent, definitions={'NXmonitor': NXevent_data})
+            children['events'] = event_group
+            for name in list(children):
+                if name.startswith('event_'):
+                    del children[name]
+            signal = 'events'
+        else:
+            signal = 'data'
+        super().__init__(attrs=attrs, children=children, fallback_signal_name=signal)
 
 
 def _group_events(*,
