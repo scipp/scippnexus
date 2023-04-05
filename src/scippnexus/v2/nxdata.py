@@ -86,7 +86,6 @@ class NXdata(NXobject):
         if name is not None and name in children:
             self._signal_name = name
             self._signal = children[name]
-            return
         # Legacy NXdata defines signal not as group attribute, but attr on dataset
         for name, field in children.items():
             # We ignore the signal value. Usually it is 1, but apparently one could
@@ -218,7 +217,12 @@ class NXdata(NXobject):
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
-        return self._signal.sizes if self._valid else super().sizes
+        if not self._valid:
+            return super().sizes
+        sizes = dict(self._signal.sizes)
+        for name in self._aux_signals:
+            sizes.update(self._children[name].sizes)
+        return sizes
 
     @property
     def unit(self) -> Union[None, sc.Unit]:

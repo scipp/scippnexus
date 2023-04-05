@@ -66,8 +66,10 @@ def test_loads_signal_and_events_when_both_found(nxroot):
     events.create_field('event_time_offset', sc.array(dims=[''], unit='s', values=[1]))
     events.create_field('event_time_zero', sc.array(dims=[''], unit='s', values=[1]))
     events.create_field('event_index', sc.array(dims=[''], unit='None', values=[0]))
+    assert detector.sizes == {'detector_number': 2, 'event_time_zero': 1}
     loaded = detector[...]
-    assert_identical(loaded['data'], data)
+    assert isinstance(loaded, sc.Dataset)
+    assert_identical(loaded['data'].data, data)
     assert loaded['events'].bins is not None
 
 
@@ -216,6 +218,26 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
                  unit=None,
                  dtype='int64',
                  values=[[2, 3], [0, 1]]))
+
+
+def test_selecting_pixels_works_with_event_signal(nxroot):
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_number', detector_numbers_xx_yy_1234())
+    create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
+    assert detector.sizes == {'dim_0': 2, 'dim_1': 2, 'event_time_zero': 4}
+    da = detector['dim_0', 0]
+    assert_identical(da.bins.size().data,
+                     sc.array(dims=['dim_1'], unit=None, dtype='int64', values=[2, 3]))
+
+
+def test_selecting_pixels_works_with_embedded_event_signal(nxroot):
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_number', detector_numbers_xx_yy_1234())
+    create_event_data_ids_1234(detector)
+    assert detector.sizes == {'dim_0': 2, 'dim_1': 2, 'event_time_zero': 4}
+    da = detector['dim_0', 0]
+    assert_identical(da.bins.size().data,
+                     sc.array(dims=['dim_1'], unit=None, dtype='int64', values=[2, 3]))
 
 
 def test_select_events_slices_underlying_event_data(nxroot):
