@@ -73,12 +73,6 @@ class NXevent_data(NXobject):
         else:
             event_select = slice(None)
 
-        if (event_id := children.get('event_id')) is not None:
-            event_id = event_id[event_select]
-            if event_id.dtype not in [sc.DType.int32, sc.DType.int64]:
-                raise NexusStructureError(
-                    "NXevent_data contains event_id field with non-integer values")
-
         event_time_offset = children['event_time_offset'][event_select]
 
         event_index = sc.array(dims=[_pulse_dimension],
@@ -91,8 +85,8 @@ class NXevent_data(NXobject):
         dg = sc.DataGroup(event_time_zero=event_time_zero,
                           event_index=event_index,
                           event_time_offset=event_time_offset)
-        if event_id is not None:
-            dg['event_id'] = event_id
+        if (event_id := children.get('event_id')) is not None:
+            dg['event_id'] = event_id[event_select]
         return dg
 
     def _get_event_index(self, children: sc.DataGroup, index):
