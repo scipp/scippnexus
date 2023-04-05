@@ -392,12 +392,10 @@ class NXdetector(NXdata):
 
         children = {name: _maybe_event_field(child) for name, child in children.items()}
         if (event_group := _find_embedded_nxevent_data(children)) is not None:
-            signal = uuid.uuid4().hex if 'events' in children else 'events'
-            children[signal] = EventField(event_data=event_group,
-                                          grouping_name=det_num_name,
-                                          grouping=detector_number)
-        else:
-            signal = 'data'
+            name = uuid.uuid4().hex if 'events' in children else 'events'
+            children[name] = EventField(event_data=event_group,
+                                        grouping_name=det_num_name,
+                                        grouping=detector_number)
 
         super().__init__(attrs=attrs,
                          children=children,
