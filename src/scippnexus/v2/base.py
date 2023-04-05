@@ -106,7 +106,7 @@ class NXobject:
         child_sel = to_child_select(tuple(self.sizes), child.dims, sel)
         return child[child_sel]
 
-    def read_children(self, obj: Group, sel: ScippIndex) -> sc.DataGroup:
+    def read_children(self, sel: ScippIndex) -> sc.DataGroup:
         """
         When a Group is indexed, this method is called to read all children.
 
@@ -347,7 +347,7 @@ class Group(Mapping):
                             and all(isclass(x) for x in sel)):
             return self._get_children_by_nx_class(sel)
 
-        dg = self._nexus.read_children(self, sel)
+        dg = self._nexus.read_children(sel)
         try:
             dg = self._nexus.assemble(dg)
         except (sc.DimensionError, NexusStructureError) as e:
