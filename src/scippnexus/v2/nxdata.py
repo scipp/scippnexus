@@ -59,7 +59,7 @@ class NXdata(NXobject):
                 # If the NXdata contains subgroups we can generally not define valid
                 # sizes... except for some non-signal "special fields" that return
                 # a DataGroup that will be wrapped in a scalar Variable.
-                if name == self._signal_name:
+                if name == self._signal_name or name in self._aux_signals:
                     continue
                 if field.attrs.get('NX_class') not in [
                         'NXoff_geometry',
@@ -87,14 +87,6 @@ class NXdata(NXobject):
             self._signal_name = name
             self._signal = children[name]
             return
-        # NXlog or NXevent_data can take the role of the signal.
-        for name, field in children.items():
-            if isinstance(field,
-                          EventField) or (isinstance(field, Group)
-                                          and field.nx_class in [NXlog, NXevent_data]):
-                self._signal_name = name
-                self._signal = field
-                return
         # Legacy NXdata defines signal not as group attribute, but attr on dataset
         for name, field in children.items():
             # We ignore the signal value. Usually it is 1, but apparently one could
@@ -103,6 +95,16 @@ class NXdata(NXobject):
                 self._signal_name = name
                 self._signal = children[name]
                 break
+        # NXlog or NXevent_data can take the role of the signal.
+        for name, field in children.items():
+            if isinstance(field,
+                          EventField) or (isinstance(field, Group)
+                                          and field.nx_class in [NXlog, NXevent_data]):
+                if self._signal is None:
+                    self._signal_name = name
+                    self._signal = field
+                else:
+                    self._aux_signals.append(name)
 
     def _init_axes(self, attrs: Dict[str, Any], children: Dict[str, Union[Field,
                                                                           Group]]):
