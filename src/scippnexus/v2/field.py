@@ -55,7 +55,7 @@ def _as_datetime(obj: Any):
             time = time_and_timezone_offset[0]
             if len(time_and_timezone_offset) == 1:
                 # No timezone, parse directly (scipp based on numpy)
-                return sc.datetime(f'{date}T{time}')
+                return sc.datetime(obj)
             else:
                 # There is timezone info. Parse with dateutil.
                 dt = dateutil.parser.isoparse(obj)
