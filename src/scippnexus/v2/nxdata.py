@@ -379,23 +379,26 @@ class NXdetector(NXdata):
                 fallback_dims = (det_num_name, )
                 detector_number.sizes = {det_num_name: detector_number.dataset.shape[0]}
 
-        detector_number = children.get(det_num_name)
+        if (event_group := _find_embedded_nxevent_data(children)) is not None:
+            embedded_events = uuid.uuid4().hex if 'events' in children else 'events'
+            children[embedded_events] = event_group
+        else:
+            embedded_events = None
 
-        def _maybe_event_field(child: Union[Field, Group]):
-            if (isinstance(child, Group) and child.nx_class == NXevent_data
-                    and detector_number is not None):
+        def _maybe_event_field(name: str, child: Union[Field, Group]):
+            if ((name == embedded_events or
+                 (isinstance(child, Group) and child.nx_class == NXevent_data))
+                    and det_num_name is not None):
                 event_field = EventField(event_data=child,
                                          grouping_name=det_num_name,
-                                         grouping=detector_number)
+                                         grouping=children.get(det_num_name))
                 return event_field
             return child
 
-        children = {name: _maybe_event_field(child) for name, child in children.items()}
-        if (event_group := _find_embedded_nxevent_data(children)) is not None:
-            name = uuid.uuid4().hex if 'events' in children else 'events'
-            children[name] = EventField(event_data=event_group,
-                                        grouping_name=det_num_name,
-                                        grouping=detector_number)
+        children = {
+            name: _maybe_event_field(name, child)
+            for name, child in children.items()
+        }
 
         super().__init__(attrs=attrs,
                          children=children,
