@@ -19,6 +19,7 @@ def _make_pooch():
             '2023/LOKI_mcstas_nexus_geometry.nxs':
             'md5:f431d9775a53caffeebe9b879189b17c',
             '2023/NMX_2e11-rechunk.h5': 'md5:1174c208614b2e7a5faddc284b41d2c9',
+            '2023/YMIR_038243_00010244.hdf': 'md5:cefb04b6d4d36f16e7f329a6045ad129',
         })
 
 

@@ -5,9 +5,10 @@ import h5py
 import numpy as np
 import pytest
 import scipp as sc
+from scipp.testing import assert_identical
 
-from scippnexus import (
-    Field,
+import scippnexus.v2 as snx
+from scippnexus.v2 import (
     NexusStructureError,
     NXdetector,
     NXentry,
@@ -27,10 +28,17 @@ UTF8_TEST_STRINGS = (
 
 
 @pytest.fixture()
-def nxroot(request):
+def h5root():
+    """Yield h5py root group (file)"""
+    with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
+        yield f
+
+
+@pytest.fixture()
+def nxroot():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
-        root = NXroot(f)
+        root = snx.Group(f, definitions=snx.base_definitions)
         root.create_class('entry', NXentry)
         yield root
 
@@ -53,7 +61,7 @@ def test_nxobject_create_class_with_string_nx_class(nxroot):
 def test_nxobject_items(nxroot):
     items = nxroot.items()
     assert len(items) == 1
-    name, entry = items[0]
+    name, entry = next(iter(items))
     assert name == 'entry'
     entry.create_class('monitor', NXmonitor)
     entry.create_class('log', NXlog)
@@ -82,7 +90,16 @@ def test_nxobject_entry(nxroot):
     assert set(entry.keys()) == {'events_0', 'events_1', 'log'}
 
 
-def test_nxobject_log(nxroot):
+def test_nx_class_can_be_bytes(h5root):
+    log = h5root.create_group('log')
+    attr = np.chararray((), itemsize=5)
+    attr[()] = b'NXlog'
+    log.attrs['NX_class'] = attr
+    group = snx.Group(log, definitions=snx.base_definitions)
+    assert group.nx_class == NXlog
+
+
+def test_nxobject_log(h5root):
     da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
                       coords={
                           'time':
@@ -90,10 +107,10 @@ def test_nxobject_log(nxroot):
                           sc.array(dims=['time'], unit='s', values=[4.4, 5.5, 6.6]).to(
                               unit='ns', dtype='int64')
                       })
-    log = nxroot['entry'].create_class('log', NXlog)
-    log['value'] = da.data
-    log['time'] = da.coords['time'] - sc.epoch(unit='ns')
-    assert log.nx_class == NXlog
+    log = snx.create_class(h5root, 'log', NXlog)
+    snx.create_field(log, 'value', da.data)
+    snx.create_field(log, 'time', da.coords['time'] - sc.epoch(unit='ns'))
+    log = snx.Group(log, definitions=snx.base_definitions)
     assert sc.identical(log[...], da)
 
 
@@ -103,10 +120,12 @@ def test_nxlog_with_missing_value_triggers_fallback(nxroot):
     log = nxroot['entry'].create_class('log', NXlog)
     log['time'] = time - sc.epoch(unit='ns')
     loaded = log[()]
-    assert sc.identical(loaded, sc.DataGroup(time=time.rename(time='dim_0')))
+    # Fallback to DataGroup, but we still have partial info from NXlog: dim is time
+    assert_identical(loaded, sc.DataGroup(time=time))
 
 
-def test_nxlog_length_1(nxroot):
+def test_nxlog_length_1(h5root):
+    nxroot = snx.Group(h5root, definitions=snx.base_definitions)
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1]),
         coords={
@@ -114,27 +133,20 @@ def test_nxlog_length_1(nxroot):
             sc.epoch(unit='ns') +
             sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
         })
-    log = nxroot['entry'].create_class('log', NXlog)
+    log = nxroot.create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
-    assert log.nx_class == NXlog
     assert sc.identical(log[...], da)
 
 
-def test_nxlog_length_1_two_dims_no_time_squeezes_all_dims(nxroot):
-    da = sc.DataArray(
-        sc.array(dims=['time', 'ignored'], values=[[1.1]]),
-        coords={
-            'time':
-            sc.epoch(unit='ns') +
-            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
-        })
+def test_nxlog_length_1_two_dims_no_time_defaults_inner_dim_name(nxroot):
+    var = sc.array(dims=['time', 'ignored'], values=[[1.1]])
     log = nxroot['entry'].create_class('log', NXlog)
-    log['value'] = da.data
-    assert sc.identical(log[...], sc.DataArray(sc.scalar(1.1)))
+    log['value'] = var
+    assert_identical(log[...], sc.DataArray(var.rename(ignored='dim_1')))
 
 
-def test_nxlog_length_1_two_dims_with_time_squeezes_inner_dim(nxroot):
+def test_nxlog_length_1_two_dims_with_time_defaults_inner_dim_name(nxroot):
     da = sc.DataArray(
         sc.array(dims=['time', 'ignored'], values=[[1.1]]),
         coords={
@@ -145,7 +157,7 @@ def test_nxlog_length_1_two_dims_with_time_squeezes_inner_dim(nxroot):
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
-    assert sc.identical(log[...], da['ignored', 0])
+    assert sc.identical(log[...], da.rename(ignored='dim_1'))
 
 
 def test_nxlog_axes_replaces_time_dim(nxroot):
@@ -157,7 +169,7 @@ def test_nxlog_axes_replaces_time_dim(nxroot):
             sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
         })
     log = nxroot['entry'].create_class('log', NXlog)
-    log.attrs['axes'] = ['yy', 'xx']
+    log._group.attrs['axes'] = ['yy', 'xx']
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
     expected = sc.DataArray(sc.array(dims=['yy', 'xx'], values=[[1.1]]),
@@ -177,7 +189,7 @@ def test_nxlog_three_dims_with_time_of_length_1(nxroot):
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
     loaded = log[...]
-    assert sc.identical(
+    assert_identical(
         loaded.data,
         sc.array(dims=['time', 'dim_1', 'dim_2'], values=np.arange(9.).reshape(1, 3,
                                                                                3)))
@@ -189,7 +201,8 @@ def test_nxlog_with_shape_0(nxroot):
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time']
-    assert sc.identical(log[...], da['ignored', 0])
+    da.coords['time'] = sc.datetimes(dims=['time'], values=[], unit='ns')
+    assert_identical(log[...], da.rename(ignored='dim_1'))
 
 
 def test_nxobject_event_data(nxroot):
@@ -237,8 +250,8 @@ def test_nxobject_getitem_by_class_get_fields(nxroot):
     nxroot['entry'].create_class('events_0', NXevent_data)
     nxroot['entry']['field1'] = sc.arange('event', 4.0, unit='ns')
     nxroot['entry']['field2'] = sc.arange('event', 2.0, unit='ns')
-    assert list(nxroot[Field]) == []
-    assert set(nxroot['entry'][Field]) == {'field1', 'field2'}
+    assert list(nxroot[snx.Field]) == []
+    assert set(nxroot['entry'][snx.Field]) == {'field1', 'field2'}
 
 
 def test_nxobject_getitem_by_class_list(nxroot):
@@ -248,14 +261,14 @@ def test_nxobject_getitem_by_class_list(nxroot):
     nxroot['entry']['field1'] = sc.arange('event', 4.0, unit='ns')
     assert set(nxroot['entry'][[NXlog,
                                 NXevent_data]]) == {'log', 'events_0', 'events_1'}
-    assert set(nxroot['entry'][[NXlog, Field]]) == {'log', 'field1'}
+    assert set(nxroot['entry'][[NXlog, snx.Field]]) == {'log', 'field1'}
 
 
 def test_nxobject_dataset_items_are_returned_as_Field(nxroot):
     events = nxroot['entry'].create_class('events_0', NXevent_data)
     events['event_time_offset'] = sc.arange('event', 5)
     field = nxroot['entry/events_0/event_time_offset']
-    assert isinstance(field, Field)
+    assert isinstance(field, snx.Field)
 
 
 def test_field_properties(nxroot):
@@ -276,8 +289,8 @@ def test_field_dim_labels(nxroot):
     events['event_id'] = sc.arange('ignored', 2)
     event_data = nxroot['entry/events_0']
     assert event_data['event_time_offset'].dims == ('event', )
-    assert event_data['event_time_zero'].dims == ('pulse', )
-    assert event_data['event_index'].dims == ('pulse', )
+    assert event_data['event_time_zero'].dims == ('event_time_zero', )
+    assert event_data['event_index'].dims == ('event_time_zero', )
     assert event_data['event_id'].dims == ('event', )
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = sc.arange('ignored', 2)
@@ -293,6 +306,25 @@ def test_field_unit_is_none_if_no_units_attribute(nxroot):
     assert log.unit is None
     field = log['value']
     assert field.unit is None
+
+
+def test_field_errors_with_same_unit_handles_them_with_value(nxroot):
+    entry = nxroot.create_class('group', snx.NXentry)
+    entry['value'] = sc.array(dims=['ignored'], values=[10.0], unit='m')
+    entry['value_errors'] = sc.array(dims=['ignored'], values=[2.0], unit='m')
+    value = nxroot['group']['value'][()]
+    assert_identical(value, sc.scalar(value=10.0, variance=4.0, unit='m'))
+
+
+def test_field_errors_with_different_unit_handles_them_individually(nxroot):
+    entry = nxroot.create_class('group', snx.NXentry)
+    entry['value'] = sc.array(dims=['ignored'], values=[10.0], unit='m')
+    entry['value_errors'] = sc.array(dims=['ignored'], values=[200.0], unit='cm')
+    value = nxroot['group']['value'][()]
+    assert_identical(value, sc.scalar(value=10.0, unit='m'))
+    assert 'value_errors' in nxroot['group']
+    errors = nxroot['group']['value_errors'][()]
+    assert_identical(errors, sc.scalar(value=200.0, unit='cm'))
 
 
 @pytest.mark.parametrize('value,type_', [(1.2, np.float32), (123, np.int32),
@@ -341,7 +373,7 @@ def test_field_of_extended_ascii_in_ascii_encoded_dataset_is_loaded_correctly():
     string = b"run at rot=90" + bytes([0xb0])
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         f['title'] = np.array([string, string + b'x'])
-        title = NXroot(f)['title']
+        title = snx.Group(f)['title']
         assert sc.identical(
             title[...],
             sc.array(dims=['dim_0'], values=["run at rot=90°", "run at rot=90°x"]))
@@ -349,7 +381,7 @@ def test_field_of_extended_ascii_in_ascii_encoded_dataset_is_loaded_correctly():
 
 def test_ms_field_with_second_datetime_attribute_loaded_as_ms_datetime(nxroot):
     nxroot['mytime'] = sc.arange('ignored', 2, unit='ms')
-    nxroot['mytime'].attrs['start_time'] = '2022-12-12T12:13:14'
+    nxroot['mytime'].dataset.attrs['start_time'] = '2022-12-12T12:13:14'
     assert sc.identical(
         nxroot['mytime'][...],
         sc.datetimes(dims=['dim_0'],
@@ -359,7 +391,7 @@ def test_ms_field_with_second_datetime_attribute_loaded_as_ms_datetime(nxroot):
 
 def test_ns_field_with_second_datetime_attribute_loaded_as_ns_datetime(nxroot):
     nxroot['mytime'] = sc.arange('ignored', 2, unit='ns')
-    nxroot['mytime'].attrs['start_time'] = '1970-01-01T00:00:00'
+    nxroot['mytime'].dataset.attrs['start_time'] = '1970-01-01T00:00:00'
     assert sc.identical(
         nxroot['mytime'][...],
         sc.datetimes(
@@ -370,7 +402,7 @@ def test_ns_field_with_second_datetime_attribute_loaded_as_ns_datetime(nxroot):
 
 def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot):
     nxroot['mytime'] = sc.arange('ignored', 2, unit='s')
-    nxroot['mytime'].attrs['start_time'] = '1984-01-01T00:00:00.000000000'
+    nxroot['mytime'].dataset.attrs['start_time'] = '1984-01-01T00:00:00.000000000'
     assert sc.identical(
         nxroot['mytime'][...],
         sc.datetimes(dims=['dim_0'],
@@ -384,14 +416,14 @@ def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot):
                                            ('+11:30', '00:30'), ('-09:30', '21:30')])
 def test_timezone_information_in_datetime_attribute_is_applied(nxroot, timezone, hhmm):
     nxroot['mytime'] = sc.scalar(value=3, unit='s')
-    nxroot['mytime'].attrs['start_time'] = f'1984-01-01T12:00:00{timezone}'
+    nxroot['mytime'].dataset.attrs['start_time'] = f'1984-01-01T12:00:00{timezone}'
     assert sc.identical(nxroot['mytime'][...],
                         sc.datetime(unit='s', value=f'1984-01-01T{hhmm}:03'))
 
 
 def test_timezone_information_in_datetime_attribute_preserves_ns_precision(nxroot):
     nxroot['mytime'] = sc.scalar(value=3, unit='s')
-    nxroot['mytime'].attrs['start_time'] = '1984-01-01T12:00:00.123456789+0200'
+    nxroot['mytime'].dataset.attrs['start_time'] = '1984-01-01T12:00:00.123456789+0200'
     assert sc.identical(nxroot['mytime'][...],
                         sc.datetime(unit='ns', value='1984-01-01T10:00:03.123456789'))
 
@@ -399,62 +431,19 @@ def test_timezone_information_in_datetime_attribute_preserves_ns_precision(nxroo
 def test_loads_bare_timestamps_if_multiple_candidate_datetime_offsets_found(nxroot):
     offsets = sc.arange('ignored', 2, unit='ms')
     nxroot['mytime'] = offsets
-    nxroot['mytime'].attrs['offset'] = '2022-12-12T12:13:14'
-    nxroot['mytime'].attrs['start_time'] = '2022-12-12T12:13:15'
+    nxroot['mytime'].dataset.attrs['offset'] = '2022-12-12T12:13:14'
+    nxroot['mytime'].dataset.attrs['start_time'] = '2022-12-12T12:13:15'
     assert sc.identical(nxroot['mytime'][...], offsets.rename(ignored='dim_0'))
 
 
-def create_event_data_ids_1234(group):
-    group['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2])
-    group['event_time_offset'] = sc.array(dims=[''],
-                                          unit='s',
-                                          values=[456, 7, 3, 345, 632, 23])
-    group['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
-    group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, -1000])
+def test_length_0_field_with_datetime_attribute_loaded_as_datetime(nxroot):
+    nxroot['mytime'] = sc.arange('ignored', 0, unit='ms')
+    nxroot['mytime'].dataset.attrs['start_time'] = '2022-12-12T12:13:14'
+    assert_identical(nxroot['mytime'][...],
+                     sc.datetimes(dims=['dim_0'], unit='ms', values=[]))
 
 
-def test_negative_event_index_converted_to_num_event(nxroot):
-    event_data = nxroot['entry'].create_class('events_0', NXevent_data)
-    create_event_data_ids_1234(event_data)
-    events = nxroot['entry/events_0'][...]
-    assert events.bins.size().values[2] == 3
-    assert events.bins.size().values[3] == 0
-
-
-def test_bad_event_index_causes_load_as_DataGroup(nxroot):
-    event_data = nxroot['entry'].create_class('events_0', NXevent_data)
-    event_data['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2])
-    event_data['event_time_offset'] = sc.array(dims=[''], unit='s', values=[0, 0, 0, 0])
-    event_data['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
-    event_data['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 666])
-    dg = nxroot['entry/events_0'][...]
-    assert isinstance(dg, sc.DataGroup)
-
-
-def create_event_data_without_event_id(group):
-    group['event_time_offset'] = sc.array(dims=[''],
-                                          unit='s',
-                                          values=[456, 7, 3, 345, 632, 23])
-    group['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
-    group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
-
-
-def test_event_data_without_event_id_can_be_loaded(nxroot):
-    event_data = nxroot['entry'].create_class('events_0', NXevent_data)
-    create_event_data_without_event_id(event_data)
-    da = event_data[...]
-    assert len(da.bins.coords) == 1
-    assert 'event_time_offset' in da.bins.coords
-
-
-def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot):
-    monitor = nxroot['entry'].create_class('monitor', NXmonitor)
-    create_event_data_without_event_id(monitor)
-    da = monitor[...]
-    assert len(da.bins.coords) == 1
-    assert 'event_time_offset' in da.bins.coords
-
-
+@pytest.mark.skip(reason='Special attributes disabled for now. Do we keep them?')
 def test___getattr__for_unique_child_groups(nxroot):
     entry = nxroot['entry']
     with pytest.raises(NexusStructureError):
@@ -469,6 +458,7 @@ def test___getattr__for_unique_child_groups(nxroot):
         entry.log
 
 
+@pytest.mark.skip(reason='Special attributes disabled for now. Do we keep them?')
 def test___dir__(nxroot):
     entry = nxroot['entry']
     assert 'log' not in entry.__dir__()
@@ -484,3 +474,121 @@ def test___dir__includes_non_dynamic_properties(nxroot):
     det.create_class('events', NXevent_data)
     # Ensure we are not replacing __dir__ but adding to it
     assert 'unit' in det.__dir__()
+
+
+def test_read_recursive(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data['signal'] = np.arange(4)
+    data['signal'].attrs['units'] = 'm'
+    data['time'] = np.arange(5)
+    data['time'].attrs['units'] = 's'
+    obj = snx.Group(entry)
+    dg = obj[()]
+    assert obj.sizes == {'dim_0': None}
+    assert 'data' in dg
+
+
+def test_errors_read_as_variances(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data['signal'] = np.arange(4.0)
+    data['signal'].attrs['units'] = 'm'
+    data['signal_errors'] = np.arange(4.0)
+    data['signal_errors'].attrs['units'] = 'm'
+    data['time'] = np.arange(5.0)
+    data['time'].attrs['units'] = 's'
+    data['time_errors'] = np.arange(5.0)
+    data['time_errors'].attrs['units'] = 's'
+    obj = snx.Group(data)
+    assert set(obj._children.keys()) == {'signal', 'time'}
+    dg = obj[()]
+    assert dg['signal'].variances is not None
+    assert dg['time'].variances is not None
+    assert np.array_equal(dg['signal'].variances, np.arange(4.0)**2)
+    assert np.array_equal(dg['time'].variances, np.arange(5.0)**2)
+
+
+def test_read_field(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data['signal'] = np.arange(4)
+    data['signal'].attrs['units'] = 'm'
+    obj = snx.Group(data)
+    var = obj['signal'][()]
+    assert sc.identical(var, sc.array(dims=['dim_0'], values=np.arange(4), unit='m'))
+
+
+def test_nxdata_with_signal_axes_indices_reads_as_data_array(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data.attrs['NX_class'] = 'NXdata'
+    data.attrs['signal'] = 'signal'
+    data.attrs['axes'] = ['time', 'temperature']
+    data.attrs['time_indices'] = [0]
+    data.attrs['temperature_indices'] = [1]
+    ref = sc.DataArray(
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m'))
+    ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
+    ref.coords['temperature'] = sc.array(dims=['temperature'],
+                                         values=np.arange(4),
+                                         unit='K')
+    data['signal'] = ref.values
+    data['signal'].attrs['units'] = str(ref.unit)
+    data['time'] = ref.coords['time'].values
+    data['time'].attrs['units'] = str(ref.coords['time'].unit)
+    data['temperature'] = ref.coords['temperature'].values
+    data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
+    obj = snx.Group(data, definitions=snx.base_definitions)
+    da = obj[()]
+    assert sc.identical(da, ref)
+
+
+def test_nxdata_positional_indexing_returns_correct_slice(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data.attrs['NX_class'] = 'NXdata'
+    data.attrs['signal'] = 'signal'
+    data.attrs['axes'] = ['time', 'temperature']
+    data.attrs['time_indices'] = [0]
+    data.attrs['temperature_indices'] = [1]
+    ref = sc.DataArray(
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m'))
+    ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
+    ref.coords['temperature'] = sc.array(dims=['temperature'],
+                                         values=np.arange(4),
+                                         unit='K')
+    data['signal'] = ref.values
+    data['signal'].attrs['units'] = str(ref.unit)
+    data['time'] = ref.coords['time'].values
+    data['time'].attrs['units'] = str(ref.coords['time'].unit)
+    data['temperature'] = ref.coords['temperature'].values
+    data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
+    obj = snx.Group(data, definitions=snx.base_definitions)
+    da = obj['time', 0:2]
+    assert sc.identical(da, ref['time', 0:2])
+
+
+def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data.attrs['NX_class'] = 'NXdata'
+    data.attrs['signal'] = 'signal'
+    data.attrs['axes'] = ['time', 'temperature']
+    data.attrs['time_indices'] = [0]
+    data.attrs['temperature_indices'] = [1]
+    ref = sc.DataArray(
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m'))
+    ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
+    ref.coords['temperature'] = sc.array(dims=['temperature'],
+                                         values=np.arange(5),
+                                         unit='K')
+    data['signal'] = ref.values
+    data['signal'].attrs['units'] = str(ref.unit)
+    data['time'] = ref.coords['time'].values
+    data['time'].attrs['units'] = str(ref.coords['time'].unit)
+    data['temperature'] = ref.coords['temperature'].values
+    data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
+    obj = snx.Group(data, definitions=snx.base_definitions)
+    da = obj['temperature', 0:2]
+    assert sc.identical(da, ref['temperature', 0:2])
