@@ -400,29 +400,6 @@ class NXdetector(NXdata):
                          fallback_dims=fallback_dims,
                          fallback_signal_name='data')
 
-    def xassemble(self,
-                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
-        if self._valid:
-            obj = super().assemble(dg)
-        else:
-            obj = NXobject.assemble(self, dg)
-        if self._embedded_events is None:
-            return obj
-        # If events are embedded we are currently not including them in the `sizes`,
-        # so indexing is not possible. We could extend this in the future.
-        events = self._embedded_events[()]
-        if isinstance(events, sc.DataGroup):
-            if isinstance(obj, sc.DataArray):
-                return sc.DataGroup({self._signal_name: obj, 'events': events})
-            else:
-                obj.update(events)
-                return obj
-        if isinstance(obj, sc.DataArray):
-            return sc.Dataset({self._signal_name: obj, 'events': events})
-        else:
-            obj[uuid.uuid4().hex if 'events' in obj else 'events'] = events
-            return obj
-
     @property
     def detector_number(self) -> Optional[str]:
         return self._detector_number(self._children)
