@@ -117,9 +117,10 @@ class NXobject:
         to implement special logic for reading children with interdependencies, i.e.,
         where reading each child in isolation is not possible.
         """
-        return sc.DataGroup(
-            {name: self.index_child(child, sel)
-             for name, child in obj.items()})
+        return sc.DataGroup({
+            name: self.index_child(child, sel)
+            for name, child in self._children.items()
+        })
 
     def assemble(self,
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:

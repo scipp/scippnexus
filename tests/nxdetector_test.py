@@ -173,19 +173,20 @@ def create_event_data_ids_1234(group):
 
 
 def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxroot):
-    detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
+    detector_numbers = sc.array(dims=[''],
+                                unit=None,
+                                values=np.array([1, 2, 3, 4, 5, 6]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
-    assert detector.sizes == {'detector_number': 4, 'event_time_zero': 4}
-    loaded = detector[...]
-    da = snx.group_events_by_detector_number(loaded)
+    assert detector.sizes == {'detector_number': 6, 'event_time_zero': 4}
+    da = detector[...]
     assert sc.identical(
         da.bins.size().data,
         sc.array(dims=['detector_number'],
                  unit=None,
                  dtype='int64',
-                 values=[2, 3, 0, 1]))
+                 values=[2, 3, 0, 1, 0, 0]))
     assert 'event_time_offset' in da.bins.coords
     assert 'event_time_zero' in da.bins.coords
 
@@ -196,8 +197,8 @@ def test_loads_event_data_with_0d_detector_numbers(nxroot):
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     assert detector.dims == ('event_time_zero', )
     assert detector.shape == (4, )
-    loaded = snx.group_events_by_detector_number(detector[...])
-    assert sc.identical(loaded.bins.size().data, sc.index(2, dtype='int64'))
+    da = detector[...]
+    assert sc.identical(da.bins.size().data, sc.index(2, dtype='int64'))
 
 
 def test_loads_event_data_with_2d_detector_numbers(nxroot):
@@ -205,9 +206,9 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     assert detector.sizes == {'dim_0': 2, 'dim_1': 2, 'event_time_zero': 4}
-    loaded = snx.group_events_by_detector_number(detector[...])
+    da = detector[...]
     assert sc.identical(
-        loaded.bins.size().data,
+        da.bins.size().data,
         sc.array(dims=['dim_0', 'dim_1'],
                  unit=None,
                  dtype='int64',
@@ -218,28 +219,28 @@ def test_select_events_slices_underlying_event_data(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
-    da = snx.group_events_by_detector_number(detector['event_time_zero', :2])
+    da = detector['event_time_zero', :2]
     assert sc.identical(
         da.bins.size().data,
         sc.array(dims=['dim_0', 'dim_1'],
                  unit=None,
                  dtype='int64',
                  values=[[1, 1], [0, 1]]))
-    da = snx.group_events_by_detector_number(detector['event_time_zero', :3])
+    da = detector['event_time_zero', :3]
     assert sc.identical(
         da.bins.size().data,
         sc.array(dims=['dim_0', 'dim_1'],
                  unit=None,
                  dtype='int64',
                  values=[[2, 2], [0, 1]]))
-    da = snx.group_events_by_detector_number(detector['event_time_zero', 3])
+    da = detector['event_time_zero', 3]
     assert sc.identical(
         da.bins.size().data,
         sc.array(dims=['dim_0', 'dim_1'],
                  unit=None,
                  dtype='int64',
                  values=[[0, 1], [0, 0]]))
-    da = snx.group_events_by_detector_number(detector[()])
+    da = detector[()]
     assert sc.identical(
         da.bins.size().data,
         sc.array(dims=['dim_0', 'dim_1'],
@@ -248,16 +249,17 @@ def test_select_events_slices_underlying_event_data(nxroot):
                  values=[[2, 3], [0, 1]]))
 
 
-def test_loading_event_data_creates_automatic_detector_numbers_if_not_present_in_file(
-        nxroot):
+def test_loading_event_data_without_detector_numbers_does_not_group_events(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     assert detector.dims == ('event_time_zero', )
-    loaded = detector[...]
-    loaded = snx.group_events_by_detector_number(loaded)
-    assert sc.identical(
-        loaded.bins.size().data,
-        sc.array(dims=['event_id'], unit=None, dtype='int64', values=[2, 3, 1]))
+    da = detector[...]
+    assert_identical(
+        da.bins.size().data,
+        sc.array(dims=['event_time_zero'],
+                 unit=None,
+                 dtype='int64',
+                 values=[3, 0, 2, 1]))
 
 
 def test_loading_event_data_with_det_selection_and_automatic_detector_numbers_raises(
