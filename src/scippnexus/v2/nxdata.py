@@ -260,7 +260,11 @@ class NXdata(NXobject):
         if aux:
             signals = {self._signal_name: da}
             signals.update(aux)
-            return sc.Dataset(signals)
+            if all(
+                    isinstance(v, (sc.Variable, sc.DataArray))
+                    for v in signals.values()):
+                return sc.Dataset(signals)
+            return sc.DataGroup(signals)
         return da
 
     def _dim_of_coord(self, name: str, coord: sc.Variable) -> Union[None, str]:
