@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from contextlib import AbstractContextManager
+from typing import Mapping
 
 import h5py
 
@@ -10,7 +11,18 @@ from .base import Group, base_definitions
 
 class File(AbstractContextManager, Group):
 
-    def __init__(self, *args, definitions=base_definitions, **kwargs):
+    def __init__(self, *args, definitions: Mapping = base_definitions, **kwargs):
+        """Context manager for NeXus files, similar to h5py.File.
+
+        Arguments other than documented are as in :py:class:`h5py.File`.
+
+        Parameters
+        ----------
+        definitions:
+            Mapping of NX_class names to application-specific definitions.
+            The default is to use the base definitions as defined in the
+            NeXus standard.
+        """
         self._file = h5py.File(*args, **kwargs)
         super().__init__(self._file, definitions=definitions)
 
