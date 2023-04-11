@@ -102,6 +102,9 @@ class NXdata(NXobject):
                 break
         # NXlog or NXevent_data can take the role of the signal.
         for name, field in children.items():
+            if name == self._signal_name:
+                # Avoid duplicate handling
+                continue
             if isinstance(field,
                           EventField) or (isinstance(field, Group)
                                           and field.nx_class in [NXlog, NXevent_data]):

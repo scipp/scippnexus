@@ -211,6 +211,23 @@ def test_auxiliary_signal_causes_load_as_dataset(h5root):
     assert_identical(data[...], sc.Dataset({'signal': da.data, 'xx': da.coords['xx']}))
 
 
+def test_NXlog_data_is_loaded_as_time_dependent_data_array(nxroot):
+    da = sc.DataArray(data=sc.array(dims=['time'], unit='K', values=[1, 2, 3]),
+                      coords={
+                          'time':
+                          sc.epoch(unit='s') +
+                          sc.array(dims=['time'], unit='s', values=[1, 2, 3])
+                      })
+    data = nxroot.create_class('data1', NXdata)
+    log = data.create_class('data', NXlog)
+    log['time'] = da.coords['time']
+    log['value'] = da.data
+    data._group.attrs['signal'] = 'data'
+
+    loaded = data[()]
+    assert_identical(loaded, da)
+
+
 def test_field_dims_match_NXdata_dims(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
