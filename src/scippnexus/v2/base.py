@@ -283,7 +283,7 @@ class Group(Mapping):
         select = tuple(select) if isinstance(select, list) else select
         for key, child in self._children.items():
             nx_class = Field if isinstance(child, Field) else child.nx_class
-            if issubclass(nx_class, select):
+            if nx_class is not None and issubclass(nx_class, select):
                 children[key] = self[key]
         return children
 
