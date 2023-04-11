@@ -334,6 +334,19 @@ def _find_embedded_nxevent_data(
 class EventField:
 
     def __init__(self, event_data: Group, grouping_name: str, grouping: Field) -> None:
+        """Create a field that represents an event data group.
+
+        Parameters
+        ----------
+        event_data:
+            The event data group holding the NXevent_data fields.
+        grouping_name:
+            The name of the field that contains the grouping information.
+        grouping:
+            The field that contains the grouping keys. These are IDs corresponding to
+            the event_id field of the NXevent_data group, such as the detector_number
+            field of an NXdetector.
+        """
         self._event_data = event_data
         self._grouping_name = grouping_name
         self._grouping = grouping
@@ -344,9 +357,7 @@ class EventField:
 
     @property
     def sizes(self) -> Dict[str, int]:
-        sizes = dict(self._grouping.sizes)
-        sizes.update(self._event_data.sizes)
-        return sizes
+        return {**self._grouping.sizes, **self._event_data.sizes}
 
     @property
     def dims(self) -> Tuple[str, ...]:
