@@ -19,7 +19,7 @@ from .base import (
     create_class,
     create_field,
 )
-from .field import Field
+from .field import Attrs, Field
 from .file import File
 from .nexus_classes import *
 from .nxdata import group_events_by_detector_number
