@@ -89,6 +89,14 @@ class NXdata(NXobject):
                     self._valid = False
 
     def _init_signal(self, name: Optional[str], children):
+        # There are multiple ways NeXus can define the "signal" dataset. The latest
+        # version uses `signal` attribute on the group (passed as `name`). However,
+        # we must give precedence to the `signal` attribute on the dataset, since
+        # older files may use that (and the `signal` group attribute is unrelated).
+        # Finally, NXlog and NXevent_data can take the role of the signal. In practice
+        # those may not be indicate by a `signal` attribute, but we support that
+        # anyway since otherwise we would not be able to find NXevent_data signals
+        # in many common files.
         if name is not None and name in children:
             self._signal_name = name
             self._signal = children[name]
