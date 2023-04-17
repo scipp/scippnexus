@@ -9,7 +9,7 @@ from scippnexus.v2 import NXdetector, NXentry, NXoff_geometry
 
 
 def make_group(group: h5py.Group) -> snx.Group:
-    return snx.Group(group, definitions=snx.base_definitions)
+    return snx.Group(group, definitions=snx.base_definitions())
 
 
 @pytest.fixture()

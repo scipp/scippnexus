@@ -1,4 +1,4 @@
-.. currentmodule:: scippnexus
+.. currentmodule:: scippnexus.v2
 
 Functions
 =========
@@ -6,4 +6,5 @@ Functions
 .. autosummary::
    :toctree: ../generated/functions
 
-   make_definition
+   create_field
+   create_class

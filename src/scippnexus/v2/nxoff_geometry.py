@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, Union
 
 import scipp as sc
 
-from .base import Group, NexusStructureError, NXobject, base_definitions
+from .base import Group, NexusStructureError, NXobject, base_definitions_dict
 from .field import Field
 
 
@@ -80,4 +80,4 @@ class NXoff_geometry(NXobject):
         return off_to_shape(**children, detector_number=detector_number)
 
 
-base_definitions['NXoff_geometry'] = NXoff_geometry
+base_definitions_dict['NXoff_geometry'] = NXoff_geometry

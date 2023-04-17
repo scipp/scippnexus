@@ -9,7 +9,7 @@ from scippnexus.v2.nxtransformations import NXtransformations
 
 
 def make_group(group: h5py.Group) -> snx.Group:
-    return snx.Group(group, definitions=snx.base_definitions)
+    return snx.Group(group, definitions=snx.base_definitions())
 
 
 @pytest.fixture()

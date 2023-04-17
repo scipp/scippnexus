@@ -12,7 +12,13 @@ import scipp as sc
 
 from .._common import convert_time_to_datetime64, to_child_select
 from ..typing import H5Dataset, ScippIndex
-from .base import Group, NexusStructureError, NXobject, asvariable, base_definitions
+from .base import (
+    Group,
+    NexusStructureError,
+    NXobject,
+    asvariable,
+    base_definitions_dict,
+)
 from .field import Field
 from .nxevent_data import NXevent_data
 
@@ -260,7 +266,11 @@ class NXdata(NXobject):
         if aux:
             signals = {self._signal_name: da}
             signals.update(aux)
-            return sc.Dataset(signals)
+            if all(
+                    isinstance(v, (sc.Variable, sc.DataArray))
+                    for v in signals.values()):
+                return sc.Dataset(signals)
+            return sc.DataGroup(signals)
         return da
 
     def _dim_of_coord(self, name: str, coord: sc.Variable) -> Union[None, str]:
@@ -485,7 +495,7 @@ def group_events_by_detector_number(
     return out
 
 
-base_definitions['NXdata'] = NXdata
-base_definitions['NXlog'] = NXlog
-base_definitions['NXdetector'] = NXdetector
-base_definitions['NXmonitor'] = NXmonitor
+base_definitions_dict['NXdata'] = NXdata
+base_definitions_dict['NXlog'] = NXlog
+base_definitions_dict['NXdetector'] = NXdetector
+base_definitions_dict['NXmonitor'] = NXmonitor

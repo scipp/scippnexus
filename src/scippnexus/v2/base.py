@@ -283,7 +283,7 @@ class Group(Mapping):
         select = tuple(select) if isinstance(select, list) else select
         for key, child in self._children.items():
             nx_class = Field if isinstance(child, Field) else child.nx_class
-            if issubclass(nx_class, select):
+            if nx_class is not None and issubclass(nx_class, select):
                 children[key] = self[key]
         return children
 
@@ -452,4 +452,13 @@ def _nx_class_registry():
     return dict(inspect.getmembers(nexus_classes, inspect.isclass))
 
 
-base_definitions = {}
+base_definitions_dict = {}
+
+
+def base_definitions() -> Dict[str, type]:
+    """Return a dict of all base definitions.
+
+    This is a copy of the base definitions dict, so that it can be modified without
+    affecting the original.
+    """
+    return dict(base_definitions_dict)

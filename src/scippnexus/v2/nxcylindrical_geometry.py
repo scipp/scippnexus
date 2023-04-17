@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, Union
 
 import scipp as sc
 
-from .base import Group, NexusStructureError, NXobject, base_definitions
+from .base import Group, NexusStructureError, NXobject, base_definitions_dict
 from .field import Field
 
 
@@ -71,4 +71,4 @@ class NXcylindrical_geometry(NXobject):
         return _parse(**children, parent_detector_number=detector_number)
 
 
-base_definitions['NXcylindrical_geometry'] = NXcylindrical_geometry
+base_definitions_dict['NXcylindrical_geometry'] = NXcylindrical_geometry

@@ -5,7 +5,7 @@ from typing import Any, Dict, Union
 
 import scipp as sc
 
-from .base import Group, NXobject, ScippIndex, base_definitions
+from .base import Group, NXobject, ScippIndex, base_definitions_dict
 from .field import Field
 
 _matrix_units = {'orientation_matrix': 'one', 'ub_matrix': '1/Angstrom'}
@@ -34,4 +34,4 @@ class NXsample(NXobject):
         })
 
 
-base_definitions['NXsample'] = NXsample
+base_definitions_dict['NXsample'] = NXsample

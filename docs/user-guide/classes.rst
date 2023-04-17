@@ -1,4 +1,4 @@
-.. currentmodule:: scippnexus
+.. currentmodule:: scippnexus.v2
 
 Classes
 =======
@@ -11,10 +11,10 @@ Data Structures
    :template: scipp-class-template.rst
    :recursive:
 
-   ApplicationDefinition
    Attrs
    Field
    File
+   Group
    NXaperture
    NXattenuator
    NXbeam
@@ -73,18 +73,6 @@ Data Structures
    NXvelocity_selector
    NXxraylens
 
-Strategies
-----------
-
-.. autosummary::
-   :toctree: ../generated/classes
-   :template: scipp-class-template.rst
-   :recursive:
-
-   NXdataStrategy
-   NXdetectorStrategy
-   NXlogStrategy
-
 Exceptions
 ----------
 
@@ -97,6 +85,8 @@ Exceptions
 
 Typing
 ------
+
+.. currentmodule:: scippnexus
 
 .. autosummary::
    :toctree: ../generated/classes

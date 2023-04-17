@@ -20,7 +20,7 @@ def h5root():
 def nxroot():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
-        root = snx.Group(f, definitions=snx.base_definitions)
+        root = snx.Group(f, definitions=snx.base_definitions())
         root.create_class('entry', snx.NXentry)
         yield root
 
@@ -110,7 +110,7 @@ def test_nxevent_data_keys(h5root):
 
 def test_nxevent_data_children_read_as_variables_with_correct_dims(h5root):
     entry = make_event_data(h5root)
-    root = snx.Group(entry, definitions=snx.base_definitions)
+    root = snx.Group(entry, definitions=snx.base_definitions())
     event_data = root['events']
     assert sc.identical(event_data['event_id'][()],
                         sc.array(dims=['event'], values=[1, 1, 1, 0], unit=None))
@@ -125,7 +125,7 @@ def test_nxevent_data_children_read_as_variables_with_correct_dims(h5root):
 
 def test_nxevent_data_dims_and_sizes_ignore_pulse_contents(h5root):
     entry = make_event_data(h5root)
-    root = snx.Group(entry, definitions=snx.base_definitions)
+    root = snx.Group(entry, definitions=snx.base_definitions())
     event_data = root['events']
     assert event_data.dims == ('event_time_zero', )
     assert event_data.sizes == {'event_time_zero': 2}
@@ -133,7 +133,7 @@ def test_nxevent_data_dims_and_sizes_ignore_pulse_contents(h5root):
 
 def test_read_nxevent_data(h5root):
     entry = make_event_data(h5root)
-    root = snx.Group(entry, definitions=snx.base_definitions)
+    root = snx.Group(entry, definitions=snx.base_definitions())
     event_data = root['events']
     da = event_data[()]
     assert sc.identical(da.data.bins.size(),
