@@ -11,7 +11,7 @@ from scippnexus.v2.application_definitions import nxcansas
 def nxroot():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
-        root = snx.Group(f, definitions=snx.base_definitions)
+        root = snx.Group(f, definitions=snx.base_definitions())
         root.create_class('entry', snx.NXentry)
         yield root
 

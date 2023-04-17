@@ -38,7 +38,7 @@ def h5root():
 def nxroot():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
-        root = snx.Group(f, definitions=snx.base_definitions)
+        root = snx.Group(f, definitions=snx.base_definitions())
         root.create_class('entry', NXentry)
         yield root
 
@@ -95,7 +95,7 @@ def test_nx_class_can_be_bytes(h5root):
     attr = np.chararray((), itemsize=5)
     attr[()] = b'NXlog'
     log.attrs['NX_class'] = attr
-    group = snx.Group(log, definitions=snx.base_definitions)
+    group = snx.Group(log, definitions=snx.base_definitions())
     assert group.nx_class == NXlog
 
 
@@ -110,7 +110,7 @@ def test_nxobject_log(h5root):
     log = snx.create_class(h5root, 'log', NXlog)
     snx.create_field(log, 'value', da.data)
     snx.create_field(log, 'time', da.coords['time'] - sc.epoch(unit='ns'))
-    log = snx.Group(log, definitions=snx.base_definitions)
+    log = snx.Group(log, definitions=snx.base_definitions())
     assert sc.identical(log[...], da)
 
 
@@ -125,7 +125,7 @@ def test_nxlog_with_missing_value_triggers_fallback(nxroot):
 
 
 def test_nxlog_length_1(h5root):
-    nxroot = snx.Group(h5root, definitions=snx.base_definitions)
+    nxroot = snx.Group(h5root, definitions=snx.base_definitions())
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1]),
         coords={
@@ -539,7 +539,7 @@ def test_nxdata_with_signal_axes_indices_reads_as_data_array(h5root):
     data['time'].attrs['units'] = str(ref.coords['time'].unit)
     data['temperature'] = ref.coords['temperature'].values
     data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
-    obj = snx.Group(data, definitions=snx.base_definitions)
+    obj = snx.Group(data, definitions=snx.base_definitions())
     da = obj[()]
     assert sc.identical(da, ref)
 
@@ -564,7 +564,7 @@ def test_nxdata_positional_indexing_returns_correct_slice(h5root):
     data['time'].attrs['units'] = str(ref.coords['time'].unit)
     data['temperature'] = ref.coords['temperature'].values
     data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
-    obj = snx.Group(data, definitions=snx.base_definitions)
+    obj = snx.Group(data, definitions=snx.base_definitions())
     da = obj['time', 0:2]
     assert sc.identical(da, ref['time', 0:2])
 
@@ -589,6 +589,6 @@ def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root)
     data['time'].attrs['units'] = str(ref.coords['time'].unit)
     data['temperature'] = ref.coords['temperature'].values
     data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
-    obj = snx.Group(data, definitions=snx.base_definitions)
+    obj = snx.Group(data, definitions=snx.base_definitions())
     da = obj['temperature', 0:2]
     assert sc.identical(da, ref['temperature', 0:2])

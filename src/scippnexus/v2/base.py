@@ -452,4 +452,13 @@ def _nx_class_registry():
     return dict(inspect.getmembers(nexus_classes, inspect.isclass))
 
 
-base_definitions = {}
+base_definitions_dict = {}
+
+
+def base_definitions() -> Dict[str, type]:
+    """Return a dict of all base definitions.
+
+    This is a copy of the base definitions dict, so that it can be modified without
+    affecting the original.
+    """
+    return dict(base_definitions_dict)

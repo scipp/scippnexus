@@ -7,7 +7,13 @@ import numpy as np
 import scipp as sc
 
 from .._common import to_plain_index
-from .base import Group, NexusStructureError, NXobject, ScippIndex, base_definitions
+from .base import (
+    Group,
+    NexusStructureError,
+    NXobject,
+    ScippIndex,
+    base_definitions_dict,
+)
 from .field import Field
 
 _event_dimension = "event"
@@ -148,4 +154,4 @@ class NXevent_data(NXobject):
         return sc.DataArray(data=binned, coords={'event_time_zero': event_time_zero})
 
 
-base_definitions['NXevent_data'] = NXevent_data
+base_definitions_dict['NXevent_data'] = NXevent_data

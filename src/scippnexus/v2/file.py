@@ -8,10 +8,12 @@ import h5py
 
 from .base import Group, base_definitions
 
+_default_definitions = object()
+
 
 class File(AbstractContextManager, Group):
 
-    def __init__(self, *args, definitions: Mapping = base_definitions, **kwargs):
+    def __init__(self, *args, definitions: Mapping = _default_definitions, **kwargs):
         """Context manager for NeXus files, similar to h5py.File.
 
         Arguments other than documented are as in :py:class:`h5py.File`.
@@ -23,6 +25,8 @@ class File(AbstractContextManager, Group):
             The default is to use the base definitions as defined in the
             NeXus standard.
         """
+        if definitions is _default_definitions:
+            definitions = base_definitions()
         self._file = h5py.File(*args, **kwargs)
         super().__init__(self._file, definitions=definitions)
 

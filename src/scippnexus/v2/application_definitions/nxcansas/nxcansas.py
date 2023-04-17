@@ -120,7 +120,7 @@ class NXcanSAS:
                     return _SASdata(attrs, children)
                 if cls == 'SAStransmission_spectrum':
                     return _SAStransmission_spectrum(attrs, children)
-            return base_definitions.get(key, default)(attrs, children)
+            return base_definitions().get(key, default)(attrs, children)
 
         return _definition_factory
 

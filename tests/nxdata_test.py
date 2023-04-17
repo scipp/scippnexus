@@ -19,7 +19,7 @@ def h5root():
 def nxroot():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
-        root = snx.Group(f, definitions=snx.base_definitions)
+        root = snx.Group(f, definitions=snx.base_definitions())
         root.create_class('entry', snx.NXentry)
         yield root
 
@@ -30,7 +30,7 @@ def test_without_coords(h5root):
     snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
-    obj = snx.Group(data, definitions=snx.base_definitions)
+    obj = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(obj[...], sc.DataArray(signal))
 
 
@@ -43,7 +43,7 @@ def test_with_coords_matching_axis_names(h5root):
     data.attrs['signal'] = 'signal'
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'xx', da.coords['xx'])
-    group = snx.Group(data, definitions=snx.base_definitions)
+    group = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(group[...], da)
 
 
@@ -56,7 +56,7 @@ def test_guessed_dim_for_coord_not_matching_axis_name(h5root):
     data.attrs['signal'] = 'signal'
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'xx2', da.coords['xx2'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -73,7 +73,7 @@ def test_multiple_coords(h5root):
     snx.create_field(data, 'xx', da.coords['xx'])
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'yy', da.coords['yy'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -89,7 +89,7 @@ def test_slice_of_1d(h5root):
     snx.create_field(data, 'xx', da.coords['xx'])
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'scalar', da.coords['scalar'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data['xx', :2], da['xx', :2])
     assert sc.identical(data[:2], da['xx', :2])
 
@@ -107,7 +107,7 @@ def test_slice_of_multiple_coords(h5root):
     snx.create_field(data, 'xx', da.coords['xx'])
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'yy', da.coords['yy'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data['xx', :2], da['xx', :2])
 
 
@@ -120,7 +120,7 @@ def test_guessed_dim_for_2d_coord_not_matching_axis_name(h5root):
     data.attrs['signal'] = 'signal'
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'xx2', da.coords['xx2'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -133,7 +133,7 @@ def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(h5root):
     data.attrs['signal'] = 'signal'
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'yy2', da.coords['yy2'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert set(data.dims) == {'dim_0', 'xx', 'yy'}
     dg = data[...]
     assert isinstance(dg, sc.DataGroup)
@@ -150,7 +150,7 @@ def test_guesses_transposed_dims_for_2d_coord(h5root):
     data.attrs['signal'] = 'signal'
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'xx2', da.coords['xx2'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -164,7 +164,7 @@ def test_indices_attribute_for_coord(h5root, indices):
     data.attrs['yy2_indices'] = indices
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'yy2', da.coords['yy2'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -178,7 +178,7 @@ def test_indices_attribute_for_coord_with_nontrivial_slice(h5root, indices):
     data.attrs['yy2_indices'] = indices
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'yy2', da.coords['yy2'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data['yy', :1], da['yy', :1])
 
 
@@ -191,7 +191,7 @@ def test_transpose_indices_attribute_for_coord(h5root):
     data.attrs['xx2_indices'] = [1, 0]
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'xx2', da.coords['xx2'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -207,7 +207,7 @@ def test_auxiliary_signal_causes_load_as_dataset(h5root):
     data.attrs['auxiliary_signals'] = ['xx']
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'xx', da.coords['xx'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert_identical(data[...], sc.Dataset({'signal': da.data, 'xx': da.coords['xx']}))
 
 
@@ -224,7 +224,7 @@ def test_field_dims_match_NXdata_dims(h5root):
     snx.create_field(data, 'xx', da.coords['xx'])
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'yy', da.coords['yy'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data['xx', :2].data, data['signal1']['xx', :2])
     assert sc.identical(data['xx', :2].coords['xx'], data['xx']['xx', :2])
     assert sc.identical(data['xx', :2].coords['xx2'], data['xx2']['xx', :2])
@@ -244,7 +244,7 @@ def test_field_dims_match_NXdata_dims_when_selected_via_class_name(h5root):
     snx.create_field(data, 'xx', da.coords['xx'])
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'yy', da.coords['yy'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     fields = data[snx.Field]
     assert fields['signal1'].dims == ('xx', 'yy')
     assert fields['xx'].dims == ('xx', )
@@ -261,7 +261,7 @@ def test_uses_default_field_dims_if_inference_fails(h5root):
     data.attrs['signal'] = 'signal'
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'yy2', da.coords['yy2'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     dg = data[()]
     assert sc.identical(dg['yy2'], da.coords['yy2'].rename(yy='dim_0'))
     assert sc.identical(data['yy2'][()], da.coords['yy2'].rename(yy='dim_0'))
@@ -271,7 +271,7 @@ def test_uses_default_field_dims_if_inference_fails(h5root):
 def test_create_field_from_variable(h5root, unit):
     var = sc.array(dims=['xx'], unit=unit, values=[3, 4])
     snx.create_field(h5root, 'field', var)
-    group = snx.Group(h5root, definitions=snx.base_definitions)
+    group = snx.Group(h5root, definitions=snx.base_definitions())
     loaded = group['field'][...]
     # Nexus does not support storing dim labels
     assert sc.identical(loaded, var.rename(xx=loaded.dim))
@@ -281,7 +281,7 @@ def test_create_datetime_field_from_variable(h5root):
     var = sc.datetime(np.datetime64('now'), unit='ns') + sc.arange(
         'time', 1, 4, dtype='int64', unit='ns')
     snx.create_field(h5root, 'field', var)
-    group = snx.Group(h5root, definitions=snx.base_definitions)
+    group = snx.Group(h5root, definitions=snx.base_definitions())
     loaded = group['field'][...]
     # Nexus does not support storing dim labels
     assert sc.identical(loaded, var.rename(time=loaded.dim))
@@ -304,7 +304,7 @@ def test_field_matching_errors_regex_is_loaded_if_no_corresponding_value_field(
     data.attrs['signal'] = 'signal'
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, f'xx{errors_suffix}', da.coords[f'xx{errors_suffix}'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -334,7 +334,7 @@ def test_uncertainties_of_coords_are_loaded(h5root, errors_suffix):
     snx.create_field(data, f'xx2{errors_suffix}', sc.stddevs(da.coords['xx2']))
     snx.create_field(data, 'scalar', sc.values(da.coords['scalar']))
     snx.create_field(data, f'scalar{errors_suffix}', sc.stddevs(da.coords['scalar']))
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -346,7 +346,7 @@ def test_unnamed_extra_dims_of_coords_are_squeezed(h5root):
     data.attrs['signal'] = 'signal'
     # shape=[1]
     snx.create_field(data, 'scalar', sc.array(dims=['ignored'], values=[1.2]))
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     loaded = data[...]
     assert sc.identical(loaded.coords['scalar'], sc.scalar(1.2))
     assert data['scalar'].ndim == 0
@@ -363,7 +363,7 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(h5root):
     # shape=[2,1]
     xx = sc.array(dims=['xx', 'ignored'], values=[[1.1], [2.2]])
     snx.create_field(data, 'xx', xx)
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     loaded = data[...]
     assert sc.identical(loaded.coords['xx'], xx['ignored', 0])
     assert data['xx'].ndim == 1
@@ -377,7 +377,7 @@ def test_dims_of_length_1_are_kept_when_axes_specified(h5root):
     snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = ['xx', 'yy']
     data.attrs['signal'] = 'signal'
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     loaded = data[...]
     assert sc.identical(loaded.data, signal)
     assert data['signal'].ndim == 2
@@ -389,7 +389,7 @@ def test_only_dim_of_length_1_is_squeezed_when_no_axes_specified(h5root):
     data = snx.create_class(h5root, 'data1', NXdata)
     snx.create_field(data, 'signal', signal)
     data.attrs['signal'] = 'signal'
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     loaded = data[...]
     assert sc.identical(loaded.data, sc.scalar(1.1, unit='m'))
     assert data['signal'].ndim == 0
@@ -401,7 +401,7 @@ def test_multi_dims_of_length_1_are_kept_when_no_axes_specified(h5root):
     data = snx.create_class(h5root, 'data1', NXdata)
     snx.create_field(data, 'signal', signal)
     data.attrs['signal'] = 'signal'
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     loaded = data[...]
     assert sc.identical(loaded.data,
                         sc.array(dims=['dim_0', 'dim_1'], unit='m', values=[[1.1]]))
@@ -414,7 +414,7 @@ def test_one_dim_of_length_1_is_kept_when_no_axes_specified(h5root):
     data = snx.create_class(h5root, 'data1', NXdata)
     snx.create_field(data, 'signal', signal)
     data.attrs['signal'] = 'signal'
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     loaded = data[...]
     # Note that dimension gets renamed to `dim_0` since no axes are specified
     assert sc.identical(
@@ -430,7 +430,7 @@ def test_only_one_axis_specified_for_2d_field(h5root):
     snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = ['zz']
     data.attrs['signal'] = 'signal'
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     loaded = data[...]
     assert sc.identical(loaded.data, sc.array(dims=['zz'], unit='m', values=[1.1]))
 
@@ -449,7 +449,7 @@ def test_fields_with_datetime_attribute_are_loaded_as_datetime(h5root):
     snx.create_field(data, 'xx', da.coords['xx'])
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'yy', da.coords['yy'])
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -465,7 +465,7 @@ def test_slicing_with_bin_edge_coord_returns_bin_edges(h5root):
     data.attrs['axes'] = ['xx']
     data.attrs['xx_indices'] = [0]
     data.attrs['xx2_indices'] = [0]
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
     assert sc.identical(data['xx', 0], da['xx', 0])
     assert sc.identical(data['xx', 1], da['xx', 1])
@@ -480,7 +480,7 @@ def test_legacy_signal_attr_is_used(h5root):
     data.attrs['axes'] = signal.dims
     field = snx.create_field(data, 'mysig', signal)
     field.attrs['signal'] = 1  # legacy way of defining signal
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], sc.DataArray(signal))
 
 
@@ -491,7 +491,7 @@ def test_invalid_group_signal_attribute_is_ignored(h5root):
     data.attrs['signal'] = 'signal'
     field = snx.create_field(data, 'mysig', signal)
     field.attrs['signal'] = 1  # legacy way of defining signal
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], sc.DataArray(signal))
 
 
@@ -506,7 +506,7 @@ def test_legacy_axis_attrs_define_dim_names(h5root):
     signal.attrs['signal'] = 1
     xx.attrs['axis'] = 1
     yy.attrs['axis'] = 2
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
@@ -517,7 +517,7 @@ def test_nested_groups_trigger_fallback_to_load_as_data_group(h5root):
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     snx.create_class(data, 'nested', NXdata)
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], sc.DataGroup(signal=da.data, nested=sc.DataGroup()))
 
 
@@ -527,7 +527,7 @@ def test_slicing_raises_given_invalid_index(h5root):
     snx.create_field(data, 'signal', signal)
     data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
-    data = snx.Group(data, definitions=snx.base_definitions)
+    data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], sc.DataArray(signal))
     with pytest.raises(IndexError):
         data['xx', 2]
