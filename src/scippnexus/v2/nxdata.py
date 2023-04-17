@@ -22,6 +22,8 @@ def _guess_dims(dims, shape, dataset: H5Dataset):
 
     Does not check for potential bin-edge coord.
     """
+    if shape is None:
+        return None
     if shape == dataset.shape:
         return dims
     lut = {}
@@ -57,7 +59,7 @@ class NXdata(NXobject):
                 # If the NXdata contains subgroups we can generally not define valid
                 # sizes... except for some non-signal "special fields" that return
                 # a DataGroup that will be wrapped in a scalar Variable.
-                if name == self._signal_name:
+                if name == self._signal_name or name in self._aux_signals:
                     continue
                 if field.attrs.get('NX_class') not in [
                         'NXoff_geometry',
@@ -84,15 +86,24 @@ class NXdata(NXobject):
         if name is not None and name in children:
             self._signal_name = name
             self._signal = children[name]
-        else:
-            # Legacy NXdata defines signal not as group attribute, but attr on dataset
-            for name, field in children.items():
-                # We ignore the signal value. Usually it is 1, but apparently one could
-                # multiple signals. We do not support this, since it is legacy anyway.
-                if 'signal' in field.attrs:
+        # Legacy NXdata defines signal not as group attribute, but attr on dataset
+        for name, field in children.items():
+            # We ignore the signal value. Usually it is 1, but apparently one could
+            # multiple signals. We do not support this, since it is legacy anyway.
+            if 'signal' in field.attrs:
+                self._signal_name = name
+                self._signal = children[name]
+                break
+        # NXlog or NXevent_data can take the role of the signal.
+        for name, field in children.items():
+            if isinstance(field,
+                          EventField) or (isinstance(field, Group)
+                                          and field.nx_class in [NXlog, NXevent_data]):
+                if self._signal is None:
                     self._signal_name = name
-                    self._signal = children[name]
-                    break
+                    self._signal = field
+                else:
+                    self._aux_signals.append(name)
 
     def _init_axes(self, attrs: Dict[str, Any], children: Dict[str, Union[Field,
                                                                           Group]]):
@@ -142,6 +153,8 @@ class NXdata(NXobject):
 
         if self._signal is None:
             self._valid = False
+        elif isinstance(self._signal, EventField):
+            group_dims = self._signal.dims
         else:
             if group_dims is not None:
                 shape = self._signal.dataset.shape
@@ -198,12 +211,18 @@ class NXdata(NXobject):
                 return self._group_dims
             return (name, )
         if self._signal is not None and self._group_dims is not None:
-            return _guess_dims(self._group_dims, self._signal.dataset.shape,
-                               field.dataset)
+            signal_shape = self._signal.dataset.shape if isinstance(
+                self._signal, Field) else None
+            return _guess_dims(self._group_dims, signal_shape, field.dataset)
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
-        return self._signal.sizes if self._valid else super().sizes
+        if not self._valid:
+            return super().sizes
+        sizes = dict(self._signal.sizes)
+        for name in self._aux_signals:
+            sizes.update(self._children[name].sizes)
+        return sizes
 
     @property
     def unit(self) -> Union[None, sc.Unit]:
@@ -234,6 +253,8 @@ class NXdata(NXobject):
         aux = {name: dg.pop(name) for name in self._aux_signals}
         signal = dg.pop(self._signal_name)
         coords = dg
+        if isinstance(signal, sc.DataGroup):
+            raise NexusStructureError("Signal is not an array-like.")
         da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
         da = self._add_coords(da, coords)
         if aux:
@@ -310,6 +331,49 @@ def _find_embedded_nxevent_data(
         return event_group
 
 
+class EventField:
+
+    def __init__(self, event_data: Group, grouping_name: str, grouping: Field) -> None:
+        """Create a field that represents an event data group.
+
+        Parameters
+        ----------
+        event_data:
+            The event data group holding the NXevent_data fields.
+        grouping_name:
+            The name of the field that contains the grouping information.
+        grouping:
+            The field that contains the grouping keys. These are IDs corresponding to
+            the event_id field of the NXevent_data group, such as the detector_number
+            field of an NXdetector.
+        """
+        self._event_data = event_data
+        self._grouping_name = grouping_name
+        self._grouping = grouping
+
+    @property
+    def attrs(self) -> Dict[str, Any]:
+        return self._event_data.attrs
+
+    @property
+    def sizes(self) -> Dict[str, int]:
+        return {**self._grouping.sizes, **self._event_data.sizes}
+
+    @property
+    def dims(self) -> Tuple[str, ...]:
+        return self._grouping.dims + self._event_data.dims
+
+    def __getitem__(self, sel: ScippIndex) -> sc.DataArray:
+        event_sel = to_child_select(self.dims, self._event_data.dims, sel)
+        events = self._event_data[event_sel]
+        detector_sel = to_child_select(self.dims, self._grouping.dims, sel)
+        if not isinstance(events, sc.DataArray):
+            return events
+        da = _group_events(event_data=events, grouping=self._grouping[detector_sel])
+        da.coords[self._grouping_name] = da.coords.pop('event_id')
+        return da
+
+
 class NXdetector(NXdata):
     _detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
@@ -322,36 +386,35 @@ class NXdetector(NXdata):
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         fallback_dims = None
         if (det_num_name := NXdetector._detector_number(children)) is not None:
-            if children[det_num_name].dataset.ndim == 1:
-                fallback_dims = ('detector_number', )
-        self._embedded_events = _find_embedded_nxevent_data(children)
+            if (detector_number := children[det_num_name]).dataset.ndim == 1:
+                fallback_dims = (det_num_name, )
+                detector_number.sizes = {det_num_name: detector_number.dataset.shape[0]}
+
+        if (event_group := _find_embedded_nxevent_data(children)) is not None:
+            embedded_events = uuid.uuid4().hex if 'events' in children else 'events'
+            children[embedded_events] = event_group
+        else:
+            embedded_events = None
+
+        def _maybe_event_field(name: str, child: Union[Field, Group]):
+            if ((name == embedded_events or
+                 (isinstance(child, Group) and child.nx_class == NXevent_data))
+                    and det_num_name is not None):
+                event_field = EventField(event_data=child,
+                                         grouping_name=det_num_name,
+                                         grouping=children.get(det_num_name))
+                return event_field
+            return child
+
+        children = {
+            name: _maybe_event_field(name, child)
+            for name, child in children.items()
+        }
+
         super().__init__(attrs=attrs,
                          children=children,
                          fallback_dims=fallback_dims,
                          fallback_signal_name='data')
-
-    def assemble(self,
-                 dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
-        if self._valid:
-            obj = super().assemble(dg)
-        else:
-            obj = NXobject.assemble(self, dg)
-        if self._embedded_events is None:
-            return obj
-        # If events are embedded we are currently not including them in the `sizes`,
-        # so indexing is not possible. We could extend this in the future.
-        events = self._embedded_events[()]
-        if isinstance(events, sc.DataGroup):
-            if isinstance(obj, sc.DataArray):
-                return sc.DataGroup({self._signal_name: obj, 'events': events})
-            else:
-                obj.update(events)
-                return obj
-        if isinstance(obj, sc.DataArray):
-            return sc.Dataset({self._signal_name: obj, 'events': events})
-        else:
-            obj[uuid.uuid4().hex if 'events' in obj else 'events'] = events
-            return obj
 
     @property
     def detector_number(self) -> Optional[str]:
@@ -376,6 +439,7 @@ def _group_events(*,
         event_id = 'event_id'
     else:
         # copy since sc.bin cannot deal with a non-contiguous view
+        grouping = asvariable(grouping)
         event_id = grouping.flatten(to='event_id').copy()
     event_data.bins.coords['event_time_zero'] = sc.bins_like(
         event_data, fill_value=event_data.coords['event_time_zero'])

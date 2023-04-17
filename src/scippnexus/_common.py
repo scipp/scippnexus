@@ -77,7 +77,7 @@ def _to_canonical_select(dims: List[str],
         return {dims[0]: select}
     if not isinstance(select, dict):
         raise IndexError(f"Cannot process index {select}.")
-    return select
+    return select.copy()
 
 
 def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, slice, tuple]:

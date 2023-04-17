@@ -54,7 +54,8 @@ class NXevent_data(NXobject):
             return (_event_dimension, )
         return None
 
-    def read_children(self, children: Group, select: ScippIndex) -> sc.DataGroup:
+    def read_children(self, select: ScippIndex) -> sc.DataGroup:
+        children = self._children
         if not children:  # TODO Check that select is trivial?
             return sc.DataGroup()
 

@@ -46,7 +46,7 @@ def create_event_data_no_ids(group):
                                                values=[0, 3, 3, 5]))
 
 
-def test_loads_event_data_in_current_group(group):
+def test_loads_event_data_in_current_group_as_data_array(group):
     monitor = group.create_class('monitor1', snx.NXmonitor)
     create_event_data_no_ids(monitor)
     assert monitor.dims == ('event_time_zero', )
@@ -60,14 +60,15 @@ def test_loads_event_data_in_current_group(group):
                  values=[3, 0, 2, 1]))
 
 
-def test_loads_event_data_in_child_group(group):
+def test_loads_event_data_in_child_group_as_data_array(group):
     monitor = group.create_class('monitor1', snx.NXmonitor)
     create_event_data_no_ids(monitor.create_class('events', snx.NXevent_data))
     assert monitor.dims == ('event_time_zero', )
     assert monitor.shape == (4, )
     loaded = monitor[...]
+    assert isinstance(loaded, sc.DataArray)
     assert sc.identical(
-        loaded['events'].bins.size().data,
+        loaded.bins.size().data,
         sc.array(dims=['event_time_zero'],
                  unit=None,
                  dtype='int64',

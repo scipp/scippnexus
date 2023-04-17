@@ -106,7 +106,7 @@ class NXobject:
         child_sel = to_child_select(tuple(self.sizes), child.dims, sel)
         return child[child_sel]
 
-    def read_children(self, obj: Group, sel: ScippIndex) -> sc.DataGroup:
+    def read_children(self, sel: ScippIndex) -> sc.DataGroup:
         """
         When a Group is indexed, this method is called to read all children.
 
@@ -117,9 +117,10 @@ class NXobject:
         to implement special logic for reading children with interdependencies, i.e.,
         where reading each child in isolation is not possible.
         """
-        return sc.DataGroup(
-            {name: self.index_child(child, sel)
-             for name, child in obj.items()})
+        return sc.DataGroup({
+            name: self.index_child(child, sel)
+            for name, child in self._children.items()
+        })
 
     def assemble(self,
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
@@ -346,7 +347,7 @@ class Group(Mapping):
                             and all(isclass(x) for x in sel)):
             return self._get_children_by_nx_class(sel)
 
-        dg = self._nexus.read_children(self, sel)
+        dg = self._nexus.read_children(sel)
         try:
             dg = self._nexus.assemble(dg)
         except (sc.DimensionError, NexusStructureError) as e:
