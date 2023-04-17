@@ -28,6 +28,17 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
+v23.04.0
+--------
+
+Features
+~~~~~~~~
+
+* Added the future API of ``scippnexus`` as ``scippnexus.v2``.
+  For many users the API changes will be minor.
+  The old API will be deprecated soon and users should try to migrate to the new API.
+  Note that ``v2`` is not fully stable yet and in particular the behavior in edge case is subject to change.
+
 v23.03.0
 --------
 
