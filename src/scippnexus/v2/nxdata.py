@@ -19,7 +19,7 @@ from .base import (
     asvariable,
     base_definitions_dict,
 )
-from .field import Field
+from .field import Field, _is_time
 from .nxevent_data import NXevent_data
 
 
@@ -331,7 +331,7 @@ class NXlog(NXdata):
     def assemble(self,
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         if (time := dg.get('time')) is not None:
-            if time.dtype != sc.DType.datetime64:
+            if time.dtype != sc.DType.datetime64 and _is_time(time):
                 dg['time'] = convert_time_to_datetime64(time,
                                                         start=sc.epoch(unit=time.unit))
         return super().assemble(dg)
