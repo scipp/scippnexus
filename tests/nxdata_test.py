@@ -228,6 +228,20 @@ def test_NXlog_data_is_loaded_as_time_dependent_data_array(nxroot):
     assert_identical(loaded, da)
 
 
+@pytest.mark.parametrize("time_unit", ['m', None])
+def test_NXlog_with_nontime_time_axis_can_be_loaded(nxroot, time_unit):
+    da = sc.DataArray(
+        data=sc.array(dims=['time'], unit='K', values=[1, 2, 3]),
+        coords={'time': sc.array(dims=['time'], unit=time_unit, values=[1, 2, 3])})
+    data = nxroot.create_class('data1', NXdata)
+    log = data.create_class('data', NXlog)
+    log['time'] = da.coords['time']
+    log['value'] = da.data
+    loaded = data[()]
+    assert_identical(loaded, da)
+    assert loaded.coords['time'].dtype != sc.DType.datetime64
+
+
 def test_field_dims_match_NXdata_dims(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
