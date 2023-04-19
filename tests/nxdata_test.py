@@ -324,6 +324,20 @@ def test_create_class(nxroot, nx_class):
     assert group.nx_class == nx_class
 
 
+def test_deprecated_errors_field_is_used_for_signal_errors(h5root):
+    data = snx.create_class(h5root, 'data1', NXdata)
+    values = sc.array(dims=['xx', 'yy'], unit='m', values=[[1., 2, 3], [4, 5, 6]])
+    errors = sc.array(dims=['xx', 'yy'], unit='m', values=[[0., 2, 3], [0, 5, 6]])
+    data.attrs['axes'] = values.dims
+    data.attrs['signal'] = 'data'
+    snx.create_field(data, 'data', values)
+    snx.create_field(data, 'errors', errors)
+    data = snx.Group(data, definitions=snx.base_definitions())
+    loaded = data[()]
+    assert_identical(sc.values(loaded), sc.DataArray(values))
+    assert_identical(sc.stddevs(loaded), sc.DataArray(errors))
+
+
 @pytest.mark.parametrize("errors_suffix", ['_error', '_errors'])
 def test_field_matching_errors_regex_is_loaded_if_no_corresponding_value_field(
         h5root, errors_suffix):
