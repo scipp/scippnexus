@@ -62,7 +62,8 @@ class NXdata(NXobject):
                           children=children)
         if (errors := children.get('errors')) is not None:
             if (isinstance(self._signal, Field) and isinstance(errors, Field)
-                    and self._signal.errors is None and self._signal.unit == errors.unit
+                    and self._signal.errors is None
+                    and (errors.unit is None or self._signal.unit == errors.unit)
                     and self._signal.dataset.shape == errors.dataset.shape):
                 self._signal.errors = errors.dataset
                 del children['errors']
