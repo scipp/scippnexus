@@ -10,12 +10,22 @@ on:
         default: ''
         required: false
         type: string
+      branch:
+        description: 'Branch/tag with documentation source. If not set, the current branch will be used.'
+        default: ''
+        required: false
+        type: string
   workflow_call:
     inputs:
       publish:
         default: false
         type: boolean
       version:
+        default: ''
+        required: false
+        type: string
+      branch:
+        description: 'Branch/tag with documentation source. If not set, the current branch will be used.'
         default: ''
         required: false
         type: string
@@ -31,7 +41,7 @@ jobs:
       - run: sudo apt install --yes graphviz pandoc
       - uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.version }}
+          ref: ${{ inputs.branch == '' && github.ref_name || inputs.branch }}
           fetch-depth: 0  # history required so cmake can determine version
       - uses: actions/setup-python@v3
         with:
