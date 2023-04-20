@@ -24,10 +24,7 @@ from .nxevent_data import NXevent_data
 
 
 def _guess_dims(dims, shape, dataset: H5Dataset):
-    """Guess dims of non-signal dataset based on shape.
-
-    Does not check for potential bin-edge coord.
-    """
+    """Guess dims of non-signal dataset based on shape."""
     if shape is None:
         return None
     if shape == dataset.shape:
@@ -39,7 +36,13 @@ def _guess_dims(dims, shape, dataset: H5Dataset):
     try:
         return [lut[s] for s in dataset.shape]
     except KeyError:
-        return None
+        try:  # Inner dimension may be bin-edges
+            shape = list(dataset.shape)
+            shape[-1] -= 1
+            return [lut[s] for s in shape]
+        except KeyError:
+            pass
+    return None
 
 
 class NXdata(NXobject):
@@ -57,6 +60,13 @@ class NXdata(NXobject):
 
         self._init_signal(name=attrs.get('signal', fallback_signal_name),
                           children=children)
+        if (errors := children.get('errors')) is not None:
+            if (isinstance(self._signal, Field) and isinstance(errors, Field)
+                    and self._signal.errors is None
+                    and (errors.unit is None or self._signal.unit == errors.unit)
+                    and self._signal.dataset.shape == errors.dataset.shape):
+                self._signal.errors = errors.dataset
+                del children['errors']
         self._init_axes(attrs=attrs, children=children)
         self._init_group_dims(attrs=attrs, fallback_dims=fallback_dims)
 
@@ -131,11 +141,18 @@ class NXdata(NXobject):
             'axes')
         if self._signal_axes is not None:
             self._signal_axes = tuple(self._signal_axes.split(','))
-        # Another old way of defining axes
+        # Another old way of defining axes. Apparently there are two different ways in
+        # which this is used: A value of '1' indicates "this is an axis". As this would
+        # not allow for determining an order, we have to assume that the signal field
+        # has an "axes" attribute that defines the order. We can then ignore the "axis"
+        # attributes, since they hold no further information. If there is not "axes"
+        # attribute on the signal field then we have to assume that "axis" gives the
+        # 1-based index of the axis.
         self._axis_index = {}
-        for name, field in children.items():
-            if (axis := field.attrs.get('axis')) is not None:
-                self._axis_index[name] = axis
+        if self._signal_axes is None:
+            for name, field in children.items():
+                if (axis := field.attrs.get('axis')) is not None:
+                    self._axis_index[name] = axis
 
     def _get_named_axes(self, fallback_dims) -> Tuple[str, ...]:
         if self._axes is not None:
