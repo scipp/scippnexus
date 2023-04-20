@@ -17,6 +17,7 @@ all_files = [
     '2023/NMX_2e11-rechunk.h5',
     '2023/YMIR_038243_00010244.hdf',
     '2023/amor2020n000346_tweaked.nxs',
+    '2023/LOKI_60322-2022-03-02_2205_fixed.nxs',
 ]
 
 
@@ -82,4 +83,22 @@ def test_amor2020n000346_tweaked():
         sc.DataArray, {'detector_number': 9216})
     schema['entry/stages/com'] = validator(sc.DataArray, {'time': 1, 'dim_1': 1})
     schema['entry/facility'] = validator(str)
+    assert_schema(dg, schema)
+
+
+@pytest.mark.externalfile
+def test_LOKI_60322_2022_03_02_2205_fixed():
+    with snx.File(
+            externalfile.get_path('2023/LOKI_60322-2022-03-02_2205_fixed.nxs')) as f:
+        dg = f[()]
+    schema = {}
+    schema['entry/instrument/larmor_detector'] = bins_validator(
+        sc.DataArray, {'detector_number': 458752})
+    schema['entry/instrument/monitor_1'] = bins_validator(sc.DataArray,
+                                                          {'event_time_zero': 1987})
+    schema['entry/instrument/monitor_2'] = bins_validator(sc.DataArray,
+                                                          {'event_time_zero': 1987})
+    schema['entry/instrument/source/transformations/trans_2'] = validator(
+        sc.DataArray, {}, sc.DType.translation3)
+
     assert_schema(dg, schema)
