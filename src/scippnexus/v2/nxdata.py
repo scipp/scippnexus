@@ -71,32 +71,35 @@ class NXdata(NXobject):
         self._init_group_dims(attrs=attrs, fallback_dims=fallback_dims)
 
         for name, field in children.items():
-            if not isinstance(field, Field):
-                # If the NXdata contains subgroups we can generally not define valid
-                # sizes... except for some non-signal "special fields" that return
-                # a DataGroup that will be wrapped in a scalar Variable.
-                if name == self._signal_name or name in self._aux_signals:
-                    continue
-                if field.attrs.get('NX_class') not in [
-                        'NXoff_geometry',
-                        'NXcylindrical_geometry',
-                        'NXgeometry',
-                        'NXtransformations',
-                ]:
-                    self._valid = False
-            elif (dims := self._get_dims(name, field)) is not None:
-                # The convention here is that the given dimensions apply to the shapes
-                # starting from the left. So we only squeeze dimensions that are after
-                # len(dims).
-                shape = _squeeze_trailing(dims, field.dataset.shape)
-                field.sizes = dict(zip(dims, shape))
-            elif self._valid:
-                s1 = self._signal.sizes
-                s2 = field.sizes
-                if not set(s2.keys()).issubset(set(s1.keys())):
-                    self._valid = False
-                elif any(s1[k] != s2[k] for k in s1.keys() & s2.keys()):
-                    self._valid = False
+            self._init_field_dims(name, field)
+
+    def _init_field_dims(self, name: str, field: Union[Field, Group]) -> None:
+        if not isinstance(field, Field):
+            # If the NXdata contains subgroups we can generally not define valid
+            # sizes... except for some non-signal "special fields" that return
+            # a DataGroup that will be wrapped in a scalar Variable.
+            if name == self._signal_name or name in self._aux_signals:
+                return
+            if field.attrs.get('NX_class') not in [
+                    'NXoff_geometry',
+                    'NXcylindrical_geometry',
+                    'NXgeometry',
+                    'NXtransformations',
+            ]:
+                self._valid = False
+        elif (dims := self._get_dims(name, field)) is not None:
+            # The convention here is that the given dimensions apply to the shapes
+            # starting from the left. So we only squeeze dimensions that are after
+            # len(dims).
+            shape = _squeeze_trailing(dims, field.dataset.shape)
+            field.sizes = dict(zip(dims, shape))
+        elif self._valid:
+            s1 = self._signal.sizes
+            s2 = field.sizes
+            if not set(s2.keys()).issubset(set(s1.keys())):
+                self._valid = False
+            elif any(s1[k] != s2[k] for k in s1.keys() & s2.keys()):
+                self._valid = False
 
     def _init_signal(self, name: Optional[str], children):
         # There are multiple ways NeXus can define the "signal" dataset. The latest
@@ -246,7 +249,8 @@ class NXdata(NXobject):
             return (name, )
         if self._signal is not None and self._group_dims is not None:
             signal_shape = self._signal.dataset.shape if isinstance(
-                self._signal, Field) else None
+                self._signal, Field) else (self._signal.shape if isinstance(
+                    self._signal, EventField) else None)
             return _guess_dims(self._group_dims, signal_shape, field.dataset)
 
     @cached_property
@@ -283,7 +287,7 @@ class NXdata(NXobject):
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         if not self._valid:
             raise NexusStructureError("Could not determine signal field or dimensions.")
-        dg = dg.copy()
+        dg = dg.copy(deep=False)
         aux = {name: dg.pop(name) for name in self._aux_signals}
         signal = dg.pop(self._signal_name)
         coords = dg
@@ -401,6 +405,10 @@ class EventField:
     def dims(self) -> Tuple[str, ...]:
         return self._grouping.dims + self._event_data.dims
 
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return self._grouping.shape + self._event_data.shape
+
     def __getitem__(self, sel: ScippIndex) -> sc.DataArray:
         event_sel = to_child_select(self.dims, self._event_data.dims, sel)
         events = self._event_data[event_sel]
@@ -503,7 +511,7 @@ def _find_event_entries(dg: sc.DataGroup) -> List[str]:
 
 def group_events_by_detector_number(
         dg: sc.DataGroup) -> Union[sc.DataArray, sc.Dataset]:
-    dg = dg.copy()
+    dg = dg.copy(deep=False)
     grouping_key = None
     for key in NXdetector._detector_number_fields:
         if (grouping := dg.get(key)) is not None:

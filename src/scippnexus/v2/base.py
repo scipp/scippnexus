@@ -66,7 +66,8 @@ def _squeezed_field_sizes(dataset: H5Dataset) -> Dict[str, int]:
 class NXobject:
 
     def _init_field(self, field: Field):
-        field.sizes = _squeezed_field_sizes(field.dataset)
+        if field.sizes is None:
+            field.sizes = _squeezed_field_sizes(field.dataset)
         field.dtype = _dtype_fromdataset(field.dataset)
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):

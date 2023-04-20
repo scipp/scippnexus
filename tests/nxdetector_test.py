@@ -196,6 +196,19 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     assert 'event_time_zero' in da.bins.coords
 
 
+def test_detector_number_fallback_dims_determines_dims_with_event_data(nxroot):
+    detector_numbers = sc.array(dims=['detector_number'],
+                                unit=None,
+                                values=np.array([1, 2, 3, 4, 5, 6]))
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_number', detector_numbers)
+    detector.create_field('pixel_offset', detector_numbers)
+    create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
+    da = detector[()]
+    assert da.sizes == {'detector_number': 6}
+    assert_identical(da.coords['pixel_offset'], detector_numbers)
+
+
 def test_loads_event_data_with_0d_detector_numbers(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', sc.index(1, dtype='int64'))
