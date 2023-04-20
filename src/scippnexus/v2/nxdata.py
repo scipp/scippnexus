@@ -287,7 +287,7 @@ class NXdata(NXobject):
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         if not self._valid:
             raise NexusStructureError("Could not determine signal field or dimensions.")
-        dg = dg.copy()
+        dg = dg.copy(deep=False)
         aux = {name: dg.pop(name) for name in self._aux_signals}
         signal = dg.pop(self._signal_name)
         coords = dg
@@ -511,7 +511,7 @@ def _find_event_entries(dg: sc.DataGroup) -> List[str]:
 
 def group_events_by_detector_number(
         dg: sc.DataGroup) -> Union[sc.DataArray, sc.Dataset]:
-    dg = dg.copy()
+    dg = dg.copy(deep=False)
     grouping_key = None
     for key in NXdetector._detector_number_fields:
         if (grouping := dg.get(key)) is not None:
