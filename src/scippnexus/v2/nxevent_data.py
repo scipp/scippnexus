@@ -78,7 +78,7 @@ class NXevent_data(NXobject):
             event_select = slice(event_index[0],
                                  event_index[-1] if last_loaded else num_event)
         else:
-            event_select = slice(None)
+            event_select = slice(0, 0)
 
         event_time_offset = children['event_time_offset'][event_select]
 
