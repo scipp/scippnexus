@@ -326,14 +326,16 @@ def test_event_data_field_dims_labels(nxroot):
     assert detector['detector_number'].dims == ('detector_number', )
 
 
-def test_nxevent_data_selection_yields_correct_pulses(nxroot):
+def test_nxevent_data_without_detector_number_selection_yields_correct_pulses(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
 
     class Load:
 
         def __getitem__(self, select=...):
-            da = detector['events'][select]
+            da = detector[select]
+            assert da.bins.size().sum(
+            ).value == da.bins.constituents['data'].sizes['event']
             return da.bins.size().values
 
     assert np.array_equal(Load()[...], [3, 0, 2, 1])
@@ -353,6 +355,38 @@ def test_nxevent_data_selection_yields_correct_pulses(nxroot):
     assert np.array_equal(Load()['event_time_zero', -2:-1], [2])
     assert np.array_equal(Load()['event_time_zero', -2:], [2, 1])
     assert np.array_equal(Load()['event_time_zero', :-2], [3, 0])
+
+
+def test_nxevent_data_selection_yields_correct_pulses(nxroot):
+    detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_number', detector_numbers)
+    create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
+
+    class Load:
+
+        def __getitem__(self, select=...):
+            da = detector[select]
+            return da.bins.size().values
+
+    assert np.array_equal(Load()[...], [2, 3, 0, 1])
+    assert np.array_equal(Load()['event_time_zero', 0], [1, 1, 0, 1])
+    assert np.array_equal(Load()['event_time_zero', 1], [0, 0, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', 2], [1, 1, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', 3], [0, 1, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', -1], [0, 1, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', -2], [1, 1, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', 0:0], [0, 0, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', 1:1], [0, 0, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', 1:-3], [0, 0, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', 3:3], [0, 0, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', -1:-1], [0, 0, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', 0:1], [1, 1, 0, 1])
+    assert np.array_equal(Load()['event_time_zero', 0:-3], [1, 1, 0, 1])
+    assert np.array_equal(Load()['event_time_zero', -1:], [0, 1, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', -2:-1], [1, 1, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', -2:], [1, 2, 0, 0])
+    assert np.array_equal(Load()['event_time_zero', :-2], [1, 1, 0, 1])
 
 
 def create_off_geometry_detector_numbers_1234(group: snx.Group,
