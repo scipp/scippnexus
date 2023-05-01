@@ -165,7 +165,9 @@ def test_log_with_connection_status_raises_with_positional_indexing(h5root):
         log[:]
 
 
-def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(h5root):
+@pytest.mark.parametrize('sublog_length', [0, 1, 2])
+def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(
+        h5root, sublog_length):
     da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
                       coords={
                           'time':
@@ -177,7 +179,7 @@ def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(h
     log = snx.create_class(h5root, 'log', NXlog)
     snx.create_field(log, 'value', da.data)
     snx.create_field(log, 'time', da.coords['time'])
-    connection_status = da['time', :2].copy()
+    connection_status = da['time', :sublog_length].copy()
     snx.create_field(log, 'connection_status', connection_status.data)
     snx.create_field(log, 'connection_status_time', connection_status.coords['time'])
     log = snx.Group(log, definitions=snx.base_definitions())

@@ -368,8 +368,8 @@ class NXlog(NXdata):
                     field = children.pop(k)
                     self._init_field(field)
                     field.sizes = {
-                        'time' if dim == 'dim_0' else dim: size
-                        for dim, size in field.sizes.items()
+                        'time' if i == 0 else f'dim_{i}': size
+                        for i, size in enumerate(field.dataset.shape)
                     }
                     self._sublog_children[k] = field
 
