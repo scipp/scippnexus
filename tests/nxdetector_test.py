@@ -624,3 +624,22 @@ def test_falls_back_to_hdf5_dim_labels_given_unnamed_axes(h5root):
     dg = detector[()]
     assert_identical(dg['xy'], xy)
     assert_identical(dg['z'], z)
+
+
+def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root):
+    xy = sc.array(dims=['x', 'yy'], values=[[1, 2], [3, 4]])
+    z = sc.array(dims=['zz'], values=[1, 2, 3])
+    detector = snx.create_class(h5root, 'detector0', NXdetector)
+    dataset = snx.create_field(detector, 'xy', xy)
+    dataset.dims[0].label = 'x'
+    dataset.dims[1].label = 'y'
+    dataset = snx.create_field(detector, 'z', z)
+    dataset.dims[0].label = 'z'
+    detector.attrs['axes'] = ['.', 'yy', 'zz']
+    detector.attrs['xy_indices'] = [0, 1]
+    detector.attrs['z_indices'] = [2]
+    detector = make_group(detector)
+    assert detector.sizes == {'x': 2, 'yy': 2, 'zz': 3}
+    dg = detector[()]
+    assert_identical(dg['xy'], xy)
+    assert_identical(dg['z'], z)

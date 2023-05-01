@@ -217,7 +217,7 @@ class NXdata(NXobject):
             for key, attr in attrs.items() if key.endswith(indices_suffix)
         }
 
-        dims = np.array(group_dims)
+        dims = np.array(self._axes)
         self._dims_from_indices = {
             key: tuple(dims[np.array(indices).flatten()])
             for key, indices in indices_attrs.items()
@@ -231,6 +231,10 @@ class NXdata(NXobject):
             return self._group_dims
         # Latest way of defining dims
         if (dims := self._dims_from_indices.get(name)) is not None:
+            if '.' in dims:
+                hdf5_dims = self._dims_from_hdf5(field)
+                return tuple(dim if dim != '.' else hdf5_dim
+                             for dim, hdf5_dim in zip(dims, hdf5_dims))
             return dims
         # Older way of defining dims via axis attribute
         if (axis := self._axis_index.get(name)) is not None:
@@ -257,6 +261,9 @@ class NXdata(NXobject):
         # would like to do so in NXobject._init_field, but this causes significant
         # overhead for small files with many datasets. Defined here, this will only
         # take effect for NXdata, NXdetector, NXlog, and NXmonitor.
+        return self._dims_from_hdf5(field)
+
+    def _dims_from_hdf5(self, field):
         hdf5_dims = [dim.label for dim in getattr(field.dataset, 'dims', [])]
         if any([dim != '' for dim in hdf5_dims]):
             while hdf5_dims and hdf5_dims[-1] == '':
