@@ -141,6 +141,26 @@ def test_nxlog_with_shape_0(nxroot):
     assert_identical(log[...], da.rename(ignored='dim_1'))
 
 
+def test_log_with_connection_status_raises_with_positional_indexing(h5root):
+    da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
+                      coords={
+                          'time':
+                          sc.array(dims=['time'],
+                                   unit='s',
+                                   values=[44, 55, 66],
+                                   dtype='int64')
+                      })
+    log = snx.create_class(h5root, 'log', NXlog)
+    snx.create_field(log, 'value', da.data)
+    snx.create_field(log, 'time', da.coords['time'])
+    connection_status = da['time', :2].copy()
+    snx.create_field(log, 'connection_status', connection_status.data)
+    snx.create_field(log, 'connection_status_time', connection_status.coords['time'])
+    log = snx.Group(log, definitions=snx.base_definitions())
+    with pytest.raises(sc.DimensionError):
+        log['time', :2]
+
+
 def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(h5root):
     da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
                       coords={
@@ -158,7 +178,6 @@ def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(h
     snx.create_field(log, 'connection_status_time', connection_status.coords['time'])
     log = snx.Group(log, definitions=snx.base_definitions())
     loaded = log[()]
-    print(list(loaded.items()))
     da.coords['time'] = sc.epoch(unit='s') + da.coords['time']
     connection_status.coords['time'] = sc.epoch(
         unit='s') + connection_status.coords['time']
@@ -185,7 +204,6 @@ def test_log_with_alarm_loaded_as_datagroup_containing_data_arrays(h5root):
     snx.create_field(log, 'alarm_time', alarm.coords['time'])
     log = snx.Group(log, definitions=snx.base_definitions())
     loaded = log[()]
-    print(list(loaded.items()))
     da.coords['time'] = sc.epoch(unit='s') + da.coords['time']
     alarm.coords['time'] = sc.epoch(unit='s') + alarm.coords['time']
     assert_identical(loaded['value'], da)
