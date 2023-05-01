@@ -355,6 +355,7 @@ class NXlog(NXdata):
     """
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+        children = dict(children)
         self._sublogs = []
         self._sublog_children = {}
         for name in children:
@@ -410,12 +411,13 @@ class NXlog(NXdata):
 
     def assemble(self,
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+        self._time_to_datetime(dg)
+        dg = sc.DataGroup(dg)
         sublogs = sc.DataGroup()
         for name in self._sublogs:
             # Somewhat arbitrary definition of which fields is the "value"
             value_name = 'severity' if name == 'alarm' else None
             sublogs[name] = self._assemble_sublog(dg, name, value_name=value_name)
-        self._time_to_datetime(dg)
         out = super().assemble(dg)
         return out if not sublogs else sc.DataGroup(value=out, **sublogs)
 
