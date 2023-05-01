@@ -265,7 +265,7 @@ class NXdata(NXobject):
 
     def _dims_from_hdf5(self, field):
         hdf5_dims = [dim.label for dim in getattr(field.dataset, 'dims', [])]
-        if any([dim != '' for dim in hdf5_dims]):
+        if any(dim != '' for dim in hdf5_dims):
             while hdf5_dims and hdf5_dims[-1] == '':
                 hdf5_dims.pop()
             return [f'dim_{i}' if dim == '' else dim for i, dim in enumerate(hdf5_dims)]
