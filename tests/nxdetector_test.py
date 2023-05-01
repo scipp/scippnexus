@@ -605,3 +605,22 @@ def test_squeezes_trailing_when_fall_back_to_partial_hdf5_dim_labels(nxroot):
     assert detector.sizes == {'x': 2}
     dg = detector[()]
     assert_identical(dg['x'], sc.squeeze(x))
+
+
+def test_falls_back_to_hdf5_dim_labels_given_unnamed_axes(h5root):
+    xy = sc.array(dims=['x', 'y'], values=[[1, 2], [3, 4]])
+    z = sc.array(dims=['z'], values=[1, 2, 3])
+    detector = snx.create_class(h5root, 'detector0', NXdetector)
+    dataset = snx.create_field(detector, 'xy', xy)
+    dataset.dims[0].label = 'x'
+    dataset.dims[1].label = 'y'
+    dataset = snx.create_field(detector, 'z', z)
+    dataset.dims[0].label = 'z'
+    detector.attrs['axes'] = ['.', '.', '.']
+    detector.attrs['xy_indices'] = [0, 1]
+    detector.attrs['z_indices'] = [2]
+    detector = make_group(detector)
+    assert detector.sizes == {'x': 2, 'y': 2, 'z': 3}
+    dg = detector[()]
+    assert_identical(dg['xy'], xy)
+    assert_identical(dg['z'], z)
