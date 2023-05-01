@@ -257,7 +257,7 @@ class NXdata(NXobject):
         # would like to do so in NXobject._init_field, but this causes significant
         # overhead for small files with many datasets. Defined here, this will only
         # take effect for NXdata, NXdetector, NXlog, and NXmonitor.
-        hdf5_dims = [dim.label for dim in field.dataset.dims]
+        hdf5_dims = [dim.label for dim in getattr(field.dataset, 'dims', [])]
         if any([dim != '' for dim in hdf5_dims]):
             while hdf5_dims and hdf5_dims[-1] == '':
                 hdf5_dims.pop()
