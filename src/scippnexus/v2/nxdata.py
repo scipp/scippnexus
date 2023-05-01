@@ -252,6 +252,16 @@ class NXdata(NXobject):
                 self._signal, Field) else (self._signal.shape if isinstance(
                     self._signal, EventField) else None)
             return _guess_dims(self._group_dims, signal_shape, field.dataset)
+        # While not mandated or recommended by the standard, we can try to find HDF5
+        # dim labels as a fallback option for defining dimension labels. Ideally we
+        # would like to do so in NXobject._init_field, but this causes significant
+        # overhead for small files with many datasets. Defined here, this will only
+        # take effect for NXdata, NXdetector, NXlog, and NXmonitor.
+        hdf5_dims = [dim.label for dim in field.dataset.dims]
+        if any([dim != '' for dim in hdf5_dims]):
+            while hdf5_dims and hdf5_dims[-1] == '':
+                hdf5_dims.pop()
+            return [f'dim_{i}' if dim == '' else dim for i, dim in enumerate(hdf5_dims)]
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
