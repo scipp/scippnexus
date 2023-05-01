@@ -229,7 +229,7 @@ class Group(Mapping):
         # event_time_offset/event_id fields, instead of the
         # event_time_zero/event_index fields). In the case of NXlog they may
         # be some utility if we deal with extremely long time-series that
-        # could be leverage for label-based indexing in the future.
+        # could be leveraged for label-based indexing in the future.
         items = {k: v for k, v in items.items() if not k.startswith('cue_')}
         for suffix in ('_errors', '_error'):
             field_with_errors = [name for name in items if f'{name}{suffix}' in items]
