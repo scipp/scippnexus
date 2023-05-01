@@ -569,3 +569,77 @@ def test_cylindrical_geometry_with_detector_numbers(nxroot):
                 'face2_center':
                 sc.vectors(dims=['cylinder'], values=[[0, 0, 0]], unit='m'),
             }))
+
+
+def test_falls_back_to_hdf5_dim_labels(nxroot):
+    detector = nxroot.create_class('detector0', NXdetector)
+    xy = sc.array(dims=['x', 'y'], values=[[1, 2], [3, 4]])
+    z = sc.array(dims=['z'], values=[1, 2, 3])
+    dataset = detector.create_field('xy', xy)
+    dataset.dims[0].label = 'x'
+    dataset.dims[1].label = 'y'
+    dataset = detector.create_field('z', z)
+    dataset.dims[0].label = 'z'
+    assert detector.sizes == {'x': 2, 'y': 2, 'z': 3}
+    dg = detector[()]
+    assert_identical(dg['xy'], xy)
+    assert_identical(dg['z'], z)
+
+
+def test_falls_back_to_partial_hdf5_dim_labels(nxroot):
+    detector = nxroot.create_class('detector0', NXdetector)
+    xyz = sc.ones(dims=['x', 'dim_1', 'z'], shape=(2, 2, 3))
+    dataset = detector.create_field('xyz', xyz)
+    dataset.dims[0].label = 'x'
+    dataset.dims[2].label = 'z'
+    assert detector.sizes == xyz.sizes
+    dg = detector[()]
+    assert_identical(dg['xyz'], xyz)
+
+
+def test_squeezes_trailing_when_fall_back_to_partial_hdf5_dim_labels(nxroot):
+    detector = nxroot.create_class('detector0', NXdetector)
+    x = sc.ones(dims=['x', 'dim_1'], shape=(2, 1))
+    dataset = detector.create_field('x', x)
+    dataset.dims[0].label = 'x'
+    assert detector.sizes == {'x': 2}
+    dg = detector[()]
+    assert_identical(dg['x'], sc.squeeze(x))
+
+
+def test_falls_back_to_hdf5_dim_labels_given_unnamed_axes(h5root):
+    xy = sc.array(dims=['x', 'y'], values=[[1, 2], [3, 4]])
+    z = sc.array(dims=['z'], values=[1, 2, 3])
+    detector = snx.create_class(h5root, 'detector0', NXdetector)
+    dataset = snx.create_field(detector, 'xy', xy)
+    dataset.dims[0].label = 'x'
+    dataset.dims[1].label = 'y'
+    dataset = snx.create_field(detector, 'z', z)
+    dataset.dims[0].label = 'z'
+    detector.attrs['axes'] = ['.', '.', '.']
+    detector.attrs['xy_indices'] = [0, 1]
+    detector.attrs['z_indices'] = [2]
+    detector = make_group(detector)
+    assert detector.sizes == {'x': 2, 'y': 2, 'z': 3}
+    dg = detector[()]
+    assert_identical(dg['xy'], xy)
+    assert_identical(dg['z'], z)
+
+
+def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root):
+    xy = sc.array(dims=['x', 'yy'], values=[[1, 2], [3, 4]])
+    z = sc.array(dims=['zz'], values=[1, 2, 3])
+    detector = snx.create_class(h5root, 'detector0', NXdetector)
+    dataset = snx.create_field(detector, 'xy', xy)
+    dataset.dims[0].label = 'x'
+    dataset.dims[1].label = 'y'
+    dataset = snx.create_field(detector, 'z', z)
+    dataset.dims[0].label = 'z'
+    detector.attrs['axes'] = ['.', 'yy', 'zz']
+    detector.attrs['xy_indices'] = [0, 1]
+    detector.attrs['z_indices'] = [2]
+    detector = make_group(detector)
+    assert detector.sizes == {'x': 2, 'yy': 2, 'zz': 3}
+    dg = detector[()]
+    assert_identical(dg['xy'], xy)
+    assert_identical(dg['z'], z)
