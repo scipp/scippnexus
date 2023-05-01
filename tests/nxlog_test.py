@@ -159,6 +159,10 @@ def test_log_with_connection_status_raises_with_positional_indexing(h5root):
     log = snx.Group(log, definitions=snx.base_definitions())
     with pytest.raises(sc.DimensionError):
         log['time', :2]
+    with pytest.raises(sc.DimensionError):
+        log[:2]
+    with pytest.raises(sc.DimensionError):
+        log[:]
 
 
 def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(h5root):

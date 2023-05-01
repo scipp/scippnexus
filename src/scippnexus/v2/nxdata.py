@@ -342,6 +342,17 @@ def _squeeze_trailing(dims: Tuple[str, ...], shape: Tuple[int, ...]) -> Tuple[in
 
 
 class NXlog(NXdata):
+    """
+    NXlog, a time-series that can be loaded as a DataArray.
+
+    In some cases the NXlog may contain additional time series, such as a connection
+    status or alarm. These cannot be handled in a standard way, since the result cannot
+    be represented as a single DataArray. Furthermore, they prevent positional
+    time-indexing, since the time coord of each time-series is different. We can
+    support label-based indexing for this in the future. If additional time-series
+    are contained within the NXlog then loading will return a DataGroup of the
+    individual time-series (DataArrays).
+    """
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         self._sublogs = []
@@ -370,7 +381,7 @@ class NXlog(NXdata):
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
         # Sublogs have distinct time axes (with a different length). Must disable
         # positional indexing.
-        if self._sublogs and ('time' in _to_canonical_select(self.sizes, sel)):
+        if self._sublogs and ('time' in _to_canonical_select(list(self.sizes), sel)):
             raise sc.DimensionError(
                 "Cannot positionally select time since there are multiple "
                 "time fields. Label-based selection is not supported yet.")
@@ -401,6 +412,7 @@ class NXlog(NXdata):
                  dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         sublogs = sc.DataGroup()
         for name in self._sublogs:
+            # Somewhat arbitrary definition of which fields is the "value"
             value_name = 'severity' if name == 'alarm' else None
             sublogs[name] = self._assemble_sublog(dg, name, value_name=value_name)
         self._time_to_datetime(dg)
