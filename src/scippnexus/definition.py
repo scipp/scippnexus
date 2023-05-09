@@ -22,7 +22,6 @@ def make_definition(mapping: Dict[NXobject, type]) -> ApplicationDefinition:
     """
 
     class Definition(ApplicationDefinition):
-
         def make_strategy(self, group: NXobject) -> type:
             return mapping.get(group.nx_class)
 

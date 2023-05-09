@@ -8,6 +8,7 @@ __all__ = ['get_path']
 
 def _make_pooch():
     import pooch
+
     return pooch.create(
         path=pooch.os_cache('scippnexus'),
         env='SCIPPNEXUS_DATA_DIR',
@@ -16,7 +17,8 @@ def _make_pooch():
         version=_version,
         registry={
             'PG3_4844_event.nxs': 'md5:d5ae38871d0a09a28ae01f85d969de1e',
-        })
+        },
+    )
 
 
 _pooch = _make_pooch()

@@ -53,20 +53,18 @@ class DimensionedArray(Protocol):
 
 
 class AttributeManager(Protocol):
-
     def __getitem__(self, name: str):
         """Get attribute"""
 
 
 class NexusStructureError(Exception):
-    """Invalid or unsupported class and field structure in Nexus.
-    """
+    """Invalid or unsupported class and field structure in Nexus."""
+
     pass
 
 
 class Attrs:
-    """HDF5 attributes.
-    """
+    """HDF5 attributes."""
 
     def __init__(self, attrs: AttributeManager):
         self._attrs = attrs
@@ -152,13 +150,15 @@ class Field:
     In HDF5 fields are represented as dataset.
     """
 
-    def __init__(self,
-                 dataset: H5Dataset,
-                 *,
-                 ancestor,
-                 dims=None,
-                 dtype: Optional[sc.DType] = None,
-                 is_time=None):
+    def __init__(
+        self,
+        dataset: H5Dataset,
+        *,
+        ancestor,
+        dims=None,
+        dtype: Optional[sc.DType] = None,
+        is_time=None,
+    ):
         self._ancestor = ancestor  # Usually the parent, but may be grandparent, etc.
         self._dataset = dataset
         self._dtype = _dtype_from_dataset(dataset) if dtype is None else dtype
@@ -176,8 +176,9 @@ class Field:
                 # The convention here is that the given dimensions apply to the shapes
                 # starting from the left. So we only squeeze dimensions that are after
                 # len(dims).
-                self._shape = self._shape[:len(self._dims)] + tuple(
-                    size for size in self._shape[len(self._dims):] if size != 1)
+                self._shape = self._shape[: len(self._dims)] + tuple(
+                    size for size in self._shape[len(self._dims) :] if size != 1
+                )
         elif (axes := self.attrs.get('axes')) is not None:
             self._dims = tuple(axes.split(','))
         else:
@@ -192,7 +193,7 @@ class Field:
         """
         index = to_plain_index(self.dims, select)
         if isinstance(index, (int, slice)):
-            index = (index, )
+            index = (index,)
 
         base_dims = self.dims
         base_shape = self.shape
@@ -243,7 +244,8 @@ class Field:
                 variable = convert_time_to_datetime64(
                     variable,
                     start=starts[0],
-                    scaling_factor=self.attrs.get('scaling_factor'))
+                    scaling_factor=self.attrs.get('scaling_factor'),
+                )
         if variable.ndim == 0 and variable.unit is None:
             # Work around scipp/scipp#2815, and avoid returning NumPy bool
             if isinstance(variable.values, np.ndarray) and variable.dtype != 'bool':
@@ -309,8 +311,10 @@ class Field:
             try:
                 return sc.Unit(unit)
             except sc.UnitError:
-                warnings.warn(f"Unrecognized unit '{unit}' for value dataset "
-                              f"in '{self.name}'; setting unit as 'dimensionless'")
+                warnings.warn(
+                    f"Unrecognized unit '{unit}' for value dataset "
+                    f"in '{self.name}'; setting unit as 'dimensionless'"
+                )
                 return sc.units.one
         return None
 
@@ -325,7 +329,6 @@ def is_dataset(obj: Union[H5Group, H5Dataset]) -> bool:
 
 
 class NXobjectStrategy:
-
     @staticmethod
     def include_child(_) -> bool:
         """Return True if the child should be included when loading."""
@@ -333,14 +336,15 @@ class NXobjectStrategy:
 
 
 class NXobject:
-    """Base class for all NeXus groups.
-    """
+    """Base class for all NeXus groups."""
 
-    def __init__(self,
-                 group: H5Group,
-                 *,
-                 definition: Any = None,
-                 strategy: Optional[Callable] = None):
+    def __init__(
+        self,
+        group: H5Group,
+        *,
+        definition: Any = None,
+        strategy: Optional[Callable] = None,
+    ):
         self._group = group
         # TODO can strategies replace child-params?
         self.child_params = {}
@@ -360,15 +364,14 @@ class NXobject:
 
     def _make(self, group) -> NXobject:
         if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
-            return _nx_class_registry().get(nx_class,
-                                            NXobject)(group,
-                                                      definition=self._definition)
+            return _nx_class_registry().get(nx_class, NXobject)(
+                group, definition=self._definition
+            )
         return group  # Return underlying (h5py) group
 
     def _get_child(
-            self,
-            name: NXobjectIndex,
-            use_field_dims: bool = False) -> Union['NXobject', Field, sc.DataArray]:
+        self, name: NXobjectIndex, use_field_dims: bool = False
+    ) -> Union['NXobject', Field, sc.DataArray]:
         """Get item, with flag to control whether fields dims should be inferred"""
         if name is None:
             raise KeyError("None is not a valid index")
@@ -378,16 +381,20 @@ class NXobject:
                 try:
                     dims = self._get_field_dims(name) if use_field_dims else None
                 except Exception as e:
-                    msg = (f"Failed to determine axis names of {item.name}: {e}. "
-                           "Falling back to default dimension labels.")
+                    msg = (
+                        f"Failed to determine axis names of {item.name}: {e}. "
+                        "Falling back to default dimension labels."
+                    )
                     warnings.warn(msg)
                     dims = None
                 dtype = self._get_field_dtype(name)
-                return Field(item,
-                             dims=dims,
-                             dtype=dtype,
-                             ancestor=self,
-                             **self.child_params.get(name, {}))
+                return Field(
+                    item,
+                    dims=dims,
+                    dtype=dtype,
+                    ancestor=self,
+                    **self.child_params.get(name, {}),
+                )
             else:
                 return self._make(item)
 
@@ -402,7 +409,8 @@ class NXobject:
             else:
                 msg = (
                     f"Failed to load {self.name} as {type(self).__name__}: {e} "
-                    "Falling back to loading HDF5 group children as scipp.DataGroup.")
+                    "Falling back to loading HDF5 group children as scipp.DataGroup."
+                )
                 warnings.warn(msg)
             da = NXobject._getitem(self, name)
         return da
@@ -414,8 +422,9 @@ class NXobject:
 
         def insert(container, name, obj):
             if hasattr(container, 'coords'):
-                container.coords[name] = obj if isinstance(
-                    obj, sc.Variable) else sc.scalar(obj)
+                container.coords[name] = (
+                    obj if isinstance(obj, sc.Variable) else sc.scalar(obj)
+                )
             else:
                 container[name] = obj
 
@@ -434,12 +443,13 @@ class NXobject:
             # loaded.
             if isinstance(t, str):
                 from .nexus_classes import NXtransformations
+
                 for key, group in self[NXtransformations].items():
                     insert(container, key, group[()])
 
     def _get_children_by_nx_class(
-            self, select: Union[type,
-                                List[type]]) -> Dict[str, Union['NXobject', Field]]:
+        self, select: Union[type, List[type]]
+    ) -> Dict[str, Union['NXobject', Field]]:
         children = {}
         select = tuple(select) if isinstance(select, list) else select
         for key in self.keys():
@@ -489,16 +499,17 @@ class NXobject:
         def isclass(x):
             return inspect.isclass(x) and issubclass(x, (Field, NXobject))
 
-        if isclass(name) or (isinstance(name, list) and len(name)
-                             and all(isclass(x) for x in name)):
+        if isclass(name) or (
+            isinstance(name, list) and len(name) and all(isclass(x) for x in name)
+        ):
             return self._get_children_by_nx_class(name)
         return self._get_child(name, use_field_dims=True)
 
     def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]:
         include = getattr(self._strategy, 'include_child', lambda x: True)
         return sc.DataGroup(
-            {name: child[index]
-             for name, child in self.items() if include(child)})
+            {name: child[index] for name, child in self.items() if include(child)}
+        )
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:
         """Subclasses should reimplement this to provide dimension labels for fields."""
@@ -561,12 +572,14 @@ class NXobject:
         if (depends_on := self.get('depends_on')) is not None:
             # Imported late to avoid cyclic import
             from .nxtransformations import TransformationError, get_full_transformation
+
             try:
                 return get_full_transformation(depends_on)
             except (NexusStructureError, TransformationError) as e:
                 warnings.warn(
                     f"Failed to load transformation {self.name}/{depends_on}:\n{e}\n"
-                    "Falling back to returning the path to the transformation.")
+                    "Falling back to returning the path to the transformation."
+                )
                 return depends_on[()]
         return None
 
@@ -626,8 +639,10 @@ class NXobject:
             raise NexusStructureError(f"No group with requested NX_class='{nxclass}'")
         if len(matches) == 1:
             return next(iter(matches.values()))
-        raise NexusStructureError(f"Multiple keys match {nxclass}, use obj[{nxclass}] "
-                                  f"to obtain all matches instead of obj.{attr}.")
+        raise NexusStructureError(
+            f"Multiple keys match {nxclass}, use obj[{nxclass}] "
+            f"to obtain all matches instead of obj.{attr}."
+        )
 
     def __dir__(self):
         keys = super().__dir__()
@@ -662,4 +677,5 @@ class NXroot(NXobject):
 @functools.lru_cache()
 def _nx_class_registry():
     from . import nexus_classes
+
     return dict(inspect.getmembers(nexus_classes, inspect.isclass))

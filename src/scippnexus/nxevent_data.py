@@ -14,7 +14,6 @@ _pulse_dimension = "pulse"
 
 
 class NXevent_data(NXobject):
-
     @property
     def shape(self) -> List[int]:
         return self['event_index'].shape
@@ -67,8 +66,9 @@ class NXevent_data(NXobject):
         event_index[event_index < 0] = num_event
 
         if len(event_index) > 0:
-            event_select = slice(event_index[0],
-                                 event_index[-1] if last_loaded else num_event)
+            event_select = slice(
+                event_index[0], event_index[-1] if last_loaded else num_event
+            )
         else:
             event_select = slice(None)
 
@@ -76,18 +76,22 @@ class NXevent_data(NXobject):
             event_id = event_id[event_select]
             if event_id.dtype not in [sc.DType.int32, sc.DType.int64]:
                 raise NexusStructureError(
-                    "NXevent_data contains event_id field with non-integer values")
+                    "NXevent_data contains event_id field with non-integer values"
+                )
 
         event_time_offset = self['event_time_offset'][event_select]
 
         # Weights are not stored in NeXus, so use 1s
-        weights = sc.ones(dims=[_event_dimension],
-                          shape=event_time_offset.shape,
-                          unit='counts',
-                          dtype=np.float32)
+        weights = sc.ones(
+            dims=[_event_dimension],
+            shape=event_time_offset.shape,
+            unit='counts',
+            dtype=np.float32,
+        )
 
-        events = sc.DataArray(data=weights,
-                              coords={'event_time_offset': event_time_offset})
+        events = sc.DataArray(
+            data=weights, coords={'event_time_offset': event_time_offset}
+        )
         if event_id is not None:
             events.coords['event_id'] = event_id
 
@@ -99,10 +103,9 @@ class NXevent_data(NXobject):
             # Copy to avoid confusing size display in _repr_html_
             event_time_zero = event_time_zero[:-1].copy()
 
-        event_index = sc.array(dims=[_pulse_dimension],
-                               values=event_index,
-                               dtype=sc.DType.int64,
-                               unit=None)
+        event_index = sc.array(
+            dims=[_pulse_dimension], values=event_index, dtype=sc.DType.int64, unit=None
+        )
 
         event_index -= event_index.min()
 
@@ -122,7 +125,8 @@ class NXevent_data(NXobject):
             binned = sc.bins(data=events, dim=_event_dimension, begin=begins, end=ends)
         except IndexError as e:
             raise NexusStructureError(
-                f"Invalid index in NXevent_data at {self.name}/event_index:\n{e}.")
+                f"Invalid index in NXevent_data at {self.name}/event_index:\n{e}."
+            )
 
         return sc.DataArray(data=binned, coords={'event_time_zero': event_time_zero})
 
@@ -130,4 +134,5 @@ class NXevent_data(NXobject):
         for field in ("event_time_zero", "event_index", "event_time_offset"):
             if field not in self:
                 raise NexusStructureError(
-                    f"Required field {field} not found in NXevent_data")
+                    f"Required field {field} not found in NXevent_data"
+                )

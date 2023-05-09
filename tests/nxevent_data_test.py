@@ -27,9 +27,9 @@ def nxroot():
 
 def create_event_data_ids_1234(group):
     group['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2])
-    group['event_time_offset'] = sc.array(dims=[''],
-                                          unit='s',
-                                          values=[456, 7, 3, 345, 632, 23])
+    group['event_time_offset'] = sc.array(
+        dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]
+    )
     group['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
     group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, -1000])
 
@@ -53,9 +53,9 @@ def test_bad_event_index_causes_load_as_DataGroup(nxroot):
 
 
 def create_event_data_without_event_id(group):
-    group['event_time_offset'] = sc.array(dims=[''],
-                                          unit='s',
-                                          values=[456, 7, 3, 345, 632, 23])
+    group['event_time_offset'] = sc.array(
+        dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]
+    )
     group['event_time_zero'] = sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
     group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
 
@@ -104,7 +104,10 @@ def test_nxevent_data_keys(h5root):
     root = snx.Group(entry)
     event_data = root['events']
     assert set(event_data.keys()) == {
-        'event_id', 'event_time_offset', 'event_time_zero', 'event_index'
+        'event_id',
+        'event_time_offset',
+        'event_time_zero',
+        'event_index',
     }
 
 
@@ -112,22 +115,29 @@ def test_nxevent_data_children_read_as_variables_with_correct_dims(h5root):
     entry = make_event_data(h5root)
     root = snx.Group(entry, definitions=snx.base_definitions())
     event_data = root['events']
-    assert sc.identical(event_data['event_id'][()],
-                        sc.array(dims=['event'], values=[1, 1, 1, 0], unit=None))
-    assert sc.identical(event_data['event_time_offset'][()],
-                        sc.array(dims=['event'], values=[0, 1, 2, 3], unit='ns'))
+    assert sc.identical(
+        event_data['event_id'][()],
+        sc.array(dims=['event'], values=[1, 1, 1, 0], unit=None),
+    )
+    assert sc.identical(
+        event_data['event_time_offset'][()],
+        sc.array(dims=['event'], values=[0, 1, 2, 3], unit='ns'),
+    )
     assert sc.identical(
         event_data['event_time_zero'][()],
-        sc.array(dims=['event_time_zero'], values=[100, 200], unit='ms'))
-    assert sc.identical(event_data['event_index'][()],
-                        sc.array(dims=['event_time_zero'], values=[0, 3], unit=None))
+        sc.array(dims=['event_time_zero'], values=[100, 200], unit='ms'),
+    )
+    assert sc.identical(
+        event_data['event_index'][()],
+        sc.array(dims=['event_time_zero'], values=[0, 3], unit=None),
+    )
 
 
 def test_nxevent_data_dims_and_sizes_ignore_pulse_contents(h5root):
     entry = make_event_data(h5root)
     root = snx.Group(entry, definitions=snx.base_definitions())
     event_data = root['events']
-    assert event_data.dims == ('event_time_zero', )
+    assert event_data.dims == ('event_time_zero',)
     assert event_data.sizes == {'event_time_zero': 2}
 
 
@@ -136,5 +146,7 @@ def test_read_nxevent_data(h5root):
     root = snx.Group(entry, definitions=snx.base_definitions())
     event_data = root['events']
     da = event_data[()]
-    assert sc.identical(da.data.bins.size(),
-                        sc.array(dims=['event_time_zero'], values=[3, 1], unit=None))
+    assert sc.identical(
+        da.data.bins.size(),
+        sc.array(dims=['event_time_zero'], values=[3, 1], unit=None),
+    )

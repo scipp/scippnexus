@@ -21,7 +21,6 @@ from .nxobject import (
 
 
 class NXdetectorStrategy(NXdataStrategy):
-
     @staticmethod
     def signal(group):
         # NXdata uses the 'signal' attribute to define the field name of the signal.
@@ -42,8 +41,7 @@ def group(da: sc.DataArray, groups: sc.Variable) -> sc.DataArray:
 
 
 class EventSelector:
-    """A proxy object for creating an NXdetector based on a selection of events.
-    """
+    """A proxy object for creating an NXdetector based on a selection of events."""
 
     def __init__(self, detector):
         self._detector = detector
@@ -62,11 +60,13 @@ class _EventField:
     event-data "signal" dataset of an NXdetector.
     """
 
-    def __init__(self,
-                 nxevent_data: NXevent_data,
-                 event_select: ScippIndex,
-                 grouping_key: Optional[str] = 'detector_number',
-                 grouping: Optional[Field] = None):
+    def __init__(
+        self,
+        nxevent_data: NXevent_data,
+        event_select: ScippIndex,
+        grouping_key: Optional[str] = 'detector_number',
+        grouping: Optional[Field] = None,
+    ):
         self._nxevent_data = nxevent_data
         self._event_select = event_select
         self._grouping_key = grouping_key
@@ -91,7 +91,8 @@ class _EventField:
         if self._grouping is None:
             raise NexusStructureError(
                 "Cannot get shape of NXdetector since no 'detector_number' "
-                "field found but detector contains event data.")
+                "field found but detector contains event data."
+            )
         return self._grouping.shape
 
     @property
@@ -107,27 +108,32 @@ class _EventField:
                 raise NexusStructureError(
                     "Cannot load slice of NXdetector since it contains event data "
                     "but no 'detector_number' field, i.e., the shape is unknown. "
-                    "Use ellipsis or an empty tuple to load the full detector.")
+                    "Use ellipsis or an empty tuple to load the full detector."
+                )
             # Ideally we would prefer to use np.unique, but a quick experiment shows
             # that this can easily be 100x slower, so it is not an option. In
             # practice most files have contiguous event_id values within a bank
             # (NXevent_data).
             id_min = event_data.bins.coords['event_id'].min()
             id_max = event_data.bins.coords['event_id'].max()
-            grouping = sc.arange(dim=self._grouping_key,
-                                 unit=None,
-                                 start=id_min.value,
-                                 stop=id_max.value + 1,
-                                 dtype=id_min.dtype)
+            grouping = sc.arange(
+                dim=self._grouping_key,
+                unit=None,
+                start=id_min.value,
+                stop=id_max.value + 1,
+                dtype=id_min.dtype,
+            )
         else:
             grouping = asarray(self._grouping[select])
             if (self._grouping_key in event_data.coords) and sc.identical(
-                    grouping, event_data.coords[self._grouping_key]):
+                grouping, event_data.coords[self._grouping_key]
+            ):
                 return event_data
         # copy since sc.bin cannot deal with a non-contiguous view
         event_id = grouping.flatten(to='event_id').copy()
         event_data.bins.coords['event_time_zero'] = sc.bins_like(
-            event_data, fill_value=event_data.coords['event_time_zero'])
+            event_data, fill_value=event_data.coords['event_time_zero']
+        )
         # After loading raw NXevent_data it is guaranteed that the event table
         # is contiguous and that there is no masking. We can therefore use the
         # more efficient approach of binning from scratch instead of erasing the
@@ -152,8 +158,13 @@ class NXdetector(NXobject):
         super().__init__(*args, **kwargs)
         self._event_select = tuple()
         self._nxevent_data_fields = [
-            'event_time_zero', 'event_index', 'event_time_offset', 'event_id',
-            'cue_timestamp_zero', 'cue_index', 'pulse_height'
+            'event_time_zero',
+            'event_index',
+            'event_time_offset',
+            'event_id',
+            'cue_timestamp_zero',
+            'cue_index',
+            'pulse_height',
         ]
         self._detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
 
@@ -199,10 +210,9 @@ class NXdetector(NXobject):
                 skip = self._nxevent_data_fields
             else:
                 skip = [events.name.split('/')[-1]]  # name of the subgroup
-        return NXdata(self._group,
-                      strategy=NXdetectorStrategy,
-                      signal_override=signal,
-                      skip=skip)
+        return NXdata(
+            self._group, strategy=NXdetectorStrategy, signal_override=signal, skip=skip
+        )
 
     @property
     def events(self) -> Union[None, NXevent_data]:
@@ -212,8 +222,10 @@ class NXdetector(NXobject):
         # NXdetector. Both cases are observed in the wild.
         event_entries = self[NXevent_data]
         if len(event_entries) > 1:
-            raise NexusStructureError("No unique NXevent_data entry in NXdetector. "
-                                      f"Found {len(event_entries)}.")
+            raise NexusStructureError(
+                "No unique NXevent_data entry in NXdetector. "
+                f"Found {len(event_entries)}."
+            )
         if len(event_entries) == 1:
             # If there is also a signal dataset (not events) it will be ignored
             # (except for possibly using it to deduce shape and dims).
@@ -230,7 +242,8 @@ class NXdetector(NXobject):
         """
         if self.events is None:
             raise NexusStructureError(
-                "Cannot select events in NXdetector not containing NXevent_data.")
+                "Cannot select events in NXdetector not containing NXevent_data."
+            )
         return EventSelector(self)
 
     def _get_field_dims(self, name: str) -> Union[None, List[str]]:

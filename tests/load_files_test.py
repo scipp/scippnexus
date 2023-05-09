@@ -33,10 +33,11 @@ def assert_schema(dg: sc.DataGroup, schema: Dict[str, Any]) -> None:
         validate(get_item_at_path(dg, name))
 
 
-def validator(item_type: type,
-              sizes: Optional[Dict[str, int]] = None,
-              dtype: Optional[Union[str, sc.DType]] = None) -> None:
-
+def validator(
+    item_type: type,
+    sizes: Optional[Dict[str, int]] = None,
+    dtype: Optional[Union[str, sc.DType]] = None,
+) -> None:
     def _validator(item):
         assert isinstance(item, item_type)
         if sizes is not None:
@@ -48,7 +49,6 @@ def validator(item_type: type,
 
 
 def bins_validator(item_type: type, sizes: Optional[Dict[str, int]] = None):
-
     def _validator(item):
         assert isinstance(item, item_type)
         assert item.bins is not None
@@ -80,7 +80,8 @@ def test_amor2020n000346_tweaked():
         dg = f[()]
     schema = {}
     schema['entry/instrument/multiblade_detector'] = bins_validator(
-        sc.DataArray, {'detector_number': 9216})
+        sc.DataArray, {'detector_number': 9216}
+    )
     schema['entry/stages/com'] = validator(sc.DataArray, {'time': 1, 'dim_1': 1})
     schema['entry/facility'] = validator(str)
     assert_schema(dg, schema)
@@ -89,16 +90,21 @@ def test_amor2020n000346_tweaked():
 @pytest.mark.externalfile
 def test_LOKI_60322_2022_03_02_2205_fixed():
     with snx.File(
-            externalfile.get_path('2023/LOKI_60322-2022-03-02_2205_fixed.nxs')) as f:
+        externalfile.get_path('2023/LOKI_60322-2022-03-02_2205_fixed.nxs')
+    ) as f:
         dg = f[()]
     schema = {}
     schema['entry/instrument/larmor_detector'] = bins_validator(
-        sc.DataArray, {'detector_number': 458752})
-    schema['entry/instrument/monitor_1'] = bins_validator(sc.DataArray,
-                                                          {'event_time_zero': 1987})
-    schema['entry/instrument/monitor_2'] = bins_validator(sc.DataArray,
-                                                          {'event_time_zero': 1987})
+        sc.DataArray, {'detector_number': 458752}
+    )
+    schema['entry/instrument/monitor_1'] = bins_validator(
+        sc.DataArray, {'event_time_zero': 1987}
+    )
+    schema['entry/instrument/monitor_2'] = bins_validator(
+        sc.DataArray, {'event_time_zero': 1987}
+    )
     schema['entry/instrument/source/transformations/trans_2'] = validator(
-        sc.DataArray, {}, sc.DType.translation3)
+        sc.DataArray, {}, sc.DType.translation3
+    )
 
     assert_schema(dg, schema)

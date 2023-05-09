@@ -24,12 +24,13 @@ def _check_for_missing_fields(fields):
     for field in NXevent_data.mandatory_fields:
         if field not in fields:
             raise NexusStructureError(
-                f"Required field {field} not found in NXevent_data")
+                f"Required field {field} not found in NXevent_data"
+            )
 
 
 class NXevent_data(NXobject):
     mandatory_fields = ("event_time_zero", "event_index", "event_time_offset")
-    handled_fields = mandatory_fields + ("event_id", )
+    handled_fields = mandatory_fields + ("event_id",)
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         super().__init__(attrs=attrs, children=children)
@@ -47,7 +48,7 @@ class NXevent_data(NXobject):
 
     @property
     def dims(self) -> List[str]:
-        return (_pulse_dimension, )[:len(self.shape)]
+        return (_pulse_dimension,)[: len(self.shape)]
 
     @property
     def sizes(self) -> Dict[str, int]:
@@ -55,9 +56,9 @@ class NXevent_data(NXobject):
 
     def field_dims(self, name: str, field: Field) -> Tuple[str, ...]:
         if name in ['event_time_zero', 'event_index']:
-            return (_pulse_dimension, )
+            return (_pulse_dimension,)
         if name in ['event_time_offset', 'event_id']:
-            return (_event_dimension, )
+            return (_event_dimension,)
         return None
 
     def read_children(self, select: ScippIndex) -> sc.DataGroup:
@@ -75,23 +76,28 @@ class NXevent_data(NXobject):
         event_index[event_index < 0] = num_event
 
         if len(event_index) > 0:
-            event_select = slice(event_index[0],
-                                 event_index[-1] if last_loaded else num_event)
+            event_select = slice(
+                event_index[0], event_index[-1] if last_loaded else num_event
+            )
         else:
             event_select = slice(0, 0)
 
         event_time_offset = children['event_time_offset'][event_select]
 
-        event_index = sc.array(dims=[_pulse_dimension],
-                               values=event_index[:-1] if last_loaded else event_index,
-                               dtype=sc.DType.int64,
-                               unit=None)
+        event_index = sc.array(
+            dims=[_pulse_dimension],
+            values=event_index[:-1] if last_loaded else event_index,
+            dtype=sc.DType.int64,
+            unit=None,
+        )
 
         event_index -= event_index.min()
 
-        dg = sc.DataGroup(event_time_zero=event_time_zero,
-                          event_index=event_index,
-                          event_time_offset=event_time_offset)
+        dg = sc.DataGroup(
+            event_time_zero=event_time_zero,
+            event_index=event_index,
+            event_time_offset=event_time_offset,
+        )
         if (event_id := children.get('event_id')) is not None:
             dg['event_id'] = event_id[event_select]
         return dg
@@ -126,13 +132,16 @@ class NXevent_data(NXobject):
         event_index = children['event_index']
 
         # Weights are not stored in NeXus, so use 1s
-        weights = sc.ones(dims=[_event_dimension],
-                          shape=event_time_offset.shape,
-                          unit='counts',
-                          dtype=np.float32)
+        weights = sc.ones(
+            dims=[_event_dimension],
+            shape=event_time_offset.shape,
+            unit='counts',
+            dtype=np.float32,
+        )
 
-        events = sc.DataArray(data=weights,
-                              coords={'event_time_offset': event_time_offset})
+        events = sc.DataArray(
+            data=weights, coords={'event_time_offset': event_time_offset}
+        )
         if (event_id := children.get('event_id')) is not None:
             events.coords['event_id'] = event_id
 

@@ -30,7 +30,6 @@ class NXtransformations(NXobject):
 
 
 class Transformation:
-
     def __init__(self, obj: Union[Field, NXobject]):  # could be an NXlog
         self._obj = obj
 
@@ -67,7 +66,8 @@ class Transformation:
         if (offset_units := self.attrs.get('offset_units')) is None:
             raise TransformationError(
                 f"Found {offset=} but no corresponding 'offset_units' "
-                f"attribute at {self.name}")
+                f"attribute at {self.name}"
+            )
         return sc.spatial.translation(value=offset, unit=offset_units)
 
     @property
@@ -82,8 +82,12 @@ class Transformation:
         value = self._obj[select]
         return self.make_transformation(value, transformation_type, select)
 
-    def make_transformation(self, value: Union[sc.Variable, sc.DataArray],
-                            transformation_type: str, select: ScippIndex):
+    def make_transformation(
+        self,
+        value: Union[sc.Variable, sc.DataArray],
+        transformation_type: str,
+        select: ScippIndex,
+    ):
         try:
             if isinstance(value, sc.DataGroup):
                 return value
@@ -96,7 +100,8 @@ class Transformation:
             else:
                 raise TransformationError(
                     f"{transformation_type=} attribute at {self.name},"
-                    " expected 'translation' or 'rotation'.")
+                    " expected 'translation' or 'rotation'."
+                )
             if isinstance(t, sc.Variable):
                 t = v
             else:
@@ -113,7 +118,8 @@ class Transformation:
                 if not isinstance(transform, sc.DataArray):
                     transform = sc.DataArray(transform)
                 transform.attrs['depends_on'] = sc.scalar(
-                    depends_on_to_relative_path(depends_on, self._obj.parent.name))
+                    depends_on_to_relative_path(depends_on, self._obj.parent.name)
+                )
             return transform
         except (sc.DimensionError, sc.UnitError, TransformationError):
             # TODO We should probably try to return some other data structure and
@@ -125,10 +131,9 @@ def _interpolate_transform(transform, xnew):
     # scipy can't interpolate with a single value
     if transform.sizes["time"] == 1:
         transform = sc.concat([transform, transform], dim="time")
-    return interpolate.interp1d(transform,
-                                "time",
-                                kind="previous",
-                                fill_value="extrapolate")(xnew=xnew)
+    return interpolate.interp1d(
+        transform, "time", kind="previous", fill_value="extrapolate"
+    )(xnew=xnew)
 
 
 def _smaller_unit(a, b):
@@ -142,7 +147,8 @@ def _smaller_unit(a, b):
 
 
 def get_full_transformation(
-        depends_on: Field) -> Union[None, sc.DataArray, sc.Variable]:
+    depends_on: Field,
+) -> Union[None, sc.DataArray, sc.Variable]:
     """
     Get the 4x4 transformation matrix for a component, resulting
     from the full chain of transformations linked by "depends_on"
@@ -154,9 +160,8 @@ def get_full_transformation(
 
 
 def get_full_transformation_starting_at(
-        t0: Transformation,
-        *,
-        index: ScippIndex = None) -> Union[None, sc.DataArray, sc.Variable]:
+    t0: Transformation, *, index: ScippIndex = None
+) -> Union[None, sc.DataArray, sc.Variable]:
     transformations = _get_transformations(t0, index=() if index is None else index)
 
     total_transform = None
@@ -164,18 +169,24 @@ def get_full_transformation_starting_at(
         if total_transform is None:
             total_transform = transform
         elif isinstance(total_transform, sc.DataArray) and isinstance(
-                transform, sc.DataArray):
-            unit = _smaller_unit(transform.coords['time'],
-                                 total_transform.coords['time'])
+            transform, sc.DataArray
+        ):
+            unit = _smaller_unit(
+                transform.coords['time'], total_transform.coords['time']
+            )
             total_transform.coords['time'] = total_transform.coords['time'].to(
-                unit=unit, copy=False)
-            transform.coords['time'] = transform.coords['time'].to(unit=unit,
-                                                                   copy=False)
-            time = sc.concat([total_transform.coords["time"], transform.coords["time"]],
-                             dim="time")
+                unit=unit, copy=False
+            )
+            transform.coords['time'] = transform.coords['time'].to(
+                unit=unit, copy=False
+            )
+            time = sc.concat(
+                [total_transform.coords["time"], transform.coords["time"]], dim="time"
+            )
             time = sc.datetimes(values=np.unique(time.values), dims=["time"], unit=unit)
-            total_transform = _interpolate_transform(transform, time) \
-                * _interpolate_transform(total_transform, time)
+            total_transform = _interpolate_transform(
+                transform, time
+            ) * _interpolate_transform(total_transform, time)
         else:
             total_transform = transform * total_transform
     if isinstance(total_transform, sc.DataArray):
@@ -186,8 +197,9 @@ def get_full_transformation_starting_at(
     return total_transform
 
 
-def _get_transformations(transform: Transformation, *,
-                         index: ScippIndex) -> List[Union[sc.DataArray, sc.Variable]]:
+def _get_transformations(
+    transform: Transformation, *, index: ScippIndex
+) -> List[Union[sc.DataArray, sc.Variable]]:
     """Get all transformations in the depends_on chain."""
     transformations = []
     t = transform
@@ -201,8 +213,10 @@ def _get_transformations(transform: Transformation, *,
 
 
 def maybe_transformation(
-        obj: Union[Field, Group], value: Union[sc.Variable, sc.DataArray, sc.DataGroup],
-        sel: ScippIndex) -> Union[sc.Variable, sc.DataArray, sc.DataGroup]:
+    obj: Union[Field, Group],
+    value: Union[sc.Variable, sc.DataArray, sc.DataGroup],
+    sel: ScippIndex,
+) -> Union[sc.Variable, sc.DataArray, sc.DataGroup]:
     """
     Return a loaded field, possibly modified if it is a transformation.
 
@@ -215,5 +229,6 @@ def maybe_transformation(
     """
     if (transformation_type := obj.attrs.get('transformation_type')) is not None:
         from .nxtransformations import Transformation
+
         return Transformation(obj).make_transformation(value, transformation_type, sel)
     return value

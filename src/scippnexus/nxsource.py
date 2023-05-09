@@ -5,5 +5,4 @@ from .leaf import Leaf
 
 
 class NXsource(Leaf):
-    """Source information, can be read as a dict.
-    """
+    """Source information, can be read as a dict."""

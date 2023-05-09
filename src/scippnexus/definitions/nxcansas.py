@@ -10,7 +10,6 @@ from ..nxobject import NXobject
 
 
 class ApplicationDefinition(BaseDef):
-
     def __init__(self, class_attribute: str, default: str = None):
         self._default_class = default
         self._class_attribute = class_attribute
@@ -20,12 +19,14 @@ class ApplicationDefinition(BaseDef):
         # This approach will likely need to be generalized as many application
         # definitions to not define a "class attribute" in the style of canSAS_class,
         # but seem to rely on basic structure and the NX_class attribute.
-        if (definition_class := group.attrs.get(self._class_attribute,
-                                                self._default_class)) is not None:
+        if (
+            definition_class := group.attrs.get(
+                self._class_attribute, self._default_class
+            )
+        ) is not None:
             return self._strategies.get(definition_class)
 
     def register(self, sas_class):
-
         def decorator(strategy):
             self._strategies[sas_class] = strategy
             return strategy
@@ -39,12 +40,14 @@ NXcanSAS = ApplicationDefinition('canSAS_class', 'SASroot')
 class SASdata:
     nx_class = 'NXdata'
 
-    def __init__(self,
-                 data: sc.DataArray,
-                 Q_variances: Optional[Literal['uncertainties', 'resolutions']] = None):
+    def __init__(
+        self,
+        data: sc.DataArray,
+        Q_variances: Optional[Literal['uncertainties', 'resolutions']] = None,
+    ):
         self.data = data
         valid = ('uncertainties', 'resolutions')
-        if Q_variances not in (None, ) + valid:
+        if Q_variances not in (None,) + valid:
             raise ValueError(f"Q_variances must be in {valid}")
         self._variances = Q_variances
 
@@ -64,13 +67,15 @@ class SASdata:
         if da.coords.is_edges('Q'):
             raise ValueError(
                 "Q is given as bin-edges, but NXcanSAS requires Q points (such as "
-                "bin centers).")
+                "bin centers)."
+            )
         coord = group.create_field('Q', da.coords['Q'])
         if da.coords['Q'].variances is not None:
             if self._variances is None:
                 raise ValueError(
                     "Q has variances, must specify whether these represent "
-                    "'uncertainties' or 'resolutions' using the 'Q_variances' option'")
+                    "'uncertainties' or 'resolutions' using the 'Q_variances' option'"
+                )
 
             coord.attrs[self._variances] = 'Q_errors'
             group.create_field('Q_errors', sc.stddevs(da.coords['Q']))
@@ -78,7 +83,6 @@ class SASdata:
 
 @NXcanSAS.register('SASdata')
 class SASdataStrategy:
-
     @staticmethod
     def axes(group: NXobject) -> Tuple[str]:
         return group.attrs.get('I_axes')
@@ -109,13 +113,12 @@ class SASdataStrategy:
 
 @NXcanSAS.register('SAStransmission_spectrum')
 class SAStransmission_spectrumStrategy:
-
     @staticmethod
     def dims(group: NXobject) -> Tuple[str]:
         # TODO A valid file should have T_axes, do we need to fallback?
         if (axes := group.attrs.get('T_axes')) is not None:
-            return (axes, )
-        return ('lambda', )
+            return (axes,)
+        return ('lambda',)
 
 
 class SASentry:

@@ -10,9 +10,10 @@ from .typing import ScippIndex
 
 
 def convert_time_to_datetime64(
-        raw_times: sc.Variable,
-        start: str = None,
-        scaling_factor: Union[float, np.float_] = None) -> sc.Variable:
+    raw_times: sc.Variable,
+    start: str = None,
+    scaling_factor: Union[float, np.float_] = None,
+) -> sc.Variable:
     """
     The nexus standard allows an arbitrary scaling factor to be inserted
     between the numbers in the `time` series and the unit of time reported
@@ -33,13 +34,15 @@ def convert_time_to_datetime64(
             time series data and the unit of the raw_times Variable. If
             not provided, defaults to 1 (a no-op scaling factor).
     """
-    if (raw_times.dtype
-            in (sc.DType.float64, sc.DType.float32)) or scaling_factor is not None:
+    if (
+        raw_times.dtype in (sc.DType.float64, sc.DType.float32)
+    ) or scaling_factor is not None:
         unit = sc.units.ns
     else:
         # determine more precise unit
         ratio = sc.scalar(1.0, unit=start.unit) / sc.scalar(
-            1.0, unit=raw_times.unit).to(unit=start.unit)
+            1.0, unit=raw_times.unit
+        ).to(unit=start.unit)
         unit = start.unit if ratio.value < 1.0 else raw_times.unit
 
     if scaling_factor is None:
@@ -47,17 +50,21 @@ def convert_time_to_datetime64(
     else:
         times = raw_times * sc.scalar(value=scaling_factor)
     return start.to(unit=unit, copy=False) + times.to(
-        dtype=sc.DType.int64, unit=unit, copy=False)
+        dtype=sc.DType.int64, unit=unit, copy=False
+    )
 
 
-def _to_canonical_select(dims: List[str],
-                         select: ScippIndex) -> Dict[str, Union[int, slice]]:
+def _to_canonical_select(
+    dims: List[str], select: ScippIndex
+) -> Dict[str, Union[int, slice]]:
     """Return selection as dict with explicit dim labels"""
 
     def check_1d():
         if len(dims) != 1:
-            raise sc.DimensionError(f"Dataset has multiple dimensions {dims}, "
-                                    "specify the dimension to index.")
+            raise sc.DimensionError(
+                f"Dataset has multiple dimensions {dims}, "
+                "specify the dimension to index."
+            )
 
     if select is Ellipsis:
         return {}
@@ -69,8 +76,10 @@ def _to_canonical_select(dims: List[str],
     if isinstance(select, tuple):
         check_1d()
         if len(select) != 1:
-            raise sc.DimensionError(f"Dataset has single dimension {dims}, "
-                                    "but multiple indices {select} were specified.")
+            raise sc.DimensionError(
+                f"Dataset has single dimension {dims}, "
+                "but multiple indices {select} were specified."
+            )
         return {dims[0]: select[0]}
     elif isinstance(select, int) or isinstance(select, slice):
         check_1d()
@@ -89,17 +98,20 @@ def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, slice, tup
     for key, sel in select.items():
         if key not in dims:
             raise sc.DimensionError(
-                f"'{key}' used for indexing not found in dataset dims {dims}.")
+                f"'{key}' used for indexing not found in dataset dims {dims}."
+            )
         index[dims.index(key)] = sel
     if len(index) == 1:
         return index[0]
     return tuple(index)
 
 
-def to_child_select(dims: List[str],
-                    child_dims: List[str],
-                    select: ScippIndex,
-                    bin_edge_dim: Optional[str] = None) -> ScippIndex:
+def to_child_select(
+    dims: List[str],
+    child_dims: List[str],
+    select: ScippIndex,
+    bin_edge_dim: Optional[str] = None,
+) -> ScippIndex:
     """
     Given a valid "scipp" index 'select' for a Nexus class, return a selection for a
     child field of the class, which may have fewer dimensions.

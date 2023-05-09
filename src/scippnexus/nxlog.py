@@ -11,7 +11,6 @@ from .nxobject import NXobject, ScippIndex
 
 
 class NXlogStrategy(NXdataStrategy):
-
     @staticmethod
     def axes(group):
         if (ax := NXdataStrategy.axes(group)) is not None:
@@ -43,7 +42,6 @@ class NXlogStrategy(NXdataStrategy):
 
 
 class NXlog(NXobject):
-
     @property
     def shape(self):
         return self._nxbase.shape
@@ -58,9 +56,11 @@ class NXlog(NXobject):
 
     @property
     def _nxbase(self) -> NXdata:
-        return NXdata(self._group,
-                      strategy=NXlogStrategy,
-                      skip=['cue_timestamp_zero', 'cue_index'])
+        return NXdata(
+            self._group,
+            strategy=NXlogStrategy,
+            skip=['cue_timestamp_zero', 'cue_index'],
+        )
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         base = self._nxbase

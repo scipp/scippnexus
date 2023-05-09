@@ -29,12 +29,14 @@ class SASentry:
 class SASdata:
     nx_class = 'NXdata'
 
-    def __init__(self,
-                 data: sc.DataArray,
-                 Q_variances: Optional[Literal['uncertainties', 'resolutions']] = None):
+    def __init__(
+        self,
+        data: sc.DataArray,
+        Q_variances: Optional[Literal['uncertainties', 'resolutions']] = None,
+    ):
         self.data = data
         valid = ('uncertainties', 'resolutions')
-        if Q_variances not in (None, ) + valid:
+        if Q_variances not in (None,) + valid:
             raise ValueError(f"Q_variances must be in {valid}")
         self._variances = Q_variances
 
@@ -55,28 +57,31 @@ class SASdata:
         if da.coords.is_edges('Q'):
             raise ValueError(
                 "Q is given as bin-edges, but NXcanSAS requires Q points (such as "
-                "bin centers).")
+                "bin centers)."
+            )
         coord = create_field(group, 'Q', da.coords['Q'])
         if da.coords['Q'].variances is not None:
             if self._variances is None:
                 raise ValueError(
                     "Q has variances, must specify whether these represent "
-                    "'uncertainties' or 'resolutions' using the 'Q_variances' option'")
+                    "'uncertainties' or 'resolutions' using the 'Q_variances' option'"
+                )
 
             coord.attrs[self._variances] = 'Q_errors'
             create_field(group, 'Q_errors', sc.stddevs(da.coords['Q']))
 
 
 class _SASdata(NXdata):
-
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         fallback_dims = attrs.get('I_axes')
         if fallback_dims is not None:
-            fallback_dims = (fallback_dims, )
-        super().__init__(attrs=attrs,
-                         children=children,
-                         fallback_dims=fallback_dims,
-                         fallback_signal_name='I')
+            fallback_dims = (fallback_dims,)
+        super().__init__(
+            attrs=attrs,
+            children=children,
+            fallback_dims=fallback_dims,
+            fallback_signal_name='I',
+        )
 
     # TODO Mechanism for custom error names
     @staticmethod
@@ -100,21 +105,21 @@ class _SASdata(NXdata):
 
 
 class _SAStransmission_spectrum(NXdata):
-
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         # TODO A valid file should have T_axes, do we need to fallback?
-        super().__init__(attrs=attrs,
-                         children=children,
-                         fallback_dims=(attrs.get('T_axes', 'lambda'), ),
-                         fallback_signal_name='T')
+        super().__init__(
+            attrs=attrs,
+            children=children,
+            fallback_dims=(attrs.get('T_axes', 'lambda'),),
+            fallback_signal_name='T',
+        )
 
 
 class NXcanSAS:
-
     def get(self, key: type, default: Callable) -> Callable:
-
-        def _definition_factory(attrs: Dict[str, Any],
-                                children: Dict[str, Union[Field, Group]]) -> NXobject:
+        def _definition_factory(
+            attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]
+        ) -> NXobject:
             if (cls := attrs.get('canSAS_class')) is not None:
                 if cls == 'SASdata':
                     return _SASdata(attrs, children)

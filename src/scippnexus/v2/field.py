@@ -78,6 +78,7 @@ class Field:
     """NeXus field.
     In HDF5 fields are represented as dataset.
     """
+
     dataset: H5Dataset
     parent: 'Group'
     sizes: Optional[Dict[str, int]] = None
@@ -103,10 +104,9 @@ class Field:
         return self.parent.file
 
     def _load_variances(self, var, index):
-        stddevs = sc.empty(dims=var.dims,
-                           shape=var.shape,
-                           dtype=var.dtype,
-                           unit=var.unit)
+        stddevs = sc.empty(
+            dims=var.dims, shape=var.shape, dtype=var.dtype, unit=var.unit
+        )
         try:
             self.errors.read_direct(stddevs.values, source_sel=index)
         except TypeError:
@@ -114,8 +114,9 @@ class Field:
         # According to the standard, errors must have the same shape as the data.
         # This is not the case in all files we observed, is there any harm in
         # attempting a broadcast?
-        var.variances = np.broadcast_to(sc.pow(stddevs, sc.scalar(2)).values,
-                                        shape=var.shape)
+        var.variances = np.broadcast_to(
+            sc.pow(stddevs, sc.scalar(2)).values, shape=var.shape
+        )
 
     def __getitem__(self, select: ScippIndex) -> Union[Any, sc.Variable]:
         """Load the field as a :py:class:`scipp.Variable` or Python object.
@@ -123,9 +124,10 @@ class Field:
         as a string or integer. Otherwise a :py:class:`scipp.Variable` is returned.
         """
         from .nxtransformations import maybe_transformation
+
         index = to_plain_index(self.dims, select)
         if isinstance(index, (int, slice)):
-            index = (index, )
+            index = (index,)
 
         base_dims = self.dims
         base_shape = self.shape
@@ -136,11 +138,13 @@ class Field:
                 dims.append(base_dims[i])
                 shape.append(len(range(*ind.indices(base_shape[i]))))
 
-        variable = sc.empty(dims=dims,
-                            shape=shape,
-                            dtype=self.dtype,
-                            unit=self.unit,
-                            with_variances=self.errors is not None)
+        variable = sc.empty(
+            dims=dims,
+            shape=shape,
+            dtype=self.dtype,
+            unit=self.unit,
+            with_variances=self.errors is not None,
+        )
 
         # If the variable is empty, return early
         if np.prod(shape) == 0:
@@ -155,8 +159,9 @@ class Field:
                 _warn_latin1_decode(self.dataset, strings, str(e))
             variable.values = np.asarray(strings).flatten()
             if self.dataset.name.endswith('depends_on') and variable.ndim == 0:
-                variable.value = depends_on_to_relative_path(variable.value,
-                                                             self.dataset.parent.name)
+                variable.value = depends_on_to_relative_path(
+                    variable.value, self.dataset.parent.name
+                )
         elif variable.values.flags["C_CONTIGUOUS"]:
             # On versions of h5py prior to 3.2, a TypeError occurs in some cases
             # where h5py cannot broadcast data with e.g. shape (20, 1) to a buffer
@@ -194,7 +199,8 @@ class Field:
                 variable = convert_time_to_datetime64(
                     variable,
                     start=starts[0],
-                    scaling_factor=self.attrs.get('scaling_factor'))
+                    scaling_factor=self.attrs.get('scaling_factor'),
+                )
 
         return variable
 
@@ -219,7 +225,9 @@ class Field:
             try:
                 return sc.Unit(unit)
             except sc.UnitError:
-                warnings.warn(f"Unrecognized unit '{unit}' for value dataset "
-                              f"in '{self.name}'; setting unit as 'dimensionless'")
+                warnings.warn(
+                    f"Unrecognized unit '{unit}' for value dataset "
+                    f"in '{self.name}'; setting unit as 'dimensionless'"
+                )
                 return sc.units.one
         return None

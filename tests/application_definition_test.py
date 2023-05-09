@@ -31,7 +31,8 @@ def I_of_Q():
         dims=['Q'],
         values=[0.1, 0.2, 0.1, 0.4],
         variances=[1.0, 4.0, 9.0, 4.0],  # values chosen for exact sqrt
-        unit='1/counts')
+        unit='1/counts',
+    )
     da = sc.DataArray(data=data)
     da.coords['Q'] = sc.linspace('Q', 0, 1, num=5, unit='1/angstrom')
     da.coords['Q'].variances = sc.array(dims=['Q'], values=[1, 1, 4, 4, 1]).values
@@ -55,7 +56,8 @@ def test_setitem_SASdata_raises_if_interpretation_of_variances_not_specified(nxr
         dims=['Q'],
         values=[0.1, 0.2, 0.1, 0.4],
         variances=[1.0, 4.0, 9.0, 4.0],  # values chosen for exact sqrt
-        unit='1/counts')
+        unit='1/counts',
+    )
     da = sc.DataArray(data=data)
     da.coords['Q'] = sc.linspace('Q', 0, 1, num=5, unit='1/angstrom')
     da.coords['Q'].variances = sc.array(dims=['Q'], values=[1, 1, 4, 4, 1]).values
@@ -68,7 +70,8 @@ def test_load_SASdata(nxroot):
     entry = nxroot['sasentry']
     da = sc.DataArray(
         sc.array(dims=['Q'], values=[1, 2, 3], unit=''),
-        coords={'Q': sc.array(dims=['Q'], values=[1, 2, 3, 4], unit='1/angstrom')})
+        coords={'Q': sc.array(dims=['Q'], values=[1, 2, 3, 4], unit='1/angstrom')},
+    )
     group = entry.create_class('sasdata', snx.NXdata)
     group._group.attrs['canSAS_class'] = 'SASdata'
     group._group.attrs['signal'] = 'I'
@@ -83,13 +86,12 @@ def test_load_SASdata(nxroot):
 def test_load_SAStransmission_spectrum(nxroot):
     nxroot['sasentry'] = nxcansas.SASentry(title='A test', run=12345)
     entry = nxroot['sasentry']
-    spectrum = sc.DataArray(sc.array(dims=['lambda'], values=[1, 2, 3], unit='counts'),
-                            coords={
-                                'lambda':
-                                sc.array(dims=['lambda'],
-                                         values=[1, 2, 3, 4],
-                                         unit='angstrom')
-                            })
+    spectrum = sc.DataArray(
+        sc.array(dims=['lambda'], values=[1, 2, 3], unit='counts'),
+        coords={
+            'lambda': sc.array(dims=['lambda'], values=[1, 2, 3, 4], unit='angstrom')
+        },
+    )
     group = entry.create_class('sastransmission_spectrum', snx.NXdata)
     group._group.attrs['canSAS_class'] = 'SAStransmission_spectrum'
     group._group.attrs['signal'] = 'T'

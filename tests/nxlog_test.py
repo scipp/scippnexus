@@ -36,13 +36,15 @@ def nxroot():
 
 
 def test_nxobject_log(h5root):
-    da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
-                      coords={
-                          'time':
-                          sc.epoch(unit='ns') +
-                          sc.array(dims=['time'], unit='s', values=[4.4, 5.5, 6.6]).to(
-                              unit='ns', dtype='int64')
-                      })
+    da = sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
+        coords={
+            'time': sc.epoch(unit='ns')
+            + sc.array(dims=['time'], unit='s', values=[4.4, 5.5, 6.6]).to(
+                unit='ns', dtype='int64'
+            )
+        },
+    )
     log = snx.create_class(h5root, 'log', NXlog)
     snx.create_field(log, 'value', da.data)
     snx.create_field(log, 'time', da.coords['time'] - sc.epoch(unit='ns'))
@@ -52,7 +54,8 @@ def test_nxobject_log(h5root):
 
 def test_nxlog_with_missing_value_triggers_fallback(nxroot):
     time = sc.epoch(unit='ns') + sc.array(
-        dims=['time'], unit='s', values=[4.4, 5.5, 6.6]).to(unit='ns', dtype='int64')
+        dims=['time'], unit='s', values=[4.4, 5.5, 6.6]
+    ).to(unit='ns', dtype='int64')
     log = nxroot['entry'].create_class('log', NXlog)
     log['time'] = time - sc.epoch(unit='ns')
     loaded = log[()]
@@ -65,10 +68,12 @@ def test_nxlog_length_1(h5root):
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1]),
         coords={
-            'time':
-            sc.epoch(unit='ns') +
-            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
-        })
+            'time': sc.epoch(unit='ns')
+            + sc.array(dims=['time'], unit='s', values=[4.4]).to(
+                unit='ns', dtype='int64'
+            )
+        },
+    )
     log = nxroot.create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
@@ -86,10 +91,12 @@ def test_nxlog_length_1_two_dims_with_time_defaults_inner_dim_name(nxroot):
     da = sc.DataArray(
         sc.array(dims=['time', 'ignored'], values=[[1.1]]),
         coords={
-            'time':
-            sc.epoch(unit='ns') +
-            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
-        })
+            'time': sc.epoch(unit='ns')
+            + sc.array(dims=['time'], unit='s', values=[4.4]).to(
+                unit='ns', dtype='int64'
+            )
+        },
+    )
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
@@ -100,40 +107,50 @@ def test_nxlog_axes_replaces_time_dim(nxroot):
     da = sc.DataArray(
         sc.array(dims=['time', 'ignored'], values=[[1.1]]),
         coords={
-            'time':
-            sc.epoch(unit='ns') +
-            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
-        })
+            'time': sc.epoch(unit='ns')
+            + sc.array(dims=['time'], unit='s', values=[4.4]).to(
+                unit='ns', dtype='int64'
+            )
+        },
+    )
     log = nxroot['entry'].create_class('log', NXlog)
     log._group.attrs['axes'] = ['yy', 'xx']
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
-    expected = sc.DataArray(sc.array(dims=['yy', 'xx'], values=[[1.1]]),
-                            coords={'time': da.coords['time'].squeeze()})
+    expected = sc.DataArray(
+        sc.array(dims=['yy', 'xx'], values=[[1.1]]),
+        coords={'time': da.coords['time'].squeeze()},
+    )
     assert sc.identical(log[...], expected)
 
 
 def test_nxlog_three_dims_with_time_of_length_1(nxroot):
     da = sc.DataArray(
-        sc.array(dims=['time', 'a', 'b'], values=np.arange(9.).reshape(1, 3, 3)),
+        sc.array(dims=['time', 'a', 'b'], values=np.arange(9.0).reshape(1, 3, 3)),
         coords={
-            'time':
-            sc.epoch(unit='ns') +
-            sc.array(dims=['time'], unit='s', values=[4.4]).to(unit='ns', dtype='int64')
-        })
+            'time': sc.epoch(unit='ns')
+            + sc.array(dims=['time'], unit='s', values=[4.4]).to(
+                unit='ns', dtype='int64'
+            )
+        },
+    )
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time'] - sc.epoch(unit='ns')
     loaded = log[...]
     assert_identical(
         loaded.data,
-        sc.array(dims=['time', 'dim_1', 'dim_2'], values=np.arange(9.).reshape(1, 3,
-                                                                               3)))
+        sc.array(
+            dims=['time', 'dim_1', 'dim_2'], values=np.arange(9.0).reshape(1, 3, 3)
+        ),
+    )
 
 
 def test_nxlog_with_shape_0(nxroot):
-    da = sc.DataArray(sc.ones(dims=['time', 'ignored'], shape=(0, 1)),
-                      coords={'time': sc.ones(dims=['time'], shape=(0, ), unit='s')})
+    da = sc.DataArray(
+        sc.ones(dims=['time', 'ignored'], shape=(0, 1)),
+        coords={'time': sc.ones(dims=['time'], shape=(0,), unit='s')},
+    )
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = da.data
     log['time'] = da.coords['time']
@@ -142,14 +159,14 @@ def test_nxlog_with_shape_0(nxroot):
 
 
 def test_log_with_connection_status_raises_with_positional_indexing(h5root):
-    da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
-                      coords={
-                          'time':
-                          sc.array(dims=['time'],
-                                   unit='s',
-                                   values=[44, 55, 66],
-                                   dtype='int64')
-                      })
+    da = sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
+        coords={
+            'time': sc.array(
+                dims=['time'], unit='s', values=[44, 55, 66], dtype='int64'
+            )
+        },
+    )
     log = snx.create_class(h5root, 'log', NXlog)
     snx.create_field(log, 'value', da.data)
     snx.create_field(log, 'time', da.coords['time'])
@@ -167,15 +184,16 @@ def test_log_with_connection_status_raises_with_positional_indexing(h5root):
 
 @pytest.mark.parametrize('sublog_length', [0, 1, 2])
 def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(
-        h5root, sublog_length):
-    da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
-                      coords={
-                          'time':
-                          sc.array(dims=['time'],
-                                   unit='s',
-                                   values=[44, 55, 66],
-                                   dtype='int64')
-                      })
+    h5root, sublog_length
+):
+    da = sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
+        coords={
+            'time': sc.array(
+                dims=['time'], unit='s', values=[44, 55, 66], dtype='int64'
+            )
+        },
+    )
     log = snx.create_class(h5root, 'log', NXlog)
     snx.create_field(log, 'value', da.data)
     snx.create_field(log, 'time', da.coords['time'])
@@ -185,21 +203,22 @@ def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(
     log = snx.Group(log, definitions=snx.base_definitions())
     loaded = log[()]
     da.coords['time'] = sc.epoch(unit='s') + da.coords['time']
-    connection_status.coords['time'] = sc.epoch(
-        unit='s') + connection_status.coords['time']
+    connection_status.coords['time'] = (
+        sc.epoch(unit='s') + connection_status.coords['time']
+    )
     assert_identical(loaded['value'], da)
     assert_identical(loaded['connection_status'], connection_status)
 
 
 def test_log_with_alarm_loaded_as_datagroup_containing_data_arrays(h5root):
-    da = sc.DataArray(sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
-                      coords={
-                          'time':
-                          sc.array(dims=['time'],
-                                   unit='s',
-                                   values=[44, 55, 66],
-                                   dtype='int64')
-                      })
+    da = sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
+        coords={
+            'time': sc.array(
+                dims=['time'], unit='s', values=[44, 55, 66], dtype='int64'
+            )
+        },
+    )
     log = snx.create_class(h5root, 'log', NXlog)
     snx.create_field(log, 'value', da.data)
     snx.create_field(log, 'time', da.coords['time'])

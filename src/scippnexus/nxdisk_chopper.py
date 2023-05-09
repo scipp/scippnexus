@@ -5,5 +5,4 @@ from .leaf import Leaf
 
 
 class NXdisk_chopper(Leaf):
-    """Disk chopper information, can be read as a dict.
-    """
+    """Disk chopper information, can be read as a dict."""
