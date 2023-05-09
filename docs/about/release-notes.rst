@@ -42,20 +42,6 @@ v23.04.1
 
 * ``scippnexus.v2``: Fix event selection of length 0 `#137 <https://github.com/scipp/scippnexus/pull/137>`_.
 
-v23.05.0
---------
-
-Features
-~~~~~~~~
-
-* ``scippnexus.v2``: Support NXlog with "sublogs" such as connection_status and alarm `#138 <https://github.com/scipp/scippnexus/pull/138>`_.
-* ``scippnexus.v2``: Fall back to dim labels from HDF5 if NeXus does not define labels in NXdata and related classes `#139 <https://github.com/scipp/scippnexus/pull/139>`_.
-
-v23.04.1
---------
-
-* ``scippnexus.v2``: Fix event selection of length 0 `#137 <https://github.com/scipp/scippnexus/pull/137>`_.
-
 v23.04.0
 --------
 
