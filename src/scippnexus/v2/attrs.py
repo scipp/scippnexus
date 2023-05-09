@@ -8,7 +8,6 @@ from .._hdf5_nexus import _cset_to_encoding, _ensure_str
 
 
 class Attrs(Mapping):
-
     def __init__(self, attrs: Mapping):
         self._base_attrs = attrs
         self._attrs = dict(attrs) if attrs else dict()

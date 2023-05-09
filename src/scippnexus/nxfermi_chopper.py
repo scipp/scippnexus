@@ -5,5 +5,4 @@ from .leaf import Leaf
 
 
 class NXfermi_chopper(Leaf):
-    """Fermi chopper information, can be read as a dict.
-    """
+    """Fermi chopper information, can be read as a dict."""

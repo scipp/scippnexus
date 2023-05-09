@@ -8,7 +8,6 @@ from .nxobject import Field
 
 
 class NXmonitor(NXdetector):
-
     @property
     def _event_grouping(self) -> Dict[str, Union[str, Field]]:
         # Unlike NXdetector, NXmonitor does not group by 'detector_number'. We pass
@@ -17,5 +16,5 @@ class NXmonitor(NXdetector):
         # binning present in the file (in NXevent_data) is preserved.
         return {
             'grouping_key': 'event_time_zero',
-            'grouping': self.events.get('event_time_zero')
+            'grouping': self.events.get('event_time_zero'),
         }

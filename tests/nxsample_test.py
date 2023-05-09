@@ -25,19 +25,26 @@ def test_ub_matrix_loaded_as_linear_transform_with_inverse_angstrom_unit(nxroot)
     assert_identical(
         loaded,
         sc.DataGroup(
-            ub_matrix=spatial.linear_transform(value=matrix, unit='1/angstrom')))
+            ub_matrix=spatial.linear_transform(value=matrix, unit='1/angstrom')
+        ),
+    )
 
 
 def test_ub_matrix_array_can_be_loaded(nxroot):
     sample = nxroot.create_class('data1', snx.NXsample)
-    matrices = np.array([[[1, 2, 3], [4, 5, 6], [7, 8, 9]],
-                         [[2, 3, 4], [5, 6, 7], [8, 9, 10]]])
+    matrices = np.array(
+        [[[1, 2, 3], [4, 5, 6], [7, 8, 9]], [[2, 3, 4], [5, 6, 7], [8, 9, 10]]]
+    )
     sample['ub_matrix'] = matrices
     loaded = sample[()]
     assert_identical(
         loaded,
-        sc.DataGroup(ub_matrix=spatial.linear_transforms(
-            dims=('dim_0', ), values=matrices, unit='1/angstrom')))
+        sc.DataGroup(
+            ub_matrix=spatial.linear_transforms(
+                dims=('dim_0',), values=matrices, unit='1/angstrom'
+            )
+        ),
+    )
 
 
 def test_orientation_matrix_loaded_as_linear_transform_with_dimensionless_unit(nxroot):
@@ -48,4 +55,6 @@ def test_orientation_matrix_loaded_as_linear_transform_with_dimensionless_unit(n
     assert_identical(
         loaded,
         sc.DataGroup(
-            orientation_matrix=spatial.linear_transform(value=matrix, unit='')))
+            orientation_matrix=spatial.linear_transform(value=matrix, unit='')
+        ),
+    )

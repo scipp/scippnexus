@@ -13,14 +13,15 @@ _matrix_units = dict(zip(['orientation_matrix', 'ub_matrix'], ['one', '1/Angstro
 
 
 class NXsample(Leaf):
-    """Sample information, can be read as a dict.
-    """
+    """Sample information, can be read as a dict."""
 
-    def _getitem(self,
-                 select: ScippIndex) -> Dict[str, Union[sc.Variable, sc.DataArray]]:
+    def _getitem(
+        self, select: ScippIndex
+    ) -> Dict[str, Union[sc.Variable, sc.DataArray]]:
         content = super()._getitem(select)
         for key in _matrix_units:
             if (item := content.get(key)) is not None:
-                content[key] = linear_transform(value=item.values,
-                                                unit=_matrix_units[key])
+                content[key] = linear_transform(
+                    value=item.values, unit=_matrix_units[key]
+                )
         return content

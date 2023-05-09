@@ -21,9 +21,9 @@ def h5root():
 
 def create_detector(group):
     data = sc.array(dims=['xx', 'yy'], values=[[1.1, 2.2], [3.3, 4.4]])
-    detector_numbers = sc.array(dims=['xx', 'yy'],
-                                unit=None,
-                                values=np.array([[1, 2], [3, 4]]))
+    detector_numbers = sc.array(
+        dims=['xx', 'yy'], unit=None, values=np.array([[1, 2], [3, 4]])
+    )
     detector = snx.create_class(group, 'detector_0', snx.NXdetector)
     snx.create_field(detector, 'detector_number', detector_numbers)
     snx.create_field(detector, 'data', data)
@@ -32,8 +32,9 @@ def create_detector(group):
 
 def test_Transformation_with_single_value(h5root):
     detector = create_detector(h5root)
-    snx.create_field(detector, 'depends_on',
-                     sc.scalar('/detector_0/transformations/t1'))
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     value = sc.scalar(6.5, unit='mm')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
@@ -58,8 +59,9 @@ def test_Transformation_with_single_value(h5root):
 
 def test_time_independent_Transformation_with_length_0(h5root):
     detector = create_detector(h5root)
-    snx.create_field(detector, 'depends_on',
-                     sc.scalar('/detector_0/transformations/t1'))
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     value = sc.array(dims=['dim_0'], values=[], unit='mm')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
@@ -99,7 +101,8 @@ def test_depends_on_relative_path_unchanged(h5root):
 
 
 def test_depends_on_attr_absolute_path_to_sibling_group_resolved_to_relative_path(
-        h5root):
+    h5root,
+):
     det1 = snx.create_class(h5root, 'det1', NXtransformations)
     transformations = snx.create_class(det1, 'transformations', NXtransformations)
     t1 = snx.create_field(transformations, 't1', sc.scalar(0.1, unit='cm'))
@@ -128,8 +131,9 @@ def test_depends_on_attr_relative_path_unchanged(h5root):
 
 def test_chain_with_single_values_and_different_unit(h5root):
     detector = create_detector(h5root)
-    snx.create_field(detector, 'depends_on',
-                     sc.scalar('/detector_0/transformations/t1'))
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     value = sc.scalar(6.5, unit='mm')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
@@ -147,8 +151,9 @@ def test_chain_with_single_values_and_different_unit(h5root):
     value2.attrs['vector'] = vector.value
 
     t1 = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
-    t2 = sc.spatial.translations(dims=t.dims, values=t.values,
-                                 unit=t.unit).to(unit='cm')
+    t2 = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit).to(
+        unit='cm'
+    )
     detector = make_group(h5root['detector_0'])
     loaded = detector[()]
     depends_on = loaded.coords['depends_on']
@@ -162,12 +167,14 @@ def test_chain_with_single_values_and_different_unit(h5root):
 
 def test_Transformation_with_multiple_values(h5root):
     detector = create_detector(h5root)
-    snx.create_field(detector, 'depends_on',
-                     sc.scalar('/detector_0/transformations/t1'))
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
-        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')})
+        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')},
+    )
     log.coords['time'] = sc.epoch(unit='ns') + log.coords['time'].to(unit='ns')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
     vector = sc.vector(value=[0, 0, 1])
@@ -192,12 +199,14 @@ def test_Transformation_with_multiple_values(h5root):
 
 def test_chain_with_multiple_values(h5root):
     detector = create_detector(h5root)
-    snx.create_field(detector, 'depends_on',
-                     sc.scalar('/detector_0/transformations/t1'))
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
-        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')})
+        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')},
+    )
     log.coords['time'] = sc.epoch(unit='ns') + log.coords['time'].to(unit='ns')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
     vector = sc.vector(value=[0, 0, 1])
@@ -231,14 +240,16 @@ def test_chain_with_multiple_values(h5root):
 
 def test_chain_with_multiple_values_and_different_time_unit(h5root):
     detector = create_detector(h5root)
-    snx.create_field(detector, 'depends_on',
-                     sc.scalar('/detector_0/transformations/t1'))
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     # Making sure to not use nanoseconds since that is used internally and may thus
     # mask bugs.
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
-        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')})
+        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')},
+    )
     log.coords['time'] = sc.epoch(unit='us') + log.coords['time'].to(unit='us')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
     vector = sc.vector(value=[0, 0, 1])
@@ -253,8 +264,9 @@ def test_chain_with_multiple_values_and_different_time_unit(h5root):
     value1.attrs['offset_units'] = str(offset.unit)
     value1.attrs['vector'] = vector.value
     value2 = snx.create_class(transformations, 't2', snx.NXlog)
-    snx.create_field(value2, 'time',
-                     log.coords['time'].to(unit='ms') - sc.epoch(unit='ms'))
+    snx.create_field(
+        value2, 'time', log.coords['time'].to(unit='ms') - sc.epoch(unit='ms')
+    )
     snx.create_field(value2, 'value', log.data)
     value2.attrs['depends_on'] = '.'
     value2.attrs['transformation_type'] = 'translation'
@@ -277,14 +289,17 @@ def test_chain_with_multiple_values_and_different_time_unit(h5root):
 
 
 def test_broken_time_dependent_transformation_returns_datagroup_but_sets_up_depends_on(
-        h5root):
+    h5root,
+):
     detector = create_detector(h5root)
-    snx.create_field(detector, 'depends_on',
-                     sc.scalar('/detector_0/transformations/t1'))
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
-        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')})
+        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')},
+    )
     log.coords['time'] = sc.epoch(unit='ns') + log.coords['time'].to(unit='ns')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
     vector = sc.vector(value=[0, 0, 1])
@@ -314,8 +329,9 @@ def test_broken_time_dependent_transformation_returns_datagroup_but_sets_up_depe
     assert_identical(loaded.coords['transformations'].value['t1'], t1)
 
 
-def write_translation(group, name: str, value: sc.Variable, offset: sc.Variable,
-                      vector: sc.Variable) -> None:
+def write_translation(
+    group, name: str, value: sc.Variable, offset: sc.Variable, vector: sc.Variable
+) -> None:
     dset = snx.create_field(group, name, value)
     dset.attrs['transformation_type'] = 'translation'
     dset.attrs['offset'] = offset.values
@@ -328,8 +344,9 @@ def test_nxtransformations_group_single_item(h5root):
     offset = sc.spatial.translation(value=[6, 2, 6], unit='mm')
     vector = sc.vector(value=[0, 1, 1])
     t = value * vector
-    expected = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                offset)
+    expected = (
+        sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
+    )
 
     transformations = snx.create_class(h5root, 'transformations', NXtransformations)
     write_translation(transformations, 't1', value, offset, vector)
@@ -347,14 +364,16 @@ def test_nxtransformations_group_two_independent_items(h5root):
     vector = sc.vector(value=[0, 1, 1])
     t = value * vector
     write_translation(transformations, 't1', value, offset, vector)
-    expected1 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 offset)
+    expected1 = (
+        sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
+    )
 
     value = value * 0.1
     t = value * vector
     write_translation(transformations, 't2', value, offset, vector)
-    expected2 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 offset)
+    expected2 = (
+        sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
+    )
 
     loaded = make_group(h5root)['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
@@ -370,15 +389,17 @@ def test_nxtransformations_group_single_chain(h5root):
     vector = sc.vector(value=[0, 1, 1])
     t = value * vector
     write_translation(transformations, 't1', value, offset, vector)
-    expected1 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 offset)
+    expected1 = (
+        sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
+    )
 
     value = value * 0.1
     t = value * vector
     write_translation(transformations, 't2', value, offset, vector)
     transformations['t2'].attrs['depends_on'] = 't1'
-    expected2 = (sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) *
-                 offset)
+    expected2 = (
+        sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
+    )
 
     loaded = make_group(h5root)['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
@@ -391,7 +412,8 @@ def test_slice_transformations(h5root):
     transformations = snx.create_class(h5root, 'transformations', NXtransformations)
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2, 3.3], unit='m'),
-        coords={'time': sc.array(dims=['time'], values=[11, 22, 33], unit='s')})
+        coords={'time': sc.array(dims=['time'], values=[11, 22, 33], unit='s')},
+    )
     log.coords['time'] = sc.epoch(unit='ns') + log.coords['time'].to(unit='ns')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
     vector = sc.vector(value=[0, 0, 1])
@@ -408,4 +430,5 @@ def test_slice_transformations(h5root):
     expected = t * offset
 
     assert sc.identical(
-        make_group(h5root)['transformations']['time', 1:3]['t1'], expected['time', 1:3])
+        make_group(h5root)['transformations']['time', 1:3]['t1'], expected['time', 1:3]
+    )

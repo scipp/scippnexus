@@ -8,11 +8,13 @@ import scipp as sc
 from .nxobject import NexusStructureError, NXobject
 
 
-def _parse(*,
-           vertices: sc.Variable,
-           cylinders: sc.Variable,
-           detector_number: Optional[sc.Variable] = None,
-           parent_detector_number: Optional[sc.Variable] = None) -> sc.Variable:
+def _parse(
+    *,
+    vertices: sc.Variable,
+    cylinders: sc.Variable,
+    detector_number: Optional[sc.Variable] = None,
+    parent_detector_number: Optional[sc.Variable] = None
+) -> sc.Variable:
     face1_center = cylinders['vertex_index', 0]
     face1_edge = cylinders['vertex_index', 1]
     face2_center = cylinders['vertex_index', 2]
@@ -27,19 +29,20 @@ def _parse(*,
     if parent_detector_number is None:
         raise NexusStructureError(
             "`detector_number` not given, but "
-            "NXcylindrical_geometry contains mapping to `detector_number`.")
+            "NXcylindrical_geometry contains mapping to `detector_number`."
+        )
     # detector_number gives indices into cylinders, the naming in the NeXus
     # standard appears to be misleading
     if parent_detector_number.values.size != detector_number.values.size:
         raise NexusStructureError(
             "Number of detector numbers in NXcylindrical_geometry "
-            "does not match the one given by the parent.")
+            "does not match the one given by the parent."
+        )
     detecting_cylinders = ds['cylinder', detector_number.values]
     # One cylinder per detector
-    begin = sc.arange('dummy',
-                      parent_detector_number.values.size,
-                      unit=None,
-                      dtype='int64')
+    begin = sc.arange(
+        'dummy', parent_detector_number.values.size, unit=None, dtype='int64'
+    )
     end = begin + sc.index(1)
     shape = sc.bins(begin=begin, end=end, dim='cylinder', data=detecting_cylinders)
     return shape.fold(dim='dummy', sizes=parent_detector_number.sizes)
@@ -47,9 +50,9 @@ def _parse(*,
 
 class NXcylindrical_geometry(NXobject):
     _dims = {
-        'vertices': ('vertex', ),
-        'detector_number': ('detector_number', ),
-        'cylinders': ('cylinder', 'vertex_index')
+        'vertices': ('vertex',),
+        'detector_number': ('detector_number',),
+        'cylinders': ('cylinder', 'vertex_index'),
     }
 
     def _get_field_dims(self, name: str) -> Union[None, Tuple[str]]:
@@ -60,6 +63,7 @@ class NXcylindrical_geometry(NXobject):
             return sc.DType.vector3
         return None
 
-    def load_as_array(self,
-                      detector_number: Optional[sc.Variable] = None) -> sc.Variable:
+    def load_as_array(
+        self, detector_number: Optional[sc.Variable] = None
+    ) -> sc.Variable:
         return _parse(**self[()], parent_detector_number=detector_number)

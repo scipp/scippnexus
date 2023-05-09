@@ -19,8 +19,9 @@ def test_vertices_loaded_as_vector3(group):
     values = [[1, 2, 3], [4, 5, 6]]
     shape['vertices'] = sc.array(dims=['ignored', 'comp'], values=values, unit='mm')
     loaded = shape[()]
-    assert sc.identical(loaded['vertices'],
-                        sc.vectors(dims=['vertex'], values=values, unit='mm'))
+    assert sc.identical(
+        loaded['vertices'], sc.vectors(dims=['vertex'], values=values, unit='mm')
+    )
 
 
 def test_field_properties(group):
@@ -30,10 +31,10 @@ def test_field_properties(group):
     shape['winding_order'] = sc.array(dims=['ignored'], values=[], unit=None)
     shape['faces'] = sc.array(dims=['ignored'], values=[], unit=None)
     loaded = shape[()]
-    assert loaded['vertices'].dims == ('vertex', )
-    assert loaded['winding_order'].dims == ('winding_order', )
+    assert loaded['vertices'].dims == ('vertex',)
+    assert loaded['winding_order'].dims == ('winding_order',)
     assert loaded['winding_order'].unit is None
-    assert loaded['faces'].dims == ('face', )
+    assert loaded['faces'].dims == ('face',)
     assert loaded['faces'].unit is None
 
 
@@ -57,9 +58,9 @@ def test_off_to_shape_raises_if_detector_faces_but_not_detector_numbers_given(gr
     off['faces'] = sc.array(dims=['_'], values=[0, 3], unit=None)
     det_num1 = 1
     det_num2 = 3
-    off['detector_faces'] = sc.array(dims=['_', 'dummy'],
-                                     values=[[0, det_num2], [1, det_num1]],
-                                     unit=None)
+    off['detector_faces'] = sc.array(
+        dims=['_', 'dummy'], values=[[0, det_num2], [1, det_num1]], unit=None
+    )
     loaded = off[()]
     with pytest.raises(snx.NexusStructureError):
         off_to_shape(**loaded)
@@ -72,9 +73,9 @@ def test_off_to_shape_with_single_detector_yields_1d_shape(group):
     off['winding_order'] = sc.array(dims=['_'], values=[0, 1, 2, 0, 2, 1], unit=None)
     off['faces'] = sc.array(dims=['_'], values=[0, 3], unit=None)
     det_num1 = 7
-    off['detector_faces'] = sc.array(dims=['_', 'dummy'],
-                                     values=[[0, det_num1], [1, det_num1]],
-                                     unit=None)
+    off['detector_faces'] = sc.array(
+        dims=['_', 'dummy'], values=[[0, det_num1], [1, det_num1]], unit=None
+    )
     loaded = off[()]
 
     detector_number = sc.index(1)  # not in detector_faces => no faces
@@ -87,8 +88,9 @@ def test_off_to_shape_with_single_detector_yields_1d_shape(group):
 
     detector_number = sc.array(dims=['detector_number'], values=[det_num1], unit=None)
     shape = off_to_shape(**loaded, detector_number=detector_number)
-    assert sc.identical(shape.bins.size(),
-                        sc.array(dims=['detector_number'], values=[2], unit=None))
+    assert sc.identical(
+        shape.bins.size(), sc.array(dims=['detector_number'], values=[2], unit=None)
+    )
 
 
 def test_off_to_shape_with_two_detectors_yields_1d_shape(group):
@@ -99,22 +101,25 @@ def test_off_to_shape_with_two_detectors_yields_1d_shape(group):
     off['faces'] = sc.array(dims=['_'], values=[0, 3], unit=None)
     det_num1 = 1
     det_num2 = 3
-    off['detector_faces'] = sc.array(dims=['_', 'dummy'],
-                                     values=[[0, det_num2], [1, det_num1]],
-                                     unit=None)
+    off['detector_faces'] = sc.array(
+        dims=['_', 'dummy'], values=[[0, det_num2], [1, det_num1]], unit=None
+    )
     loaded = off[()]
-    detector_number = sc.array(dims=['detector_number'],
-                               values=[det_num1, det_num2],
-                               unit=None)
+    detector_number = sc.array(
+        dims=['detector_number'], values=[det_num1, det_num2], unit=None
+    )
     shape = off_to_shape(**loaded, detector_number=detector_number)
     assert shape.sizes == {'detector_number': 2}
-    assert sc.identical(shape.bins.size(),
-                        sc.array(dims=['detector_number'], values=[1, 1], unit=None))
+    assert sc.identical(
+        shape.bins.size(), sc.array(dims=['detector_number'], values=[1, 1], unit=None)
+    )
     assert sc.identical(
         shape[0].value,
-        sc.vectors(dims=['face', 'vertex'], values=[values[[0, 2, 1]]], unit='m'))
-    assert sc.identical(shape[1].value,
-                        sc.vectors(dims=['face', 'vertex'], values=[values], unit='m'))
+        sc.vectors(dims=['face', 'vertex'], values=[values[[0, 2, 1]]], unit='m'),
+    )
+    assert sc.identical(
+        shape[1].value, sc.vectors(dims=['face', 'vertex'], values=[values], unit='m')
+    )
 
 
 def test_off_to_shape_uses_order_of_provided_detector_number_param(group):
@@ -125,14 +130,16 @@ def test_off_to_shape_uses_order_of_provided_detector_number_param(group):
     off['faces'] = sc.array(dims=['_'], values=[0, 3], unit=None)
     det_num1 = 1
     det_num2 = 3
-    off['detector_faces'] = sc.array(dims=['_', 'dummy'],
-                                     values=[[0, det_num2], [1, det_num1]],
-                                     unit=None)
+    off['detector_faces'] = sc.array(
+        dims=['_', 'dummy'], values=[[0, det_num2], [1, det_num1]], unit=None
+    )
     loaded = off[()]
     detector_number = sc.array(dims=['detector_number'], values=[3, 1], unit=None)
     shape = off_to_shape(**loaded, detector_number=detector_number)
-    assert sc.identical(shape[0].value,
-                        sc.vectors(dims=['face', 'vertex'], values=[values], unit='m'))
+    assert sc.identical(
+        shape[0].value, sc.vectors(dims=['face', 'vertex'], values=[values], unit='m')
+    )
     assert sc.identical(
         shape[1].value,
-        sc.vectors(dims=['face', 'vertex'], values=[values[[0, 2, 1]]], unit='m'))
+        sc.vectors(dims=['face', 'vertex'], values=[values[[0, 2, 1]]], unit='m'),
+    )

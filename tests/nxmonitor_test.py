@@ -28,7 +28,8 @@ def test_dense_monitor(h5root):
     monitor = snx.create_class(h5root, 'monitor', snx.NXmonitor)
     da = sc.DataArray(
         sc.array(dims=['time_of_flight'], values=[1.0]),
-        coords={'time_of_flight': sc.array(dims=['time_of_flight'], values=[1.0])})
+        coords={'time_of_flight': sc.array(dims=['time_of_flight'], values=[1.0])},
+    )
     data = snx.create_field(monitor, 'data', da.data)
     data.attrs['axes'] = 'time_of_flight'
     snx.create_field(monitor, 'time_of_flight', da.coords['time_of_flight'])
@@ -37,39 +38,42 @@ def test_dense_monitor(h5root):
 
 
 def create_event_data_no_ids(group):
-    group.create_field('event_time_offset',
-                       sc.array(dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]))
-    group.create_field('event_time_zero',
-                       sc.array(dims=[''], unit='s', values=[1, 2, 3, 4]))
-    group.create_field('event_index', sc.array(dims=[''],
-                                               unit=None,
-                                               values=[0, 3, 3, 5]))
+    group.create_field(
+        'event_time_offset',
+        sc.array(dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]),
+    )
+    group.create_field(
+        'event_time_zero', sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
+    )
+    group.create_field(
+        'event_index', sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
+    )
 
 
 def test_loads_event_data_in_current_group_as_data_array(group):
     monitor = group.create_class('monitor1', snx.NXmonitor)
     create_event_data_no_ids(monitor)
-    assert monitor.dims == ('event_time_zero', )
-    assert monitor.shape == (4, )
+    assert monitor.dims == ('event_time_zero',)
+    assert monitor.shape == (4,)
     loaded = monitor[...]
     assert_identical(
         loaded.bins.size().data,
-        sc.array(dims=['event_time_zero'],
-                 unit=None,
-                 dtype='int64',
-                 values=[3, 0, 2, 1]))
+        sc.array(
+            dims=['event_time_zero'], unit=None, dtype='int64', values=[3, 0, 2, 1]
+        ),
+    )
 
 
 def test_loads_event_data_in_child_group_as_data_array(group):
     monitor = group.create_class('monitor1', snx.NXmonitor)
     create_event_data_no_ids(monitor.create_class('events', snx.NXevent_data))
-    assert monitor.dims == ('event_time_zero', )
-    assert monitor.shape == (4, )
+    assert monitor.dims == ('event_time_zero',)
+    assert monitor.shape == (4,)
     loaded = monitor[...]
     assert isinstance(loaded, sc.DataArray)
     assert sc.identical(
         loaded.bins.size().data,
-        sc.array(dims=['event_time_zero'],
-                 unit=None,
-                 dtype='int64',
-                 values=[3, 0, 2, 1]))
+        sc.array(
+            dims=['event_time_zero'], unit=None, dtype='int64', values=[3, 0, 2, 1]
+        ),
+    )

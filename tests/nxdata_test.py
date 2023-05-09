@@ -36,7 +36,8 @@ def test_without_coords(h5root):
 
 def test_with_coords_matching_axis_names(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx'] = da.data['yy', 0]
     data = snx.create_class(h5root, 'data1', snx.NXdata)
     data.attrs['axes'] = da.dims
@@ -49,7 +50,8 @@ def test_with_coords_matching_axis_names(h5root):
 
 def test_guessed_dim_for_coord_not_matching_axis_name(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx2'] = da.data['yy', 1]
     data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
@@ -62,7 +64,8 @@ def test_guessed_dim_for_coord_not_matching_axis_name(h5root):
 
 def test_multiple_coords(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
@@ -96,7 +99,8 @@ def test_slice_of_1d(h5root):
 
 def test_slice_of_multiple_coords(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
@@ -113,7 +117,8 @@ def test_slice_of_multiple_coords(h5root):
 
 def test_guessed_dim_for_2d_coord_not_matching_axis_name(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx2'] = da.data
     data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
@@ -126,7 +131,8 @@ def test_guessed_dim_for_2d_coord_not_matching_axis_name(h5root):
 
 def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    )
     da.coords['yy2'] = da.data['xx', 0]
     data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
@@ -143,7 +149,8 @@ def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(h5root):
 
 def test_guesses_transposed_dims_for_2d_coord(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx2'] = sc.transpose(da.data)
     data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
@@ -197,7 +204,8 @@ def test_transpose_indices_attribute_for_coord(h5root):
 
 def test_auxiliary_signal_causes_load_as_dataset(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx'] = da.data['xx', 0]
     data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
@@ -212,12 +220,13 @@ def test_auxiliary_signal_causes_load_as_dataset(h5root):
 
 
 def test_NXlog_data_is_loaded_as_time_dependent_data_array(nxroot):
-    da = sc.DataArray(data=sc.array(dims=['time'], unit='K', values=[1, 2, 3]),
-                      coords={
-                          'time':
-                          sc.epoch(unit='s') +
-                          sc.array(dims=['time'], unit='s', values=[1, 2, 3])
-                      })
+    da = sc.DataArray(
+        data=sc.array(dims=['time'], unit='K', values=[1, 2, 3]),
+        coords={
+            'time': sc.epoch(unit='s')
+            + sc.array(dims=['time'], unit='s', values=[1, 2, 3])
+        },
+    )
     data = nxroot.create_class('data1', NXdata)
     log = data.create_class('data', NXlog)
     log['time'] = da.coords['time']
@@ -232,7 +241,8 @@ def test_NXlog_data_is_loaded_as_time_dependent_data_array(nxroot):
 def test_NXlog_with_nontime_time_axis_can_be_loaded(nxroot, time_unit):
     da = sc.DataArray(
         data=sc.array(dims=['time'], unit='K', values=[1, 2, 3]),
-        coords={'time': sc.array(dims=['time'], unit=time_unit, values=[1, 2, 3])})
+        coords={'time': sc.array(dims=['time'], unit=time_unit, values=[1, 2, 3])},
+    )
     data = nxroot.create_class('data1', NXdata)
     log = data.create_class('data', NXlog)
     log['time'] = da.coords['time']
@@ -244,7 +254,8 @@ def test_NXlog_with_nontime_time_axis_can_be_loaded(nxroot, time_unit):
 
 def test_field_dims_match_NXdata_dims(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
@@ -264,7 +275,8 @@ def test_field_dims_match_NXdata_dims(h5root):
 
 def test_field_dims_match_NXdata_dims_when_selected_via_class_name(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]
@@ -278,14 +290,15 @@ def test_field_dims_match_NXdata_dims_when_selected_via_class_name(h5root):
     data = snx.Group(data, definitions=snx.base_definitions())
     fields = data[snx.Field]
     assert fields['signal1'].dims == ('xx', 'yy')
-    assert fields['xx'].dims == ('xx', )
-    assert fields['xx2'].dims == ('xx', )
-    assert fields['yy'].dims == ('yy', )
+    assert fields['xx'].dims == ('xx',)
+    assert fields['xx2'].dims == ('xx',)
+    assert fields['yy'].dims == ('yy',)
 
 
 def test_uses_default_field_dims_if_inference_fails(h5root):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     yy2 = sc.arange('yy', 5)
     data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
@@ -310,7 +323,8 @@ def test_create_field_from_variable(h5root, unit):
 
 def test_create_datetime_field_from_variable(h5root):
     var = sc.datetime(np.datetime64('now'), unit='ns') + sc.arange(
-        'time', 1, 4, dtype='int64', unit='ns')
+        'time', 1, 4, dtype='int64', unit='ns'
+    )
     snx.create_field(h5root, 'field', var)
     group = snx.Group(h5root, definitions=snx.base_definitions())
     loaded = group['field'][...]
@@ -326,8 +340,8 @@ def test_create_class(nxroot, nx_class):
 
 def test_deprecated_errors_field_is_used_for_signal_errors(h5root):
     data = snx.create_class(h5root, 'data1', NXdata)
-    values = sc.array(dims=['xx', 'yy'], unit='m', values=[[1., 2, 3], [4, 5, 6]])
-    errors = sc.array(dims=['xx', 'yy'], unit='m', values=[[0., 2, 3], [0, 5, 6]])
+    values = sc.array(dims=['xx', 'yy'], unit='m', values=[[1.0, 2, 3], [4, 5, 6]])
+    errors = sc.array(dims=['xx', 'yy'], unit='m', values=[[0.0, 2, 3], [0, 5, 6]])
     data.attrs['axes'] = values.dims
     data.attrs['signal'] = 'data'
     snx.create_field(data, 'data', values)
@@ -340,9 +354,11 @@ def test_deprecated_errors_field_is_used_for_signal_errors(h5root):
 
 @pytest.mark.parametrize("errors_suffix", ['_error', '_errors'])
 def test_field_matching_errors_regex_is_loaded_if_no_corresponding_value_field(
-        h5root, errors_suffix):
+    h5root, errors_suffix
+):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords[f'xx{errors_suffix}'] = da.data['yy', 0]
     data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
@@ -356,17 +372,14 @@ def test_field_matching_errors_regex_is_loaded_if_no_corresponding_value_field(
 @pytest.mark.parametrize("errors_suffix", ['_error', '_errors'])
 def test_uncertainties_of_coords_are_loaded(h5root, errors_suffix):
     da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]]))
-    da.coords['xx'] = sc.array(dims=['xx'],
-                               unit='m',
-                               values=[1, 2, 3],
-                               variances=[1, 4, 9],
-                               dtype='float64')
-    da.coords['xx2'] = sc.array(dims=['xx'],
-                                unit='m',
-                                values=[2, 3],
-                                variances=[4, 9],
-                                dtype='float64')
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
+    da.coords['xx'] = sc.array(
+        dims=['xx'], unit='m', values=[1, 2, 3], variances=[1, 4, 9], dtype='float64'
+    )
+    da.coords['xx2'] = sc.array(
+        dims=['xx'], unit='m', values=[2, 3], variances=[4, 9], dtype='float64'
+    )
     da.coords['scalar'] = sc.scalar(value=1.2, variance=4.0, unit='K')
     data = snx.create_class(h5root, 'data1', NXdata)
     data.attrs['axes'] = da.dims
@@ -412,7 +425,7 @@ def test_unnamed_extra_dims_of_multidim_coords_are_squeezed(h5root):
     loaded = data[...]
     assert sc.identical(loaded.coords['xx'], xx['ignored', 0])
     assert data['xx'].ndim == 1
-    assert data['xx'].shape == (2, )
+    assert data['xx'].shape == (2,)
     assert sc.identical(data['xx'][...], xx['ignored', 0])
 
 
@@ -448,8 +461,9 @@ def test_multi_dims_of_length_1_are_kept_when_no_axes_specified(h5root):
     data.attrs['signal'] = 'signal'
     data = snx.Group(data, definitions=snx.base_definitions())
     loaded = data[...]
-    assert sc.identical(loaded.data,
-                        sc.array(dims=['dim_0', 'dim_1'], unit='m', values=[[1.1]]))
+    assert sc.identical(
+        loaded.data, sc.array(dims=['dim_0', 'dim_1'], unit='m', values=[[1.1]])
+    )
     assert data['signal'].ndim == 2
     assert data['signal'].shape == (1, 1)
 
@@ -463,7 +477,8 @@ def test_one_dim_of_length_1_is_kept_when_no_axes_specified(h5root):
     loaded = data[...]
     # Note that dimension gets renamed to `dim_0` since no axes are specified
     assert sc.identical(
-        loaded.data, sc.array(dims=['dim_0', 'dim_1'], unit='m', values=[[1.1, 2.2]]))
+        loaded.data, sc.array(dims=['dim_0', 'dim_1'], unit='m', values=[[1.1, 2.2]])
+    )
     assert data['signal'].ndim == 2
     assert data['signal'].shape == (1, 2)
     assert data['signal'].dims == ('dim_0', 'dim_1')
@@ -482,8 +497,9 @@ def test_only_one_axis_specified_for_2d_field(h5root):
 
 def test_fields_with_datetime_attribute_are_loaded_as_datetime(h5root):
     da = sc.DataArray(
-        sc.epoch(unit='s') +
-        sc.array(dims=['xx', 'yy'], unit='s', values=[[1, 2, 3], [4, 5, 6]]))
+        sc.epoch(unit='s')
+        + sc.array(dims=['xx', 'yy'], unit='s', values=[[1, 2, 3], [4, 5, 6]])
+    )
     da.coords['xx'] = da.data['yy', 0]
     da.coords['xx2'] = da.data['yy', 1]
     da.coords['yy'] = da.data['xx', 0]

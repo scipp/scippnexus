@@ -12,7 +12,6 @@ _default_definitions = object()
 
 
 class File(AbstractContextManager, Group):
-
     def __init__(self, *args, definitions: Mapping = _default_definitions, **kwargs):
         """Context manager for NeXus files, similar to h5py.File.
 

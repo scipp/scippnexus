@@ -28,10 +28,12 @@ class NXsample(NXobject):
                 field.dtype = sc.DType.linear_transform3
 
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
-        return sc.DataGroup({
-            name: _fix_unit(name, self.index_child(child, sel))
-            for name, child in self._children.items()
-        })
+        return sc.DataGroup(
+            {
+                name: _fix_unit(name, self.index_child(child, sel))
+                for name, child in self._children.items()
+            }
+        )
 
 
 base_definitions_dict['NXsample'] = NXsample

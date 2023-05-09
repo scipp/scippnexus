@@ -23,6 +23,7 @@ class NXdataStrategy:
 
     May be subclassed to customize behavior.
     """
+
     _error_suffixes = ['_errors', '_error']  # _error is the deprecated suffix
 
     @staticmethod
@@ -62,21 +63,23 @@ class NXdataStrategy:
         if len(errors) == 0:
             return None
         if len(errors) == 2:
-            warn(f"Found {name}_errors as well as the deprecated "
-                 f"{name}_error. The latter will be ignored.")
+            warn(
+                f"Found {name}_errors as well as the deprecated "
+                f"{name}_error. The latter will be ignored."
+            )
         return errors[0]
 
 
 class NXdata(NXobject):
-
     def __init__(
-            self,
-            group: H5Group,
-            *,
-            definition=None,
-            strategy=None,
-            signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
-            skip: List[str] = None):
+        self,
+        group: H5Group,
+        *,
+        definition=None,
+        strategy=None,
+        signal_override: Union[Field, '_EventField'] = None,  # noqa: F821
+        skip: List[str] = None,
+    ):
         """
         Parameters
         ----------
@@ -139,7 +142,8 @@ class NXdata(NXobject):
         if self._signal_name is not None:
             if self._signal_name not in self:
                 raise NexusStructureError(
-                    f"Signal field '{self._signal_name}' not found in group.")
+                    f"Signal field '{self._signal_name}' not found in group."
+                )
             return self[self._signal_name]
         return None
 
@@ -170,7 +174,8 @@ class NXdata(NXobject):
             dims = [lut[s] for s in shape]
         except KeyError:
             raise NexusStructureError(
-                f"Could not determine axis indices for {self.name}/{name}")
+                f"Could not determine axis indices for {self.name}/{name}"
+            )
         return dims
 
     def _try_guess_dims(self, name):
@@ -186,7 +191,7 @@ class NXdata(NXobject):
         if (indices := self.attrs.get(f'{name}_indices')) is not None:
             return list(np.array(self.dims)[np.array(indices).flatten()])
         if (axis := self._get_child(name).attrs.get('axis')) is not None:
-            return (self._get_group_dims()[axis - 1], )
+            return (self._get_group_dims()[axis - 1],)
         if name in [self._signal_name, self._errors_name]:
             return self._get_group_dims()  # if None, field determines dims itself
         if name in list(self.attrs.get('auxiliary_signals', [])):
@@ -197,7 +202,8 @@ class NXdata(NXobject):
             # However, if the item is not 1-D we need more labels. Try to use labels of
             # signal if dimensionality matches.
             if self._signal_name in self and self._get_child(name).ndim == len(
-                    self.shape):
+                self.shape
+            ):
                 return self[self._signal_name].dims
             return [name]
         return self._try_guess_dims(name)
@@ -226,6 +232,7 @@ class NXdata(NXobject):
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         from .nexus_classes import NXgeometry
+
         signal = self._signal
         if signal is None:
             raise NexusStructureError("No signal field found, cannot load group.")
@@ -235,8 +242,9 @@ class NXdata(NXobject):
             # According to the standard, errors must have the same shape as the data.
             # This is not the case in all files we observed, is there any harm in
             # attempting a broadcast?
-            signal.variances = np.broadcast_to(sc.pow(stddevs, sc.scalar(2)).values,
-                                               shape=signal.shape)
+            signal.variances = np.broadcast_to(
+                sc.pow(stddevs, sc.scalar(2)).values, shape=signal.shape
+            )
 
         da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
 
@@ -252,19 +260,24 @@ class NXdata(NXobject):
             # It is not entirely clear whether skipping NXtransformations is the right
             # solution. In principle NXobject will load them via the 'depends_on'
             # mechanism, so for valid files this should be sufficient.
-            allowed = (Field, NXtransformations, NXcylindrical_geometry, NXoff_geometry,
-                       NXgeometry)
+            allowed = (
+                Field,
+                NXtransformations,
+                NXcylindrical_geometry,
+                NXoff_geometry,
+                NXgeometry,
+            )
             if not isinstance(self._get_child(name), allowed):
                 raise NexusStructureError(
-                    "Invalid NXdata: may not contain nested groups")
+                    "Invalid NXdata: may not contain nested groups"
+                )
 
         for name, field in self[Field].items():
             if name in skip:
                 continue
-            sel = to_child_select(self.dims,
-                                  field.dims,
-                                  select,
-                                  bin_edge_dim=self._bin_edge_dim(field))
+            sel = to_child_select(
+                self.dims, field.dims, select, bin_edge_dim=self._bin_edge_dim(field)
+            )
             coord: sc.Variable = asarray(self[name][sel])
             if (error_name := self._strategy.coord_errors(self, name)) is not None:
                 stddevs = asarray(self[error_name][sel])

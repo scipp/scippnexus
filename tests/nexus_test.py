@@ -65,11 +65,10 @@ def test_nxobject_items(nxroot):
     assert name == 'entry'
     entry.create_class('monitor', NXmonitor)
     entry.create_class('log', NXlog)
-    assert {k: v.nx_class
-            for k, v in entry.items()} == {
-                'log': NXlog,
-                'monitor': NXmonitor
-            }
+    assert {k: v.nx_class for k, v in entry.items()} == {
+        'log': NXlog,
+        'monitor': NXmonitor,
+    }
 
 
 def test_nxobject_iter(nxroot):
@@ -153,8 +152,11 @@ def test_nxobject_getitem_by_class_list(nxroot):
     nxroot['entry'].create_class('events_0', NXevent_data)
     nxroot['entry'].create_class('events_1', NXevent_data)
     nxroot['entry']['field1'] = sc.arange('event', 4.0, unit='ns')
-    assert set(nxroot['entry'][[NXlog,
-                                NXevent_data]]) == {'log', 'events_0', 'events_1'}
+    assert set(nxroot['entry'][[NXlog, NXevent_data]]) == {
+        'log',
+        'events_0',
+        'events_1',
+    }
     assert set(nxroot['entry'][[NXlog, snx.Field]]) == {'log', 'field1'}
 
 
@@ -171,7 +173,7 @@ def test_field_properties(nxroot):
     field = nxroot['entry/events_0/event_time_offset']
     assert field.dtype == 'int64'
     assert field.name == '/entry/events_0/event_time_offset'
-    assert field.shape == (6, )
+    assert field.shape == (6,)
     assert field.unit == sc.Unit('ns')
 
 
@@ -182,15 +184,15 @@ def test_field_dim_labels(nxroot):
     events['event_index'] = sc.arange('ignored', 2)
     events['event_id'] = sc.arange('ignored', 2)
     event_data = nxroot['entry/events_0']
-    assert event_data['event_time_offset'].dims == ('event', )
-    assert event_data['event_time_zero'].dims == ('event_time_zero', )
-    assert event_data['event_index'].dims == ('event_time_zero', )
-    assert event_data['event_id'].dims == ('event', )
+    assert event_data['event_time_offset'].dims == ('event',)
+    assert event_data['event_time_zero'].dims == ('event_time_zero',)
+    assert event_data['event_index'].dims == ('event_time_zero',)
+    assert event_data['event_id'].dims == ('event',)
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = sc.arange('ignored', 2)
     log['time'] = sc.arange('ignored', 2)
-    assert log['time'].dims == ('time', )
-    assert log['value'].dims == ('time', )
+    assert log['time'].dims == ('time',)
+    assert log['value'].dims == ('time',)
 
 
 def test_field_unit_is_none_if_no_units_attribute(nxroot):
@@ -221,10 +223,12 @@ def test_field_errors_with_different_unit_handles_them_individually(nxroot):
     assert_identical(errors, sc.scalar(value=200.0, unit='cm'))
 
 
-@pytest.mark.parametrize('value,type_', [(1.2, np.float32), (123, np.int32),
-                                         ('abc', str), (True, bool)])
+@pytest.mark.parametrize(
+    'value,type_', [(1.2, np.float32), (123, np.int32), ('abc', str), (True, bool)]
+)
 def test_field_is_returned_as_python_object_if_shape_empty_and_no_unit(
-        nxroot, value, type_):
+    nxroot, value, type_
+):
     nxroot['field1'] = sc.scalar(value, unit=None, dtype=type_)
     field = nxroot['field1'][()]
     assert isinstance(field, type_)
@@ -243,34 +247,40 @@ def test_field_getitem_returns_variable_with_correct_size_and_values(nxroot):
     field = nxroot['field']
     assert sc.identical(
         field[...],
-        sc.array(dims=['dim_0'], unit='ns', values=[0, 1, 2, 3, 4, 5], dtype='int64'))
+        sc.array(dims=['dim_0'], unit='ns', values=[0, 1, 2, 3, 4, 5], dtype='int64'),
+    )
     assert sc.identical(
         field[1:],
-        sc.array(dims=['dim_0'], unit='ns', values=[1, 2, 3, 4, 5], dtype='int64'))
+        sc.array(dims=['dim_0'], unit='ns', values=[1, 2, 3, 4, 5], dtype='int64'),
+    )
     assert sc.identical(
         field[:-1],
-        sc.array(dims=['dim_0'], unit='ns', values=[0, 1, 2, 3, 4], dtype='int64'))
+        sc.array(dims=['dim_0'], unit='ns', values=[0, 1, 2, 3, 4], dtype='int64'),
+    )
 
 
 @pytest.mark.parametrize("string", UTF8_TEST_STRINGS)
 def test_field_of_utf8_encoded_dataset_is_loaded_correctly(nxroot, string):
-    nxroot['entry']['title'] = sc.array(dims=['ignored'],
-                                        values=[string, string + string])
+    nxroot['entry']['title'] = sc.array(
+        dims=['ignored'], values=[string, string + string]
+    )
     title = nxroot['entry/title']
-    assert sc.identical(title[...],
-                        sc.array(dims=['dim_0'], values=[string, string + string]))
+    assert sc.identical(
+        title[...], sc.array(dims=['dim_0'], values=[string, string + string])
+    )
 
 
 def test_field_of_extended_ascii_in_ascii_encoded_dataset_is_loaded_correctly():
     # When writing, if we use bytes h5py will write as ascii encoding
     # 0xb0 = degrees symbol in latin-1 encoding.
-    string = b"run at rot=90" + bytes([0xb0])
+    string = b"run at rot=90" + bytes([0xB0])
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
         f['title'] = np.array([string, string + b'x'])
         title = snx.Group(f)['title']
         assert sc.identical(
             title[...],
-            sc.array(dims=['dim_0'], values=["run at rot=90°", "run at rot=90°x"]))
+            sc.array(dims=['dim_0'], values=["run at rot=90°", "run at rot=90°x"]),
+        )
 
 
 def test_ms_field_with_second_datetime_attribute_loaded_as_ms_datetime(nxroot):
@@ -278,9 +288,12 @@ def test_ms_field_with_second_datetime_attribute_loaded_as_ms_datetime(nxroot):
     nxroot['mytime'].dataset.attrs['start_time'] = '2022-12-12T12:13:14'
     assert sc.identical(
         nxroot['mytime'][...],
-        sc.datetimes(dims=['dim_0'],
-                     unit='ms',
-                     values=['2022-12-12T12:13:14.000', '2022-12-12T12:13:14.001']))
+        sc.datetimes(
+            dims=['dim_0'],
+            unit='ms',
+            values=['2022-12-12T12:13:14.000', '2022-12-12T12:13:14.001'],
+        ),
+    )
 
 
 def test_ns_field_with_second_datetime_attribute_loaded_as_ns_datetime(nxroot):
@@ -291,7 +304,9 @@ def test_ns_field_with_second_datetime_attribute_loaded_as_ns_datetime(nxroot):
         sc.datetimes(
             dims=['dim_0'],
             unit='ns',
-            values=['1970-01-01T00:00:00.000000000', '1970-01-01T00:00:00.000000001']))
+            values=['1970-01-01T00:00:00.000000000', '1970-01-01T00:00:00.000000001'],
+        ),
+    )
 
 
 def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot):
@@ -299,27 +314,42 @@ def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot):
     nxroot['mytime'].dataset.attrs['start_time'] = '1984-01-01T00:00:00.000000000'
     assert sc.identical(
         nxroot['mytime'][...],
-        sc.datetimes(dims=['dim_0'],
-                     unit='ns',
-                     values=['1984-01-01T00:00:00', '1984-01-01T00:00:01']))
+        sc.datetimes(
+            dims=['dim_0'],
+            unit='ns',
+            values=['1984-01-01T00:00:00', '1984-01-01T00:00:01'],
+        ),
+    )
 
 
-@pytest.mark.parametrize('timezone,hhmm', [('Z', '12:00'), ('+04', '08:00'),
-                                           ('+00', '12:00'), ('-02', '14:00'),
-                                           ('+1130', '00:30'), ('-0930', '21:30'),
-                                           ('+11:30', '00:30'), ('-09:30', '21:30')])
+@pytest.mark.parametrize(
+    'timezone,hhmm',
+    [
+        ('Z', '12:00'),
+        ('+04', '08:00'),
+        ('+00', '12:00'),
+        ('-02', '14:00'),
+        ('+1130', '00:30'),
+        ('-0930', '21:30'),
+        ('+11:30', '00:30'),
+        ('-09:30', '21:30'),
+    ],
+)
 def test_timezone_information_in_datetime_attribute_is_applied(nxroot, timezone, hhmm):
     nxroot['mytime'] = sc.scalar(value=3, unit='s')
     nxroot['mytime'].dataset.attrs['start_time'] = f'1984-01-01T12:00:00{timezone}'
-    assert sc.identical(nxroot['mytime'][...],
-                        sc.datetime(unit='s', value=f'1984-01-01T{hhmm}:03'))
+    assert sc.identical(
+        nxroot['mytime'][...], sc.datetime(unit='s', value=f'1984-01-01T{hhmm}:03')
+    )
 
 
 def test_timezone_information_in_datetime_attribute_preserves_ns_precision(nxroot):
     nxroot['mytime'] = sc.scalar(value=3, unit='s')
     nxroot['mytime'].dataset.attrs['start_time'] = '1984-01-01T12:00:00.123456789+0200'
-    assert sc.identical(nxroot['mytime'][...],
-                        sc.datetime(unit='ns', value='1984-01-01T10:00:03.123456789'))
+    assert sc.identical(
+        nxroot['mytime'][...],
+        sc.datetime(unit='ns', value='1984-01-01T10:00:03.123456789'),
+    )
 
 
 def test_loads_bare_timestamps_if_multiple_candidate_datetime_offsets_found(nxroot):
@@ -333,8 +363,9 @@ def test_loads_bare_timestamps_if_multiple_candidate_datetime_offsets_found(nxro
 def test_length_0_field_with_datetime_attribute_loaded_as_datetime(nxroot):
     nxroot['mytime'] = sc.arange('ignored', 0, unit='ms')
     nxroot['mytime'].dataset.attrs['start_time'] = '2022-12-12T12:13:14'
-    assert_identical(nxroot['mytime'][...],
-                     sc.datetimes(dims=['dim_0'], unit='ms', values=[]))
+    assert_identical(
+        nxroot['mytime'][...], sc.datetimes(dims=['dim_0'], unit='ms', values=[])
+    )
 
 
 @pytest.mark.skip(reason='Special attributes disabled for now. Do we keep them?')
@@ -399,8 +430,8 @@ def test_errors_read_as_variances(h5root):
     dg = obj[()]
     assert dg['signal'].variances is not None
     assert dg['time'].variances is not None
-    assert np.array_equal(dg['signal'].variances, np.arange(4.0)**2)
-    assert np.array_equal(dg['time'].variances, np.arange(5.0)**2)
+    assert np.array_equal(dg['signal'].variances, np.arange(4.0) ** 2)
+    assert np.array_equal(dg['time'].variances, np.arange(5.0) ** 2)
 
 
 def test_read_field(h5root):
@@ -422,11 +453,12 @@ def test_nxdata_with_signal_axes_indices_reads_as_data_array(h5root):
     data.attrs['time_indices'] = [0]
     data.attrs['temperature_indices'] = [1]
     ref = sc.DataArray(
-        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m'))
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m')
+    )
     ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
-    ref.coords['temperature'] = sc.array(dims=['temperature'],
-                                         values=np.arange(4),
-                                         unit='K')
+    ref.coords['temperature'] = sc.array(
+        dims=['temperature'], values=np.arange(4), unit='K'
+    )
     data['signal'] = ref.values
     data['signal'].attrs['units'] = str(ref.unit)
     data['time'] = ref.coords['time'].values
@@ -447,11 +479,12 @@ def test_nxdata_positional_indexing_returns_correct_slice(h5root):
     data.attrs['time_indices'] = [0]
     data.attrs['temperature_indices'] = [1]
     ref = sc.DataArray(
-        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m'))
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m')
+    )
     ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
-    ref.coords['temperature'] = sc.array(dims=['temperature'],
-                                         values=np.arange(4),
-                                         unit='K')
+    ref.coords['temperature'] = sc.array(
+        dims=['temperature'], values=np.arange(4), unit='K'
+    )
     data['signal'] = ref.values
     data['signal'].attrs['units'] = str(ref.unit)
     data['time'] = ref.coords['time'].values
@@ -472,11 +505,12 @@ def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root)
     data.attrs['time_indices'] = [0]
     data.attrs['temperature_indices'] = [1]
     ref = sc.DataArray(
-        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m'))
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m')
+    )
     ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
-    ref.coords['temperature'] = sc.array(dims=['temperature'],
-                                         values=np.arange(5),
-                                         unit='K')
+    ref.coords['temperature'] = sc.array(
+        dims=['temperature'], values=np.arange(5), unit='K'
+    )
     data['signal'] = ref.values
     data['signal'].attrs['units'] = str(ref.unit)
     data['time'] = ref.coords['time'].values

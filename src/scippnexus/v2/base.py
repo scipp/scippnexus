@@ -24,8 +24,8 @@ def asvariable(obj: Union[Any, sc.Variable]) -> sc.Variable:
 
 
 class NexusStructureError(Exception):
-    """Invalid or unsupported class and field structure in Nexus.
-    """
+    """Invalid or unsupported class and field structure in Nexus."""
+
     pass
 
 
@@ -58,13 +58,12 @@ def _dtype_fromdataset(dataset: H5Dataset) -> sc.DType:
 
 
 def _squeezed_field_sizes(dataset: H5Dataset) -> Dict[str, int]:
-    if (shape := dataset.shape) == (1, ):
+    if (shape := dataset.shape) == (1,):
         return {}
     return {f'dim_{i}': size for i, size in enumerate(shape)}
 
 
 class NXobject:
-
     def _init_field(self, field: Field):
         if field.sizes is None:
             field.sizes = _squeezed_field_sizes(field.dataset)
@@ -82,14 +81,15 @@ class NXobject:
     @property
     def unit(self) -> Union[None, sc.Unit]:
         raise AttributeError(
-            f"Group-like {self._attrs.get('NX_class')} has no well-defined unit")
+            f"Group-like {self._attrs.get('NX_class')} has no well-defined unit"
+        )
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
         return sc.DataGroup(self._children).sizes
 
     def index_child(
-            self, child: Union[Field, Group], sel: ScippIndex
+        self, child: Union[Field, Group], sel: ScippIndex
     ) -> Union[sc.Variable, sc.DataArray, sc.Dataset, sc.DataGroup]:
         """
         When a Group is indexed, this method is called to index each child.
@@ -118,13 +118,16 @@ class NXobject:
         to implement special logic for reading children with interdependencies, i.e.,
         where reading each child in isolation is not possible.
         """
-        return sc.DataGroup({
-            name: self.index_child(child, sel)
-            for name, child in self._children.items()
-        })
+        return sc.DataGroup(
+            {
+                name: self.index_child(child, sel)
+                for name, child in self._children.items()
+            }
+        )
 
-    def assemble(self,
-                 dg: sc.DataGroup) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+    def assemble(
+        self, dg: sc.DataGroup
+    ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         """
         When a Group is indexed, this method is called to assemble the read children
         into the result object.
@@ -216,7 +219,6 @@ class Group(Mapping):
         return self._lazy_children
 
     def _read_children(self) -> Dict[str, Union[Field, Group]]:
-
         def _make_child(obj: Union[H5Dataset, H5Group]) -> Union[Field, Group]:
             if is_dataset(obj):
                 return Field(obj, parent=self)
@@ -236,9 +238,12 @@ class Group(Mapping):
             for name in field_with_errors:
                 values = items[name]
                 errors = items[f'{name}{suffix}']
-                if (isinstance(values, Field) and isinstance(errors, Field)
-                        and values.unit == errors.unit
-                        and values.dataset.shape == errors.dataset.shape):
+                if (
+                    isinstance(values, Field)
+                    and isinstance(errors, Field)
+                    and values.unit == errors.unit
+                    and values.dataset.shape == errors.dataset.shape
+                ):
                     values.errors = errors.dataset
                     del items[f'{name}{suffix}']
         return items
@@ -268,9 +273,9 @@ class Group(Mapping):
         """
         if self._lazy_nexus is not None:
             return
-        self._lazy_nexus = self._definitions.get(self.attrs.get('NX_class'),
-                                                 NXobject)(attrs=self.attrs,
-                                                           children=self._children)
+        self._lazy_nexus = self._definitions.get(self.attrs.get('NX_class'), NXobject)(
+            attrs=self.attrs, children=self._children
+        )
 
     def __len__(self) -> int:
         return len(self._children)
@@ -279,7 +284,8 @@ class Group(Mapping):
         return self._children.__iter__()
 
     def _get_children_by_nx_class(
-            self, select: Union[type, List[type]]) -> Dict[str, Union[NXobject, Field]]:
+        self, select: Union[type, List[type]]
+    ) -> Dict[str, Union[NXobject, Field]]:
         children = {}
         select = tuple(select) if isinstance(select, list) else select
         for key, child in self._children.items():
@@ -293,8 +299,9 @@ class Group(Mapping):
         ...
 
     @overload
-    def __getitem__(self,
-                    sel: ScippIndex) -> Union[sc.DataArray, sc.DataGroup, sc.Dataset]:
+    def __getitem__(
+        self, sel: ScippIndex
+    ) -> Union[sc.DataArray, sc.DataGroup, sc.Dataset]:
         ...
 
     @overload
@@ -344,8 +351,9 @@ class Group(Mapping):
         def isclass(x):
             return inspect.isclass(x) and issubclass(x, (Field, NXobject))
 
-        if isclass(sel) or (isinstance(sel, list) and len(sel)
-                            and all(isclass(x) for x in sel)):
+        if isclass(sel) or (
+            isinstance(sel, list) and len(sel) and all(isclass(x) for x in sel)
+        ):
             return self._get_children_by_nx_class(sel)
 
         dg = self._nexus.read_children(sel)
@@ -357,11 +365,14 @@ class Group(Mapping):
         # take the place of the `value` field. In this case, we need to read the
         # properties of the NXlog group to make the actual transformation.
         from .nxtransformations import maybe_transformation
+
         return maybe_transformation(self, value=dg, sel=sel)
 
     def _warn_fallback(self, e: Exception) -> None:
-        msg = (f"Failed to load {self.name} as {type(self._nexus).__name__}: {e} "
-               "Falling back to loading HDF5 group children as scipp.DataGroup.")
+        msg = (
+            f"Failed to load {self.name} as {type(self._nexus).__name__}: {e} "
+            "Falling back to loading HDF5 group children as scipp.DataGroup."
+        )
         warnings.warn(msg)
 
     def __setitem__(self, key, value):
@@ -396,8 +407,9 @@ class Group(Mapping):
             Nexus class, can be a valid string for the NX_class attribute, or a
             subclass of NXobject, such as NXdata or NXlog.
         """
-        return Group(create_class(self._group, name, class_name),
-                     definitions=self._definitions)
+        return Group(
+            create_class(self._group, name, class_name), definitions=self._definitions
+        )
 
     @cached_property
     def sizes(self) -> Dict[str, int]:
@@ -412,8 +424,9 @@ class Group(Mapping):
         return tuple(self.sizes.values())
 
 
-def create_field(group: H5Group, name: str, data: Union[np.ndarray, sc.Variable],
-                 **kwargs) -> H5Dataset:
+def create_field(
+    group: H5Group, name: str, data: Union[np.ndarray, sc.Variable], **kwargs
+) -> H5Dataset:
     if not isinstance(data, sc.Variable):
         return group.create_dataset(name, data=data, **kwargs)
     values = data.values
@@ -450,6 +463,7 @@ def create_class(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Gro
 @lru_cache()
 def _nx_class_registry():
     from . import nexus_classes
+
     return dict(inspect.getmembers(nexus_classes, inspect.isclass))
 
 

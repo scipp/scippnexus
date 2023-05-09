@@ -25,18 +25,22 @@ def _cset_to_encoding(cset: int) -> str:
     elif cset == h5py.h5t.CSET_UTF8:
         return "utf-8"
     else:
-        raise ValueError(f"Unknown character set in HDF5 data file. Expected data "
-                         f"types are {h5py.h5t.CSET_ASCII=} or "
-                         f"{h5py.h5t.CSET_UTF8=} but got '{cset}'. ")
+        raise ValueError(
+            f"Unknown character set in HDF5 data file. Expected data "
+            f"types are {h5py.h5t.CSET_ASCII=} or "
+            f"{h5py.h5t.CSET_UTF8=} but got '{cset}'. "
+        )
 
 
 def _warn_latin1_decode(obj, decoded, error):
-    warnings.warn(f"Encoding for bytes '{obj}' declared as ascii, "
-                  f"but contains characters in extended ascii range. Assuming "
-                  f"extended ASCII (latin-1), but this behavior is not "
-                  f"specified by the HDF5 or nexus standards and may therefore "
-                  f"be incorrect. Decoded string using latin-1 is '{decoded}'. "
-                  f"Error was '{error}'.")
+    warnings.warn(
+        f"Encoding for bytes '{obj}' declared as ascii, "
+        f"but contains characters in extended ascii range. Assuming "
+        f"extended ASCII (latin-1), but this behavior is not "
+        f"specified by the HDF5 or nexus standards and may therefore "
+        f"be incorrect. Decoded string using latin-1 is '{decoded}'. "
+        f"Error was '{error}'."
+    )
 
 
 def _ensure_str(str_or_bytes: Union[str, bytes], encoding: str) -> str:

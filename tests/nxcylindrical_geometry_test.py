@@ -19,21 +19,22 @@ def test_vertices_loaded_as_vector3(nxroot):
     values = [[1, 2, 3], [4, 5, 6]]
     shape['vertices'] = sc.array(dims=['ignored', 'comp'], values=values, unit='mm')
     loaded = shape[()]
-    assert sc.identical(loaded['vertices'],
-                        sc.vectors(dims=['vertex'], values=values, unit='mm'))
+    assert sc.identical(
+        loaded['vertices'], sc.vectors(dims=['vertex'], values=values, unit='mm')
+    )
 
 
 def test_field_properties(nxroot):
     shape = nxroot['entry'].create_class('shape', snx.NXcylindrical_geometry)
     values = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     shape['vertices'] = sc.array(dims=['ignored', 'comp'], values=values, unit='m')
-    shape['cylinders'] = sc.array(dims=['ignored', 'index'],
-                                  values=[[0, 1, 2]],
-                                  unit=None)
+    shape['cylinders'] = sc.array(
+        dims=['ignored', 'index'], values=[[0, 1, 2]], unit=None
+    )
     shape['detector_number'] = sc.array(dims=['ignored'], values=[], unit=None)
     loaded = shape[()]
-    assert loaded['vertices'].dims == ('vertex', )
+    assert loaded['vertices'].dims == ('vertex',)
     assert loaded['cylinders'].dims == ('cylinder', 'vertex_index')
     assert loaded['cylinders'].unit is None
-    assert loaded['detector_number'].dims == ('detector_number', )
+    assert loaded['detector_number'].dims == ('detector_number',)
     assert loaded['detector_number'].unit is None
