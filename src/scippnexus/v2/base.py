@@ -325,7 +325,7 @@ class Group(Mapping):
 
         Parameters
         ----------
-        name:
+        sel:
             Child name, class, or index.
 
         Returns
