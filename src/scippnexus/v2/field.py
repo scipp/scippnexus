@@ -119,9 +119,21 @@ class Field:
         )
 
     def __getitem__(self, select: ScippIndex) -> Union[Any, sc.Variable]:
-        """Load the field as a :py:class:`scipp.Variable` or Python object.
+        """
+        Load the field as a :py:class:`scipp.Variable` or Python object.
+
         If the shape is empty and no unit is given this returns a Python object, such
         as a string or integer. Otherwise a :py:class:`scipp.Variable` is returned.
+
+        Parameters
+        ----------
+        select:
+            Scipp-style index: Load the specified slice of the current group.
+
+        Returns
+        -------
+        :
+            Loaded data.
         """
         from .nxtransformations import maybe_transformation
 
