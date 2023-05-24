@@ -571,7 +571,8 @@ def test_legacy_axis_attrs_define_dim_names(h5root):
     assert sc.identical(data[...], da)
 
 
-def test_alternative_legacy_axis_attrs_with_signal_axes(h5root):
+@pytest.mark.parametrize('axis_sep', [':', ','])
+def test_alternative_legacy_axis_attrs_with_signal_axes(h5root, axis_sep):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     da.coords['xx'] = da.data['yy', 0]
     da.coords['yy'] = da.data['xx', 0]
@@ -586,34 +587,52 @@ def test_alternative_legacy_axis_attrs_with_signal_axes(h5root):
     # 2. As a boolean, where "1" means that the field is an axis.
     # In the latter case it appears to be useless since axis order cannot be inferred,
     # and we ignore the value if the signal has an `axes` attribute.
-    signal.attrs['axes'] = 'xx,yy'
+    signal.attrs['axes'] = axis_sep.join(['xx', 'yy'])
     xx.attrs['axis'] = 1
     yy.attrs['axis'] = 1
     data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
-def test_guesses_dims_of_bin_edge_fields(h5root):
+def test_legacy_axis_favors_colon_sep(h5root):
+    da = sc.DataArray(sc.array(dims=['xx,zz', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
+    da.coords['xx,zz'] = da.data['yy', 0]
+    da.coords['yy'] = da.data['xx,zz', 0]
+    data = snx.create_class(h5root, 'data1', NXdata)
+    signal = snx.create_field(data, 'signal', da.data)
+    xx = snx.create_field(data, 'xx,zz', da.coords['xx,zz'])
+    yy = snx.create_field(data, 'yy', da.coords['yy'])
+    signal.attrs['signal'] = 1
+    signal.attrs['axes'] = 'xx,zz:yy'
+    xx.attrs['axis'] = 1
+    yy.attrs['axis'] = 1
+    data = snx.Group(data, definitions=snx.base_definitions())
+    assert sc.identical(data[...], da)
+
+
+@pytest.mark.parametrize('axis_sep', [':', ','])
+def test_guesses_dims_of_bin_edge_fields(h5root, axis_sep):
     da = sc.DataArray(sc.ones(dims=['xx', 'yy'], unit='m', shape=(2, 4)))
     da.coords['xx2'] = sc.array(dims=['xx'], unit='m', values=[1, 2, 3])
     da.coords['yy2'] = sc.array(dims=['yy'], unit='m', values=[1, 2, 3, 4, 5])
     data = snx.create_class(h5root, 'data1', NXdata)
     signal = snx.create_field(data, 'signal', da.data)
     signal.attrs['signal'] = 1
-    signal.attrs['axes'] = 'xx,yy'
+    signal.attrs['axes'] = axis_sep.join(['xx', 'yy'])
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'yy2', da.coords['yy2'])
     data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
 
 
-def test_guesses_dims_of_2d_bin_edge_fields(h5root):
+@pytest.mark.parametrize('axis_sep', [':', ','])
+def test_guesses_dims_of_2d_bin_edge_fields(h5root, axis_sep):
     da = sc.DataArray(sc.ones(dims=['xx', 'yy'], unit='m', shape=(2, 4)))
     da.coords['xx2'] = sc.ones(dims=['xx', 'yy'], unit='m', shape=(2, 5))
     data = snx.create_class(h5root, 'data1', NXdata)
     signal = snx.create_field(data, 'signal', da.data)
     signal.attrs['signal'] = 1
-    signal.attrs['axes'] = 'xx,yy'
+    signal.attrs['axes'] = axis_sep.join(['xx', 'yy'])
     snx.create_field(data, 'xx2', da.coords['xx2'])
     data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)
@@ -642,3 +661,16 @@ def test_slicing_raises_given_invalid_index(h5root):
         data['xx', 2]
     with pytest.raises(sc.DimensionError):
         data['zz', 0]
+
+
+def test_scalar_signal_without_unit_works(h5root):
+    da = sc.DataArray(
+        sc.scalar(1.1, unit=None), coords={'xx': sc.scalar(2.0, unit='m')}
+    )
+    data = snx.create_class(h5root, 'data1', snx.NXdata)
+    data.attrs['axes'] = []
+    data.attrs['signal'] = 'signal'
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    group = snx.Group(data, definitions=snx.base_definitions())
+    assert sc.identical(group[...], da)

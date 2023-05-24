@@ -150,7 +150,11 @@ class NXdata(NXobject):
             None if self._signal is None else self._signal.attrs.get('axes')
         )
         if self._signal_axes is not None:
-            self._signal_axes = tuple(self._signal_axes.split(','))
+            self._signal_axes = tuple(self._signal_axes.split(':'))
+            # The standard says that the axes should be colon-separated, but some
+            # files use comma-separated.
+            if len(self._signal_axes) == 1 and self._signal.dataset.ndim > 1:
+                self._signal_axes = tuple(self._signal_axes[0].split(','))
         # Another old way of defining axes. Apparently there are two different ways in
         # which this is used: A value of '1' indicates "this is an axis". As this would
         # not allow for determining an order, we have to assume that the signal field
@@ -327,7 +331,11 @@ class NXdata(NXobject):
         coords = dg
         if isinstance(signal, sc.DataGroup):
             raise NexusStructureError("Signal is not an array-like.")
-        da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
+        da = (
+            signal
+            if isinstance(signal, sc.DataArray)
+            else sc.DataArray(data=asvariable(signal))
+        )
         da = self._add_coords(da, coords)
         if aux:
             signals = {self._signal_name: da}

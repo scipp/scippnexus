@@ -180,7 +180,11 @@ class Field:
                     size for size in self._shape[len(self._dims) :] if size != 1
                 )
         elif (axes := self.attrs.get('axes')) is not None:
-            self._dims = tuple(axes.split(','))
+            self._dims = tuple(axes.split(':'))
+            # The standard says that the axes should be colon-separated, but some
+            # files use comma-separated.
+            if len(self._dims) == 1 and self._dataset.ndim > 1:
+                self._dims = tuple(axes.split(','))
         else:
             self._shape = tuple(size for size in self._shape if size != 1)
             self._dims = tuple(f'dim_{i}' for i in range(self.ndim))

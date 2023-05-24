@@ -154,7 +154,12 @@ class NXdata(NXobject):
             return [a for a in axes if a != '.']
         elif (signal := self._signal) is not None:
             if (axes := signal.attrs.get('axes')) is not None:
-                return axes.split(',')
+                dims = axes.split(':')
+                # The standard says that the axes should be colon-separated, but some
+                # files use comma-separated.
+                if len(dims) == 1 and self._signal.ndim > 1:
+                    dims = tuple(axes.split(','))
+                return dims
         return []
 
     def _guess_dims(self, name: str):
@@ -246,7 +251,11 @@ class NXdata(NXobject):
                 sc.pow(stddevs, sc.scalar(2)).values, shape=signal.shape
             )
 
-        da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
+        da = (
+            signal
+            if isinstance(signal, sc.DataArray)
+            else sc.DataArray(data=asarray(signal))
+        )
 
         skip = self._skip
         skip += [self._signal_name, self._errors_name]
