@@ -586,7 +586,7 @@ def test_alternative_legacy_axis_attrs_with_signal_axes(h5root):
     # 2. As a boolean, where "1" means that the field is an axis.
     # In the latter case it appears to be useless since axis order cannot be inferred,
     # and we ignore the value if the signal has an `axes` attribute.
-    signal.attrs['axes'] = 'xx,yy'
+    signal.attrs['axes'] = 'xx:yy'
     xx.attrs['axis'] = 1
     yy.attrs['axis'] = 1
     data = snx.Group(data, definitions=snx.base_definitions())
@@ -600,7 +600,7 @@ def test_guesses_dims_of_bin_edge_fields(h5root):
     data = snx.create_class(h5root, 'data1', NXdata)
     signal = snx.create_field(data, 'signal', da.data)
     signal.attrs['signal'] = 1
-    signal.attrs['axes'] = 'xx,yy'
+    signal.attrs['axes'] = 'xx:yy'
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'yy2', da.coords['yy2'])
     data = snx.Group(data, definitions=snx.base_definitions())
@@ -613,7 +613,7 @@ def test_guesses_dims_of_2d_bin_edge_fields(h5root):
     data = snx.create_class(h5root, 'data1', NXdata)
     signal = snx.create_field(data, 'signal', da.data)
     signal.attrs['signal'] = 1
-    signal.attrs['axes'] = 'xx,yy'
+    signal.attrs['axes'] = 'xx:yy'
     snx.create_field(data, 'xx2', da.coords['xx2'])
     data = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(data[...], da)

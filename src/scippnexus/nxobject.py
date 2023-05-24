@@ -180,7 +180,7 @@ class Field:
                     size for size in self._shape[len(self._dims) :] if size != 1
                 )
         elif (axes := self.attrs.get('axes')) is not None:
-            self._dims = tuple(axes.split(','))
+            self._dims = tuple(axes.split(':'))
         else:
             self._shape = tuple(size for size in self._shape if size != 1)
             self._dims = tuple(f'dim_{i}' for i in range(self.ndim))

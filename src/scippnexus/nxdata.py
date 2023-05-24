@@ -154,7 +154,7 @@ class NXdata(NXobject):
             return [a for a in axes if a != '.']
         elif (signal := self._signal) is not None:
             if (axes := signal.attrs.get('axes')) is not None:
-                return axes.split(',')
+                return axes.split(':')
         return []
 
     def _guess_dims(self, name: str):
