@@ -28,6 +28,15 @@ Release Notes
    Neil Vaytet :sup:`a`\ ,
    and Jan-Lukas Wynen :sup:`a`
 
+v23.05.1
+--------
+
+Bugfixes
+~~~~~~~~
+
+* Fix loading of data with legacy ``axes`` attribute on signal fields `#145 <https://github.com/scipp/scippnexus/pull/145>`_.
+* Fix loading of groups with single-valued and unit-less signal field `#145 <https://github.com/scipp/scippnexus/pull/145>`_.
+
 v23.05.0
 --------
 
