@@ -151,6 +151,10 @@ class NXdata(NXobject):
         )
         if self._signal_axes is not None:
             self._signal_axes = tuple(self._signal_axes.split(':'))
+            # The standard says that the axes should be colon-separated, but some
+            # files use comma-separated.
+            if len(self._signal_axes) == 1 and self._signal.dataset.ndim > 1:
+                self._signal_axes = tuple(self._signal_axes[0].split(','))
         # Another old way of defining axes. Apparently there are two different ways in
         # which this is used: A value of '1' indicates "this is an axis". As this would
         # not allow for determining an order, we have to assume that the signal field
