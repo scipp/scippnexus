@@ -158,7 +158,7 @@ class NXdata(NXobject):
                 # The standard says that the axes should be colon-separated, but some
                 # files use comma-separated.
                 if len(dims) == 1 and self._signal.ndim > 1:
-                    self._dims = tuple(axes.split(','))
+                    dims = tuple(axes.split(','))
                 return dims
         return []
 
