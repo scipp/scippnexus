@@ -327,7 +327,11 @@ class NXdata(NXobject):
         coords = dg
         if isinstance(signal, sc.DataGroup):
             raise NexusStructureError("Signal is not an array-like.")
-        da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
+        da = (
+            signal
+            if isinstance(signal, sc.DataArray)
+            else sc.DataArray(data=asvariable(signal))
+        )
         da = self._add_coords(da, coords)
         if aux:
             signals = {self._signal_name: da}

@@ -642,3 +642,16 @@ def test_slicing_raises_given_invalid_index(h5root):
         data['xx', 2]
     with pytest.raises(sc.DimensionError):
         data['zz', 0]
+
+
+def test_scalar_signal_without_unit_works(h5root):
+    da = sc.DataArray(
+        sc.scalar(1.1, unit=None), coords={'xx': sc.scalar(2.0, unit='m')}
+    )
+    data = snx.create_class(h5root, 'data1', snx.NXdata)
+    data.attrs['axes'] = []
+    data.attrs['signal'] = 'signal'
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    group = snx.Group(data, definitions=snx.base_definitions())
+    assert sc.identical(group[...], da)

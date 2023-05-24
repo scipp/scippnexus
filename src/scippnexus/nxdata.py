@@ -246,7 +246,11 @@ class NXdata(NXobject):
                 sc.pow(stddevs, sc.scalar(2)).values, shape=signal.shape
             )
 
-        da = sc.DataArray(data=signal) if isinstance(signal, sc.Variable) else signal
+        da = (
+            signal
+            if isinstance(signal, sc.DataArray)
+            else sc.DataArray(data=asarray(signal))
+        )
 
         skip = self._skip
         skip += [self._signal_name, self._errors_name]
