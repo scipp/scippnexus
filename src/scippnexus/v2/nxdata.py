@@ -354,28 +354,33 @@ class NXdata(NXobject):
             return name
         return self._bin_edge_dim(coord)
 
-    def _coord_to_attr(self, da: sc.DataArray, name: str, coord: sc.Variable) -> bool:
+    def _should_be_aligned(
+        self, da: sc.DataArray, name: str, coord: sc.Variable
+    ) -> bool:
         if name == 'depends_on':
-            return False
+            return True
         dim_of_coord = self._dim_of_coord(name, coord)
         if dim_of_coord is None:
-            return False
-        if dim_of_coord not in da.dims:
             return True
-        return False
+        if dim_of_coord not in da.dims:
+            return False
+        return True
 
     def _add_coords(self, da: sc.DataArray, coords: sc.DataGroup) -> sc.DataArray:
-        """Add coords to data array, converting to attrs in the same way as slicing
-        scipp.DataArray would."""
+        """Add coords to a data array.
+
+        Sets alignment in the same way as slicing scipp.DataArray would.
+        """
         for name, coord in coords.items():
             if not isinstance(coord, sc.Variable):
                 da.coords[name] = sc.scalar(coord)
-            # We need the shape *before* slicing to determine dims, so we get the
-            # field from the group for the conditional.
-            elif self._coord_to_attr(da, name, self._children[name]):
-                da.attrs[name] = coord
             else:
                 da.coords[name] = coord
+                # We need the shape *before* slicing to determine dims, so we get the
+                # field from the group for the conditional.
+                da.coords.set_aligned(
+                    name, self._should_be_aligned(da, name, self._children[name])
+                )
         return da
 
 
