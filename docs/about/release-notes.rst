@@ -6,8 +6,8 @@ Release Notes
 
 .. Template, copy this to create a new section after a release:
 
-   v0.xy.0 (Unreleased)
-   --------------------
+   vrelease
+   --------
 
    Features
    ~~~~~~~~
@@ -21,37 +21,14 @@ Release Notes
    Deprecations
    ~~~~~~~~~~~~
 
-   Contributors
-   ~~~~~~~~~~~~
-
-   Simon Heybrock :sup:`a`\ ,
-   Neil Vaytet :sup:`a`\ ,
-   and Jan-Lukas Wynen :sup:`a`
-
-v0.xy.0 (Unreleased)
---------------------
-
-Features
-~~~~~~~~
+v23.07.0
+--------
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
 * When loading slices, coordinates are no longer converted to attributes but are flagged as unaligned.
   This is equivalent to slicing in Scipp since v23.07.0 `#154 <https://github.com/scipp/scippnexus/pull/154>`_.
-
-Bugfixes
-~~~~~~~~
-
-Deprecations
-~~~~~~~~~~~~
-
-Contributors
-~~~~~~~~~~~~
-
-Simon Heybrock :sup:`a`\ ,
-Neil Vaytet :sup:`a`\ ,
-and Jan-Lukas Wynen :sup:`a`
 
 v23.05.1
 --------
