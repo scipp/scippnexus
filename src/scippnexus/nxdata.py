@@ -227,13 +227,13 @@ class NXdata(NXobject):
             return name
         return self._bin_edge_dim(coord)
 
-    def _coord_to_attr(self, da: sc.DataArray, name: str, coord: Field) -> bool:
+    def _should_be_aligned(self, da: sc.DataArray, name: str, coord: Field) -> bool:
         dim_of_coord = self._dim_of_coord(name, coord)
         if dim_of_coord is None:
-            return False
-        if dim_of_coord not in da.dims:
             return True
-        return False
+        if dim_of_coord not in da.dims:
+            return False
+        return True
 
     def _getitem(self, select: ScippIndex) -> sc.DataArray:
         from .nexus_classes import NXgeometry
@@ -292,12 +292,8 @@ class NXdata(NXobject):
                 stddevs = asarray(self[error_name][sel])
                 coord.variances = sc.pow(stddevs, sc.scalar(2)).values
             try:
-                if self._coord_to_attr(da, name, field):
-                    # Like scipp, slicing turns coord into attr if slicing removes the
-                    # dim corresponding to the coord.
-                    da.attrs[name] = coord
-                else:
-                    da.coords[name] = coord
+                da.coords[name] = coord
+                da.coords.set_aligned(name, self._should_be_aligned(da, name, field))
             except sc.DimensionError as e:
                 raise NexusStructureError(
                     f"Field in NXdata incompatible with dims or shape of signal: {e}"
