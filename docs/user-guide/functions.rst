@@ -1,4 +1,4 @@
-.. currentmodule:: scippnexus.v2
+.. currentmodule:: scippnexus
 
 Functions
 =========
