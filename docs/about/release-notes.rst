@@ -21,6 +21,15 @@ Release Notes
    Deprecations
    ~~~~~~~~~~~~
 
+v23.08.0
+--------
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* ``scippnexus.v2`` is now the default when running ``import scippnexus``.
+  Legacy interface has moved to ``scippnexus.v1``, but this will be removed in a future release `#158 <https://github.com/scipp/scippnexus/pull/158>`_.
+
 v23.07.0
 --------
 
