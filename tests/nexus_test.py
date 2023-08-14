@@ -7,8 +7,8 @@ import pytest
 import scipp as sc
 from scipp.testing import assert_identical
 
-import scippnexus.v2 as snx
-from scippnexus.v2 import (
+import scippnexus as snx
+from scippnexus import (
     NexusStructureError,
     NXdetector,
     NXentry,

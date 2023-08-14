@@ -15,14 +15,14 @@ import h5py
 import numpy as np
 import scipp as sc
 
-from ._common import convert_time_to_datetime64, to_plain_index
-from ._hdf5_nexus import (
+from .._common import convert_time_to_datetime64, to_plain_index
+from .._hdf5_nexus import (
     _cset_to_encoding,
     _ensure_str,
     _ensure_supported_int_type,
     _warn_latin1_decode,
 )
-from .typing import H5Dataset, H5Group, ScippIndex
+from ..typing import H5Dataset, H5Group, ScippIndex
 
 NXobjectIndex = Union[str, ScippIndex]
 

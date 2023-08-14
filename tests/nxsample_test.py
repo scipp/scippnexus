@@ -5,7 +5,7 @@ import scipp as sc
 from scipp import spatial
 from scipp.testing import assert_identical
 
-import scippnexus.v2 as snx
+import scippnexus as snx
 
 
 @pytest.fixture()

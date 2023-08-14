@@ -4,7 +4,7 @@
 from collections.abc import Mapping
 from typing import Any, Iterator
 
-from .._hdf5_nexus import _cset_to_encoding, _ensure_str
+from ._hdf5_nexus import _cset_to_encoding, _ensure_str
 
 
 class Attrs(Mapping):

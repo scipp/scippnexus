@@ -13,10 +13,10 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, overload
 import numpy as np
 import scipp as sc
 
-from .._common import to_child_select
-from ..typing import H5Dataset, H5Group, ScippIndex
+from ._common import to_child_select
 from .attrs import Attrs
 from .field import Field
+from .typing import H5Dataset, H5Group, ScippIndex
 
 
 def asvariable(obj: Union[Any, sc.Variable]) -> sc.Variable:

@@ -3,14 +3,13 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import Group, NexusStructureError, NXobject, ScippIndex
-from .field import Field, depends_on_to_relative_path
+from .nxobject import Field, NexusStructureError, NXobject, ScippIndex
 
 
 class TransformationError(NexusStructureError):
@@ -19,31 +18,29 @@ class TransformationError(NexusStructureError):
 
 def make_transformation(obj, /, path) -> Optional[Transformation]:
     if path.startswith('/'):
-        return obj.file[path]
+        return Transformation(obj.file[path])
     elif path != '.':
-        return obj.parent[path]
+        return Transformation(obj.parent[path])
     return None  # end of chain
 
 
 class NXtransformations(NXobject):
     """Group of transformations."""
 
+    def _getitem(self, index: ScippIndex) -> sc.DataGroup:
+        return sc.DataGroup(
+            {
+                name: get_full_transformation_starting_at(
+                    Transformation(child), index=index
+                )
+                for name, child in self.items()
+            }
+        )
+
 
 class Transformation:
     def __init__(self, obj: Union[Field, NXobject]):  # could be an NXlog
         self._obj = obj
-
-    @property
-    def sizes(self) -> dict:
-        return self._obj.sizes
-
-    @property
-    def dims(self) -> Tuple[str, ...]:
-        return self._obj.dims
-
-    @property
-    def shape(self) -> Tuple[int, ...]:
-        return self._obj.shape
 
     @property
     def attrs(self):
@@ -80,20 +77,15 @@ class Transformation:
         # shape=[1] for single values. It is unclear how and if this could be
         # distinguished from a scan of length 1.
         value = self._obj[select]
-        return self.make_transformation(value, transformation_type, select)
-
-    def make_transformation(
-        self,
-        value: Union[sc.Variable, sc.DataArray],
-        transformation_type: str,
-        select: ScippIndex,
-    ):
         try:
             if isinstance(value, sc.DataGroup):
-                return value
+                raise TransformationError(
+                    f"Failed to load transformation at {self.name}."
+                )
             t = value * self.vector
             v = t if isinstance(t, sc.Variable) else t.data
             if transformation_type == 'translation':
+                v = v.to(unit='m', copy=False)
                 v = sc.spatial.translations(dims=v.dims, values=v.values, unit=v.unit)
             elif transformation_type == 'rotation':
                 v = sc.spatial.rotations_from_rotvecs(v)
@@ -107,24 +99,14 @@ class Transformation:
             else:
                 t.data = v
             if (offset := self.offset) is None:
-                transform = t
-            else:
-                offset = sc.vector(value=offset.values, unit=offset.unit)
-                offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
-                if transformation_type == 'translation':
-                    offset = offset.to(unit=t.unit, copy=False)
-                transform = t * offset
-            if (depends_on := self.attrs.get('depends_on')) is not None:
-                if not isinstance(transform, sc.DataArray):
-                    transform = sc.DataArray(transform)
-                transform.attrs['depends_on'] = sc.scalar(
-                    depends_on_to_relative_path(depends_on, self._obj.parent.name)
-                )
-            return transform
-        except (sc.DimensionError, sc.UnitError, TransformationError):
-            # TODO We should probably try to return some other data structure and
-            # also insert offset and other attributes.
-            return value
+                return t
+            offset = sc.vector(value=offset.values, unit=offset.unit).to(unit='m')
+            offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
+            return t * offset
+        except (sc.DimensionError, sc.UnitError) as e:
+            raise NexusStructureError(
+                f"Invalid transformation in NXtransformations: {e}"
+            ) from e
 
 
 def _interpolate_transform(transform, xnew):
@@ -210,25 +192,3 @@ def _get_transformations(
     # to deal with changing beamline components (e.g. pixel positions) during a
     # live data stream (see https://github.com/scipp/scippneutron/issues/76).
     return transformations
-
-
-def maybe_transformation(
-    obj: Union[Field, Group],
-    value: Union[sc.Variable, sc.DataArray, sc.DataGroup],
-    sel: ScippIndex,
-) -> Union[sc.Variable, sc.DataArray, sc.DataGroup]:
-    """
-    Return a loaded field, possibly modified if it is a transformation.
-
-    Transformations are usually stored in NXtransformations groups. However, identifying
-    transformation fields in this way requires inspecting the parent group, which
-    is cumbersome to implement. Furthermore, according to the NXdetector documentation
-    transformations are not necessarily placed inside NXtransformations.
-    Instead we use the presence of the attribute 'transformation_type' to identify
-    transformation fields.
-    """
-    if (transformation_type := obj.attrs.get('transformation_type')) is not None:
-        from .nxtransformations import Transformation
-
-        return Transformation(obj).make_transformation(value, transformation_type, sel)
-    return value

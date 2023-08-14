@@ -4,8 +4,8 @@ import pytest
 import scipp as sc
 from scipp.testing import assert_identical
 
-import scippnexus.v2 as snx
-from scippnexus.v2 import NXdetector, NXentry, NXoff_geometry
+import scippnexus as snx
+from scippnexus import NXdetector, NXentry, NXoff_geometry
 
 
 def make_group(group: h5py.Group) -> snx.Group:

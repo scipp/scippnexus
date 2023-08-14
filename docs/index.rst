@@ -27,6 +27,8 @@ This is especially powerful since a number of concepts of Scipp map well to conc
 News
 ----
 
+- [August 2023] scippnexus-23.08.0 has been released.
+  The "v2" API is now the default.
 - [April 2023] scippnexus-23.04.0 has been released.
   This adds ``scippnexus.v2``, which provides the future API of ``scippnexus``.
   The new API avoids performance bottlenecks when working with small files that contain many groups and datasets.

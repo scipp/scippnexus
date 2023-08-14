@@ -2,7 +2,7 @@ import h5py
 import pytest
 import scipp as sc
 
-import scippnexus.v2 as snx
+import scippnexus as snx
 
 
 @pytest.fixture()

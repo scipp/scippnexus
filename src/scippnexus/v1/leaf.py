@@ -5,7 +5,7 @@ from typing import Dict, Union
 
 import scipp as sc
 
-from ._common import to_plain_index
+from .._common import to_plain_index
 from .nxobject import NXobject, ScippIndex
 
 
