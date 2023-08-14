@@ -5,10 +5,10 @@ from typing import Any, Callable, Dict, Literal, Optional, Union
 
 import scipp as sc
 
-from ....typing import H5Group
 from ...base import Group, NXobject, base_definitions, create_field
 from ...field import Field
 from ...nxdata import NXdata
+from ...typing import H5Group
 
 
 class SASentry:

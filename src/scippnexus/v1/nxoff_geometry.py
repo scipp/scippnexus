@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Tuple, Union
 
 import scipp as sc
 
-from .base import Group, NexusStructureError, NXobject, base_definitions_dict
-from .field import Field
+from .nxobject import NexusStructureError, NXobject
 
 
 def off_to_shape(
@@ -22,21 +21,13 @@ def off_to_shape(
     """
     # Vertices in winding order. This duplicates vertices if they are part of more than
     # one faces.
-    # TODO Should use this:
-    #     vw = vertices[winding_order.values]
-    # but NumPy is currently much faster.
-    # See https://github.com/scipp/scipp/issues/3044
-    vw = sc.vectors(
-        dims=vertices.dims,
-        values=vertices.values[winding_order.values],
-        unit=vertices.unit,
-    )
+    vw = vertices[winding_order.values]
     # Same as above, grouped by face.
     fvw = sc.bins(begin=faces, data=vw, dim=vw.dim)
     low = fvw.bins.size().min().value
     high = fvw.bins.size().max().value
     if low == high:
-        # Vertices in winding order, grouped by face. Unlike `fvw` above we now know
+        # Vertices in winding order, groupbed by face. Unlike `fvw` above we now know
         # that each face has the same number of vertices, so we can fold instead of
         # using binned data.
         shapes = vw.fold(dim=vertices.dim, sizes={faces.dim: -1, vertices.dim: low})
@@ -52,8 +43,8 @@ def off_to_shape(
             "`detector_number` not given but NXoff_geometry "
             "contains `detector_faces`."
         )
-    shape_index = detector_faces['face_index|detector_number', 0].copy()
-    detid = detector_faces['face_index|detector_number', 1].copy()
+    shape_index = detector_faces['column', 0].copy()
+    detid = detector_faces['column', 1].copy()
     da = sc.DataArray(shape_index, coords={'detector_number': detid}).group(
         detector_number.flatten(to='detector_number')
     )
@@ -64,30 +55,21 @@ def off_to_shape(
 
 class NXoff_geometry(NXobject):
     _dims = {
-        'detector_faces': ('face', 'face_index|detector_number'),
+        'detector_faces': ('face', 'column'),
         'vertices': ('vertex',),
         'winding_order': ('winding_order',),
         'faces': ('face',),
     }
 
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
-        super().__init__(attrs=attrs, children=children)
-        for name, field in children.items():
-            if isinstance(field, Field):
-                field.sizes = dict(zip(self._dims.get(name), field.dataset.shape))
-                if name == 'vertices':
-                    field.dtype = sc.DType.vector3
+    def _get_field_dims(self, name: str) -> Union[None, Tuple[str]]:
+        return self._dims.get(name)
+
+    def _get_field_dtype(self, name: str) -> Union[None, sc.DType]:
+        if name == 'vertices':
+            return sc.DType.vector3
+        return None
 
     def load_as_array(
         self, detector_number: Optional[sc.Variable] = None
     ) -> sc.Variable:
         return off_to_shape(**self[()], detector_number=detector_number)
-
-    @staticmethod
-    def assemble_as_child(
-        children: sc.DataGroup, detector_number: Optional[sc.Variable] = None
-    ) -> sc.Variable:
-        return off_to_shape(**children, detector_number=detector_number)
-
-
-base_definitions_dict['NXoff_geometry'] = NXoff_geometry

@@ -4,7 +4,7 @@ import pytest
 import scipp as sc
 
 import scippnexus.v2 as snx
-from scippnexus.v2.nxoff_geometry import NXoff_geometry, off_to_shape
+from scippnexus.nxoff_geometry import NXoff_geometry, off_to_shape
 
 
 @pytest.fixture()
