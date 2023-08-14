@@ -7,8 +7,8 @@ import pytest
 import scipp as sc
 from scipp.testing import assert_identical
 
-import scippnexus.v2 as snx
-from scippnexus.v2 import NXentry, NXlog
+import scippnexus as snx
+from scippnexus import NXentry, NXlog
 
 # representative sample of UTF-8 test strings from
 # https://www.w3.org/2001/06/utf-8-test/UTF-8-demo.html
