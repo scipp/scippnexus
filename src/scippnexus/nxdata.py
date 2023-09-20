@@ -579,6 +579,60 @@ class NXdetector(NXdata):
             fallback_signal_name='data',
         )
 
+    def assemble(self, dg: sc.DataGroup) -> Union[sc.DataArray, sc.Dataset]:
+        bitmasks = {
+            key.lstrip('pixel_mask'): dg.pop(key)
+            # tuple because we are going to change the dict over the iteration
+            for key in tuple(dg.keys())
+            if key.startswith('pixel_mask')
+        }
+
+        array_or_dataset = super().assemble(dg)
+
+        for suffix, bitmask in bitmasks.items():
+            masks = self.transform_bitmask_to_dict_of_masks(bitmask, suffix)
+            for da in (
+                array_or_dataset.items()
+                if isinstance(array_or_dataset, sc.Dataset)
+                else [array_or_dataset]
+            ):
+                for name, mask in masks.items():
+                    da.masks[name] = mask
+        return array_or_dataset
+
+    @staticmethod
+    def transform_bitmask_to_dict_of_masks(bitmask: sc.Variable, suffix: str = None):
+        bit_to_mask_name = {
+            0: 'gap',
+            1: 'dead',
+            2: 'under_responding',
+            3: 'virtual_pixel',
+            4: 'noisy',
+            6: 'pixel_is_part_of_a_cluster_of_problematic_pixels',
+            8: 'user_defined_mask',
+            31: 'virtual_pixel',
+        }
+
+        number_of_bits_in_dtype = 8 * bitmask.values.dtype.itemsize
+        # Bitwise indicator of what masks are present
+        masks_present = np.bitwise_or.reduce(bitmask.values)
+
+        masks = {}
+        for bit in range(number_of_bits_in_dtype):
+            steps_to_first_bit = number_of_bits_in_dtype - bit - 1
+            # Check if the mask associated with the current `bit` is present
+            mask_is_present = (masks_present >> steps_to_first_bit) % 2
+            if mask_is_present:
+                name = bit_to_mask_name.get(bit, f'pixel_mask_{bit}') + (
+                    f'_{suffix}' if suffix else ''
+                )
+                masks[name] = sc.array(
+                    dims=bitmask.dims,
+                    values=(bitmask.values >> (steps_to_first_bit)) % 2,
+                    dtype='bool',
+                )
+        return masks
+
     @property
     def detector_number(self) -> Optional[str]:
         return self._detector_number(self._children)
