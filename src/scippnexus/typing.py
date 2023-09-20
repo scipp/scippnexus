@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Protocol, Tuple, Un
 
 class H5Base(Protocol):
     @property
-    def attrs(self) -> List[int]:
+    def attrs(self) -> Dict:
         """Attributes of dataset or group"""
 
     @property
