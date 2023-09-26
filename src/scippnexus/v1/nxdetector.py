@@ -150,7 +150,7 @@ class NXdetector(NXobject):
     """A detector or detector bank providing an array of values or events.
 
     If the detector stores event data then the 'detector_number' field (if present)
-    is used to map event do detector pixels. Otherwise this returns event data in the
+    is used to map events to detector pixels. Otherwise this returns event data in the
     same format as NXevent_data.
     """
 
