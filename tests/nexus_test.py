@@ -520,3 +520,16 @@ def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root)
     obj = snx.Group(data, definitions=snx.base_definitions())
     da = obj['temperature', 0:2]
     assert sc.identical(da, ref['temperature', 0:2])
+
+
+def test_create_field_saves_errors(nxroot):
+    entry = nxroot['entry']
+    data = sc.array(
+        dims=['d0'], values=[1.2, 3.4, 5.6], variances=[0.9, 0.8, 0.7], unit='cm'
+    )
+    entry.create_field('signal', data)
+
+    loaded = entry['signal'][()]
+    # Use allclose instead of identical because the variances are stored as stddevs
+    # which loses precision.
+    assert sc.allclose(loaded, data.rename_dims(d0='dim_0'))
