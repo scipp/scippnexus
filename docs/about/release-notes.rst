@@ -21,6 +21,23 @@ Release Notes
    Deprecations
    ~~~~~~~~~~~~
 
+vrelease
+--------
+
+Features
+~~~~~~~~
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+Bugfixes
+~~~~~~~~
+
+* Save errors when writing variables using ``create_field`` or ``Group.__setitem__`` `#167 <https://github.com/scipp/scippnexus/pull/167>`_.
+
+Deprecations
+~~~~~~~~~~~~
+
 v23.08.0
 --------
 
