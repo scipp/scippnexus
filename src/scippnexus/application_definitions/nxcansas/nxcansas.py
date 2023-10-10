@@ -68,7 +68,7 @@ class SASdata:
                 )
 
             coord.attrs[self._variances] = 'Q_errors'
-            create_field(group, 'Q_errors', sc.stddevs(da.coords['Q']))
+            # The errors are written automatically by create_field.
 
 
 class _SASdata(NXdata):

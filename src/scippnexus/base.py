@@ -241,7 +241,7 @@ class Group(Mapping):
                 if (
                     isinstance(values, Field)
                     and isinstance(errors, Field)
-                    and values.unit == errors.unit
+                    and (values.unit == errors.unit or errors.unit is None)
                     and values.dataset.shape == errors.dataset.shape
                 ):
                     values.errors = errors.dataset
@@ -390,7 +390,14 @@ class Group(Mapping):
         """Create a child dataset with given name and value.
 
         Note that due to the caching mechanisms in this class, reading the group
-        or its children may not reflect the changes made by this method."""
+        or its children may not reflect the changes made by this method.
+
+        Returns
+        -------
+        :
+            The created dataset of the values.
+            If errors are written to the file, their dataset is not returned.
+        """
         return create_field(self._group, key, value)
 
     def create_class(self, name: str, class_name: str) -> Group:
@@ -424,23 +431,46 @@ class Group(Mapping):
         return tuple(self.sizes.values())
 
 
+def _create_field_params_numpy(data: np.ndarray):
+    return data, None, {}
+
+
+def _create_field_params_string(data: sc.Variable):
+    return np.array(data.values, dtype=object), None, {}
+
+
+def _create_field_params_datetime(data: sc.Variable):
+    start = sc.epoch(unit=data.unit)
+    return (data - start).values, None, {'start': str(start.value)}
+
+
+def _create_field_params_number(data: sc.Variable):
+    errors = sc.stddevs(data).values if data.variances is not None else None
+    return data.values, errors, {}
+
+
 def create_field(
     group: H5Group, name: str, data: Union[np.ndarray, sc.Variable], **kwargs
 ) -> H5Dataset:
     if not isinstance(data, sc.Variable):
-        return group.create_dataset(name, data=data, **kwargs)
-    values = data.values
-    if data.dtype == sc.DType.string:
-        values = np.array(data.values, dtype=object)
+        values, errors, attrs = _create_field_params_numpy(data)
+    elif data.dtype == sc.DType.string:
+        values, errors, attrs = _create_field_params_string(data)
     elif data.dtype == sc.DType.datetime64:
-        start = sc.epoch(unit=data.unit)
-        values = (data - start).values
-    dataset = group.create_dataset(name, data=values, **kwargs)
-    if data.unit is not None:
-        dataset.attrs['units'] = str(data.unit)
-    if data.dtype == sc.DType.datetime64:
-        dataset.attrs['start'] = str(start.value)
-    return dataset
+        values, errors, attrs = _create_field_params_datetime(data)
+    else:
+        values, errors, attrs = _create_field_params_number(data)
+
+    if isinstance(data, sc.Variable) and data.unit:
+        attrs['units'] = str(data.unit)
+
+    values_dataset = group.create_dataset(name, data=values, **kwargs)
+    values_dataset.attrs.update(attrs)
+    if errors is not None:
+        errors_dataset = group.create_dataset(name + '_errors', data=errors, **kwargs)
+        errors_dataset.attrs.update(attrs)
+
+    return values_dataset
 
 
 def create_class(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Group:
