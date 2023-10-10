@@ -241,7 +241,7 @@ class Group(Mapping):
                 if (
                     isinstance(values, Field)
                     and isinstance(errors, Field)
-                    and values.unit == errors.unit
+                    and (values.unit == errors.unit or errors.unit is None)
                     and values.dataset.shape == errors.dataset.shape
                 ):
                     values.errors = errors.dataset
