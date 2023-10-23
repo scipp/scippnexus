@@ -216,7 +216,7 @@ def test_auxiliary_signal_causes_load_as_dataset(h5root):
     snx.create_field(data, 'signal', da.data)
     snx.create_field(data, 'xx', da.coords['xx'])
     data = snx.Group(data, definitions=snx.base_definitions())
-    assert_identical(data[...], sc.Dataset({'signal': da.data, 'xx': da.coords['xx']}))
+    assert_identical(data[...], sc.DataGroup(signal=da.data, xx=da.coords['xx']))
 
 
 def test_NXlog_data_is_loaded_as_time_dependent_data_array(nxroot):
