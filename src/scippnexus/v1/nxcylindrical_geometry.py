@@ -18,10 +18,13 @@ def _parse(
     face1_center = cylinders['vertex_index', 0]
     face1_edge = cylinders['vertex_index', 1]
     face2_center = cylinders['vertex_index', 2]
-    ds = sc.Dataset()
-    ds['face1_center'] = vertices[face1_center.values]
-    ds['face1_edge'] = vertices[face1_edge.values]
-    ds['face2_center'] = vertices[face2_center.values]
+    ds = sc.Dataset(
+        {
+            'face1_center': vertices[face1_center.values],
+            'face1_edge': vertices[face1_edge.values],
+            'face2_center': vertices[face2_center.values],
+        }
+    )
     ds = ds.rename(**{vertices.dim: 'cylinder'})
     if detector_number is None:
         # All cylinders belong to the same shape
