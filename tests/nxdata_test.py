@@ -202,7 +202,7 @@ def test_transpose_indices_attribute_for_coord(h5root):
     assert sc.identical(data[...], da)
 
 
-def test_auxiliary_signal_causes_load_as_dataset(h5root):
+def test_auxiliary_signal_causes_load_as_datagroup(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
     )
