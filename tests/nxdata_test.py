@@ -674,3 +674,30 @@ def test_scalar_signal_without_unit_works(h5root):
     snx.create_field(data, 'xx', da.coords['xx'])
     group = snx.Group(data, definitions=snx.base_definitions())
     assert sc.identical(group[...], da)
+
+
+@pytest.mark.parametrize('bits', (32, 64))
+def test_pixel_masks_interpreted_correctly(bits):
+    bitmask = sc.array(
+        dims=['detector_pixel'],
+        values=1 << (bits - np.array([1, 2, 3, 0, 5])),
+        dtype=f'int{bits}',
+    )
+    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask)
+
+    assert np.all(masks.get('gap').values == np.array([1, 0, 0, 0, 0]))
+    assert np.all(masks.get('dead').values == np.array([0, 1, 0, 0, 0]))
+    assert np.all(masks.get('under_responding').values == np.array([0, 0, 1, 0, 0]))
+    assert np.all(masks.get('noisy').values == np.array([0, 0, 0, 0, 1]))
+    assert 'virtual_pixel' not in masks
+    assert 'user_defined_pixel' not in masks
+
+
+def test_pixel_masks_adds_suffix():
+    bitmask = sc.array(
+        dims=['detector_pixel'],
+        values=1 << (32 - np.array([1, 2, 3, 0, 5])),
+        dtype='int32',
+    )
+    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask, 'test')
+    assert all(k.endswith('_test') for k in masks.keys())
