@@ -12,7 +12,7 @@ ScippNexus is available as open source under the [BSD-3 license](https://opensou
 
 Please cite the following:
 
-[![DOI](https://zenodo.org/badge/475453428.svg)](https://zenodo.org/badge/latestdoi/475453428)
+[![DOI](https://zenodo.org/badge/475453428.svg)](https://zenodo.org/doi/10.5281/zenodo.7408075)
 
 To cite a specific version of ScippNeXus select the desired version on Zenodo to get the corresponding DOI.
 
