@@ -2,7 +2,6 @@
 
 ## Classes
 
-
 ### Data Structures
 
 ```{eval-rst}
