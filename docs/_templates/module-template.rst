@@ -32,7 +32,7 @@
 
    .. autosummary::
       :toctree:
-      :template: scipp-class-template.rst
+      :template: class-template.rst
    {% for item in classes %}
       {{ item }}
    {%- endfor %}
@@ -57,7 +57,7 @@
 
 .. autosummary::
    :toctree:
-   :template: scipp-module-template.rst
+   :template: module-template.rst
    :recursive:
 {% for item in modules %}
    {{ item }}

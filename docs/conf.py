@@ -3,71 +3,15 @@
 import doctest
 import os
 import sys
-from datetime import date
-from typing import Any, Dict, Optional
-
-import sphinx_book_theme
-from docutils.nodes import document
-from sphinx.application import Sphinx
 
 import scippnexus
 
 sys.path.insert(0, os.path.abspath('.'))
 
-from version import VersionInfo  # noqa: E402
-
 # General information about the project.
 project = u'scippnexus'
 copyright = u'2023 Scipp contributors'
 author = u'Scipp contributors'
-
-version_info = VersionInfo()
-long_version = scippnexus.__version__
-outdated = not version_info.is_latest(long_version)
-
-
-def add_buttons(
-    app: Sphinx,
-    pagename: str,
-    templatename: str,
-    context: Dict[str, Any],
-    doctree: Optional[document],
-):
-    base = "https://scipp.github.io"
-    l1 = []
-    l1.append({"type": "link", "text": "scipp", "url": f"{base}"})
-    l1.append({"type": "link", "text": "scippnexus", "url": f"{base}/scippnexus"})
-    l1.append({"type": "link", "text": "scippneutron", "url": f"{base}/scippneutron"})
-    l1.append({"type": "link", "text": "ess", "url": f"{base}/ess"})
-    header_buttons = context["header_buttons"]
-    header_buttons.append(
-        {
-            "type": "group",
-            "buttons": l1,
-            "icon": "fa fa-caret-down",
-            "text": "Related projects",
-        }
-    )
-    releases = version_info.minor_releases(first='0.1')
-    if outdated:
-        current = f"{long_version} (outdated)"
-        latest = "latest"
-        entries = ['.'.join(long_version.split('.')[:2])]
-    else:
-        current = f"{long_version} (latest)"
-        latest = f"{releases[0]} (latest)"
-        entries = releases[1:]
-    lines = [{"type": "link", "text": latest, "url": f"{base}/{project}"}]
-    for r in entries:
-        lines.append(
-            {"type": "link", "text": f"{r}", "url": f"{base}/{project}/release/{r}"}
-        )
-    header_buttons.append(
-        {"type": "group", "buttons": lines, "icon": "fa fa-caret-down", "text": current}
-    )
-
-
-sphinx_book_theme.add_launch_buttons = add_buttons
 
 html_show_sourcelink = True
 
@@ -75,24 +19,39 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
+    'sphinx.ext.githubpages',
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
+    "sphinx_design",
     'nbsphinx',
+    'myst_parser',
 ]
+
+myst_enable_extensions = [
+    "amsmath",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
+
+myst_heading_anchors = 3
 
 autodoc_type_aliases = {
     'VariableLike': 'VariableLike',
     'MetaDataMap': 'MetaDataMap',
     'array_like': 'array_like',
 }
-
-rst_epilog = f"""
-.. |SCIPP_RELEASE_MONTH| replace:: {date.today().strftime("%B %Y")}
-.. |SCIPP_VERSION| replace:: {scippnexus.__version__}
-"""  # noqa: E501
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
@@ -129,8 +88,7 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 html_sourcelink_suffix = ''  # Avoid .ipynb.txt extensions in sources
 
 # The master toctree document.
@@ -140,10 +98,11 @@ master_doc = 'index'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
+
 # The short X.Y version.
-version = u''
+version = scippnexus.__version__
 # The full version, including alpha/beta/rc tags.
-release = u''
+release = scippnexus.__version__
 
 warning_is_error = True
 
@@ -152,7 +111,7 @@ warning_is_error = True
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -167,81 +126,67 @@ todo_include_todos = False
 
 # -- Options for HTML output ----------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-
-html_theme = 'sphinx_book_theme'
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#
+html_theme = "pydata_sphinx_theme"
 html_theme_options = {
-    "logo_only": True,
-    "repository_url": f"https://github.com/scipp/{project}",
-    "repository_branch": "main",
-    "path_to_docs": "docs",
-    "use_repository_button": True,
-    "use_issues_button": True,
-    "use_edit_page_button": True,
-    "show_toc_level": 2,  # Show subheadings in secondary sidebar
+    "primary_sidebar_end": ["edit-this-page", "sourcelink"],
+    "secondary_sidebar_items": [],
+    "show_nav_level": 1,
+    # Adjust this to ensure external links are moved to "Move" menu
+    "header_links_before_dropdown": 4,
+    "pygment_light_style": "github-light-high-contrast",
+    "pygment_dark_style": "github-dark-high-contrast",
+    "logo": {
+        "image_light": "_static/logo.svg",
+        "image_dark": "_static/logo-dark.svg",
+    },
+    "external_links": [
+        {"name": "Scipp", "url": "https://scipp.github.io"},
+        {"name": "ScippNeutron", "url": "https://scipp.github.io/scippneutron"},
+    ],
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/scipp/scippnexus",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/scippnexus/",
+            "icon": "fa-brands fa-python",
+            "type": "fontawesome",
+        },
+        {
+            "name": "Conda",
+            "url": "https://anaconda.org/conda-forge/scippnexus",
+            "icon": "_static/anaconda-logo.svg",
+            "type": "local",
+        },
+    ],
+    "footer_start": ["copyright", "sphinx-version"],
+    "footer_end": ["doc_version", "theme-version"],
+}
+html_context = {
+    "doc_path": "docs",
+}
+html_sidebars = {
+    "**": ["sidebar-nav-bs", "page-toc"],
 }
 
-if outdated:
-    html_theme_options["announcement"] = (
-        f"⚠️ You are viewing the documentation for an old version of {project}. "
-        f"Switch to <a href='https://scipp.github.io/{project}' "
-        "style='color:white;text-decoration:underline;'"
-        ">latest</a> version. ⚠️"
-    )
-
-html_logo = "_static/logo-2022.svg"
+html_title = "scippnexus"
+html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_css_files = ["css/custom.css"]
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'scippnexusdoc'
-
-# -- Options for LaTeX output ---------------------------------------------
-
-latex_elements = {}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'scipp.tex', u'scipp Documentation', u'Simon Heybrock', 'manual'),
-]
-
-# -- Options for manual page output ---------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, 'scipp', u'scipp Documentation', [author], 1)]
-
-# -- Options for Texinfo output -------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (
-        master_doc,
-        'scipp',
-        u'scipp Documentation',
-        author,
-        'scipp',
-        'One line description of project.',
-        'Miscellaneous',
-    ),
-]
 
 # -- Options for Matplotlib in notebooks ----------------------------------
 

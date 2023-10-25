@@ -1,10 +1,11 @@
+# API Reference
+
+## Classes
+
+### Data Structures
+
+```{eval-rst}
 .. currentmodule:: scippnexus
-
-Classes
-=======
-
-Data Structures
----------------
 
 .. autosummary::
    :toctree: ../generated/classes
@@ -72,20 +73,24 @@ Data Structures
    NXuser
    NXvelocity_selector
    NXxraylens
+```
 
-Exceptions
-----------
+### Exceptions
+
+```{eval-rst}
+.. currentmodule:: scippnexus
 
 .. autosummary::
    :toctree: ../generated/classes
-   :template: scipp-class-template.rst
+   :template: class-template.rst
    :recursive:
 
    NexusStructureError
+```
 
-Typing
-------
+### Typing
 
+```{eval-rst}
 .. currentmodule:: scippnexus
 
 .. autosummary::
@@ -96,3 +101,24 @@ Typing
    typing.H5Dataset
    typing.H5Group
    typing.ScippIndex
+```
+
+## Top-level functions
+
+```{eval-rst}
+.. autosummary::
+   :toctree: ../generated/functions
+   :recursive:
+
+   create_field
+   create_class
+```
+
+## Submodules
+
+```{eval-rst}
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: module-template.rst
+   :recursive:
+```
