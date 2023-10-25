@@ -1,17 +1,15 @@
-build
 dist
+html
 .tox
 src/scippnexus.egg-info
 
 *.sw?
-compile_commands.json
 
 .clangd/
 .idea/
 .vscode/
 *.ipynb_checkpoints
 __pycache__/
-CMakeSettings.json
 .vs/
 .virtual_documents
 .hypothesis
