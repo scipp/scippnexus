@@ -628,7 +628,7 @@ class NXdetector(NXdata):
             mask_is_present = (masks_present >> steps_to_first_bit) % 2
             if mask_is_present:
                 name = bit_to_mask_name.get(bit, f'pixel_mask_{bit}') + (
-                    f'_{suffix}' if suffix else ''
+                    suffix if suffix is not None else ''
                 )
                 masks[name] = sc.array(
                     dims=bitmask.dims,

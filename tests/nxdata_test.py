@@ -701,5 +701,5 @@ def test_pixel_masks_adds_suffix():
         values=1 << (32 - np.array([1, 2, 3, 0, 5])),
         dtype='int32',
     )
-    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask, 'test')
+    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask, '_test')
     assert all(k.endswith('_test') for k in masks.keys())
