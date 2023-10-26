@@ -601,7 +601,7 @@ class NXdetector(NXdata):
         return array_or_dataset
 
     @staticmethod
-    def transform_bitmask_to_dict_of_masks(bitmask: sc.Variable, suffix: str = None):
+    def transform_bitmask_to_dict_of_masks(bitmask: sc.Variable, suffix: str = ''):
         bit_to_mask_name = {
             0: 'gap',
             1: 'dead',
@@ -627,9 +627,7 @@ class NXdetector(NXdata):
             # Check if the mask associated with the current `bit` is present
             mask_is_present = (masks_present >> steps_to_first_bit) % 2
             if mask_is_present:
-                name = bit_to_mask_name.get(bit, f'undefined_bit{bit}') + (
-                    suffix if suffix is not None else ''
-                )
+                name = bit_to_mask_name.get(bit, f'undefined_bit{bit}') + suffix
                 masks[name] = sc.array(
                     dims=bitmask.dims,
                     values=(bitmask.values >> (steps_to_first_bit)) % 2,
