@@ -581,7 +581,7 @@ class NXdetector(NXdata):
 
     def assemble(self, dg: sc.DataGroup) -> Union[sc.DataArray, sc.Dataset]:
         bitmasks = {
-            key.lstrip('pixel_mask'): dg.pop(key)
+            key[len('pixel_mask') :]: dg.pop(key)
             # tuple because we are going to change the dict over the iteration
             for key in tuple(dg.keys())
             if key.startswith('pixel_mask')
@@ -616,13 +616,12 @@ class NXdetector(NXdata):
         number_of_bits_in_dtype = 8 * bitmask.values.dtype.itemsize
 
         # Bitwise indicator of what masks are present
-        masks_present = np.bitwise_or.reduce(bitmask.values)
+        masks_present = np.bitwise_or.reduce(bitmask.values.ravel())
 
         masks = {}
         for bit in range(number_of_bits_in_dtype):
             # Check if the mask associated with the current `bit` is present
-            mask_is_present = (masks_present >> bit) % 2
-            if mask_is_present:
+            if (masks_present >> bit) % 2:
                 name = bit_to_mask_name.get(bit, f'undefined_bit{bit}') + suffix
                 masks[name] = sc.array(
                     dims=bitmask.dims,

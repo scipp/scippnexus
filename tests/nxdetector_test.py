@@ -736,3 +736,25 @@ def test_pixel_masks_undefined_are_included():
     )
     masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask)
     assert np.all(masks.get('undefined_bit9').values == np.array([1, 0]))
+
+
+def test_pixel_masks_reads_expected_fields(h5root):
+    bitmask = 1 << np.array([[0, 1], [-1, -1]])
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
+    )
+    da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
+    da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
+    detector = snx.create_class(h5root, 'detector0', NXdetector)
+    snx.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx.create_field(detector, 'xx', da.coords['xx'])
+    snx.create_field(detector, 'data', da.data)
+    snx.create_field(detector, 'pixel_mask', bitmask)
+    snx.create_field(detector, 'pixel_mask_2', bitmask)
+    detector.attrs['axes'] = ['xx', '.']
+    detector = make_group(detector)
+    da = detector[...]
+    assert np.allclose(da.masks.get('gap').values, np.array([[1, 0], [0, 0]]))
+    assert np.allclose(da.masks.get('dead').values, np.array([[0, 1], [0, 0]]))
+    assert np.allclose(da.masks.get('gap_2').values, np.array([[1, 0], [0, 0]]))
+    assert np.allclose(da.masks.get('dead_2').values, np.array([[0, 1], [0, 0]]))
