@@ -323,6 +323,11 @@ class NXdata(NXobject):
     def assemble(
         self, dg: sc.DataGroup
     ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+        return self._assemble_as_data(dg)
+
+    def _assemble_as_data(
+        self, dg: sc.DataGroup
+    ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         if not self._valid:
             raise NexusStructureError("Could not determine signal field or dimensions.")
         dg = dg.copy(deep=False)
@@ -346,6 +351,42 @@ class NXdata(NXobject):
                 return sc.Dataset(signals)
             return sc.DataGroup(signals)
         return da
+
+    def _assemble_as_physical_component(self, dg: sc.DataGroup) -> sc.DataGroup:
+        """
+        Assemble suitable for physical components such as NXdetector or NXmonitor.
+
+        NeXus groups representing physical components typically contain fields or
+        subgroups such as 'depends_on', 'NXtransformations', or 'NXoff_geometry'.
+        Adding these wrapped into a scalar variable as coordinates would be
+        cumbersome. Therefore, we do not assemble the entire NXdetector or NXmonitor
+        into a single DataArray (as typically done by NXdata). On the other hand, we
+        do want to return a useful DataArray with coordinates. In NeXus the data,
+        coordinates, and other datasets or subgroups are all stored in the same group.
+        As this is not very useful and user-friendly, we assemble the data and coords
+        into a DataArray, which will take the place of the signal field in the output
+        DataGroup, while non-signal non-coord fields are simply kept as-is.
+        """
+        data_items = sc.DataGroup()
+        result = sc.DataGroup()
+        signals = [self._signal_name] + self._aux_signals
+        for name, value in dg.items():
+            # We need the shape *before* slicing to determine dims, so we get the
+            # field from the group for the conditional.
+            if name not in signals and (
+                isinstance(value, (sc.DataArray, sc.DataGroup))
+                or self._children[name].shape == ()
+            ):
+                result[name] = value
+            else:
+                data_items[name] = value
+        assembled_nxdata = self._assemble_as_data(data_items)
+        result.update(
+            {self._signal_name: assembled_nxdata}
+            if isinstance(assembled_nxdata, sc.DataArray)
+            else assembled_nxdata
+        )
+        return result
 
     def _dim_of_coord(self, name: str, coord: sc.Variable) -> Union[None, str]:
         if len(coord.dims) == 1:
@@ -579,6 +620,9 @@ class NXdetector(NXdata):
             fallback_signal_name='data',
         )
 
+    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
+        return self._assemble_as_physical_component(dg)
+
     @property
     def detector_number(self) -> Optional[str]:
         return self._detector_number(self._children)
@@ -592,6 +636,9 @@ class NXmonitor(NXdata):
         else:
             signal = 'data'
         super().__init__(attrs=attrs, children=children, fallback_signal_name=signal)
+
+    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
+        return self._assemble_as_physical_component(dg)
 
 
 def _group_events(

@@ -156,9 +156,9 @@ def test_chain_with_single_values_and_different_unit(h5root):
     )
     detector = make_group(h5root['detector_0'])
     loaded = detector[()]
-    depends_on = loaded.coords['depends_on']
-    assert depends_on.value == 'transformations/t1'
-    transforms = loaded.coords['transformations'].value
+    depends_on = loaded['depends_on']
+    assert depends_on == 'transformations/t1'
+    transforms = loaded['transformations']
     assert_identical(transforms['t1'].data, t1)
     assert transforms['t1'].attrs['depends_on'].value == 't2'
     assert_identical(transforms['t2'].data, t2)
@@ -232,10 +232,10 @@ def test_chain_with_multiple_values(h5root):
     expected2 = t
     expected2.attrs['depends_on'] = sc.scalar('.')
     detector = make_group(detector)[()]
-    depends_on = detector.coords['depends_on']
-    assert depends_on.value == 'transformations/t1'
-    assert_identical(detector.coords['transformations'].value['t1'], expected1)
-    assert_identical(detector.coords['transformations'].value['t2'], expected2)
+    depends_on = detector['depends_on']
+    assert depends_on == 'transformations/t1'
+    assert_identical(detector['transformations']['t1'], expected1)
+    assert_identical(detector['transformations']['t2'], expected2)
 
 
 def test_chain_with_multiple_values_and_different_time_unit(h5root):
@@ -282,10 +282,10 @@ def test_chain_with_multiple_values_and_different_time_unit(h5root):
 
     detector = make_group(detector)
     loaded = detector[...]
-    depends_on = loaded.coords['depends_on']
-    assert depends_on.value == 'transformations/t1'
-    assert_identical(loaded.coords['transformations'].value['t1'], expected1)
-    assert_identical(loaded.coords['transformations'].value['t2'], expected2)
+    depends_on = loaded['depends_on']
+    assert depends_on == 'transformations/t1'
+    assert_identical(loaded['transformations']['t1'], expected1)
+    assert_identical(loaded['transformations']['t2'], expected2)
 
 
 def test_broken_time_dependent_transformation_returns_datagroup_but_sets_up_depends_on(
@@ -317,7 +317,7 @@ def test_broken_time_dependent_transformation_returns_datagroup_but_sets_up_depe
 
     detector = make_group(detector)
     loaded = detector[()]
-    t = loaded.coords['transformations'].value
+    t = loaded['transformations']
     assert isinstance(t, sc.DataGroup)
     # Due to the way NXtransformations works, vital information is stored in the
     # attributes. DataGroup does currently not support attributes, so this information
@@ -325,8 +325,8 @@ def test_broken_time_dependent_transformation_returns_datagroup_but_sets_up_depe
     t1 = t['t1']
     assert isinstance(t1, sc.DataGroup)
     assert t1.keys() == {'time', 'value'}
-    assert loaded.coords['depends_on'].value == 'transformations/t1'
-    assert_identical(loaded.coords['transformations'].value['t1'], t1)
+    assert loaded['depends_on'] == 'transformations/t1'
+    assert_identical(loaded['transformations']['t1'], t1)
 
 
 def write_translation(

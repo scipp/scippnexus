@@ -53,7 +53,10 @@ def test_finds_data_from_group_attr(h5root):
     snx.create_field(detector, 'custom', da.data)
     detector.attrs['signal'] = 'custom'
     detector = make_group(detector)
-    assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
+    loaded = detector[...]
+    assert sc.identical(
+        loaded['custom'], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'})
+    )
 
 
 def test_loads_signal_and_events_when_both_found(nxroot):
@@ -69,7 +72,7 @@ def test_loads_signal_and_events_when_both_found(nxroot):
     events.create_field('event_index', sc.array(dims=[''], unit='None', values=[0]))
     assert detector.sizes == {'detector_number': 2, 'event_time_zero': 1}
     loaded = detector[...]
-    assert isinstance(loaded, sc.Dataset)
+    assert isinstance(loaded, sc.DataGroup)
     assert_identical(loaded['data'].data, data)
     assert loaded['events'].bins is not None
 
@@ -85,7 +88,7 @@ def test_loads_as_data_array_with_embedded_events(nxroot):
     detector.create_field('event_time_zero', sc.array(dims=[''], unit='s', values=[1]))
     detector.create_field('event_index', sc.array(dims=[''], unit='None', values=[0]))
     assert detector.dims == ('detector_number', 'event_time_zero')
-    da = detector[...]
+    da = detector[...]['events']
     assert da.bins is not None
     assert_identical(
         da.bins.size(),
@@ -107,7 +110,9 @@ def test_loads_data_without_coords(h5root):
     snx.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
     snx.create_field(detector, 'data', da.data)
     detector = make_group(detector)
-    assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
+    assert sc.identical(
+        detector[...]['data'], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'})
+    )
 
 
 @pytest.mark.parametrize(
@@ -120,7 +125,9 @@ def test_detector_number_key_alias(h5root, detector_number_key):
     snx.create_field(detector, detector_number_key, da.coords[detector_number_key])
     snx.create_field(detector, 'data', da.data)
     detector = make_group(detector)
-    assert sc.identical(detector[...], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'}))
+    assert sc.identical(
+        detector[...]['data'], da.rename_dims({'xx': 'dim_0', 'yy': 'dim_1'})
+    )
 
 
 def test_loads_data_with_coords(h5root):
@@ -135,7 +142,7 @@ def test_loads_data_with_coords(h5root):
     snx.create_field(detector, 'data', da.data)
     detector.attrs['axes'] = ['xx', '.']
     detector = make_group(detector)
-    assert sc.identical(detector[...], da.rename_dims({'yy': 'dim_1'}))
+    assert sc.identical(detector[...]['data'], da.rename_dims({'yy': 'dim_1'}))
 
 
 def test_slicing_works_as_in_scipp(h5root):
@@ -161,14 +168,14 @@ def test_slicing_works_as_in_scipp(h5root):
     detector.attrs['axes'] = ['xx', 'yy']
     detector.attrs['2d_edges_indices'] = [1, 0]
     detector = make_group(detector)
-    assert_identical(detector[...], da)
-    assert_identical(detector['xx', 0], da['xx', 0])
-    assert_identical(detector['xx', 1], da['xx', 1])
-    assert_identical(detector['xx', 0:1], da['xx', 0:1])
-    assert_identical(detector['yy', 0], da['yy', 0])
-    assert_identical(detector['yy', 1], da['yy', 1])
-    assert_identical(detector['yy', 0:1], da['yy', 0:1])
-    assert_identical(detector['yy', 1:1], da['yy', 1:1])  # empty slice
+    assert_identical(detector[...]['data'], da)
+    assert_identical(detector['xx', 0]['data'], da['xx', 0])
+    assert_identical(detector['xx', 1]['data'], da['xx', 1])
+    assert_identical(detector['xx', 0:1]['data'], da['xx', 0:1])
+    assert_identical(detector['yy', 0]['data'], da['yy', 0])
+    assert_identical(detector['yy', 1]['data'], da['yy', 1])
+    assert_identical(detector['yy', 0:1]['data'], da['yy', 0:1])
+    assert_identical(detector['yy', 1:1]['data'], da['yy', 1:1])  # empty slice
 
 
 def create_event_data_ids_1234(group):
@@ -195,7 +202,7 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     detector.create_field('detector_number', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     assert detector.sizes == {'detector_number': 6, 'event_time_zero': 4}
-    da = detector[...]
+    da = detector[...]['events']
     assert sc.identical(
         da.bins.size().data,
         sc.array(
@@ -217,7 +224,7 @@ def test_detector_number_fallback_dims_determines_dims_with_event_data(nxroot):
     detector.create_field('detector_number', detector_numbers)
     detector.create_field('pixel_offset', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
-    da = detector[()]
+    da = detector[()]['events']
     assert da.sizes == {'detector_number': 6}
     assert_identical(da.coords['pixel_offset'], detector_numbers)
 
@@ -228,7 +235,7 @@ def test_loads_event_data_with_0d_detector_numbers(nxroot):
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     assert detector.dims == ('event_time_zero',)
     assert detector.shape == (4,)
-    da = detector[...]
+    da = detector[...]['events']
     assert sc.identical(da.bins.size().data, sc.index(2, dtype='int64'))
 
 
@@ -237,7 +244,7 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     assert detector.sizes == {'dim_0': 2, 'dim_1': 2, 'event_time_zero': 4}
-    da = detector[...]
+    da = detector[...]['events']
     assert sc.identical(
         da.bins.size().data,
         sc.array(
@@ -251,7 +258,7 @@ def test_selecting_pixels_works_with_event_signal(nxroot):
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     assert detector.sizes == {'dim_0': 2, 'dim_1': 2, 'event_time_zero': 4}
-    da = detector['dim_0', 0]
+    da = detector['dim_0', 0]['events']
     assert_identical(
         da.bins.size().data,
         sc.array(dims=['dim_1'], unit=None, dtype='int64', values=[2, 3]),
@@ -263,7 +270,7 @@ def test_selecting_pixels_works_with_embedded_event_signal(nxroot):
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector)
     assert detector.sizes == {'dim_0': 2, 'dim_1': 2, 'event_time_zero': 4}
-    da = detector['dim_0', 0]
+    da = detector['dim_0', 0]['events']
     assert_identical(
         da.bins.size().data,
         sc.array(dims=['dim_1'], unit=None, dtype='int64', values=[2, 3]),
@@ -274,28 +281,28 @@ def test_select_events_slices_underlying_event_data(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
-    da = detector['event_time_zero', :2]
+    da = detector['event_time_zero', :2]['events']
     assert sc.identical(
         da.bins.size().data,
         sc.array(
             dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[1, 1], [0, 1]]
         ),
     )
-    da = detector['event_time_zero', :3]
+    da = detector['event_time_zero', :3]['events']
     assert sc.identical(
         da.bins.size().data,
         sc.array(
             dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[2, 2], [0, 1]]
         ),
     )
-    da = detector['event_time_zero', 3]
+    da = detector['event_time_zero', 3]['events']
     assert sc.identical(
         da.bins.size().data,
         sc.array(
             dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[0, 1], [0, 0]]
         ),
     )
-    da = detector[()]
+    da = detector[()]['events']
     assert sc.identical(
         da.bins.size().data,
         sc.array(
@@ -308,7 +315,7 @@ def test_loading_event_data_without_detector_numbers_does_not_group_events(nxroo
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     assert detector.dims == ('event_time_zero',)
-    da = detector[...]
+    da = detector[...]['events']
     assert_identical(
         da.bins.size().data,
         sc.array(
@@ -351,7 +358,7 @@ def test_nxevent_data_without_detector_number_selection_yields_correct_pulses(nx
 
     class Load:
         def __getitem__(self, select=...):
-            da = detector[select]
+            da = detector[select]['events']
             assert (
                 da.bins.size().sum().value
                 == da.bins.constituents['data'].sizes['event']
@@ -385,7 +392,7 @@ def test_nxevent_data_selection_yields_correct_pulses(nxroot):
 
     class Load:
         def __getitem__(self, select=...):
-            da = detector[select]
+            da = detector[select]['events']
             return da.bins.size().values
 
     assert np.array_equal(Load()[...], [2, 3, 0, 1])
@@ -449,7 +456,7 @@ def test_loads_data_with_coords_and_off_geometry(nxroot, detid_name):
     detector._group.attrs['axes'] = ['xx', 'yy']
     expected = create_off_geometry_detector_numbers_1234(detector, name='shape')
     loaded = detector[...]
-    assert_identical(loaded.coords['shape'].value, expected)
+    assert_identical(loaded['shape'], expected)
 
 
 def test_missing_detector_numbers_given_off_geometry_with_det_faces_loads_as_usual(
@@ -461,10 +468,12 @@ def test_missing_detector_numbers_given_off_geometry_with_det_faces_loads_as_usu
     detector._group.attrs['axes'] = ['xx', 'yy']
     expected = create_off_geometry_detector_numbers_1234(detector, name='shape')
     loaded = detector[...]
-    assert_identical(loaded.coords['shape'].value, expected)
+    assert_identical(loaded['shape'], expected)
 
 
-def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nxroot):
+def test_off_geometry_without_detector_faces_loaded_on_top_level_with_multiple_faces(
+    nxroot,
+):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
@@ -473,8 +482,8 @@ def test_off_geometry_without_detector_faces_loaded_as_0d_with_multiple_faces(nx
         detector, name='shape', detector_faces=False
     )
     loaded = detector[...]
-    assert_identical(loaded.coords['shape'].value, expected)
-    shape = snx.NXoff_geometry.assemble_as_child(loaded.coords['shape'].value)
+    assert_identical(loaded['shape'], expected)
+    shape = snx.NXoff_geometry.assemble_as_child(loaded['shape'])
     assert sc.identical(shape.bins.size(), sc.index(4))
 
 
@@ -498,7 +507,7 @@ def create_cylindrical_geometry_detector_numbers_1234(
     return dg
 
 
-def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
+def test_cylindrical_geometry_without_detector_numbers_loaded_on_top_level(nxroot):
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
@@ -507,8 +516,8 @@ def test_cylindrical_geometry_without_detector_numbers_loaded_as_0d(nxroot):
         detector, name='shape', detector_numbers=False
     )
     loaded = detector[...]
-    assert_identical(loaded.coords['shape'].value, expected)
-    shape = snx.NXcylindrical_geometry.assemble_as_child(loaded.coords['shape'].value)
+    assert_identical(loaded['shape'], expected)
+    shape = snx.NXcylindrical_geometry.assemble_as_child(loaded['shape'])
     assert shape.dims == ()
     assert sc.identical(shape.bins.size(), sc.index(2))
     assert sc.identical(
@@ -540,7 +549,7 @@ def test_cylindrical_geometry_with_missing_parent_detector_numbers_loads_as_usua
         detector, name='shape', detector_numbers=True
     )
     loaded = detector[...]
-    assert_identical(loaded.coords['shape'].value, expected)
+    assert_identical(loaded['shape'], expected)
 
 
 def test_cylindrical_geometry_with_inconsistent_detector_numbers_loads_as_usual(nxroot):
@@ -555,11 +564,11 @@ def test_cylindrical_geometry_with_inconsistent_detector_numbers_loads_as_usual(
         detector, name='shape', detector_numbers=True
     )
     loaded = detector[...]
-    assert_identical(loaded.coords['shape'].value, expected)
-    detector_number = loaded.coords['detector_number']
+    assert_identical(loaded['shape'], expected)
+    detector_number = loaded['data'].coords['detector_number']
     with pytest.raises(snx.NexusStructureError):
         snx.NXcylindrical_geometry.assemble_as_child(
-            loaded.coords['shape'].value, detector_number=detector_number
+            loaded['shape'], detector_number=detector_number
         )
 
 
@@ -574,9 +583,9 @@ def test_cylindrical_geometry_with_detector_numbers(nxroot):
         detector, name='shape', detector_numbers=True
     )
     loaded = detector[...]
-    assert_identical(loaded.coords['shape'].value, expected)
+    assert_identical(loaded['shape'], expected)
     shape = snx.NXcylindrical_geometry.assemble_as_child(
-        loaded.coords['shape'].value, detector_number=loaded.coords['detector_number']
+        loaded['shape'], detector_number=loaded['data'].coords['detector_number']
     )
     assert shape.dims == detector_number.dims
     for i in [0, 3]:
