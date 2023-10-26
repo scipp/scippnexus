@@ -703,3 +703,21 @@ def test_pixel_masks_adds_suffix():
     )
     masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask, '_test')
     assert all(k.endswith('_test') for k in masks.keys())
+
+
+def test_pixel_masks_undefined_are_included():
+    bitmask = sc.array(
+        dims=['detector_pixel'],
+        values=1 << (32 - np.array([10, 0])),
+        dtype='int32',
+    )
+    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask)
+    assert np.all(
+        masks.get('undefined_bit9').values
+        == np.array(
+            [
+                1,
+                0,
+            ]
+        )
+    )
