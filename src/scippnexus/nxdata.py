@@ -614,6 +614,10 @@ class NXdetector(NXdata):
         }
 
         number_of_bits_in_dtype = 8 * bitmask.values.dtype.itemsize
+        # Special case, treat bool as if it only stores a single bit
+        if bitmask.dtype == 'bool':
+            number_of_bits_in_dtype = 1
+
         # Bitwise indicator of what masks are present
         masks_present = np.bitwise_or.reduce(bitmask.values)
 
