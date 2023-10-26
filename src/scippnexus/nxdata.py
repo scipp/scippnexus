@@ -413,15 +413,12 @@ class NXdata(NXobject):
         Sets alignment in the same way as slicing scipp.DataArray would.
         """
         for name, coord in coords.items():
-            if not isinstance(coord, sc.Variable):
-                da.coords[name] = sc.scalar(coord)
-            else:
-                da.coords[name] = coord
-                # We need the shape *before* slicing to determine dims, so we get the
-                # field from the group for the conditional.
-                da.coords.set_aligned(
-                    name, self._should_be_aligned(da, name, self._children[name])
-                )
+            da.coords[name] = coord
+            # We need the shape *before* slicing to determine dims, so we get the
+            # field from the group for the conditional.
+            da.coords.set_aligned(
+                name, self._should_be_aligned(da, name, self._children[name])
+            )
         return da
 
 
