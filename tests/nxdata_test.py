@@ -202,21 +202,19 @@ def test_transpose_indices_attribute_for_coord(h5root):
     assert sc.identical(data[...], da)
 
 
-def test_auxiliary_signal_causes_load_as_datagroup(h5root):
-    da = sc.DataArray(
-        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
-    )
-    da.coords['xx'] = da.data['xx', 0]
+def test_auxiliary_signal_causes_load_as_dataset(h5root):
+    signal = sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    aux = signal * 2
     data = snx.create_class(h5root, 'data1', NXdata)
-    data.attrs['axes'] = da.dims
+    data.attrs['axes'] = signal.dims
     data.attrs['signal'] = 'signal'
     # We flag 'xx' as auxiliary_signal. It should thus not be loaded as a coord,
     # even though we create the field.
     data.attrs['auxiliary_signals'] = ['xx']
-    snx.create_field(data, 'signal', da.data)
-    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'signal', signal)
+    snx.create_field(data, 'xx', aux)
     data = snx.Group(data, definitions=snx.base_definitions())
-    assert_identical(data[...], sc.DataGroup(signal=da.data, xx=da.coords['xx']))
+    assert_identical(data[...], sc.Dataset({'signal': signal, 'xx': aux}))
 
 
 def test_NXlog_data_is_loaded_as_time_dependent_data_array(nxroot):
