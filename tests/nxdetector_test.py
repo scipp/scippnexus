@@ -687,3 +687,43 @@ def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root):
     dg = detector[()]
     assert_identical(dg['xy'], xy)
     assert_identical(dg['z'], z)
+
+
+@pytest.mark.parametrize('bits,dtype', ((1, 'bool'), (32, 'int32'), (64, 'int64')))
+def test_pixel_masks_interpreted_correctly(bits, dtype):
+    bitmask = sc.array(
+        dims=['detector_pixel'],
+        # Set mask 0, 1, 2, and 4 but not 3.
+        values=1 << (bits - np.array([1, 2, 3, bits + 1, 5])),
+        dtype=dtype,
+    )
+    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask)
+
+    assert np.all(masks.get('gap').values == np.array([1, 0, 0, 0, 0]))
+    # A 'boolean' bitmask can only define one mask
+    if dtype != 'bool':
+        assert np.all(masks.get('dead').values == np.array([0, 1, 0, 0, 0]))
+        assert np.all(masks.get('under_responding').values == np.array([0, 0, 1, 0, 0]))
+        assert np.all(masks.get('noisy').values == np.array([0, 0, 0, 0, 1]))
+        assert 'virtual_pixel' not in masks
+        assert 'user_defined_pixel' not in masks
+
+
+def test_pixel_masks_adds_suffix():
+    bitmask = sc.array(
+        dims=['detector_pixel'],
+        values=1 << (32 - np.array([1, 2, 3, 0, 5])),
+        dtype='int32',
+    )
+    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask, '_test')
+    assert all(k.endswith('_test') for k in masks.keys())
+
+
+def test_pixel_masks_undefined_are_included():
+    bitmask = sc.array(
+        dims=['detector_pixel'],
+        values=1 << (32 - np.array([10, 0])),
+        dtype='int32',
+    )
+    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask)
+    assert np.all(masks.get('undefined_bit9').values == np.array([1, 0]))
