@@ -592,7 +592,7 @@ class NXdetector(NXdata):
         for suffix, bitmask in bitmasks.items():
             masks = self.transform_bitmask_to_dict_of_masks(bitmask, suffix)
             for da in (
-                array_or_dataset.items()
+                array_or_dataset.values()
                 if isinstance(array_or_dataset, sc.Dataset)
                 else [array_or_dataset]
             ):
