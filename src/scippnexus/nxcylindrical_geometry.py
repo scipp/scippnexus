@@ -14,7 +14,7 @@ def _parse(
     vertices: sc.Variable,
     cylinders: sc.Variable,
     detector_number: Optional[sc.Variable] = None,
-    parent_detector_number: Optional[sc.Variable] = None
+    parent_detector_number: Optional[sc.Variable] = None,
 ) -> sc.Variable:
     face1_center = cylinders['vertex_index', 0]
     face1_edge = cylinders['vertex_index', 1]

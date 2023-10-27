@@ -14,7 +14,7 @@ def off_to_shape(
     winding_order: sc.Variable,
     faces: sc.Variable,
     detector_faces: Optional[sc.Variable] = None,
-    detector_number: Optional[sc.Variable] = None
+    detector_number: Optional[sc.Variable] = None,
 ) -> sc.Variable:
     """
     Convert OFF shape description to simpler shape representation.

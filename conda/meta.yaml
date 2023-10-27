@@ -1,6 +1,8 @@
 package:
   name: scippnexus
+
   version: {{ GIT_DESCRIBE_TAG }}
+
 source:
   path: ..
 
@@ -34,7 +36,7 @@ build:
 about:
   home: https://github.com/scipp/scippnexus
   license: BSD-3-Clause
-  summary: An h5py-like utility for NeXus files based with seamless scipp integration
-  description: An h5py-like utility for NeXus files based with seamless scipp integration
+  summary: An h5py-like utility for NeXus files with seamless Scipp integration
+  description: An h5py-like utility for NeXus files with seamless Scipp integration
   dev_url: https://github.com/scipp/scippnexus
   doc_url: https://scipp.github.io/scippnexus
