@@ -765,7 +765,6 @@ def test_pixel_masks_parses_masks_correctly(h5root, dtype):
         ),
     )
 
-    # A 'boolean' bitmask can only define one mask
     if dtype in ('int8', 'int16'):
         assert len(da.masks) == 4
         return
