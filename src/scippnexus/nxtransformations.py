@@ -232,3 +232,52 @@ def maybe_transformation(
 
         return Transformation(obj).make_transformation(value, transformation_type, sel)
     return value
+
+
+class GroupTree:
+    """
+    Navigate in a nested dict structure like in a filesystem.
+    """
+
+    def __init__(self, path: List[sc.DataGroup]):
+        self.path = path
+
+    @property
+    def root(self) -> GroupTree:
+        return GroupTree(self.path[0:1])
+
+    @property
+    def parent(self) -> Optional[GroupTree]:
+        return None if len(self.path) == 1 else GroupTree(self.path[:-1])
+
+    @property
+    def value(self) -> sc.DataGroup:
+        return self.path[-1]
+
+    def __getitem__(self, path: str) -> GroupTree:
+        segments = path.split('/', maxsplit=1)
+        if segments[0] == '':
+            return self.root[segments[1]]
+        if segments[0] == '.':
+            return self[segments[1]]
+        if segments[0] == '..':
+            return self.parent[segments[1]]
+        tree = GroupTree(self.path + [self.path[-1][segments[0]]])
+        return tree if len(segments) == 1 else tree[segments[1]]
+
+    def resolve_depends_on(self) -> Optional[sc.DataArray]:
+        depends_on = self.value.get('depends_on')
+        if depends_on is None:
+            return None
+        origin = sc.vector([0, 0, 0], unit='m')
+        if depends_on == '.':
+            return origin.copy()
+        return self._make_transform(depends_on) * origin
+
+    def _make_transform(self, depends_on: str) -> sc.DataArray:
+        node = self[depends_on]
+        transform = node.value.copy(deep=False)
+        depends_on = transform.coords.pop('depends_on').value
+        if depends_on == '.':
+            return transform
+        return transform * node.parent._make_transform(depends_on)
