@@ -690,71 +690,14 @@ def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root):
 
 
 @pytest.mark.parametrize('dtype', ('bool', 'int8', 'int16', 'int32', 'int64'))
-def test_pixel_masks_interpreted_correctly(dtype):
-    bitmask = sc.array(
-        dims=['detector_pixel'],
-        values=(
-            # Set mask 0, 1, 2, and 4 but not 3.
-            1 << np.array([0, 1, 2, -1, 4])
-            if dtype != 'bool'
-            else
-            # Set mask 0 only.
-            np.array([1, 0, 0, 0, 0])
-        )
-        .astype(dtype)
-        .astype('int64'),
-        dtype='int64',
-    )
-    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask)
-
-    assert_identical(
-        masks.get('gap'),
-        sc.array(dims=('detector_pixel',), values=[1, 0, 0, 0, 0], dtype='bool'),
-    )
-
-    # A 'boolean' bitmask can only define one mask
+def test_pixel_masks_parses_masks_correctly(h5root, dtype):
     if dtype == 'bool':
-        assert len(masks) == 1
-        return
+        bitmask = np.array([[1, 0], [0, 0]], dtype=dtype)
+    elif dtype in ('int8', 'int16'):
+        bitmask = np.array([[1, 2], [0, 0]], dtype=dtype)
+    else:
+        bitmask = np.array([[1, 2], [2**17, 0]], dtype=dtype)
 
-    assert_identical(
-        masks.get('dead'),
-        sc.array(dims=('detector_pixel',), values=[0, 1, 0, 0, 0], dtype='bool'),
-    )
-    assert_identical(
-        masks.get('under_responding'),
-        sc.array(dims=('detector_pixel',), values=[0, 0, 1, 0, 0], dtype='bool'),
-    )
-    assert_identical(
-        masks.get('noisy'),
-        sc.array(dims=('detector_pixel',), values=[0, 0, 0, 0, 1], dtype='bool'),
-    )
-    assert len(masks) == 4
-
-
-def test_pixel_masks_adds_suffix():
-    bitmask = sc.array(
-        dims=['detector_pixel'],
-        values=(1 << np.array([0, 1, 2, -1, 4])),
-        dtype='int32',
-    )
-    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask, '_1')
-    assert len(masks) == 4
-    assert all(k.endswith('_1') for k in masks.keys())
-
-
-def test_pixel_masks_undefined_are_included():
-    bitmask = sc.array(
-        dims=['detector_pixel'],
-        values=1 << np.array([9, 0]),
-        dtype='int32',
-    )
-    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask)
-    assert np.all(masks.get('undefined_bit9').values == np.array([1, 0]))
-
-
-def test_pixel_masks_reads_expected_fields(h5root):
-    bitmask = 1 << np.array([[0, 1], [-1, -1]])
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     )
@@ -769,8 +712,9 @@ def test_pixel_masks_reads_expected_fields(h5root):
     detector.attrs['axes'] = ['xx', '.']
     detector = make_group(detector)
     da = detector[...]
+
     assert_identical(
-        da.masks.get('gap'),
+        da.masks.get('gap_pixel'),
         sc.array(
             dims=(
                 'dim_1',
@@ -781,18 +725,7 @@ def test_pixel_masks_reads_expected_fields(h5root):
         ),
     )
     assert_identical(
-        da.masks.get('dead'),
-        sc.array(
-            dims=(
-                'dim_1',
-                'xx',
-            ),
-            values=[[0, 1], [0, 0]],
-            dtype='bool',
-        ),
-    )
-    assert_identical(
-        da.masks.get('gap_2'),
+        da.masks.get('gap_pixel_2'),
         sc.array(
             dims=(
                 'dim_1',
@@ -802,8 +735,15 @@ def test_pixel_masks_reads_expected_fields(h5root):
             dtype='bool',
         ),
     )
+
+    # A 'boolean' bitmask can only define one mask
+    if dtype == 'bool':
+        print(bitmask, list(da.masks.keys()))
+        assert len(da.masks) == 2
+        return
+
     assert_identical(
-        da.masks.get('dead_2'),
+        da.masks.get('dead_pixel'),
         sc.array(
             dims=(
                 'dim_1',
@@ -813,7 +753,46 @@ def test_pixel_masks_reads_expected_fields(h5root):
             dtype='bool',
         ),
     )
-    assert len(da.masks) == 4
+    assert_identical(
+        da.masks.get('dead_pixel_2'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[0, 1], [0, 0]],
+            dtype='bool',
+        ),
+    )
+
+    # A 'boolean' bitmask can only define one mask
+    if dtype in ('int8', 'int16'):
+        assert len(da.masks) == 4
+        return
+
+    assert_identical(
+        da.masks.get('undefined_bit17_pixel'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[0, 0], [1, 0]],
+            dtype='bool',
+        ),
+    )
+    assert_identical(
+        da.masks.get('undefined_bit17_pixel_2'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[0, 0], [1, 0]],
+            dtype='bool',
+        ),
+    )
+    assert len(da.masks) == 6
 
 
 def test_pixel_masks_adds_mask_to_all_dataarrays_of_dataset(h5root):
@@ -833,5 +812,5 @@ def test_pixel_masks_adds_mask_to_all_dataarrays_of_dataset(h5root):
     detector.attrs['axes'] = ['xx', '.']
     detector = make_group(detector)
     ds = detector[...]
-    assert set(ds['data'].masks.keys()) == set(('gap', 'dead'))
-    assert set(ds['data_2'].masks.keys()) == set(('gap', 'dead'))
+    assert set(ds['data'].masks.keys()) == set(('gap_pixel', 'dead_pixel'))
+    assert set(ds['data_2'].masks.keys()) == set(('gap_pixel', 'dead_pixel'))
