@@ -707,14 +707,29 @@ def test_pixel_masks_interpreted_correctly(dtype):
     )
     masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask)
 
-    assert np.all(masks.get('gap').values == np.array([1, 0, 0, 0, 0]))
+    assert_identical(
+        masks.get('gap'),
+        sc.array(dims=('detector_pixel',), values=[1, 0, 0, 0, 0], dtype='bool'),
+    )
+
     # A 'boolean' bitmask can only define one mask
-    if dtype != 'bool':
-        assert np.all(masks.get('dead').values == np.array([0, 1, 0, 0, 0]))
-        assert np.all(masks.get('under_responding').values == np.array([0, 0, 1, 0, 0]))
-        assert np.all(masks.get('noisy').values == np.array([0, 0, 0, 0, 1]))
-        assert 'virtual_pixel' not in masks
-        assert 'user_defined_pixel' not in masks
+    if dtype == 'bool':
+        assert len(masks) == 1
+        return
+
+    assert_identical(
+        masks.get('dead'),
+        sc.array(dims=('detector_pixel',), values=[0, 1, 0, 0, 0], dtype='bool'),
+    )
+    assert_identical(
+        masks.get('under_responding'),
+        sc.array(dims=('detector_pixel',), values=[0, 0, 1, 0, 0], dtype='bool'),
+    )
+    assert_identical(
+        masks.get('noisy'),
+        sc.array(dims=('detector_pixel',), values=[0, 0, 0, 0, 1], dtype='bool'),
+    )
+    assert len(masks) == 4
 
 
 def test_pixel_masks_adds_suffix():
@@ -723,9 +738,9 @@ def test_pixel_masks_adds_suffix():
         values=(1 << np.array([0, 1, 2, -1, 4])),
         dtype='int32',
     )
-    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask, '_test')
+    masks = snx.NXdetector.transform_bitmask_to_dict_of_masks(bitmask, '_1')
     assert len(masks) == 4
-    assert all(k.endswith('_test') for k in masks.keys())
+    assert all(k.endswith('_1') for k in masks.keys())
 
 
 def test_pixel_masks_undefined_are_included():
@@ -754,10 +769,51 @@ def test_pixel_masks_reads_expected_fields(h5root):
     detector.attrs['axes'] = ['xx', '.']
     detector = make_group(detector)
     da = detector[...]
-    assert np.allclose(da.masks.get('gap').values, np.array([[1, 0], [0, 0]]))
-    assert np.allclose(da.masks.get('dead').values, np.array([[0, 1], [0, 0]]))
-    assert np.allclose(da.masks.get('gap_2').values, np.array([[1, 0], [0, 0]]))
-    assert np.allclose(da.masks.get('dead_2').values, np.array([[0, 1], [0, 0]]))
+    assert_identical(
+        da.masks.get('gap'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[1, 0], [0, 0]],
+            dtype='bool',
+        ),
+    )
+    assert_identical(
+        da.masks.get('dead'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[0, 1], [0, 0]],
+            dtype='bool',
+        ),
+    )
+    assert_identical(
+        da.masks.get('gap_2'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[1, 0], [0, 0]],
+            dtype='bool',
+        ),
+    )
+    assert_identical(
+        da.masks.get('dead_2'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[0, 1], [0, 0]],
+            dtype='bool',
+        ),
+    )
+    assert len(da.masks) == 4
 
 
 def test_pixel_masks_adds_mask_to_all_dataarrays_of_dataset(h5root):

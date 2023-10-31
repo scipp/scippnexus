@@ -583,7 +583,7 @@ class NXdetector(NXdata):
         bitmasks = {
             key[len('pixel_mask') :]: dg.pop(key)
             # tuple because we are going to change the dict over the iteration
-            for key in tuple(dg.keys())
+            for key in tuple(dg)
             if key.startswith('pixel_mask')
         }
 
@@ -606,9 +606,9 @@ class NXdetector(NXdata):
             0: 'gap',
             1: 'dead',
             2: 'under_responding',
-            3: 'virtual_pixel',
+            3: 'over_responding',
             4: 'noisy',
-            6: 'pixel_is_part_of_a_cluster_of_problematic_pixels',
+            6: 'part_of_a_cluster_of_problematic_pixels',
             8: 'user_defined_mask',
             31: 'virtual_pixel',
         }
@@ -617,15 +617,16 @@ class NXdetector(NXdata):
 
         # Bitwise indicator of what masks are present
         masks_present = np.bitwise_or.reduce(bitmask.values.ravel())
+        one = np.array(1)
 
         masks = {}
         for bit in range(number_of_bits_in_dtype):
             # Check if the mask associated with the current `bit` is present
-            if (masks_present >> bit) % 2:
+            if masks_present & (one << bit):
                 name = bit_to_mask_name.get(bit, f'undefined_bit{bit}') + suffix
                 masks[name] = sc.array(
                     dims=bitmask.dims,
-                    values=(bitmask.values >> bit) % 2,
+                    values=bitmask.values & (one << bit),
                     dtype='bool',
                 )
         return masks
