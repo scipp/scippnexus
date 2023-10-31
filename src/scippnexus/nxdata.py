@@ -605,8 +605,8 @@ class NXdetector(NXdata):
         bit_to_mask_name = {
             0: 'gap_pixel',
             1: 'dead_pixel',
-            2: 'under_responding_pixel',
-            3: 'over_responding_pixel',
+            2: 'underresponding_pixel',
+            3: 'overresponding_pixel',
             4: 'noisy_pixel',
             6: 'part_of_a_cluster_of_problematic_pixels',
             8: 'user_defined_mask_pixel',
