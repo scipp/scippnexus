@@ -47,9 +47,9 @@ def test_finds_data_from_group_attr(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     )
-    da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
+    da.coords['detector_number'] = detector_numbers_xx_yy_1234()
     detector = snx.create_class(h5root, 'detector0', NXdetector)
-    snx.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx.create_field(detector, 'detector_number', da.coords['detector_number'])
     snx.create_field(detector, 'custom', da.data)
     detector.attrs['signal'] = 'custom'
     detector = make_group(detector)
@@ -105,9 +105,9 @@ def detector_numbers_xx_yy_1234():
 
 def test_loads_data_without_coords(h5root):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], values=[[1.1, 2.2], [3.3, 4.4]]))
-    da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
+    da.coords['detector_number'] = detector_numbers_xx_yy_1234()
     detector = snx.create_class(h5root, 'detector0', NXdetector)
-    snx.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx.create_field(detector, 'detector_number', da.coords['detector_number'])
     snx.create_field(detector, 'data', da.data)
     detector = make_group(detector)
     assert sc.identical(
@@ -134,10 +134,10 @@ def test_loads_data_with_coords(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     )
-    da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
+    da.coords['detector_number'] = detector_numbers_xx_yy_1234()
     da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
     detector = snx.create_class(h5root, 'detector0', NXdetector)
-    snx.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx.create_field(detector, 'detector_number', da.coords['detector_number'])
     snx.create_field(detector, 'xx', da.coords['xx'])
     snx.create_field(detector, 'data', da.data)
     detector.attrs['axes'] = ['xx', '.']
@@ -149,7 +149,7 @@ def test_slicing_works_as_in_scipp(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2, 3.3], [3.3, 4.4, 5.5]])
     )
-    da.coords['detector_numbers'] = sc.array(
+    da.coords['detector_number'] = sc.array(
         dims=['xx', 'yy'], unit=None, values=np.array([[1, 2, 3], [4, 5, 6]])
     )
     da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
@@ -159,13 +159,14 @@ def test_slicing_works_as_in_scipp(h5root):
         dims=['yy', 'xx'], unit='m', values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     )
     detector = snx.create_class(h5root, 'detector0', NXdetector)
-    snx.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx.create_field(detector, 'detector_number', da.coords['detector_number'])
     snx.create_field(detector, 'xx', da.coords['xx'])
     snx.create_field(detector, 'xx2', da.coords['xx2'])
     snx.create_field(detector, 'yy', da.coords['yy'])
     snx.create_field(detector, '2d_edges', da.coords['2d_edges'])
     snx.create_field(detector, 'data', da.data)
     detector.attrs['axes'] = ['xx', 'yy']
+    detector.attrs['xx2_indices'] = [0]
     detector.attrs['2d_edges_indices'] = [1, 0]
     detector = make_group(detector)
     assert_identical(detector[...]['data'], da)
@@ -222,11 +223,9 @@ def test_detector_number_fallback_dims_determines_dims_with_event_data(nxroot):
     )
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
-    detector.create_field('pixel_offset', detector_numbers)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     da = detector[()]['events']
     assert da.sizes == {'detector_number': 6}
-    assert_identical(da.coords['pixel_offset'], detector_numbers)
 
 
 def test_loads_event_data_with_0d_detector_numbers(nxroot):

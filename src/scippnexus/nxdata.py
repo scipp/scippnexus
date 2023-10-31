@@ -229,6 +229,8 @@ class NXdata(NXobject):
             for key, attr in attrs.items()
             if key.endswith(indices_suffix)
         }
+        # Datasets referenced by an "indices" attribute will be added as coords.
+        self._explicit_coords = list(indices_attrs)
 
         dims = np.array(self._axes)
         self._dims_from_indices = {
@@ -352,7 +354,9 @@ class NXdata(NXobject):
             return sc.DataGroup(signals)
         return da
 
-    def _assemble_as_physical_component(self, dg: sc.DataGroup) -> sc.DataGroup:
+    def _assemble_as_physical_component(
+        self, dg: sc.DataGroup, allow_in_coords: List[str]
+    ) -> sc.DataGroup:
         """
         Assemble suitable for physical components such as NXdetector or NXmonitor.
 
@@ -369,17 +373,19 @@ class NXdata(NXobject):
         """
         data_items = sc.DataGroup()
         result = sc.DataGroup()
-        signals = [self._signal_name] + self._aux_signals
+        forward = (
+            [self._signal_name]
+            + list(self._group_dims or [])
+            + self._aux_signals
+            + self._explicit_coords
+            + allow_in_coords
+        )
+
         for name, value in dg.items():
-            # We need the shape *before* slicing to determine dims, so we get the
-            # field from the group for the conditional.
-            if name not in signals and (
-                isinstance(value, (sc.DataArray, sc.DataGroup))
-                or self._children[name].shape == ()
-            ):
-                result[name] = value
-            else:
+            if name in forward:
                 data_items[name] = value
+            else:
+                result[name] = value
         assembled_nxdata = self._assemble_as_data(data_items)
         result.update(
             {self._signal_name: assembled_nxdata}
@@ -620,8 +626,37 @@ class NXdetector(NXdata):
             fallback_signal_name='data',
         )
 
+    def coord_allow_list(self) -> List[str]:
+        """
+        Names of datasets that will be treated as coordinates.
+
+        Note that in addition to these, all datasets matching the data's dimensions
+        as well as datasets explicitly referenced by an "indices" attribute in the
+        group's list of attributes will be treated as coordinates.
+
+        Override in subclasses to customize assembly of datasets into loaded output.
+        """
+        return NXdetector._detector_number_fields + [
+            'time_of_flight',
+            'raw_time_of_flight',
+            'x_pixel_offset',
+            'y_pixel_offset',
+            'z_pixel_offset',
+            'distance',
+            'polar_angle',
+            'azimuthal_angle',
+            'crate',
+            'slot',
+            'input',
+            'start_time',
+            'stop_time',
+            'sequence_number',
+        ]
+
     def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
-        return self._assemble_as_physical_component(dg)
+        return self._assemble_as_physical_component(
+            dg, allow_in_coords=self.coord_allow_list()
+        )
 
     @property
     def detector_number(self) -> Optional[str]:
@@ -637,8 +672,22 @@ class NXmonitor(NXdata):
             signal = 'data'
         super().__init__(attrs=attrs, children=children, fallback_signal_name=signal)
 
+    def coord_allow_list(self) -> List[str]:
+        """
+        Names of datasets that will be treated as coordinates.
+
+        Note that in addition to these, all datasets matching the data's dimensions
+        as well as datasets explicitly referenced by an "indices" attribute in the
+        group's list of attributes will be treated as coordinates.
+
+        Override in subclasses to customize assembly of datasets into loaded output.
+        """
+        return ['distance', 'time_of_flight']
+
     def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
-        return self._assemble_as_physical_component(dg)
+        return self._assemble_as_physical_component(
+            dg, allow_in_coords=self.coord_allow_list()
+        )
 
 
 def _group_events(
