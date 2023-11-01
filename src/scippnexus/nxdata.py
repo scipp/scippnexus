@@ -57,7 +57,7 @@ class NXdata(NXobject):
         self._valid = True  # True if the children can be assembled
         self._signal_name = None
         self._signal = None
-        self._aux_signals = attrs.get('auxiliary_signals', [])
+        self._aux_signals = list(attrs.get('auxiliary_signals', []))
 
         self._init_signal(
             name=attrs.get('signal', fallback_signal_name), children=children
@@ -654,9 +654,54 @@ class NXdetector(NXdata):
         ]
 
     def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
-        return self._assemble_as_physical_component(
+        bitmasks = {
+            key[len('pixel_mask') :]: dg.pop(key)
+            # tuple because we are going to change the dict over the iteration
+            for key in tuple(dg)
+            if key.startswith('pixel_mask')
+        }
+
+        out = self._assemble_as_physical_component(
             dg, allow_in_coords=self.coord_allow_list()
         )
+
+        for suffix, bitmask in bitmasks.items():
+            masks = self.transform_bitmask_to_dict_of_masks(bitmask, suffix)
+            for signal in [self._signal_name] + self._aux_signals:
+                for name, mask in masks.items():
+                    out[signal].masks[name] = mask
+        return out
+
+    @staticmethod
+    def transform_bitmask_to_dict_of_masks(bitmask: sc.Variable, suffix: str = ''):
+        bit_to_mask_name = {
+            0: 'gap_pixel',
+            1: 'dead_pixel',
+            2: 'underresponding_pixel',
+            3: 'overresponding_pixel',
+            4: 'noisy_pixel',
+            6: 'part_of_a_cluster_of_problematic_pixels',
+            8: 'user_defined_mask_pixel',
+            31: 'virtual_pixel',
+        }
+
+        number_of_bits_in_dtype = 8 * bitmask.values.dtype.itemsize
+
+        # Bitwise indicator of what masks are present
+        masks_present = np.bitwise_or.reduce(bitmask.values.ravel())
+        one = np.array(1)
+
+        masks = {}
+        for bit in range(number_of_bits_in_dtype):
+            # Check if the mask associated with the current `bit` is present
+            if masks_present & (one << bit):
+                name = bit_to_mask_name.get(bit, f'undefined_bit{bit}_pixel') + suffix
+                masks[name] = sc.array(
+                    dims=bitmask.dims,
+                    values=bitmask.values & (one << bit),
+                    dtype='bool',
+                )
+        return masks
 
     @property
     def detector_number(self) -> Optional[str]:
