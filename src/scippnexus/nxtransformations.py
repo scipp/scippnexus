@@ -3,6 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
+from math import prod
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
@@ -271,14 +272,12 @@ class TransformationChainResolver:
         if depends_on is None:
             return None
         origin = sc.vector([0, 0, 0], unit='m')
-        if depends_on == '.':
-            return origin.copy()
-        return self._make_transform(depends_on) * origin
+        return prod(self.get_chain(depends_on)) * origin
 
-    def _make_transform(self, depends_on: str) -> sc.DataArray:
+    def get_chain(self, depends_on: str) -> List[Union[sc.DataArray, sc.Variable]]:
+        if depends_on == '.':
+            return []
         node = self[depends_on]
         transform = node.value.copy(deep=False)
         depends_on = transform.coords.pop('depends_on').value
-        if depends_on == '.':
-            return transform
-        return transform * node.parent._make_transform(depends_on)
+        return [transform] + node.parent.get_chain(depends_on)
