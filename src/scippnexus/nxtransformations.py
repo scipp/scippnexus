@@ -232,7 +232,7 @@ def maybe_transformation(
     return value
 
 
-class GroupTree:
+class TransformationChainResolver:
     """
     Navigate in a nested dict structure like in a filesystem.
     """
@@ -241,18 +241,20 @@ class GroupTree:
         self.path = path
 
     @property
-    def root(self) -> GroupTree:
-        return GroupTree(self.path[0:1])
+    def root(self) -> TransformationChainResolver:
+        return TransformationChainResolver(self.path[0:1])
 
     @property
-    def parent(self) -> Optional[GroupTree]:
-        return None if len(self.path) == 1 else GroupTree(self.path[:-1])
+    def parent(self) -> Optional[TransformationChainResolver]:
+        return (
+            None if len(self.path) == 1 else TransformationChainResolver(self.path[:-1])
+        )
 
     @property
     def value(self) -> sc.DataGroup:
         return self.path[-1]
 
-    def __getitem__(self, path: str) -> GroupTree:
+    def __getitem__(self, path: str) -> TransformationChainResolver:
         base, *remainder = path.split('/', maxsplit=1)
         if base == '':
             node = self.root
@@ -261,7 +263,7 @@ class GroupTree:
         elif base == '..':
             node = self.parent
         else:
-            node = GroupTree(self.path + [self.path[-1][base]])
+            node = TransformationChainResolver(self.path + [self.path[-1][base]])
         return node if len(remainder) == 0 else node[remainder[0]]
 
     def resolve_depends_on(self) -> Optional[sc.DataArray]:

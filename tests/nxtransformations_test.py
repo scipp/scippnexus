@@ -5,7 +5,7 @@ import scipp as sc
 from scipp.testing import assert_identical
 
 import scippnexus as snx
-from scippnexus.nxtransformations import GroupTree, NXtransformations
+from scippnexus.nxtransformations import NXtransformations, TransformationChainResolver
 
 
 def make_group(group: h5py.Group) -> snx.Group:
@@ -434,8 +434,8 @@ def test_slice_transformations(h5root):
     )
 
 
-def test_GroupTree():
-    tree = GroupTree([{'a': {'b': {'c': 1}}}])
+def test_TransformationChainResolver_path_handling():
+    tree = TransformationChainResolver([{'a': {'b': {'c': 1}}}])
     assert tree['a']['b']['c'].value == 1
     assert tree['a/b/c'].value == 1
     assert tree['/a/b/c'].value == 1
@@ -448,20 +448,20 @@ origin = sc.vector([0, 0, 0], unit='m')
 
 
 def test_resolve_depends_on_dot():
-    tree = GroupTree([{'depends_on': '.'}])
+    tree = TransformationChainResolver([{'depends_on': '.'}])
     assert sc.identical(tree.resolve_depends_on(), origin)
 
 
 def test_resolve_depends_on_child():
     transform = sc.DataArray(sc.scalar(1), coords={'depends_on': sc.scalar('.')})
-    tree = GroupTree([{'depends_on': 'child', 'child': transform}])
+    tree = TransformationChainResolver([{'depends_on': 'child', 'child': transform}])
     expected = transform.drop_coords('depends_on') * origin
     assert sc.identical(tree.resolve_depends_on(), expected)
 
 
 def test_resolve_depends_on_grandchild():
     transform = sc.DataArray(sc.scalar(1), coords={'depends_on': sc.scalar('.')})
-    tree = GroupTree(
+    tree = TransformationChainResolver(
         [{'depends_on': 'child/grandchild', 'child': {'grandchild': transform}}]
     )
     expected = transform.drop_coords('depends_on') * origin
@@ -471,7 +471,7 @@ def test_resolve_depends_on_grandchild():
 def test_resolve_depends_on_child1_depends_on_child2():
     transform1 = sc.DataArray(sc.scalar(2), coords={'depends_on': sc.scalar('child2')})
     transform2 = sc.DataArray(sc.scalar(3), coords={'depends_on': sc.scalar('.')})
-    tree = GroupTree(
+    tree = TransformationChainResolver(
         [{'depends_on': 'child1', 'child1': transform1, 'child2': transform2}]
     )
     expected = (
@@ -487,7 +487,7 @@ def test_resolve_depends_on_grandchild1_depends_on_grandchild2():
         sc.scalar(2), coords={'depends_on': sc.scalar('grandchild2')}
     )
     transform2 = sc.DataArray(sc.scalar(3), coords={'depends_on': sc.scalar('.')})
-    tree = GroupTree(
+    tree = TransformationChainResolver(
         [
             {
                 'depends_on': 'child/grandchild1',
@@ -508,7 +508,7 @@ def test_resolve_depends_on_grandchild1_depends_on_child2():
         sc.scalar(2), coords={'depends_on': sc.scalar('../child2')}
     )
     transform2 = sc.DataArray(sc.scalar(3), coords={'depends_on': sc.scalar('.')})
-    tree = GroupTree(
+    tree = TransformationChainResolver(
         [
             {
                 'depends_on': 'child1/grandchild1',
