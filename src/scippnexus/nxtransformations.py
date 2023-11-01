@@ -238,8 +238,51 @@ class TransformationChainResolver:
             return []
         node = self[depends_on]
         transform = node.value.copy(deep=False)
-        depends_on = transform.coords.pop('depends_on').value
-        # If transform is time-dependent then we keep it is a DataArray, otherwise
-        # we convert it to a Variable.
-        transform = transform if transform.coords else transform.data
+        depends_on = '.'
+        if isinstance(transform, sc.DataArray):
+            if (attr := transform.coords.pop('depends_on', None)) is not None:
+                depends_on = attr.value
+            # If transform is time-dependent then we keep it is a DataArray, otherwise
+            # we convert it to a Variable.
+            transform = transform if transform.coords else transform.data
         return [transform] + node.parent.get_chain(depends_on)
+
+
+def compute_positions(dg: sc.DataGroup, *, store_as: str = 'position') -> sc.DataGroup:
+    """
+    Recursively compute positions from depends_on attributes.
+
+    Parameters
+    ----------
+    dg:
+        Data group with depends_on entry points into transformation chains.
+    store_as:
+        Name used to store result of resolving each depends_on chain.
+
+    Returns
+    -------
+    :
+        Data group with positions added.
+    """
+    # Create resolver at root level, since any depends_on chain may lead to a parent,
+    # i.e., we cannot use a resolver at the level of each chain's entry point.
+    resolver = TransformationChainResolver([dg])
+    return _compute_positions(dg, store_as=store_as, resolver=resolver)
+
+
+def _compute_positions(
+    dg: sc.DataGroup,
+    *,
+    store_as: str,
+    resolver: TransformationChainResolver,
+) -> sc.DataGroup:
+    out = sc.DataGroup()
+    if 'depends_on' in dg:
+        out[store_as] = resolver.resolve_depends_on()
+    for name, value in dg.items():
+        if isinstance(value, sc.DataGroup):
+            value = _compute_positions(
+                value, store_as=store_as, resolver=resolver[name]
+            )
+        out[name] = value
+    return out
