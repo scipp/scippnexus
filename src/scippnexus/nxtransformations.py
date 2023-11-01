@@ -17,14 +17,6 @@ class TransformationError(NexusStructureError):
     pass
 
 
-def make_transformation(obj, /, path) -> Optional[Union[Field, Group]]:
-    if path.startswith('/'):
-        return obj.file[path]
-    elif path != '.':
-        return obj.parent[path]
-    return None  # end of chain
-
-
 class NXtransformations(NXobject):
     """Group of transformations."""
 
@@ -52,12 +44,6 @@ class Transformation:
     @property
     def name(self):
         return self._obj.name
-
-    @property
-    def depends_on(self):
-        if (path := self.attrs.get('depends_on')) is not None:
-            return make_transformation(self._obj, path)
-        return None
 
     @property
     def offset(self):
@@ -146,26 +132,6 @@ def _smaller_unit(a, b):
         return b.unit
 
 
-def get_full_transformation(
-    depends_on: Field,
-) -> Union[None, sc.DataArray, sc.Variable]:
-    """
-    Get the 4x4 transformation matrix for a component, resulting
-    from the full chain of transformations linked by "depends_on"
-    attributes
-    """
-    if (t0 := make_transformation(depends_on, depends_on[()])) is None:
-        return None
-    return get_full_transformation_starting_at(t0)
-
-
-def get_full_transformation_starting_at(
-    t0: Transformation, *, index: ScippIndex = None
-) -> Union[None, sc.DataArray, sc.Variable]:
-    transformations = _get_transformations(t0, index=() if index is None else index)
-    return combine_transformations(transformations)
-
-
 def combine_transformations(
     chain: List[Union[sc.DataArray, sc.Variable]]
 ) -> Union[sc.DataArray, sc.Variable]:
@@ -200,21 +166,6 @@ def combine_transformations(
         latest_log_start = sc.reduce(times).max()
         return total_transform['time', latest_log_start:].copy()
     return 1 if total_transform is None else total_transform
-
-
-def _get_transformations(
-    transform: Transformation, *, index: ScippIndex
-) -> List[Union[sc.DataArray, sc.Variable]]:
-    """Get all transformations in the depends_on chain."""
-    transformations = []
-    t = transform
-    while t is not None:
-        transformations.append(t[index])
-        t = t.depends_on
-    # TODO: this list of transformation should probably be cached in the future
-    # to deal with changing beamline components (e.g. pixel positions) during a
-    # live data stream (see https://github.com/scipp/scippneutron/issues/76).
-    return transformations
 
 
 def maybe_transformation(
