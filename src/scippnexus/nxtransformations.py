@@ -17,7 +17,7 @@ class TransformationError(NexusStructureError):
     pass
 
 
-def make_transformation(obj, /, path) -> Optional[Transformation]:
+def make_transformation(obj, /, path) -> Optional[Union[Field, Group]]:
     if path.startswith('/'):
         return obj.file[path]
     elif path != '.':
@@ -30,7 +30,7 @@ class NXtransformations(NXobject):
 
 
 class Transformation:
-    def __init__(self, obj: Union[Field, NXobject]):  # could be an NXlog
+    def __init__(self, obj: Union[Field, Group]):  # could be an NXlog
         self._obj = obj
 
     @property
@@ -228,8 +228,6 @@ def maybe_transformation(
     transformation fields.
     """
     if (transformation_type := obj.attrs.get('transformation_type')) is not None:
-        from .nxtransformations import Transformation
-
         return Transformation(obj).make_transformation(value, transformation_type, sel)
     return value
 
