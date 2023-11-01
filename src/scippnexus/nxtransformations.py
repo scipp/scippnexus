@@ -263,6 +263,16 @@ def compute_positions(dg: sc.DataGroup, *, store_as: str = 'position') -> sc.Dat
     Recursively compute positions from depends_on attributes as well as the
     [xyz]_pixel_offset fields of NXdetector groups.
 
+    This function does not operate directly on a NeXus file but on the result of
+    loading a NeXus file or sub-group into a scipp.DataGroup. NeXus puts no
+    limitations on the structure of the depends_on chains, i.e., they may reference
+    parent groups. If this is the case, a call to this function will fail if only the
+    subgroup is passed as input.
+
+    Note that this does not consider "legacy" ways of storing positions. In particular,
+    ``NXmonitor.distance``, ``NXdetector.distance``, ``NXdetector.polar_angle``, and
+    ``NXdetector.azimuthal_angle`` are ignored.
+
     Parameters
     ----------
     dg:
