@@ -687,3 +687,128 @@ def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root):
     dg = detector[()]
     assert_identical(dg['xy'], xy)
     assert_identical(dg['z'], z)
+
+
+@pytest.mark.parametrize('dtype', ('bool', 'int8', 'int16', 'int32', 'int64'))
+def test_pixel_masks_parses_masks_correctly(h5root, dtype):
+    if dtype == 'bool':
+        bitmask = np.array([[1, 0], [0, 0]], dtype=dtype)
+    elif dtype in ('int8', 'int16'):
+        bitmask = np.array([[1, 2], [0, 0]], dtype=dtype)
+    else:
+        bitmask = np.array([[1, 2], [2**17, 0]], dtype=dtype)
+
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
+    )
+    da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
+    da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
+    detector = snx.create_class(h5root, 'detector0', NXdetector)
+    snx.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx.create_field(detector, 'xx', da.coords['xx'])
+    snx.create_field(detector, 'data', da.data)
+    snx.create_field(detector, 'pixel_mask', bitmask)
+    snx.create_field(detector, 'pixel_mask_2', bitmask)
+    detector.attrs['axes'] = ['xx', '.']
+    detector = make_group(detector)
+    da = detector[...]
+
+    assert_identical(
+        da.masks.get('gap_pixel'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[1, 0], [0, 0]],
+            dtype='bool',
+        ),
+    )
+    assert_identical(
+        da.masks.get('gap_pixel_2'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[1, 0], [0, 0]],
+            dtype='bool',
+        ),
+    )
+
+    # A 'boolean' bitmask can only define one mask
+    if dtype == 'bool':
+        assert len(da.masks) == 2
+        return
+
+    assert_identical(
+        da.masks.get('dead_pixel'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[0, 1], [0, 0]],
+            dtype='bool',
+        ),
+    )
+    assert_identical(
+        da.masks.get('dead_pixel_2'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[0, 1], [0, 0]],
+            dtype='bool',
+        ),
+    )
+
+    if dtype in ('int8', 'int16'):
+        assert len(da.masks) == 4
+        return
+
+    assert_identical(
+        da.masks.get('undefined_bit17_pixel'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[0, 0], [1, 0]],
+            dtype='bool',
+        ),
+    )
+    assert_identical(
+        da.masks.get('undefined_bit17_pixel_2'),
+        sc.array(
+            dims=(
+                'dim_1',
+                'xx',
+            ),
+            values=[[0, 0], [1, 0]],
+            dtype='bool',
+        ),
+    )
+    assert len(da.masks) == 6
+
+
+def test_pixel_masks_adds_mask_to_all_dataarrays_of_dataset(h5root):
+    bitmask = 1 << np.array([[0, 1], [-1, -1]])
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
+    )
+    da.coords['detector_numbers'] = detector_numbers_xx_yy_1234()
+    da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
+    detector = snx.create_class(h5root, 'detector0', NXdetector)
+    snx.create_field(detector, 'detector_numbers', da.coords['detector_numbers'])
+    snx.create_field(detector, 'xx', da.coords['xx'])
+    snx.create_field(detector, 'data', da.data)
+    snx.create_field(detector, 'data_2', da.data)
+    detector.attrs['auxiliary_signals'] = ['data_2']
+    snx.create_field(detector, 'pixel_mask', bitmask)
+    detector.attrs['axes'] = ['xx', '.']
+    detector = make_group(detector)
+    ds = detector[...]
+    assert set(ds['data'].masks.keys()) == set(('gap_pixel', 'dead_pixel'))
+    assert set(ds['data_2'].masks.keys()) == set(('gap_pixel', 'dead_pixel'))

@@ -579,6 +579,58 @@ class NXdetector(NXdata):
             fallback_signal_name='data',
         )
 
+    def assemble(self, dg: sc.DataGroup) -> Union[sc.DataArray, sc.Dataset]:
+        bitmasks = {
+            key[len('pixel_mask') :]: dg.pop(key)
+            # tuple because we are going to change the dict over the iteration
+            for key in tuple(dg)
+            if key.startswith('pixel_mask')
+        }
+
+        array_or_dataset = super().assemble(dg)
+
+        for suffix, bitmask in bitmasks.items():
+            masks = self.transform_bitmask_to_dict_of_masks(bitmask, suffix)
+            for da in (
+                array_or_dataset.values()
+                if isinstance(array_or_dataset, sc.Dataset)
+                else [array_or_dataset]
+            ):
+                for name, mask in masks.items():
+                    da.masks[name] = mask
+        return array_or_dataset
+
+    @staticmethod
+    def transform_bitmask_to_dict_of_masks(bitmask: sc.Variable, suffix: str = ''):
+        bit_to_mask_name = {
+            0: 'gap_pixel',
+            1: 'dead_pixel',
+            2: 'underresponding_pixel',
+            3: 'overresponding_pixel',
+            4: 'noisy_pixel',
+            6: 'part_of_a_cluster_of_problematic_pixels',
+            8: 'user_defined_mask_pixel',
+            31: 'virtual_pixel',
+        }
+
+        number_of_bits_in_dtype = 8 * bitmask.values.dtype.itemsize
+
+        # Bitwise indicator of what masks are present
+        masks_present = np.bitwise_or.reduce(bitmask.values.ravel())
+        one = np.array(1)
+
+        masks = {}
+        for bit in range(number_of_bits_in_dtype):
+            # Check if the mask associated with the current `bit` is present
+            if masks_present & (one << bit):
+                name = bit_to_mask_name.get(bit, f'undefined_bit{bit}_pixel') + suffix
+                masks[name] = sc.array(
+                    dims=bitmask.dims,
+                    values=bitmask.values & (one << bit),
+                    dtype='bool',
+                )
+        return masks
+
     @property
     def detector_number(self) -> Optional[str]:
         return self._detector_number(self._children)
