@@ -55,7 +55,7 @@ addopts = "-ra -v --strict-markers -m 'not externalfile'"
 testpaths = "tests"
 filterwarnings = [
   "error",
-  "ignore::UserWarning",
+  "ignore:Failed to load :UserWarning",
 ]
 markers = [
     "externalfile",
