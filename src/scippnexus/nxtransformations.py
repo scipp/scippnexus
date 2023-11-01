@@ -255,15 +255,16 @@ class GroupTree:
         return self.path[-1]
 
     def __getitem__(self, path: str) -> GroupTree:
-        segments = path.split('/', maxsplit=1)
-        if segments[0] == '':
-            return self.root[segments[1]]
-        if segments[0] == '.':
-            return self[segments[1]]
-        if segments[0] == '..':
-            return self.parent[segments[1]]
-        tree = GroupTree(self.path + [self.path[-1][segments[0]]])
-        return tree if len(segments) == 1 else tree[segments[1]]
+        base, *remainder = path.split('/', maxsplit=1)
+        if base == '':
+            node = self.root
+        elif base == '.':
+            node = self
+        elif base == '..':
+            node = self.parent
+        else:
+            node = GroupTree(self.path + [self.path[-1][base]])
+        return node if len(remainder) == 0 else node[remainder[0]]
 
     def resolve_depends_on(self) -> Optional[sc.DataArray]:
         depends_on = self.value.get('depends_on')
