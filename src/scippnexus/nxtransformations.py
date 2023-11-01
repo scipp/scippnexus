@@ -3,7 +3,6 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-from math import prod
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
@@ -164,9 +163,14 @@ def get_full_transformation_starting_at(
     t0: Transformation, *, index: ScippIndex = None
 ) -> Union[None, sc.DataArray, sc.Variable]:
     transformations = _get_transformations(t0, index=() if index is None else index)
+    return combine_transformations(transformations)
 
+
+def combine_transformations(
+    chain: List[Union[sc.DataArray, sc.Variable]]
+) -> Union[sc.DataArray, sc.Variable]:
     total_transform = None
-    for transform in transformations:
+    for transform in chain:
         if total_transform is None:
             total_transform = transform
         elif isinstance(total_transform, sc.DataArray) and isinstance(
@@ -191,11 +195,11 @@ def get_full_transformation_starting_at(
         else:
             total_transform = transform * total_transform
     if isinstance(total_transform, sc.DataArray):
-        time_dependent = [t for t in transformations if isinstance(t, sc.DataArray)]
+        time_dependent = [t for t in chain if isinstance(t, sc.DataArray)]
         times = [da.coords['time'][0] for da in time_dependent]
         latest_log_start = sc.reduce(times).max()
         return total_transform['time', latest_log_start:].copy()
-    return total_transform
+    return 1 if total_transform is None else total_transform
 
 
 def _get_transformations(
@@ -272,7 +276,9 @@ class TransformationChainResolver:
         if depends_on is None:
             return None
         origin = sc.vector([0, 0, 0], unit='m')
-        return prod(self.get_chain(depends_on)) * origin
+        # Note that transformations have to be applied in "reverse" order, i.e.,
+        # simply taking math.prod(chain) * origin would be wrong.
+        return combine_transformations(self.get_chain(depends_on)) * origin
 
     def get_chain(self, depends_on: str) -> List[Union[sc.DataArray, sc.Variable]]:
         if depends_on == '.':
@@ -280,4 +286,5 @@ class TransformationChainResolver:
         node = self[depends_on]
         transform = node.value.copy(deep=False)
         depends_on = transform.coords.pop('depends_on').value
+        transform = transform if transform.coords else transform.data
         return [transform] + node.parent.get_chain(depends_on)
