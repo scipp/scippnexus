@@ -103,7 +103,7 @@ class Transformation:
             if (depends_on := self.attrs.get('depends_on')) is not None:
                 if not isinstance(transform, sc.DataArray):
                     transform = sc.DataArray(transform)
-                transform.attrs['depends_on'] = sc.scalar(
+                transform.coords['depends_on'] = sc.scalar(
                     depends_on_to_relative_path(depends_on, self._obj.parent.name)
                 )
             return transform
@@ -202,10 +202,10 @@ class TransformationChainResolver:
         return TransformationChainResolver(self.path[0:1])
 
     @property
-    def parent(self) -> Optional[TransformationChainResolver]:
-        return (
-            None if len(self.path) == 1 else TransformationChainResolver(self.path[:-1])
-        )
+    def parent(self) -> TransformationChainResolver:
+        if len(self.path) == 1:
+            raise TransformationError("Transformation depends on node beyond root")
+        return TransformationChainResolver(self.path[:-1])
 
     @property
     def value(self) -> sc.DataGroup:
@@ -224,6 +224,14 @@ class TransformationChainResolver:
         return node if len(remainder) == 0 else node[remainder[0]]
 
     def resolve_depends_on(self) -> Optional[Union[sc.DataArray, sc.Variable]]:
+        """
+        Resolve the depends_on attribute of a transformation chain.
+
+        Returns
+        -------
+        :
+            The resolved position in meter, or None if no depends_on was found.
+        """
         depends_on = self.value.get('depends_on')
         if depends_on is None:
             return None
@@ -245,12 +253,15 @@ class TransformationChainResolver:
             # If transform is time-dependent then we keep it is a DataArray, otherwise
             # we convert it to a Variable.
             transform = transform if transform.coords else transform.data
+        if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
+            transform = transform.to(unit='m', copy=False)
         return [transform] + node.parent.get_chain(depends_on)
 
 
 def compute_positions(dg: sc.DataGroup, *, store_as: str = 'position') -> sc.DataGroup:
     """
-    Recursively compute positions from depends_on attributes.
+    Recursively compute positions from depends_on attributes as well as the
+    [xyz]_pixel_offset fields of NXdetector groups.
 
     Parameters
     ----------
@@ -262,27 +273,44 @@ def compute_positions(dg: sc.DataGroup, *, store_as: str = 'position') -> sc.Dat
     Returns
     -------
     :
-        Data group with positions added.
+        New data group with added positions.
     """
     # Create resolver at root level, since any depends_on chain may lead to a parent,
     # i.e., we cannot use a resolver at the level of each chain's entry point.
     resolver = TransformationChainResolver([dg])
-    return _compute_positions(dg, store_as=store_as, resolver=resolver)
+    return _with_positions(dg, store_as=store_as, resolver=resolver)
 
 
-def _compute_positions(
+def _zip_pixel_offsets(da: sc.DataArray) -> sc.Variable:
+    zero = sc.scalar(0.0, unit=da.coords['x_pixel_offset'].unit)
+    return sc.spatial.as_vectors(
+        da.coords['x_pixel_offset'],
+        da.coords.get('y_pixel_offset', zero),
+        da.coords.get('z_pixel_offset', zero),
+    )
+
+
+def _with_positions(
     dg: sc.DataGroup,
     *,
     store_as: str,
     resolver: TransformationChainResolver,
 ) -> sc.DataGroup:
     out = sc.DataGroup()
+    has_position = False
     if 'depends_on' in dg:
         out[store_as] = resolver.resolve_depends_on()
+        has_position = True
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):
-            value = _compute_positions(
-                value, store_as=store_as, resolver=resolver[name]
-            )
+            value = _with_positions(value, store_as=store_as, resolver=resolver[name])
+        elif (
+            has_position
+            and isinstance(value, sc.DataArray)
+            and 'x_pixel_offset' in value.coords
+        ):
+            offset = _zip_pixel_offsets(value).to(unit='m', copy=False)
+            base_pos = out[store_as]
+            value = value.assign_coords({store_as: offset + base_pos})
         out[name] = value
     return out
