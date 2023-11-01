@@ -190,7 +190,8 @@ def maybe_transformation(
 
 class TransformationChainResolver:
     """
-    Navigate in a nested dict structure like in a filesystem.
+    Resolve a chain of transformations, given depends_on attributes with absolute or
+    relative paths.
     """
 
     def __init__(self, path: List[sc.DataGroup]):
@@ -222,13 +223,14 @@ class TransformationChainResolver:
             node = TransformationChainResolver(self.path + [self.path[-1][base]])
         return node if len(remainder) == 0 else node[remainder[0]]
 
-    def resolve_depends_on(self) -> Optional[sc.DataArray]:
+    def resolve_depends_on(self) -> Optional[Union[sc.DataArray, sc.Variable]]:
         depends_on = self.value.get('depends_on')
         if depends_on is None:
             return None
         origin = sc.vector([0, 0, 0], unit='m')
         # Note that transformations have to be applied in "reverse" order, i.e.,
-        # simply taking math.prod(chain) * origin would be wrong.
+        # simply taking math.prod(chain) * origin would be wrong, even if we could
+        # ignore potential time-dependence.
         return combine_transformations(self.get_chain(depends_on)) * origin
 
     def get_chain(self, depends_on: str) -> List[Union[sc.DataArray, sc.Variable]]:
@@ -237,5 +239,7 @@ class TransformationChainResolver:
         node = self[depends_on]
         transform = node.value.copy(deep=False)
         depends_on = transform.coords.pop('depends_on').value
+        # If transform is time-dependent then we keep it is a DataArray, otherwise
+        # we convert it to a Variable.
         transform = transform if transform.coords else transform.data
         return [transform] + node.parent.get_chain(depends_on)

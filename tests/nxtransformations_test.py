@@ -446,7 +446,6 @@ def test_TransformationChainResolver_path_handling():
 
 origin = sc.vector([0, 0, 0], unit='m')
 shiftX = sc.spatial.translation(value=[1, 0, 0], unit='m')
-rotY = sc.spatial.rotations_from_rotvecs(sc.vector([0, 90, 0], unit='deg'))
 rotZ = sc.spatial.rotations_from_rotvecs(sc.vector([0, 0, 90], unit='deg'))
 
 
