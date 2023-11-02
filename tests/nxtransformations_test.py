@@ -551,8 +551,6 @@ def test_compute_positions(h5root):
         result['instrument']['detector_0']['position'],
         t2.to(unit='m') * t1.to(unit='m') * origin,
     )
-    print(result['instrument']['detector_0']['position'])
-    print(result['instrument']['detector_0']['data'])
     assert_identical(
         result['instrument']['detector_0']['data'].coords['position'],
         t2.to(unit='m') * t1.to(unit='m') * origin
