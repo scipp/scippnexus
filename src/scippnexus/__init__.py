@@ -21,4 +21,3 @@ from .base import (
 from .field import Attrs, Field
 from .file import File
 from .nexus_classes import *
-from .nxdata import group_events_by_detector_number

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import uuid
 from functools import cached_property
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -666,42 +666,6 @@ def _group_events(
     if grouping is None:
         return event_data
     return event_data.fold(dim='event_id', sizes=grouping.sizes)
-
-
-def _find_event_entries(dg: sc.DataGroup) -> List[str]:
-    event_entries = []
-    for name, value in dg.items():
-        if (
-            isinstance(value, sc.DataArray)
-            and 'event_time_zero' in value.coords
-            and value.bins is not None
-        ):
-            event_entries.append(name)
-    return event_entries
-
-
-def group_events_by_detector_number(
-    dg: sc.DataGroup,
-) -> Union[sc.DataArray, sc.Dataset]:
-    dg = dg.copy(deep=False)
-    grouping_key = None
-    for key in NXdetector._detector_number_fields:
-        if (grouping := dg.get(key)) is not None:
-            grouping_key = key
-            break
-    grouping = None if grouping_key is None else asvariable(dg.pop(grouping_key))
-    grouped_events = sc.DataGroup()
-    for event_entry in _find_event_entries(dg):
-        events = dg.pop(event_entry)
-        grouped_events[event_entry] = _group_events(
-            event_data=events, grouping=grouping
-        )
-    if len(grouped_events) == 1:
-        out = next(iter(grouped_events.values()))
-    else:
-        out = sc.Dataset(grouped_events)
-    out.coords.update(dg)
-    return out
 
 
 base_definitions_dict['NXdata'] = NXdata
