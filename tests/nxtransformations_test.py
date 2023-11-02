@@ -560,3 +560,56 @@ def test_compute_positions(h5root):
             unit='m',
         ),
     )
+
+
+def test_compute_positions_raises_for_path_beyond_root(h5root):
+    instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
+    value = sc.scalar(6.5, unit='m')
+    vector = sc.vector(value=[0, 0, 1])
+    transform = snx.create_field(instrument, 't1', value)
+    transform.attrs['depends_on'] = '.'
+    transform.attrs['transformation_type'] = 'translation'
+    transform.attrs['vector'] = vector.value
+    monitor = snx.create_class(instrument, 'monitor', snx.NXmonitor)
+    snx.create_field(monitor, 'depends_on', '../t1')
+    root = make_group(h5root)
+    loaded = root[()]
+    assert 'position' in snx.compute_positions(loaded)['instrument']['monitor']
+    assert 'position' in snx.compute_positions(loaded['instrument'])['monitor']
+    with pytest.raises(snx.NexusStructureError):
+        snx.compute_positions(loaded['instrument']['monitor'])
+
+
+def test_compute_positions_returns_position_with_unit_meters(h5root):
+    instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
+    value = sc.scalar(6.5, unit='cm')
+    vector = sc.vector(value=[0, 0, 1])
+    transform = snx.create_field(instrument, 't1', value)
+    transform.attrs['depends_on'] = '.'
+    transform.attrs['transformation_type'] = 'translation'
+    transform.attrs['vector'] = vector.value
+    monitor = snx.create_class(instrument, 'monitor', snx.NXmonitor)
+    snx.create_field(monitor, 'depends_on', '../t1')
+    root = make_group(h5root)
+    loaded = root[()]
+    mon = snx.compute_positions(loaded)['instrument']['monitor']
+    assert mon['position'].unit == 'm'
+
+
+def test_compute_positions_handles_chains_with_mixed_units(h5root):
+    instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
+    vector = sc.vector(value=[0, 0, 1])
+    t1 = snx.create_field(instrument, 't1', sc.scalar(100, unit='cm'))
+    t1.attrs['depends_on'] = 't2'
+    t1.attrs['transformation_type'] = 'translation'
+    t1.attrs['vector'] = vector.value
+    t2 = snx.create_field(instrument, 't2', sc.scalar(1000, unit='mm'))
+    t2.attrs['depends_on'] = '.'
+    t2.attrs['transformation_type'] = 'translation'
+    t2.attrs['vector'] = vector.value
+    monitor = snx.create_class(instrument, 'monitor', snx.NXmonitor)
+    snx.create_field(monitor, 'depends_on', '../t1')
+    root = make_group(h5root)
+    loaded = root[()]
+    mon = snx.compute_positions(loaded)['instrument']['monitor']
+    assert_identical(mon['position'], sc.vector([0, 0, 2], unit='m'))
