@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import uuid
 from functools import cached_property
+from itertools import chain
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
@@ -373,12 +374,14 @@ class NXdata(NXobject):
         """
         data_items = sc.DataGroup()
         result = sc.DataGroup()
-        forward = (
-            [self._signal_name]
-            + list(self._group_dims or [])
-            + self._aux_signals
-            + self._explicit_coords
-            + allow_in_coords
+        forward = list(
+            chain(
+                [self._signal_name],
+                self._group_dims or [],
+                self._aux_signals,
+                self._explicit_coords,
+                allow_in_coords,
+            )
         )
 
         for name, value in dg.items():
