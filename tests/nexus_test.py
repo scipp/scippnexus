@@ -270,6 +270,7 @@ def test_field_of_utf8_encoded_dataset_is_loaded_correctly(nxroot, string):
     )
 
 
+@pytest.mark.filterwarnings("ignore:Encoding for bytes")
 def test_field_of_extended_ascii_in_ascii_encoded_dataset_is_loaded_correctly():
     # When writing, if we use bytes h5py will write as ascii encoding
     # 0xb0 = degrees symbol in latin-1 encoding.
