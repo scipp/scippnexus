@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import uuid
 from functools import cached_property
-from typing import Any, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
