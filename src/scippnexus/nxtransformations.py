@@ -235,11 +235,10 @@ class TransformationChainResolver:
         depends_on = self.value.get('depends_on')
         if depends_on is None:
             return None
-        origin = sc.vector([0, 0, 0], unit='m')
         # Note that transformations have to be applied in "reverse" order, i.e.,
-        # simply taking math.prod(chain) * origin would be wrong, even if we could
+        # simply taking math.prod(chain) would be wrong, even if we could
         # ignore potential time-dependence.
-        return combine_transformations(self.get_chain(depends_on)) * origin
+        return combine_transformations(self.get_chain(depends_on))
 
     def get_chain(self, depends_on: str) -> List[Union[sc.DataArray, sc.Variable]]:
         if depends_on == '.':
