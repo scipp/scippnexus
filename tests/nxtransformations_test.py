@@ -553,8 +553,45 @@ def test_compute_positions(h5root):
     )
     assert_identical(
         result['instrument']['detector_0']['data'].coords['position'],
-        t2.to(unit='m') * t1.to(unit='m') * origin
-        + sc.vectors(
+        t2.to(unit='m')
+        * t1.to(unit='m')
+        * sc.vectors(
+            dims=['xx', 'yy'],
+            values=[[[-1, -1, 0], [-1, 1, 0]], [[1, -1, 0], [1, 1, 0]]],
+            unit='m',
+        ),
+    )
+
+
+def test_compute_positions_with_rotation(h5root):
+    instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
+    detector = create_detector(instrument)
+    snx.create_field(detector, 'x_pixel_offset', sc.linspace('xx', -1, 1, 2, unit='m'))
+    snx.create_field(detector, 'y_pixel_offset', sc.linspace('yy', -1, 1, 2, unit='m'))
+    detector.attrs['axes'] = ['xx', 'yy']
+    detector.attrs['x_pixel_offset_indices'] = [0]
+    detector.attrs['y_pixel_offset_indices'] = [1]
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/instrument/detector_0/transformations/t1')
+    )
+    transformations = snx.create_class(detector, 'transformations', NXtransformations)
+    value = sc.scalar(90.0, unit='deg')
+    vector = sc.vector(value=[0, 1, 0])
+    rot = snx.create_field(transformations, 't1', value)
+    rot.attrs['depends_on'] = '.'
+    rot.attrs['transformation_type'] = 'rotation'
+    rot.attrs['vector'] = vector.value
+
+    transform = sc.spatial.rotations_from_rotvecs(sc.vector([0, 90, 0], unit='deg'))
+    root = make_group(h5root)
+    loaded = root[()]
+    result = snx.compute_positions(loaded)
+    origin = sc.vector([0, 0, 0], unit='m')
+    assert_identical(result['instrument']['detector_0']['position'], origin)
+    assert_identical(
+        result['instrument']['detector_0']['data'].coords['position'],
+        transform
+        * sc.vectors(
             dims=['xx', 'yy'],
             values=[[[-1, -1, 0], [-1, 1, 0]], [[1, -1, 0], [1, 1, 0]]],
             unit='m',
@@ -613,3 +650,43 @@ def test_compute_positions_handles_chains_with_mixed_units(h5root):
     loaded = root[()]
     mon = snx.compute_positions(loaded)['instrument']['monitor']
     assert_identical(mon['position'], sc.vector([0, 0, 2], unit='m'))
+
+
+def test_compute_positions_does_not_apply_time_dependent_transform_to_pixel_offsets(
+    h5root,
+):
+    detector = create_detector(h5root)
+    snx.create_field(detector, 'x_pixel_offset', sc.linspace('xx', -1, 1, 2, unit='m'))
+    snx.create_field(detector, 'y_pixel_offset', sc.linspace('yy', -1, 1, 2, unit='m'))
+    detector.attrs['axes'] = ['xx', 'yy']
+    detector.attrs['x_pixel_offset_indices'] = [0]
+    detector.attrs['y_pixel_offset_indices'] = [1]
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
+    transformations = snx.create_class(detector, 'transformations', NXtransformations)
+    log = sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
+        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')},
+    )
+    log.coords['time'] = sc.epoch(unit='ns') + log.coords['time'].to(unit='ns')
+    offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
+    vector = sc.vector(value=[0, 0, 1])
+    t = log * vector
+    t.data = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit)
+    value = snx.create_class(transformations, 't1', snx.NXlog)
+    snx.create_field(value, 'time', log.coords['time'] - sc.epoch(unit='ns'))
+    snx.create_field(value, 'value', log.data)
+    value.attrs['depends_on'] = '.'
+    value.attrs['transformation_type'] = 'translation'
+    value.attrs['offset'] = offset.values
+    value.attrs['offset_units'] = str(offset.unit)
+    value.attrs['vector'] = vector.value
+
+    root = make_group(h5root)
+    loaded = root[()]
+    result = snx.compute_positions(loaded)
+    assert 'position' in result['detector_0']
+    assert 'position' not in result['detector_0']['data'].coords
+    result = snx.compute_positions(loaded, store_transform='transform')
+    assert_identical(result['detector_0']['transform'], t * offset)

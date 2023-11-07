@@ -3,7 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -300,15 +300,41 @@ def compute_positions(
     # Create resolver at root level, since any depends_on chain may lead to a parent,
     # i.e., we cannot use a resolver at the level of each chain's entry point.
     resolver = TransformationChainResolver([dg])
-    return _with_positions(dg, store_position=store_position, resolver=resolver)
+    return _with_positions(
+        dg,
+        store_position=store_position,
+        store_transform=store_transform,
+        resolver=resolver,
+    )
 
 
-def _zip_pixel_offsets(da: sc.DataArray) -> sc.Variable:
-    zero = sc.scalar(0.0, unit=da.coords['x_pixel_offset'].unit)
+def zip_pixel_offsets(x: Dict[str, sc.Variable], /) -> sc.Variable:
+    """
+    Zip the x_pixel_offset, y_pixel_offset, and z_pixel_offset fields into a vector.
+
+    These fields originate from NXdetector groups. All but x_pixel_offset are optional,
+    e.g., for 2D detectors. Zero values for missing fields are assumed.
+
+    Parameters
+    ----------
+    mapping:
+        Mapping (typically a data group, or data array coords) containing
+        x_pixel_offset, y_pixel_offset, and z_pixel_offset.
+
+    Returns
+    -------
+    :
+        Vectors with pixel offsets.
+
+    See Also
+    --------
+    compute_positions
+    """
+    zero = sc.scalar(0.0, unit=x['x_pixel_offset'].unit)
     return sc.spatial.as_vectors(
-        da.coords['x_pixel_offset'],
-        da.coords.get('y_pixel_offset', zero),
-        da.coords.get('z_pixel_offset', zero),
+        x['x_pixel_offset'],
+        x.get('y_pixel_offset', zero),
+        x.get('z_pixel_offset', zero),
     )
 
 
@@ -329,7 +355,10 @@ def _with_positions(
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):
             value = _with_positions(
-                value, store_position=store_position, resolver=resolver[name]
+                value,
+                store_position=store_position,
+                store_transform=store_transform,
+                resolver=resolver[name],
             )
         elif (
             isinstance(value, sc.DataArray)
@@ -339,7 +368,7 @@ def _with_positions(
             # of the data.
             and (transform is not None and transform.dims == ())
         ):
-            offset = _zip_pixel_offsets(value).to(unit='m', copy=False)
+            offset = zip_pixel_offsets(value.coords).to(unit='m', copy=False)
             position = offset if transform is None else transform * offset
             value = value.assign_coords({store_position: position})
         out[name] = value
