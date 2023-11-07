@@ -257,7 +257,12 @@ class TransformationChainResolver:
         return [transform] + node.parent.get_chain(depends_on)
 
 
-def compute_positions(dg: sc.DataGroup, *, store_as: str = 'position') -> sc.DataGroup:
+def compute_positions(
+    dg: sc.DataGroup,
+    *,
+    store_position: str = 'position',
+    store_transform: Optional[str] = None,
+) -> sc.DataGroup:
     """
     Recursively compute positions from depends_on attributes as well as the
     [xyz]_pixel_offset fields of NXdetector groups.
@@ -272,12 +277,20 @@ def compute_positions(dg: sc.DataGroup, *, store_as: str = 'position') -> sc.Dat
     ``NXmonitor.distance``, ``NXdetector.distance``, ``NXdetector.polar_angle``, and
     ``NXdetector.azimuthal_angle`` are ignored.
 
+    Note that transformation chains may be time-dependent. In this case it will not
+    be applied to the pixel offsets, since the result may consume too much memory and
+    the shape is in general incompatible with the shape of the data. Use the
+    ``store_transform`` argument to store the resolved transformation chain in this
+    case.
+
     Parameters
     ----------
     dg:
         Data group with depends_on entry points into transformation chains.
-    store_as:
+    store_position:
         Name used to store result of resolving each depends_on chain.
+    store_transform:
+        If not None, store the resolved transformation chain in this field.
 
     Returns
     -------
@@ -287,7 +300,7 @@ def compute_positions(dg: sc.DataGroup, *, store_as: str = 'position') -> sc.Dat
     # Create resolver at root level, since any depends_on chain may lead to a parent,
     # i.e., we cannot use a resolver at the level of each chain's entry point.
     resolver = TransformationChainResolver([dg])
-    return _with_positions(dg, store_as=store_as, resolver=resolver)
+    return _with_positions(dg, store_position=store_position, resolver=resolver)
 
 
 def _zip_pixel_offsets(da: sc.DataArray) -> sc.Variable:
@@ -302,24 +315,32 @@ def _zip_pixel_offsets(da: sc.DataArray) -> sc.Variable:
 def _with_positions(
     dg: sc.DataGroup,
     *,
-    store_as: str,
+    store_position: str,
+    store_transform: Optional[str] = None,
     resolver: TransformationChainResolver,
 ) -> sc.DataGroup:
     out = sc.DataGroup()
-    has_position = False
+    transform = None
     if 'depends_on' in dg:
-        out[store_as] = resolver.resolve_depends_on()
-        has_position = True
+        transform = resolver.resolve_depends_on()
+        out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
+        if store_transform is not None:
+            out[store_transform] = transform
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):
-            value = _with_positions(value, store_as=store_as, resolver=resolver[name])
+            value = _with_positions(
+                value, store_position=store_position, resolver=resolver[name]
+            )
         elif (
-            has_position
-            and isinstance(value, sc.DataArray)
+            isinstance(value, sc.DataArray)
             and 'x_pixel_offset' in value.coords
+            # Transform can be time-dependent, do not apply it to offsets since
+            # result can be massive and is in general not compatible with the shape
+            # of the data.
+            and (transform is not None and transform.dims == ())
         ):
             offset = _zip_pixel_offsets(value).to(unit='m', copy=False)
-            base_pos = out[store_as]
-            value = value.assign_coords({store_as: offset + base_pos})
+            position = offset if transform is None else transform * offset
+            value = value.assign_coords({store_position: position})
         out[name] = value
     return out
