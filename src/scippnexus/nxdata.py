@@ -57,7 +57,7 @@ class NXdata(NXobject):
         self._valid = True  # True if the children can be assembled
         self._signal_name = None
         self._signal = None
-        self._aux_signals = attrs.get('auxiliary_signals', [])
+        self._aux_signals = list(attrs.get('auxiliary_signals', []))
 
         self._init_signal(
             name=attrs.get('signal', fallback_signal_name), children=children
@@ -229,6 +229,8 @@ class NXdata(NXobject):
             for key, attr in attrs.items()
             if key.endswith(indices_suffix)
         }
+        # Datasets referenced by an "indices" attribute will be added as coords.
+        self._explicit_coords = list(indices_attrs)
 
         dims = np.array(self._axes)
         self._dims_from_indices = {
@@ -323,6 +325,11 @@ class NXdata(NXobject):
     def assemble(
         self, dg: sc.DataGroup
     ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+        return self._assemble_as_data(dg)
+
+    def _assemble_as_data(
+        self, dg: sc.DataGroup
+    ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
         if not self._valid:
             raise NexusStructureError("Could not determine signal field or dimensions.")
         dg = dg.copy(deep=False)
@@ -346,6 +353,46 @@ class NXdata(NXobject):
                 return sc.Dataset(signals)
             return sc.DataGroup(signals)
         return da
+
+    def _assemble_as_physical_component(
+        self, dg: sc.DataGroup, allow_in_coords: List[str]
+    ) -> sc.DataGroup:
+        """
+        Assemble suitable for physical components such as NXdetector or NXmonitor.
+
+        NeXus groups representing physical components typically contain fields or
+        subgroups such as 'depends_on', 'NXtransformations', or 'NXoff_geometry'.
+        Adding these wrapped into a scalar variable as coordinates would be
+        cumbersome. Therefore, we do not assemble the entire NXdetector or NXmonitor
+        into a single DataArray (as typically done by NXdata). On the other hand, we
+        do want to return a useful DataArray with coordinates. In NeXus the data,
+        coordinates, and other datasets or subgroups are all stored in the same group.
+        As this is not very useful and user-friendly, we assemble the data and coords
+        into a DataArray, which will take the place of the signal field in the output
+        DataGroup, while non-signal non-coord fields are simply kept as-is.
+        """
+        data_items = sc.DataGroup()
+        result = sc.DataGroup()
+        forward = (
+            [self._signal_name]
+            + list(self._group_dims or [])
+            + self._aux_signals
+            + self._explicit_coords
+            + allow_in_coords
+        )
+
+        for name, value in dg.items():
+            if name in forward:
+                data_items[name] = value
+            else:
+                result[name] = value
+        assembled_nxdata = self._assemble_as_data(data_items)
+        result.update(
+            {self._signal_name: assembled_nxdata}
+            if isinstance(assembled_nxdata, sc.DataArray)
+            else assembled_nxdata
+        )
+        return result
 
     def _dim_of_coord(self, name: str, coord: sc.Variable) -> Union[None, str]:
         if len(coord.dims) == 1:
@@ -579,7 +626,34 @@ class NXdetector(NXdata):
             fallback_signal_name='data',
         )
 
-    def assemble(self, dg: sc.DataGroup) -> Union[sc.DataArray, sc.Dataset]:
+    def coord_allow_list(self) -> List[str]:
+        """
+        Names of datasets that will be treated as coordinates.
+
+        Note that in addition to these, all datasets matching the data's dimensions
+        as well as datasets explicitly referenced by an "indices" attribute in the
+        group's list of attributes will be treated as coordinates.
+
+        Override in subclasses to customize assembly of datasets into loaded output.
+        """
+        return NXdetector._detector_number_fields + [
+            'time_of_flight',
+            'raw_time_of_flight',
+            'x_pixel_offset',
+            'y_pixel_offset',
+            'z_pixel_offset',
+            'distance',
+            'polar_angle',
+            'azimuthal_angle',
+            'crate',
+            'slot',
+            'input',
+            'start_time',
+            'stop_time',
+            'sequence_number',
+        ]
+
+    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
         bitmasks = {
             key[len('pixel_mask') :]: dg.pop(key)
             # tuple because we are going to change the dict over the iteration
@@ -587,18 +661,16 @@ class NXdetector(NXdata):
             if key.startswith('pixel_mask')
         }
 
-        array_or_dataset = super().assemble(dg)
+        out = self._assemble_as_physical_component(
+            dg, allow_in_coords=self.coord_allow_list()
+        )
 
         for suffix, bitmask in bitmasks.items():
             masks = self.transform_bitmask_to_dict_of_masks(bitmask, suffix)
-            for da in (
-                array_or_dataset.values()
-                if isinstance(array_or_dataset, sc.Dataset)
-                else [array_or_dataset]
-            ):
+            for signal in [self._signal_name] + self._aux_signals:
                 for name, mask in masks.items():
-                    da.masks[name] = mask
-        return array_or_dataset
+                    out[signal].masks[name] = mask
+        return out
 
     @staticmethod
     def transform_bitmask_to_dict_of_masks(bitmask: sc.Variable, suffix: str = ''):
@@ -644,6 +716,23 @@ class NXmonitor(NXdata):
         else:
             signal = 'data'
         super().__init__(attrs=attrs, children=children, fallback_signal_name=signal)
+
+    def coord_allow_list(self) -> List[str]:
+        """
+        Names of datasets that will be treated as coordinates.
+
+        Note that in addition to these, all datasets matching the data's dimensions
+        as well as datasets explicitly referenced by an "indices" attribute in the
+        group's list of attributes will be treated as coordinates.
+
+        Override in subclasses to customize assembly of datasets into loaded output.
+        """
+        return ['distance', 'time_of_flight']
+
+    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
+        return self._assemble_as_physical_component(
+            dg, allow_in_coords=self.coord_allow_list()
+        )
 
 
 def _group_events(

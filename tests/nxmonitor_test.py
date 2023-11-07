@@ -34,7 +34,7 @@ def test_dense_monitor(h5root):
     data.attrs['axes'] = 'time_of_flight'
     snx.create_field(monitor, 'time_of_flight', da.coords['time_of_flight'])
     monitor = make_group(monitor)
-    assert sc.identical(monitor[...], da)
+    assert sc.identical(monitor[...]['data'], da)
 
 
 def create_event_data_no_ids(group):
@@ -55,7 +55,7 @@ def test_loads_event_data_in_current_group_as_data_array(group):
     create_event_data_no_ids(monitor)
     assert monitor.dims == ('event_time_zero',)
     assert monitor.shape == (4,)
-    loaded = monitor[...]
+    loaded = monitor[...]['events']
     assert_identical(
         loaded.bins.size().data,
         sc.array(
@@ -70,9 +70,10 @@ def test_loads_event_data_in_child_group_as_data_array(group):
     assert monitor.dims == ('event_time_zero',)
     assert monitor.shape == (4,)
     loaded = monitor[...]
-    assert isinstance(loaded, sc.DataArray)
+    assert isinstance(loaded, sc.DataGroup)
+    assert isinstance(loaded['events'], sc.DataArray)
     assert sc.identical(
-        loaded.bins.size().data,
+        loaded['events'].bins.size().data,
         sc.array(
             dims=['event_time_zero'], unit=None, dtype='int64', values=[3, 0, 2, 1]
         ),
