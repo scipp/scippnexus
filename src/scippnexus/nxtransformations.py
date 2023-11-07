@@ -205,6 +205,11 @@ class TransformationChainResolver:
     class follows the paths and resolves the chain of transformations.
     """
 
+    class ChainError(KeyError):
+        """Raised when a transformation chain cannot be resolved."""
+
+        pass
+
     def __init__(self, stack: List[sc.DataGroup]):
         self._stack = stack
 
@@ -215,7 +220,9 @@ class TransformationChainResolver:
     @property
     def parent(self) -> TransformationChainResolver:
         if len(self._stack) == 1:
-            raise KeyError("Transformation depends on node beyond root")
+            raise TransformationChainResolver.ChainError(
+                "Transformation depends on node beyond root"
+            )
         return TransformationChainResolver(self._stack[:-1])
 
     @property
@@ -368,7 +375,7 @@ def _with_positions(
             out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
             if store_transform is not None:
                 out[store_transform] = transform
-        except KeyError:
+        except TransformationChainResolver.ChainError:
             pass
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):
