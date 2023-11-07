@@ -21,3 +21,4 @@ from .base import (
 from .field import Attrs, Field
 from .file import File
 from .nexus_classes import *
+from .nxtransformations import compute_positions, zip_pixel_offsets

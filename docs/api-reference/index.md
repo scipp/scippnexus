@@ -110,6 +110,7 @@
    :toctree: ../generated/functions
    :recursive:
 
+   compute_positions
    create_field
    create_class
 ```
