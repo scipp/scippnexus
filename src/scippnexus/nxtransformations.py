@@ -135,6 +135,12 @@ def _smaller_unit(a, b):
 def combine_transformations(
     chain: List[Union[sc.DataArray, sc.Variable]]
 ) -> Union[sc.DataArray, sc.Variable]:
+    """
+    Take the product of a chain of transformations, handling potentially mismatching
+    time-dependence.
+
+    Time-dependent transformations are interpolated to a common time-coordinate.
+    """
     total_transform = None
     for transform in chain:
         if total_transform is None:
@@ -165,7 +171,7 @@ def combine_transformations(
         times = [da.coords['time'][0] for da in time_dependent]
         latest_log_start = sc.reduce(times).max()
         return total_transform['time', latest_log_start:].copy()
-    return 1 if total_transform is None else total_transform
+    return sc.scalar(1) if total_transform is None else total_transform
 
 
 def maybe_transformation(
@@ -192,24 +198,29 @@ class TransformationChainResolver:
     """
     Resolve a chain of transformations, given depends_on attributes with absolute or
     relative paths.
+
+    A `depends_on` field serves as an entry point into a chain of transformations.
+    It points to another entry, based on an absolute or relative path. The target
+    entry may have a `depends_on` attribute pointing to the next transform. This
+    class follows the paths and resolves the chain of transformations.
     """
 
-    def __init__(self, path: List[sc.DataGroup]):
-        self.path = path
+    def __init__(self, stack: List[sc.DataGroup]):
+        self._stack = stack
 
     @property
     def root(self) -> TransformationChainResolver:
-        return TransformationChainResolver(self.path[0:1])
+        return TransformationChainResolver(self._stack[0:1])
 
     @property
     def parent(self) -> TransformationChainResolver:
-        if len(self.path) == 1:
-            raise TransformationError("Transformation depends on node beyond root")
-        return TransformationChainResolver(self.path[:-1])
+        if len(self._stack) == 1:
+            raise KeyError("Transformation depends on node beyond root")
+        return TransformationChainResolver(self._stack[:-1])
 
     @property
     def value(self) -> sc.DataGroup:
-        return self.path[-1]
+        return self._stack[-1]
 
     def __getitem__(self, path: str) -> TransformationChainResolver:
         base, *remainder = path.split('/', maxsplit=1)
@@ -220,7 +231,7 @@ class TransformationChainResolver:
         elif base == '..':
             node = self.parent
         else:
-            node = TransformationChainResolver(self.path + [self.path[-1][base]])
+            node = TransformationChainResolver(self._stack + [self._stack[-1][base]])
         return node if len(remainder) == 0 else node[remainder[0]]
 
     def resolve_depends_on(self) -> Optional[Union[sc.DataArray, sc.Variable]]:
@@ -282,6 +293,10 @@ def compute_positions(
     the shape is in general incompatible with the shape of the data. Use the
     ``store_transform`` argument to store the resolved transformation chain in this
     case.
+
+    If a transformation chain has an invalid 'depends_on' value, e.g., a path beyond
+    the root data group, then the chain is ignored and no position is computed. This
+    does not affect other chains.
 
     Parameters
     ----------
@@ -348,10 +363,13 @@ def _with_positions(
     out = sc.DataGroup()
     transform = None
     if 'depends_on' in dg:
-        transform = resolver.resolve_depends_on()
-        out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
-        if store_transform is not None:
-            out[store_transform] = transform
+        try:
+            transform = resolver.resolve_depends_on()
+            out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
+            if store_transform is not None:
+                out[store_transform] = transform
+        except KeyError:
+            pass
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):
             value = _with_positions(

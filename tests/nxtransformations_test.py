@@ -444,6 +444,22 @@ def test_TransformationChainResolver_path_handling():
     assert tree['a/b']['./c'].value == 1
 
 
+def test_TransformationChainResolver_raises_if_child_does_not_exists():
+    tree = TransformationChainResolver([{'a': {'b': {'c': 1}}}])
+    with pytest.raises(KeyError):
+        tree['a']['b']['d']
+
+
+def test_TransformationChainResolver_raises_if_path_leads_beyond_root():
+    tree = TransformationChainResolver([{'a': {'b': {'c': 1}}}])
+    with pytest.raises(KeyError):
+        tree['..']
+    with pytest.raises(KeyError):
+        tree['a']['../..']
+    with pytest.raises(KeyError):
+        tree['../a']
+
+
 origin = sc.vector([0, 0, 0], unit='m')
 shiftX = sc.spatial.translation(value=[1, 0, 0], unit='m')
 rotZ = sc.spatial.rotations_from_rotvecs(sc.vector([0, 0, 90], unit='deg'))
@@ -599,22 +615,28 @@ def test_compute_positions_with_rotation(h5root):
     )
 
 
-def test_compute_positions_raises_for_path_beyond_root(h5root):
+def test_compute_positions_skips_for_path_beyond_root(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     value = sc.scalar(6.5, unit='m')
     vector = sc.vector(value=[0, 0, 1])
-    transform = snx.create_field(instrument, 't1', value)
-    transform.attrs['depends_on'] = '.'
-    transform.attrs['transformation_type'] = 'translation'
-    transform.attrs['vector'] = vector.value
-    monitor = snx.create_class(instrument, 'monitor', snx.NXmonitor)
-    snx.create_field(monitor, 'depends_on', '../t1')
+    transform1 = snx.create_field(h5root, 't1', value)
+    transform1.attrs['depends_on'] = '.'
+    transform1.attrs['transformation_type'] = 'translation'
+    transform1.attrs['vector'] = vector.value
+    transform2 = snx.create_field(instrument, 't2', value)
+    transform2.attrs['depends_on'] = '.'
+    transform2.attrs['transformation_type'] = 'translation'
+    transform2.attrs['vector'] = vector.value
+    monitor1 = snx.create_class(instrument, 'monitor1', snx.NXmonitor)
+    monitor2 = snx.create_class(instrument, 'monitor2', snx.NXmonitor)
+    snx.create_field(monitor1, 'depends_on', '../../t1')
+    snx.create_field(monitor2, 'depends_on', '../t2')
     root = make_group(h5root)
     loaded = root[()]
-    assert 'position' in snx.compute_positions(loaded)['instrument']['monitor']
-    assert 'position' in snx.compute_positions(loaded['instrument'])['monitor']
-    with pytest.raises(snx.NexusStructureError):
-        snx.compute_positions(loaded['instrument']['monitor'])
+    assert 'position' in snx.compute_positions(loaded)['instrument']['monitor1']
+    assert 'position' in snx.compute_positions(loaded)['instrument']['monitor2']
+    assert 'position' not in snx.compute_positions(loaded['instrument'])['monitor1']
+    assert 'position' in snx.compute_positions(loaded['instrument'])['monitor2']
 
 
 def test_compute_positions_returns_position_with_unit_meters(h5root):
