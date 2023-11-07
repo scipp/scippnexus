@@ -387,7 +387,6 @@ def _with_positions(
             and (transform is not None and transform.dims == ())
         ):
             offset = zip_pixel_offsets(value.coords).to(unit='m', copy=False)
-            position = offset if transform is None else transform * offset
-            value = value.assign_coords({store_position: position})
+            value = value.assign_coords({store_position: transform * offset})
         out[name] = value
     return out
