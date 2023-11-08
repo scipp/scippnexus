@@ -42,6 +42,7 @@ dynamic = ["version"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/scippnexus/issues"
+"Documentation" = "https://scipp.github.io/scippnexus"
 "Source" = "https://github.com/scipp/scippnexus"
 
 [tool.setuptools_scm]
@@ -71,6 +72,7 @@ skip-string-normalization = true
 [tool.isort]
 skip_gitignore = true
 profile = "black"
+known_first_party = ["scippnexus"]
 
 [tool.mypy]
 strict = true
