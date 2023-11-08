@@ -444,19 +444,19 @@ def test_TransformationChainResolver_path_handling():
     assert tree['a/b']['./c'].value == 1
 
 
-def test_TransformationChainResolver_raises_if_child_does_not_exists():
+def test_TransformationChainResolver_raises_ChainError_if_child_does_not_exists():
     tree = TransformationChainResolver([{'a': {'b': {'c': 1}}}])
-    with pytest.raises(KeyError):
+    with pytest.raises(TransformationChainResolver.ChainError):
         tree['a']['b']['d']
 
 
-def test_TransformationChainResolver_raises_if_path_leads_beyond_root():
+def test_TransformationChainResolver_raises_ChainError_if_path_leads_beyond_root():
     tree = TransformationChainResolver([{'a': {'b': {'c': 1}}}])
-    with pytest.raises(KeyError):
+    with pytest.raises(TransformationChainResolver.ChainError):
         tree['..']
-    with pytest.raises(KeyError):
+    with pytest.raises(TransformationChainResolver.ChainError):
         tree['a']['../..']
-    with pytest.raises(KeyError):
+    with pytest.raises(TransformationChainResolver.ChainError):
         tree['../a']
 
 

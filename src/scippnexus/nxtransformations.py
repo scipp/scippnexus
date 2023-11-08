@@ -238,7 +238,13 @@ class TransformationChainResolver:
         elif base == '..':
             node = self.parent
         else:
-            node = TransformationChainResolver(self._stack + [self._stack[-1][base]])
+            try:
+                child = self._stack[-1][base]
+            except KeyError:
+                raise TransformationChainResolver.ChainError(
+                    f"Transformation depends on non-existing node '{base}'"
+                )
+            node = TransformationChainResolver(self._stack + [child])
         return node if len(remainder) == 0 else node[remainder[0]]
 
     def resolve_depends_on(self) -> Optional[Union[sc.DataArray, sc.Variable]]:
