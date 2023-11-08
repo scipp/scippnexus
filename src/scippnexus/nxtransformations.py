@@ -3,6 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
+import warnings
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -381,8 +382,10 @@ def _with_positions(
             out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
             if store_transform is not None:
                 out[store_transform] = transform
-        except TransformationChainResolver.ChainError:
-            pass
+        except TransformationChainResolver.ChainError as e:
+            warnings.warn(
+                UserWarning(f'depends_on chain references missing node:\n{e}')
+            )
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):
             value = _with_positions(

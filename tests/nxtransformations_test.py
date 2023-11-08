@@ -615,6 +615,7 @@ def test_compute_positions_with_rotation(h5root):
     )
 
 
+@pytest.mark.filterwarnings("ignore:depends_on chain references missing node")
 def test_compute_positions_skips_for_path_beyond_root(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     value = sc.scalar(6.5, unit='m')
@@ -712,3 +713,13 @@ def test_compute_positions_does_not_apply_time_dependent_transform_to_pixel_offs
     assert 'position' not in result['detector_0']['data'].coords
     result = snx.compute_positions(loaded, store_transform='transform')
     assert_identical(result['detector_0']['transform'], t * offset)
+
+
+def test_compute_positions_warns_if_depends_on_is_dead_link(h5root):
+    instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
+    detector = create_detector(instrument)
+    snx.create_field(detector, 'depends_on', sc.scalar('transform'))
+    root = make_group(h5root)
+    loaded = root[()]
+    with pytest.warns(UserWarning, match='depends_on chain references missing node'):
+        snx.compute_positions(loaded)
