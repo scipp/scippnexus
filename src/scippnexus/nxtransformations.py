@@ -3,6 +3,8 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
+import warnings
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -210,8 +212,23 @@ class TransformationChainResolver:
 
         pass
 
-    def __init__(self, stack: List[sc.DataGroup]):
+    @dataclass
+    class Entry:
+        name: str
+        value: sc.DataGroup
+
+    def __init__(self, stack: List[TransformationChainResolver.Entry]):
         self._stack = stack
+
+    @staticmethod
+    def from_root(dg: sc.DataGroup) -> TransformationChainResolver:
+        return TransformationChainResolver(
+            [TransformationChainResolver.Entry(name='', value=dg)]
+        )
+
+    @property
+    def name(self) -> str:
+        return '/'.join([e.name for e in self._stack])
 
     @property
     def root(self) -> TransformationChainResolver:
@@ -227,7 +244,7 @@ class TransformationChainResolver:
 
     @property
     def value(self) -> sc.DataGroup:
-        return self._stack[-1]
+        return self._stack[-1].value
 
     def __getitem__(self, path: str) -> TransformationChainResolver:
         base, *remainder = path.split('/', maxsplit=1)
@@ -238,7 +255,16 @@ class TransformationChainResolver:
         elif base == '..':
             node = self.parent
         else:
-            node = TransformationChainResolver(self._stack + [self._stack[-1][base]])
+            try:
+                child = self._stack[-1].value[base]
+            except KeyError:
+                raise TransformationChainResolver.ChainError(
+                    f"{base} not found in {self.name}"
+                )
+            node = TransformationChainResolver(
+                self._stack
+                + [TransformationChainResolver.Entry(name=base, value=child)]
+            )
         return node if len(remainder) == 0 else node[remainder[0]]
 
     def resolve_depends_on(self) -> Optional[Union[sc.DataArray, sc.Variable]]:
@@ -321,7 +347,7 @@ def compute_positions(
     """
     # Create resolver at root level, since any depends_on chain may lead to a parent,
     # i.e., we cannot use a resolver at the level of each chain's entry point.
-    resolver = TransformationChainResolver([dg])
+    resolver = TransformationChainResolver.from_root(dg)
     return _with_positions(
         dg,
         store_position=store_position,
@@ -375,8 +401,10 @@ def _with_positions(
             out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
             if store_transform is not None:
                 out[store_transform] = transform
-        except TransformationChainResolver.ChainError:
-            pass
+        except TransformationChainResolver.ChainError as e:
+            warnings.warn(
+                UserWarning(f'depends_on chain references missing node:\n{e}')
+            )
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):
             value = _with_positions(
