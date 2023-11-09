@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
+import warnings
+
 import h5py
 import numpy as np
 import pytest
@@ -552,3 +554,11 @@ def test_create_field_saves_errors(nxroot):
     # Use allclose instead of identical because the variances are stored as stddevs
     # which loses precision.
     assert sc.allclose(loaded, data.rename_dims(d0='dim_0'))
+
+
+@pytest.mark.parametrize('nxclass', [NXlog, NXmonitor, NXdetector, NXevent_data])
+def test_empty_class_does_not_warn(nxroot, nxclass):
+    log = nxroot['entry'].create_class('log', nxclass)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        log[()]
