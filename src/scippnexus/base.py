@@ -357,6 +357,11 @@ class Group(Mapping):
             return self._get_children_by_nx_class(sel)
 
         dg = self._nexus.read_children(sel)
+        if not dg:
+            # Bail out early to avoid fallback warnings. Everything is optional in
+            # NeXus so we cannot assume that the group is invalid (in contrast to
+            # likely partially incomplete groups that will fail to assemble below).
+            return dg
         try:
             dg = self._nexus.assemble(dg)
         except (sc.DimensionError, NexusStructureError) as e:
