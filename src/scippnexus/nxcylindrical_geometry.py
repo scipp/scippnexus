@@ -78,5 +78,35 @@ class NXcylindrical_geometry(NXobject):
     ) -> sc.Variable:
         return _parse(**children, parent_detector_number=detector_number)
 
+    @staticmethod
+    def solid_angle(cylinders: sc.DataSet, origin: sc.Variable):
+        """Approximation of the solid angle of a cylinder.
+        The approximation does not take edge caps into account.
+
+        Cylinder is approximated by a rectangle cross section parallel
+        to the axis of the cylinder.
+        The rectangle cross section is selected to maximize the solid angle.
+
+        The solid angle of the rectangular cross section is computed by
+        splitting it into two equal triangles and applying the
+        solid angle equation for triangles in 3-space,
+        source: doi.org/10.1080/0025570X.1990.11977515.
+        """
+
+        f1c = cylinders['face1_center']
+        f2c = cylinders['face2_center']
+        f1e = cylinders['face1_edge']
+        o = origin
+
+        R = sc.norm(f1e - f1c)
+        w = sc.cross(f1c - o, f2c - f1c)
+        w *= R / sc.norm(w)
+
+        a = f1c - w
+        b = f1c + w
+        c = f2c + w
+
+        return 4 * sc.abs(sc.atan(a @ sc.cross(b, c) / (1 + b @ c + c @ a + a @ b)))
+
 
 base_definitions_dict['NXcylindrical_geometry'] = NXcylindrical_geometry
