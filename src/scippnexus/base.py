@@ -378,7 +378,7 @@ class Group(Mapping):
             f"Failed to load {self.name} as {type(self._nexus).__name__}: {e} "
             "Falling back to loading HDF5 group children as scipp.DataGroup."
         )
-        warnings.warn(msg)
+        warnings.warn(msg, stacklevel=2)
 
     def __setitem__(self, key, value):
         """Set a child group or child dataset.

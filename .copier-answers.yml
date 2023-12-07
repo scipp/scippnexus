@@ -1,12 +1,13 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 13cf3e6
+_commit: ec09f73
 _src_path: gh:scipp/copier_template
 description: An h5py-like utility for NeXus files with seamless Scipp integration
 max_python: '3.12'
-min_python: '3.8'
+min_python: '3.9'
 namespace_package: ''
 nightly_deps: scipp
 orgname: scipp
+prettyname: ScippNexus
 projectname: scippnexus
 related_projects: Scipp,ScippNeutron
 year: 2023

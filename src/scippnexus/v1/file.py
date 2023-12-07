@@ -16,6 +16,7 @@ class File(AbstractContextManager, NXroot):
             "The scippnexus.v1 API is deprecated and will be removed in release 24.01. "
             "Switch to 'import scippnexus as snx' to use API version 2.",
             VisibleDeprecationWarning,
+            stacklevel=2,
         )
         self._file = h5py.File(*args, **kwargs)
         NXroot.__init__(self, self._file, definition=definition)

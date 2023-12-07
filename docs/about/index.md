@@ -1,4 +1,4 @@
-# About ScippNexus
+# About
 
 ## Development
 
@@ -14,7 +14,7 @@ Please cite the following:
 
 [![DOI](https://zenodo.org/badge/475453428.svg)](https://zenodo.org/doi/10.5281/zenodo.7408075)
 
-To cite a specific version of ScippNeXus select the desired version on Zenodo to get the corresponding DOI.
+To cite a specific version of ScippNexus, select the desired version on Zenodo to get the corresponding DOI.
 
 ## Older versions of the documentation
 
