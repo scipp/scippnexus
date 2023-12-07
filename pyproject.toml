@@ -18,7 +18,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -26,7 +25,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Typing :: Typed",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 # IMPORTANT:
 # Run 'tox -e deps' after making changes here. This will update requirement files.
@@ -52,7 +51,13 @@ minversion = "7.0"
 # The custom `externalfile` marker runs tests that require passwordless
 # SSH access to login.esss.dk. We do not run it by default. Make sure to
 # setup keys in your SSH agent before running `pytest -m externalfile`.
-addopts = "-ra -v --strict-markers -m 'not externalfile'"
+addopts = """
+--strict-config
+--strict-markers
+-ra
+-v
+-m 'not externalfile'
+"""
 testpaths = "tests"
 filterwarnings = [
   "error",

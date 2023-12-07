@@ -1,2 +1,4 @@
+# Add test dependencies in basetest.in
+
 -r base.in
-pytest
+-r basetest.in

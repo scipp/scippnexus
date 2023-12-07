@@ -11,7 +11,7 @@ requirements:
     - setuptools
     - setuptools_scm
   run:
-    - python>=3.8
+    - python>=3.9
     - python-dateutil
     - scipp>=23.07.0
     - scipy
@@ -31,7 +31,7 @@ test:
 build:
   noarch: python
   script:
-    - pip install .
+    - python -m pip install .
 
 about:
   home: https://github.com/scipp/scippnexus
