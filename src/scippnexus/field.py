@@ -239,7 +239,8 @@ class Field:
             except sc.UnitError:
                 warnings.warn(
                     f"Unrecognized unit '{unit}' for value dataset "
-                    f"in '{self.name}'; setting unit as 'dimensionless'"
+                    f"in '{self.name}'; setting unit as 'dimensionless'",
+                    stacklevel=2,
                 )
                 return sc.units.one
         return None

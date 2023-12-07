@@ -39,7 +39,8 @@ def _warn_latin1_decode(obj, decoded, error):
         f"extended ASCII (latin-1), but this behavior is not "
         f"specified by the HDF5 or nexus standards and may therefore "
         f"be incorrect. Decoded string using latin-1 is '{decoded}'. "
-        f"Error was '{error}'."
+        f"Error was '{error}'.",
+        stacklevel=2,
     )
 
 

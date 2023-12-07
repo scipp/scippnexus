@@ -403,7 +403,8 @@ def _with_positions(
                 out[store_transform] = transform
         except TransformationChainResolver.ChainError as e:
             warnings.warn(
-                UserWarning(f'depends_on chain references missing node:\n{e}')
+                UserWarning(f'depends_on chain references missing node:\n{e}'),
+                stacklevel=2,
             )
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):

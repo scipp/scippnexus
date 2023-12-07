@@ -317,7 +317,8 @@ class Field:
             except sc.UnitError:
                 warnings.warn(
                     f"Unrecognized unit '{unit}' for value dataset "
-                    f"in '{self.name}'; setting unit as 'dimensionless'"
+                    f"in '{self.name}'; setting unit as 'dimensionless'",
+                    stacklevel=2,
                 )
                 return sc.units.one
         return None
@@ -389,7 +390,7 @@ class NXobject:
                         f"Failed to determine axis names of {item.name}: {e}. "
                         "Falling back to default dimension labels."
                     )
-                    warnings.warn(msg)
+                    warnings.warn(msg, stacklevel=2)
                     dims = None
                 dtype = self._get_field_dtype(name)
                 return Field(
@@ -415,7 +416,7 @@ class NXobject:
                     f"Failed to load {self.name} as {type(self).__name__}: {e} "
                     "Falling back to loading HDF5 group children as scipp.DataGroup."
                 )
-                warnings.warn(msg)
+                warnings.warn(msg, stacklevel=2)
             da = NXobject._getitem(self, name)
         return da
 
@@ -582,7 +583,8 @@ class NXobject:
             except (NexusStructureError, TransformationError) as e:
                 warnings.warn(
                     f"Failed to load transformation {self.name}/{depends_on}:\n{e}\n"
-                    "Falling back to returning the path to the transformation."
+                    "Falling back to returning the path to the transformation.",
+                    stacklevel=2,
                 )
                 return depends_on[()]
         return None
