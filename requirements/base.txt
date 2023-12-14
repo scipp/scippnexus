@@ -46,7 +46,7 @@ pygments==2.17.2
     # via ipython
 python-dateutil==2.8.2
     # via -r base.in
-scipp==23.11.0
+scipp==23.11.1
     # via -r base.in
 scipy==1.11.4
     # via -r base.in
