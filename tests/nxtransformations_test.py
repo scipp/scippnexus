@@ -587,11 +587,16 @@ def test_compute_positions(h5root):
     )
 
 
-def test_compute_positions_with_rotation(h5root):
+@pytest.mark.parametrize('dtype', ['float64', 'float32'])
+def test_compute_positions_with_rotation(h5root, dtype):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     detector = create_detector(instrument)
-    snx.create_field(detector, 'x_pixel_offset', sc.linspace('xx', -1, 1, 2, unit='m'))
-    snx.create_field(detector, 'y_pixel_offset', sc.linspace('yy', -1, 1, 2, unit='m'))
+    snx.create_field(
+        detector, 'x_pixel_offset', sc.linspace('xx', -1, 1, 2, unit='m', dtype=dtype)
+    )
+    snx.create_field(
+        detector, 'y_pixel_offset', sc.linspace('yy', -1, 1, 2, unit='m', dtype=dtype)
+    )
     detector.attrs['axes'] = ['xx', 'yy']
     detector.attrs['x_pixel_offset_indices'] = [0]
     detector.attrs['y_pixel_offset_indices'] = [1]
