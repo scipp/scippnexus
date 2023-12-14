@@ -380,9 +380,9 @@ def zip_pixel_offsets(x: Dict[str, sc.Variable], /) -> sc.Variable:
     """
     zero = sc.scalar(0.0, unit=x['x_pixel_offset'].unit)
     return sc.spatial.as_vectors(
-        x['x_pixel_offset'],
-        x.get('y_pixel_offset', zero),
-        x.get('z_pixel_offset', zero),
+        x['x_pixel_offset'].to(dtype='float64', copy=False),
+        x.get('y_pixel_offset', zero).to(dtype='float64', copy=False),
+        x.get('z_pixel_offset', zero).to(dtype='float64', copy=False),
     )
 
 
