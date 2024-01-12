@@ -147,6 +147,41 @@ def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(h5root):
     assert set(dg.dims) == {'dim_0', 'xx', 'yy'}
 
 
+def test_dim_guessing_with_ambiguous_shape_accepts_multi_dim_match_at_end(h5root):
+    da = sc.DataArray(
+        sc.array(
+            dims=['aux', 'xx', 'yy'],
+            unit='m',
+            values=[[[1, 2, 3], [4, 5, 6], [7, 8, 9]]],
+        )
+    )
+    data = snx.create_class(h5root, 'data1', NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, '2x2', da.data['aux', 0])
+    data = snx.Group(data, definitions=snx.base_definitions())
+    loaded = data[...]
+    assert_identical(loaded.data, da.data)
+    assert_identical(loaded.coords['2x2'], da.data['aux', 0])
+
+
+def test_dim_guessing_with_ambiguous_shape_rejects_1d_dim_match_at_end(h5root):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+    )
+    data = snx.create_class(h5root, 'data1', NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, '1d', da.data['xx', 0])
+    data = snx.Group(data, definitions=snx.base_definitions())
+    dg = data[...]
+    assert isinstance(dg, sc.DataGroup)
+    assert '1d' in dg
+    assert set(dg.dims) == {'dim_0', 'xx', 'yy'}
+
+
 def test_guesses_transposed_dims_for_2d_coord(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
