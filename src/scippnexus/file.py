@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+import threading
 from contextlib import AbstractContextManager
 from typing import Mapping
 
@@ -12,6 +13,8 @@ _default_definitions = object()
 
 
 class File(AbstractContextManager, Group):
+    _lock = threading.Lock()
+
     def __init__(self, *args, definitions: Mapping = _default_definitions, **kwargs):
         """Context manager for NeXus files, similar to h5py.File.
 
@@ -30,11 +33,13 @@ class File(AbstractContextManager, Group):
         super().__init__(self._file, definitions=definitions)
 
     def __enter__(self):
+        self._lock.acquire()
         self._file.__enter__()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self._file.close()
+        self._lock.release()
 
     def close(self):
         self._file.close()
