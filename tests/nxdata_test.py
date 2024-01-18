@@ -159,11 +159,11 @@ def test_dim_guessing_with_ambiguous_shape_accepts_multi_dim_match_at_end(h5root
     data.attrs['axes'] = da.dims
     data.attrs['signal'] = 'signal'
     snx.create_field(data, 'signal', da.data)
-    snx.create_field(data, '2x2', da.data['aux', 0])
+    snx.create_field(data, '3x3', da.data['aux', 0])
     data = snx.Group(data, definitions=snx.base_definitions())
     loaded = data[...]
     assert_identical(loaded.data, da.data)
-    assert_identical(loaded.coords['2x2'], da.data['aux', 0])
+    assert_identical(loaded.coords['3x3'], da.data['aux', 0])
 
 
 def test_dim_guessing_with_ambiguous_shape_rejects_1d_dim_match_at_end(h5root):

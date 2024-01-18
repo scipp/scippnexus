@@ -31,7 +31,7 @@ def _guess_dims(dims, shape, dataset: H5Dataset):
     if shape == dataset.shape:
         return dims
     if 1 < len(dataset.shape) <= len(shape):
-        # We allow exact multi-dim matches at the end, even thought there is a risk
+        # We allow exact multi-dim matches at the end, even though there is a risk
         # for ambiguity with the transpose. Since image data is very common and many
         # sensors are square, this is a hopefully reasonable compromise.
         if dataset.shape == shape[-len(dataset.shape) :]:
