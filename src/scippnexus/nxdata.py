@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 import uuid
-from functools import cached_property
 from itertools import chain
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
 
+from ._cache import cached_property
 from ._common import _to_canonical_select, convert_time_to_datetime64, to_child_select
 from .base import (
     Group,

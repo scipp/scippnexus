@@ -6,7 +6,6 @@ import posixpath
 import re
 import warnings
 from dataclasses import dataclass
-from functools import cached_property
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
@@ -18,6 +17,7 @@ from scippnexus._common import convert_time_to_datetime64, to_plain_index
 from scippnexus._hdf5_nexus import _warn_latin1_decode
 from scippnexus.typing import H5Dataset, ScippIndex
 
+from ._cache import cached_property
 from .attrs import Attrs
 
 if TYPE_CHECKING:
