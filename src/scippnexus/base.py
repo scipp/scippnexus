@@ -6,13 +6,14 @@ from __future__ import annotations
 import inspect
 import warnings
 from collections.abc import Mapping
-from functools import cached_property, lru_cache
+from functools import lru_cache
 from types import MappingProxyType
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, overload
 
 import numpy as np
 import scipp as sc
 
+from ._cache import cached_property
 from ._common import to_child_select
 from .attrs import Attrs
 from .field import Field
