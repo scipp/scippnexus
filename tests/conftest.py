@@ -2,6 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import os
+import sys
+from pathlib import Path
 from typing import Any, List
 
 import pytest
@@ -9,6 +11,8 @@ import scipp as sc
 
 # Silence warning from Jupyter
 os.environ['JUPYTER_PLATFORM_DIRS'] = '1'
+# To import helper modules
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 pytest.register_assert_rewrite('scipp.testing.assertions')
 
