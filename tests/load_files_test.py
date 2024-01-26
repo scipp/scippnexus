@@ -2,11 +2,12 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 from typing import Any, Dict, Optional, Union
 
-import externalfile
 import pytest
 import scipp as sc
 
 import scippnexus as snx
+
+externalfile = pytest.importorskip('externalfile')
 
 all_files = [
     '2023/DREAM_baseline_all_dets.nxs',
