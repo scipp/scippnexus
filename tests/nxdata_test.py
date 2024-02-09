@@ -696,6 +696,31 @@ def test_slicing_raises_given_invalid_index(h5root):
         data['zz', 0]
 
 
+def test_label_based_slicing(h5root):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]),
+        coords=dict(
+            xx=sc.array(dims=['xx'], unit='m', values=[1.0, 2.0]),
+            yy=sc.array(dims=['yy'], unit='m', values=[0.1, 0.0]),
+        ),
+    )
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'yy', da.coords['yy'])
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions())
+    sc.testing.assert_identical(
+        data['xx', sc.scalar(1.0, unit='m') : sc.scalar(3.0, unit='m')],
+        da['xx', sc.scalar(1.0, unit='m') : sc.scalar(3.0, unit='m')],
+    )
+    sc.testing.assert_identical(
+        data['yy', sc.scalar(0.2, unit='m') : sc.scalar(0.01, unit='m')],
+        da['yy', sc.scalar(0.2, unit='m') : sc.scalar(0.01, unit='m')],
+    )
+
+
 def test_scalar_signal_without_unit_works(h5root):
     da = sc.DataArray(
         sc.scalar(1.1, unit=None), coords={'xx': sc.scalar(2.0, unit='m')}
