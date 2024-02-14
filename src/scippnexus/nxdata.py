@@ -9,6 +9,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
+from scipp.core import label_based_index_to_positional_index
 
 from ._cache import cached_property
 from ._common import (
@@ -340,17 +341,7 @@ class NXdata(NXobject):
             if coord not in self._children:
                 raise ValueError(f'Coordinate {coord} was not found on the object')
             child = self._children[coord][()]
-            if len(child.dims) != 1:
-                raise ValueError('The indexed coordinate must be 1-d')
-            ascending = child.values[:-1] < child.values[1:]
-            descending = child.values[:-1] > child.values[1:]
-            if not (ascending or descending):
-                raise ValueError(
-                    'The indexed coordinate must monotonically increasing or decreasing'
-                )
-            start = child < index.start if ascending else child > index.start
-            stop = child < index.stop if ascending else child > index.stop
-            sel = coord, slice(start.sum().value, stop.sum().value)
+            sel = label_based_index_to_positional_index(self.sizes, child, index)
 
         return super().read_children(sel)
 
