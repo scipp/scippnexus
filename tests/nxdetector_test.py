@@ -310,6 +310,40 @@ def test_select_events_slices_underlying_event_data(nxroot):
     )
 
 
+def test_label_based_select_events_slices_underlying_event_data(nxroot):
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_number', detector_numbers_xx_yy_1234())
+    create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
+    da = detector['event_time_zero', : sc.scalar(3, unit='s')]['events']
+    assert sc.identical(
+        da.bins.size().data,
+        sc.array(
+            dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[1, 1], [0, 1]]
+        ),
+    )
+    da = detector['event_time_zero', : sc.scalar(4, unit='s')]['events']
+    assert sc.identical(
+        da.bins.size().data,
+        sc.array(
+            dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[2, 2], [0, 1]]
+        ),
+    )
+    da = detector['event_time_zero', sc.scalar(4, unit='s')]['events']
+    assert sc.identical(
+        da.bins.size().data,
+        sc.array(
+            dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[0, 1], [0, 0]]
+        ),
+    )
+    da = detector[()]['events']
+    assert sc.identical(
+        da.bins.size().data,
+        sc.array(
+            dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[2, 3], [0, 1]]
+        ),
+    )
+
+
 def test_loading_event_data_without_detector_numbers_does_not_group_events(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))

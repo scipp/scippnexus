@@ -9,7 +9,6 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
-from scipp.core import label_based_index_to_positional_index
 
 from ._cache import cached_property
 from ._common import _to_canonical_select, convert_time_to_datetime64, to_child_select
@@ -329,25 +328,6 @@ class NXdata(NXobject):
             tuple(self.sizes), child.dims, sel, bin_edge_dim=self._bin_edge_dim(child)
         )
         return child[child_sel]
-
-    def _convert_index_to_positional(self, sel):
-        if isinstance(sel, dict):
-            return {s[0]: self._convert_index_to_positional(s) for s in sel.items()}
-        if (
-            isinstance(sel, tuple)
-            and len(sel) > 1
-            and isinstance(sel[1], slice)
-            and (
-                isinstance(sel[1].start, sc.Variable)
-                or isinstance(sel[1].stop, sc.Variable)
-            )
-        ):
-            coord, index = sel
-            if coord not in self._children:
-                raise ValueError(f'Coordinate {coord} was not found on the object')
-            child = self._children[coord][()]
-            return label_based_index_to_positional_index(self.sizes, child, index)
-        return sel
 
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
         sel = self._convert_index_to_positional(sel)

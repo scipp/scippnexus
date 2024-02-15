@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, overload
 
 import numpy as np
 import scipp as sc
+from scipp.core import label_based_index_to_positional_index
 
 from ._cache import cached_property
 from ._common import to_child_select
@@ -139,6 +140,30 @@ class NXobject:
         an object with more semantics such as a DataArray or Dataset.
         """
         return dg
+
+    def _convert_index_to_positional(self, sel):
+        if isinstance(sel, dict):
+            return dict((self._convert_index_to_positional(s) for s in sel.items()))
+        if not (isinstance(sel, tuple) and len(sel) > 1):
+            return sel
+        coord, index = sel
+        if coord not in self._children:
+            return sel
+        if (
+            # Scalar label based index
+            isinstance(index, sc.Variable)
+            or (
+                # Slice label based index
+                isinstance(index, slice)
+                and (
+                    isinstance(index.start, sc.Variable)
+                    or isinstance(index.stop, sc.Variable)
+                )
+            )
+        ):
+            child = self._children[coord][()]
+            return label_based_index_to_positional_index(self.sizes, child, index)
+        return sel
 
 
 class NXroot(NXobject):

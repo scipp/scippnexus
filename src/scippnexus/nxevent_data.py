@@ -66,6 +66,7 @@ class NXevent_data(NXobject):
         if not children:  # TODO Check that select is trivial?
             return sc.DataGroup()
 
+        select = self._convert_index_to_positional(select)
         index = to_plain_index([_pulse_dimension], select)
         event_time_zero = children['event_time_zero'][index]
         last_loaded, event_index = self._get_event_index(children, index)
