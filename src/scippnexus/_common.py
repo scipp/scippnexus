@@ -106,19 +106,6 @@ def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, slice, tup
     return tuple(index)
 
 
-def is_label_based_index(sel: ScippIndex) -> bool:
-    """
-    Determine if the index is label based
-    """
-    return (
-        isinstance(sel, tuple)
-        and len(sel) > 1
-        and isinstance(sel[1], slice)
-        and isinstance(sel[1].start, sc.Variable)
-        and isinstance(sel[1].stop, sc.Variable)
-    )
-
-
 def to_child_select(
     dims: List[str],
     child_dims: List[str],

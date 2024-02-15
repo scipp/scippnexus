@@ -12,12 +12,7 @@ import scipp as sc
 from scipp.core import label_based_index_to_positional_index
 
 from ._cache import cached_property
-from ._common import (
-    _to_canonical_select,
-    convert_time_to_datetime64,
-    is_label_based_index,
-    to_child_select,
-)
+from ._common import _to_canonical_select, convert_time_to_datetime64, to_child_select
 from .base import (
     Group,
     NexusStructureError,
@@ -335,14 +330,27 @@ class NXdata(NXobject):
         )
         return child[child_sel]
 
-    def read_children(self, sel: ScippIndex) -> sc.DataGroup:
-        if is_label_based_index(sel):
+    def _convert_index_to_positional(self, sel):
+        if isinstance(sel, dict):
+            return {s[0]: self._convert_index_to_positional(s) for s in sel.items()}
+        if (
+            isinstance(sel, tuple)
+            and len(sel) > 1
+            and isinstance(sel, slice)
+            and (
+                isinstance(sel[1].start, sc.Variable)
+                or isinstance(sel[1].stop, sc.Variable)
+            )
+        ):
             coord, index = sel
             if coord not in self._children:
                 raise ValueError(f'Coordinate {coord} was not found on the object')
             child = self._children[coord][()]
-            sel = label_based_index_to_positional_index(self.sizes, child, index)
+            return label_based_index_to_positional_index(self.sizes, child, index)
+        return sel
 
+    def read_children(self, sel: ScippIndex) -> sc.DataGroup:
+        sel = self._convert_index_to_positional(sel)
         return super().read_children(sel)
 
     def assemble(
