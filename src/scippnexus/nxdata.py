@@ -157,7 +157,11 @@ class NXdata(NXobject):
             None if self._signal is None else self._signal.attrs.get('axes')
         )
         if self._signal_axes is not None:
-            self._signal_axes = tuple(self._signal_axes.split(':'))
+            self._signal_axes = (
+                tuple(self._signal_axes.split(':'))
+                if isinstance(self._signal_axes, str)
+                else tuple(self._signal_axes)
+            )
             # The standard says that the axes should be colon-separated, but some
             # files use comma-separated.
             if len(self._signal_axes) == 1 and self._signal.dataset.ndim > 1:
@@ -213,7 +217,11 @@ class NXdata(NXobject):
             group_dims = self._signal.dims
         else:
             if group_dims is not None:
-                shape = self._signal.dataset.shape
+                shape = (
+                    self._signal.dataset.shape
+                    if hasattr(self._signal, 'dataset')
+                    else self._signal.shape  # signal is a subgroup
+                )
                 # If we have explicit group dims, we can drop trailing 1s.
                 shape = _squeeze_trailing(group_dims, shape)
                 self._signal.sizes = dict(zip(group_dims, shape))
