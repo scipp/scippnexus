@@ -157,10 +157,10 @@ class NXdata(NXobject):
             None if self._signal is None else self._signal.attrs.get('axes')
         )
         if self._signal_axes is not None:
-            self._signal_axes = (
-                tuple(self._signal_axes.split(':'))
+            self._signal_axes = tuple(
+                self._signal_axes.split(':')
                 if isinstance(self._signal_axes, str)
-                else tuple(self._signal_axes)
+                else self._signal_axes
             )
             # The standard says that the axes should be colon-separated, but some
             # files use comma-separated.
