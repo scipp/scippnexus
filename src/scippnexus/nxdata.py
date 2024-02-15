@@ -336,7 +336,7 @@ class NXdata(NXobject):
         if (
             isinstance(sel, tuple)
             and len(sel) > 1
-            and isinstance(sel, slice)
+            and isinstance(sel[1], slice)
             and (
                 isinstance(sel[1].start, sc.Variable)
                 or isinstance(sel[1].stop, sc.Variable)
