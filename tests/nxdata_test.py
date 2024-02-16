@@ -97,6 +97,24 @@ def test_slice_of_1d(h5root):
     assert sc.identical(data[:2], da['xx', :2])
 
 
+def test_label_slice_of_1d(h5root):
+    da = sc.DataArray(sc.array(dims=['xx'], unit='m', values=[1, 2, 3]))
+    da.coords['xx'] = da.data
+    da.coords['xx2'] = da.data
+    da.coords['scalar'] = sc.scalar(1.2)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    snx.create_field(data, 'scalar', da.coords['scalar'])
+    data = snx.Group(data, definitions=snx.base_definitions())
+    assert sc.identical(
+        data['xx', : sc.scalar(3, unit='m')], da['xx', : sc.scalar(3, unit='m')]
+    )
+
+
 def test_slice_of_multiple_coords(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
@@ -112,7 +130,9 @@ def test_slice_of_multiple_coords(h5root):
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'yy', da.coords['yy'])
     data = snx.Group(data, definitions=snx.base_definitions())
-    assert sc.identical(data['xx', :2], da['xx', :2])
+    assert sc.identical(
+        data['xx', : sc.scalar(3, unit='m')], da['xx', : sc.scalar(3, unit='m')]
+    )
 
 
 def test_guessed_dim_for_2d_coord_not_matching_axis_name(h5root):

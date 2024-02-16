@@ -517,6 +517,34 @@ def test_nxdata_positional_indexing_returns_correct_slice(h5root):
     assert sc.identical(da, ref['time', 0:2])
 
 
+def test_nxdata_label_indexing_returns_correct_slice(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data.attrs['NX_class'] = 'NXdata'
+    data.attrs['signal'] = 'signal'
+    data.attrs['axes'] = ['time', 'temperature']
+    data.attrs['time_indices'] = [0]
+    data.attrs['temperature_indices'] = [1]
+    ref = sc.DataArray(
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m')
+    )
+    ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
+    ref.coords['temperature'] = sc.array(
+        dims=['temperature'], values=np.arange(4), unit='K'
+    )
+    data['signal'] = ref.values
+    data['signal'].attrs['units'] = str(ref.unit)
+    data['time'] = ref.coords['time'].values
+    data['time'].attrs['units'] = str(ref.coords['time'].unit)
+    data['temperature'] = ref.coords['temperature'].values
+    data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
+    obj = snx.Group(data, definitions=snx.base_definitions())
+    da = obj['time', sc.scalar(0, unit='s') : sc.scalar(2, unit='s')]
+    assert sc.identical(
+        da, ref['time', sc.scalar(0, unit='s') : sc.scalar(2, unit='s')]
+    )
+
+
 def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root):
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
@@ -541,6 +569,34 @@ def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root)
     obj = snx.Group(data, definitions=snx.base_definitions())
     da = obj['temperature', 0:2]
     assert sc.identical(da, ref['temperature', 0:2])
+
+
+def test_nxdata_with_bin_edges_label_indexing_returns_correct_slice(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data.attrs['NX_class'] = 'NXdata'
+    data.attrs['signal'] = 'signal'
+    data.attrs['axes'] = ['time', 'temperature']
+    data.attrs['time_indices'] = [0]
+    data.attrs['temperature_indices'] = [1]
+    ref = sc.DataArray(
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m')
+    )
+    ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
+    ref.coords['temperature'] = sc.array(
+        dims=['temperature'], values=np.arange(5), unit='K'
+    )
+    data['signal'] = ref.values
+    data['signal'].attrs['units'] = str(ref.unit)
+    data['time'] = ref.coords['time'].values
+    data['time'].attrs['units'] = str(ref.coords['time'].unit)
+    data['temperature'] = ref.coords['temperature'].values
+    data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
+    obj = snx.Group(data, definitions=snx.base_definitions())
+    da = obj['temperature', sc.scalar(0, unit='K') : sc.scalar(2, unit='K')]
+    assert sc.identical(
+        da, ref['temperature', sc.scalar(0, unit='K') : sc.scalar(2, unit='K')]
+    )
 
 
 def test_create_field_saves_errors(nxroot):

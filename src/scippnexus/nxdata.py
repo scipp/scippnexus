@@ -11,7 +11,12 @@ import numpy as np
 import scipp as sc
 
 from ._cache import cached_property
-from ._common import _to_canonical_select, convert_time_to_datetime64, to_child_select
+from ._common import (
+    _to_canonical_select,
+    convert_time_to_datetime64,
+    is_label_index,
+    to_child_select,
+)
 from .base import (
     Group,
     NexusStructureError,
@@ -492,7 +497,7 @@ class NXlog(NXdata):
         # Sublogs have distinct time axes (with a different length). Must disable
         # positional indexing.
         if (
-            self._convert_index_to_positional(sel) == sel
+            not is_label_index(sel)
             and self._sublogs
             and ('time' in _to_canonical_select(list(self.sizes), sel))
         ):
