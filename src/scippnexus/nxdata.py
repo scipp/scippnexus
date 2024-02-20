@@ -11,12 +11,7 @@ import numpy as np
 import scipp as sc
 
 from ._cache import cached_property
-from ._common import (
-    _to_canonical_select,
-    convert_time_to_datetime64,
-    is_label_index,
-    to_child_select,
-)
+from ._common import _to_canonical_select, convert_time_to_datetime64, to_child_select
 from .base import (
     Group,
     NexusStructureError,
@@ -496,11 +491,7 @@ class NXlog(NXdata):
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
         # Sublogs have distinct time axes (with a different length). Must disable
         # positional indexing.
-        if (
-            not is_label_index(sel)
-            and self._sublogs
-            and ('time' in _to_canonical_select(list(self.sizes), sel))
-        ):
+        if self._sublogs and ('time' in _to_canonical_select(list(self.sizes), sel)):
             raise sc.DimensionError(
                 "Cannot positionally select time since there are multiple "
                 "time fields."

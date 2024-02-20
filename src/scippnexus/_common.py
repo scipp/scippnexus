@@ -106,19 +106,6 @@ def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, slice, tup
     return tuple(index)
 
 
-def is_label_index(s):
-    if isinstance(s, dict):
-        return all(map(is_label_index, s.items()))
-    if isinstance(s, tuple) and len(s) > 1:
-        dim, ind = s
-        return isinstance(dim, str) and (
-            isinstance(ind, sc.Variable)
-            or isinstance(ind, slice)
-            and any((isinstance(v, sc.Variable) for v in (ind.start, ind.stop)))
-        )
-    return False
-
-
 def to_child_select(
     dims: List[str],
     child_dims: List[str],
