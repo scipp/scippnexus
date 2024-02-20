@@ -494,7 +494,7 @@ class NXlog(NXdata):
         if self._sublogs and ('time' in _to_canonical_select(list(self.sizes), sel)):
             raise sc.DimensionError(
                 "Cannot positionally select time since there are multiple "
-                "time fields."
+                "time fields. Label-based selection is not supported yet."
             )
 
         dg = super().read_children(sel)
