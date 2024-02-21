@@ -599,6 +599,64 @@ def test_nxdata_with_bin_edges_label_indexing_returns_correct_slice(h5root):
     )
 
 
+def create_nexus_group_with_data_arrays(h5root, dims, coords):
+    entry = h5root.create_group('entry')
+    for i, (dim, coord) in enumerate(zip(dims, coords)):
+        data = entry.create_group(f'data_{i}')
+        data.attrs['NX_class'] = 'NXdata'
+        data['signal'] = np.arange(5)
+        data['signal'].attrs['units'] = 'm'
+        data[coord] = np.arange(5)
+        data[coord].attrs['units'] = 's'
+        data.attrs['signal'] = 'signal'
+        data.attrs['axes'] = [dim]
+        data.attrs[f'{dim}_indices'] = [0]
+    return snx.Group(h5root, definitions=snx.base_definitions())
+
+
+@pytest.mark.parametrize(
+    '_slice',
+    (
+        ('time', sc.scalar(1, unit='s')),
+        ('time', slice(sc.scalar(1, unit='s'), None)),
+        ('time', slice(None, sc.scalar(1, unit='s'))),
+        {'time': sc.scalar(1, unit='s'), 'x': sc.scalar(1, unit='s')},
+        {'x': sc.scalar(1, unit='s')},
+    ),
+)
+@pytest.mark.parametrize(
+    'dims, coords',
+    (
+        (('time',), ('time2',)),
+        (('time', 'time'), ('time2', 'time')),
+        (('x', 'y'), ('time2', 'time')),
+    ),
+)
+def test_label_indexing_group_behaves_same_as_indexing_scipp_datagroup(
+    h5root, _slice, dims, coords
+):
+    nx = create_nexus_group_with_data_arrays(h5root, dims, coords)
+    dg = nx[()]
+
+    exception = None
+    try:
+        # Scipp does not support dict slicing,
+        # manually slice datagroup in multiple coords
+        if isinstance(_slice, dict):
+            for s in _slice.items():
+                dg = dg[s]
+        else:
+            dg = dg[_slice]
+    except Exception as e:
+        exception = type(e)
+
+    if exception:
+        with pytest.raises(exception):
+            assert nx[_slice]
+    else:
+        assert sc.identical(nx[_slice], dg)
+
+
 def test_create_field_saves_errors(nxroot):
     entry = nxroot['entry']
     data = sc.array(

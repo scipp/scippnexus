@@ -143,12 +143,16 @@ class NXobject:
 
     def _convert_index_to_positional(self, sel):
         if isinstance(sel, dict):
-            return dict((self._convert_index_to_positional(s) for s in sel.items()))
+            return dict(
+                (
+                    pos_ind
+                    for s in sel.items()
+                    if (pos_ind := self._convert_index_to_positional(s)) != ...
+                )
+            )
         if not (isinstance(sel, tuple) and len(sel) > 1):
             return sel
-        coord, index = sel
-        if coord not in self._children:
-            return sel
+        dimcoord, index = sel
         if (
             # Scalar label based index
             isinstance(index, sc.Variable)
@@ -161,7 +165,17 @@ class NXobject:
                 )
             )
         ):
-            child = self._children[coord][()]
+            if dimcoord not in self.sizes:
+                return ...
+            if dimcoord not in self._children:
+                raise sc.DimensionError(
+                    (
+                        f'Invalid slice dimension: \'{dimcoord}\': '
+                        f'no coordinate for that dimension. '
+                        f'Coordinates are {tuple(self._children.keys())}'
+                    )
+                )
+            child = self._children[dimcoord][()]
             return label_based_index_to_positional_index(self.sizes, child, index)
         return sel
 
