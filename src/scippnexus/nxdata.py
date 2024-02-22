@@ -9,6 +9,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
+from scipp.core import label_based_index_to_positional_index
 
 from ._cache import cached_property
 from ._common import _to_canonical_select, convert_time_to_datetime64, to_child_select
@@ -443,6 +444,19 @@ class NXdata(NXobject):
                 )
         return da
 
+    def _convert_index_to_positional_impl(self, sel):
+        dimcoord, index = sel
+        if dimcoord not in self._children:
+            raise sc.DimensionError(
+                (
+                    f'Invalid slice dimension: \'{dimcoord}\': '
+                    f'no coordinate for that dimension. '
+                    f'Coordinates are {tuple(self._children.keys())}'
+                )
+            )
+        child = self._children[dimcoord][()]
+        return label_based_index_to_positional_index(self.sizes, child, index)
+
 
 def _squeeze_trailing(dims: Tuple[str, ...], shape: Tuple[int, ...]) -> Tuple[int, ...]:
     return shape[: len(dims)] + tuple(size for size in shape[len(dims) :] if size != 1)
@@ -720,6 +734,13 @@ class NXdetector(NXdata):
     @property
     def detector_number(self) -> Optional[str]:
         return self._detector_number(self._children)
+
+    def _convert_index_to_positional_impl(self, sel):
+        dimcoord, index = sel
+        if dimcoord not in self._children:
+            return sel
+        child = self._children[dimcoord][()]
+        return label_based_index_to_positional_index(self.sizes, child, index)
 
 
 class NXmonitor(NXdata):

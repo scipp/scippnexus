@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import scipp as sc
+from scipp.core import label_based_index_to_positional_index
 
 from ._common import to_plain_index
 from .base import (
@@ -162,6 +163,21 @@ class NXevent_data(NXobject):
             raise NexusStructureError(f"Invalid index in NXevent_data at {path}:\n{e}")
 
         return sc.DataArray(data=binned, coords={'event_time_zero': event_time_zero})
+
+    def _convert_index_to_positional_impl(self, sel):
+        dimcoord, index = sel
+        if dimcoord not in self._children:
+            if dimcoord not in self.sizes:
+                return ...
+            raise sc.DimensionError(
+                (
+                    f'Invalid slice dimension: \'{dimcoord}\': '
+                    f'no coordinate for that dimension. '
+                    f'Coordinates are {tuple(self._children.keys())}'
+                )
+            )
+        child = self._children[dimcoord][()]
+        return label_based_index_to_positional_index(self.sizes, child, index)
 
 
 base_definitions_dict['NXevent_data'] = NXevent_data

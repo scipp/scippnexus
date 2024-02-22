@@ -12,7 +12,6 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, overload
 
 import numpy as np
 import scipp as sc
-from scipp.core import label_based_index_to_positional_index
 
 from ._cache import cached_property
 from ._common import to_child_select
@@ -165,18 +164,7 @@ class NXobject:
                 )
             )
         ):
-            if dimcoord not in self.sizes:
-                return ...
-            if dimcoord not in self._children:
-                raise sc.DimensionError(
-                    (
-                        f'Invalid slice dimension: \'{dimcoord}\': '
-                        f'no coordinate for that dimension. '
-                        f'Coordinates are {tuple(self._children.keys())}'
-                    )
-                )
-            child = self._children[dimcoord][()]
-            return label_based_index_to_positional_index(self.sizes, child, index)
+            return self._convert_index_to_positional_impl(sel)
         return sel
 
 

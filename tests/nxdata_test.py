@@ -741,6 +741,71 @@ def test_label_based_slicing(h5root):
     )
 
 
+def create_nxdata(h5root, dims, coords):
+    da = sc.DataArray(
+        sc.array(dims=dims, unit='m', values=np.random.randn(*(5 for _ in dims))),
+        coords={
+            coord: sc.linspace(dim, 0, 1, 5, unit='s')
+            for dim, coord in zip(dims, coords)
+        },
+    )
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', da.data)
+    for dim, coord in zip(dims, coords):
+        snx.create_field(data, dim, da.coords[coord])
+
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions())
+    return data
+
+
+@pytest.mark.parametrize(
+    '_slice',
+    (
+        ('time', sc.scalar(1, unit='s')),
+        ('time', slice(sc.scalar(1, unit='s'), None)),
+        ('time', slice(None, sc.scalar(1, unit='s'))),
+        ('time', slice(sc.scalar(1, unit='s'), sc.scalar(3, unit='s'))),
+        {'time': sc.scalar(1, unit='s'), 'x': sc.scalar(1, unit='s')},
+        {'x': sc.scalar(1, unit='s')},
+    ),
+)
+@pytest.mark.parametrize(
+    'dims, coords',
+    (
+        (('time',), ('time',)),
+        (('time',), ('time2',)),
+        (('time', 'x'), ('time2', 'x')),
+        (('x', 'y'), ('time2', 'time')),
+        (('x', 'y'), ('x', 'y')),
+    ),
+)
+def test_label_indexing_dataset_behaves_same_as_indexing_scipp_dataarray(
+    h5root, _slice, dims, coords
+):
+    nx = create_nxdata(h5root, dims, coords)
+    da = nx[()]
+
+    exception = None
+    try:
+        # Scipp does not support dict slicing,
+        # manually slice datagroup in multiple coords
+        if isinstance(_slice, dict):
+            for s in _slice.items():
+                da = da[s]
+        else:
+            da = da[_slice]
+    except Exception as e:
+        exception = type(e)
+
+    if exception:
+        with pytest.raises(exception):
+            nx[_slice]
+    else:
+        assert sc.identical(nx[_slice], da)
+
+
 def test_scalar_signal_without_unit_works(h5root):
     da = sc.DataArray(
         sc.scalar(1.1, unit=None), coords={'xx': sc.scalar(2.0, unit='m')}
