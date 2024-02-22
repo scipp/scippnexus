@@ -447,13 +447,7 @@ class NXdata(NXobject):
     def _convert_index_to_positional_impl(self, sel):
         dimcoord, index = sel
         if dimcoord not in self._children:
-            raise sc.DimensionError(
-                (
-                    f'Invalid slice dimension: \'{dimcoord}\': '
-                    f'no coordinate for that dimension. '
-                    f'Coordinates are {tuple(self._children.keys())}'
-                )
-            )
+            return sel
         child = self._children[dimcoord][()]
         return label_based_index_to_positional_index(self.sizes, child, index)
 
@@ -734,13 +728,6 @@ class NXdetector(NXdata):
     @property
     def detector_number(self) -> Optional[str]:
         return self._detector_number(self._children)
-
-    def _convert_index_to_positional_impl(self, sel):
-        dimcoord, index = sel
-        if dimcoord not in self._children:
-            return sel
-        child = self._children[dimcoord][()]
-        return label_based_index_to_positional_index(self.sizes, child, index)
 
 
 class NXmonitor(NXdata):

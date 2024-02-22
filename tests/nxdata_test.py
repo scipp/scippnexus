@@ -803,7 +803,7 @@ def test_label_indexing_dataset_behaves_same_as_indexing_scipp_dataarray(
         with pytest.raises(exception):
             nx[_slice]
     else:
-        assert sc.identical(nx[_slice], da)
+        assert_identical(nx[_slice], da)
 
 
 def test_scalar_signal_without_unit_works(h5root):

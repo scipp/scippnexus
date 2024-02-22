@@ -654,7 +654,7 @@ def test_label_indexing_group_behaves_same_as_indexing_scipp_datagroup(
         with pytest.raises(exception):
             nx[_slice]
     else:
-        assert sc.identical(nx[_slice], dg)
+        assert_identical(nx[_slice], dg)
 
 
 def test_create_field_saves_errors(nxroot):
