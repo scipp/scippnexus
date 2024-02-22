@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, overload
 
 import numpy as np
 import scipp as sc
+from scipp.core import label_based_index_to_positional_index
 
 from ._cache import cached_property
 from ._common import to_child_select
@@ -140,31 +141,33 @@ class NXobject:
         """
         return dg
 
-    def _convert_index_to_positional(self, sel):
+    def _try_convert_label_index_to_positional(self, sel):
         if isinstance(sel, dict):
             return dict(
-                (
-                    pos_ind
-                    for s in sel.items()
-                    if (pos_ind := self._convert_index_to_positional(s)) != ...
-                )
+                (self._try_convert_label_index_to_positional(s) for s in sel.items())
             )
-        if not (isinstance(sel, tuple) and len(sel) > 1):
-            return sel
-        dimcoord, index = sel
         if (
-            # Scalar label based index
-            isinstance(index, sc.Variable)
-            or (
-                # Slice label based index
-                isinstance(index, slice)
-                and (
-                    isinstance(index.start, sc.Variable)
-                    or isinstance(index.stop, sc.Variable)
+            isinstance(sel, tuple)
+            and len(sel) > 1
+            and (
+                # Scalar label index
+                isinstance((index := sel[1]), sc.Variable)
+                or (
+                    # Slice label index
+                    isinstance(index, slice)
+                    and (
+                        isinstance(index.start, sc.Variable)
+                        or isinstance(index.stop, sc.Variable)
+                    )
                 )
             )
         ):
-            return self._convert_index_to_positional_impl(sel)
+            if (coord := sel[0]) in self._children:
+                child = self._children[coord][()]
+                return label_based_index_to_positional_index(self.sizes, child, index)
+
+        # It is not a label index, or the coord is not available in the children.
+        # Either way, pass it on.
         return sel
 
 

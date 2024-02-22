@@ -9,7 +9,6 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
-from scipp.core import label_based_index_to_positional_index
 
 from ._cache import cached_property
 from ._common import _to_canonical_select, convert_time_to_datetime64, to_child_select
@@ -331,7 +330,7 @@ class NXdata(NXobject):
         return child[child_sel]
 
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
-        sel = self._convert_index_to_positional(sel)
+        sel = self._try_convert_label_index_to_positional(sel)
         return super().read_children(sel)
 
     def assemble(
@@ -443,13 +442,6 @@ class NXdata(NXobject):
                     name, self._should_be_aligned(da, name, self._children[name])
                 )
         return da
-
-    def _convert_index_to_positional_impl(self, sel):
-        dimcoord, index = sel
-        if dimcoord not in self._children:
-            return sel
-        child = self._children[dimcoord][()]
-        return label_based_index_to_positional_index(self.sizes, child, index)
 
 
 def _squeeze_trailing(dims: Tuple[str, ...], shape: Tuple[int, ...]) -> Tuple[int, ...]:

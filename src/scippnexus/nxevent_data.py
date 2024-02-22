@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import scipp as sc
-from scipp.core import label_based_index_to_positional_index
 
 from ._common import to_plain_index
 from .base import (
@@ -67,7 +66,7 @@ class NXevent_data(NXobject):
         if not children:  # TODO Check that select is trivial?
             return sc.DataGroup()
 
-        select = self._convert_index_to_positional(select)
+        select = self._try_convert_label_index_to_positional(select)
         index = to_plain_index([_pulse_dimension], select)
         event_time_zero = children['event_time_zero'][index]
         last_loaded, event_index = self._get_event_index(children, index)
@@ -163,21 +162,6 @@ class NXevent_data(NXobject):
             raise NexusStructureError(f"Invalid index in NXevent_data at {path}:\n{e}")
 
         return sc.DataArray(data=binned, coords={'event_time_zero': event_time_zero})
-
-    def _convert_index_to_positional_impl(self, sel):
-        dimcoord, index = sel
-        if dimcoord not in self._children:
-            if dimcoord not in self.sizes:
-                return ...
-            raise sc.DimensionError(
-                (
-                    f'Invalid slice dimension: \'{dimcoord}\': '
-                    f'no coordinate for that dimension. '
-                    f'Coordinates are {tuple(self._children.keys())}'
-                )
-            )
-        child = self._children[dimcoord][()]
-        return label_based_index_to_positional_index(self.sizes, child, index)
 
 
 base_definitions_dict['NXevent_data'] = NXevent_data
