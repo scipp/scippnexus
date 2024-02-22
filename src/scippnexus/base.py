@@ -107,7 +107,12 @@ class NXobject:
         # TODO Could avoid determining sizes if sel is trivial. Merge with
         # NXdata.index_child?
         child_sel = to_child_select(tuple(self.sizes), child.dims, sel)
-        return child[child_sel]
+        try:
+            return child[child_sel]
+        except sc.DimensionError as e:
+            if hasattr(e, 'flag') and e.flag:
+                return child[()]
+            raise e
 
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
         """
@@ -162,7 +167,7 @@ class NXobject:
                 )
             )
         ):
-            if (coord := sel[0]) in self._children:
+            if (coord := sel[0]) in self._children and coord in self.sizes:
                 child = self._children[coord][()]
                 return label_based_index_to_positional_index(self.sizes, child, index)
 

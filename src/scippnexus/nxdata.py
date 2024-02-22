@@ -327,6 +327,29 @@ class NXdata(NXobject):
         child_sel = to_child_select(
             tuple(self.sizes), child.dims, sel, bin_edge_dim=self._bin_edge_dim(child)
         )
+        if isinstance(child, Field):
+            e = None
+            for d, v in tuple(child_sel.items()):
+                if (
+                    isinstance(v, sc.Variable)
+                    or isinstance(v, slice)
+                    and (
+                        isinstance(v.start, sc.Variable)
+                        or isinstance(v.stop, sc.Variable)
+                    )
+                ):
+                    if not e or e and hasattr(e, 'flag'):
+                        e = sc.DimensionError(
+                            (
+                                f'Invalid slice dimension: \'{d}\': '
+                                f'no coordinate for that dimension. '
+                                f'Coordinates are {tuple(self._children.keys())}'
+                            )
+                        )
+                        if d not in child.dims:
+                            e.flag = True
+            if e is not None:
+                raise e
         return child[child_sel]
 
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
