@@ -330,6 +330,7 @@ class NXdata(NXobject):
         if isinstance(child, Field):
             e = None
             for d, v in tuple(child_sel.items()):
+                # If selection is label based
                 if (
                     isinstance(v, sc.Variable)
                     or isinstance(v, slice)
@@ -338,7 +339,11 @@ class NXdata(NXobject):
                         or isinstance(v.stop, sc.Variable)
                     )
                 ):
-                    if not e or e and hasattr(e, 'flag'):
+                    if (
+                        not e
+                        or e
+                        and hasattr(e, 'slice_dimension_not_present_among_child_dims')
+                    ):
                         e = sc.DimensionError(
                             (
                                 f'Invalid slice dimension: \'{d}\': '
@@ -347,7 +352,7 @@ class NXdata(NXobject):
                             )
                         )
                         if d not in child.dims:
-                            e.flag = True
+                            e.slice_dimension_not_present_among_child_dims = True
             if e is not None:
                 raise e
         return child[child_sel]

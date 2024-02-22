@@ -110,7 +110,7 @@ class NXobject:
         try:
             return child[child_sel]
         except sc.DimensionError as e:
-            if hasattr(e, 'flag') and e.flag:
+            if hasattr(e, 'slice_dimension_not_present_among_child_dims'):
                 return child[()]
             raise e
 
