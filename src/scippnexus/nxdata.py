@@ -327,38 +327,10 @@ class NXdata(NXobject):
         child_sel = to_child_select(
             tuple(self.sizes), child.dims, sel, bin_edge_dim=self._bin_edge_dim(child)
         )
-        if isinstance(child, Field):
-            e = None
-            for d, v in tuple(child_sel.items()):
-                # If selection is label based
-                if (
-                    isinstance(v, sc.Variable)
-                    or isinstance(v, slice)
-                    and (
-                        isinstance(v.start, sc.Variable)
-                        or isinstance(v.stop, sc.Variable)
-                    )
-                ):
-                    if (
-                        not e
-                        or e
-                        and hasattr(e, 'slice_dimension_not_present_among_child_dims')
-                    ):
-                        e = sc.DimensionError(
-                            (
-                                f'Invalid slice dimension: \'{d}\': '
-                                f'no coordinate for that dimension. '
-                                f'Coordinates are {tuple(self._children.keys())}'
-                            )
-                        )
-                        if d not in child.dims:
-                            e.slice_dimension_not_present_among_child_dims = True
-            if e is not None:
-                raise e
         return child[child_sel]
 
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
-        sel = self._try_convert_label_index_to_positional(sel)
+        sel = self.convert_label_index_to_positional(sel)
         return super().read_children(sel)
 
     def assemble(
