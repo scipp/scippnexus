@@ -496,7 +496,6 @@ class NXlog(NXdata):
                 "Cannot positionally select time since there are multiple "
                 "time fields. Label-based selection is not supported yet."
             )
-
         dg = super().read_children(sel)
         for name, field in self._sublog_children.items():
             dg[name] = field[sel]

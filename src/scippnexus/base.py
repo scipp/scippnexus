@@ -107,12 +107,7 @@ class NXobject:
         # TODO Could avoid determining sizes if sel is trivial. Merge with
         # NXdata.index_child?
         child_sel = to_child_select(tuple(self.sizes), child.dims, sel)
-        try:
-            return child[child_sel]
-        except sc.DimensionError as e:
-            if hasattr(e, 'slice_dimension_not_present_among_child_dims'):
-                return child[()]
-            raise e
+        return child[child_sel]
 
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
         """
