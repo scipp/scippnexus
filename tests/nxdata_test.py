@@ -97,6 +97,24 @@ def test_slice_of_1d(h5root):
     assert sc.identical(data[:2], da['xx', :2])
 
 
+def test_label_slice_of_1d(h5root):
+    da = sc.DataArray(sc.array(dims=['xx'], unit='m', values=[1, 2, 3]))
+    da.coords['xx'] = da.data
+    da.coords['xx2'] = da.data
+    da.coords['scalar'] = sc.scalar(1.2)
+    data = snx.create_class(h5root, 'data1', NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'xx2', da.coords['xx2'])
+    snx.create_field(data, 'scalar', da.coords['scalar'])
+    data = snx.Group(data, definitions=snx.base_definitions())
+    assert sc.identical(
+        data['xx', : sc.scalar(3, unit='m')], da['xx', : sc.scalar(3, unit='m')]
+    )
+
+
 def test_slice_of_multiple_coords(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
@@ -112,7 +130,9 @@ def test_slice_of_multiple_coords(h5root):
     snx.create_field(data, 'xx2', da.coords['xx2'])
     snx.create_field(data, 'yy', da.coords['yy'])
     data = snx.Group(data, definitions=snx.base_definitions())
-    assert sc.identical(data['xx', :2], da['xx', :2])
+    assert sc.identical(
+        data['xx', : sc.scalar(3, unit='m')], da['xx', : sc.scalar(3, unit='m')]
+    )
 
 
 def test_guessed_dim_for_2d_coord_not_matching_axis_name(h5root):
@@ -694,6 +714,96 @@ def test_slicing_raises_given_invalid_index(h5root):
         data['xx', 2]
     with pytest.raises(sc.DimensionError):
         data['zz', 0]
+
+
+def test_label_based_slicing(h5root):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]),
+        coords=dict(
+            xx=sc.array(dims=['xx'], unit='m', values=[1.0, 2.0]),
+            yy=sc.array(dims=['yy'], unit='m', values=[0.1, 0.0]),
+        ),
+    )
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    snx.create_field(data, 'yy', da.coords['yy'])
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions())
+    sc.testing.assert_identical(
+        data['xx', sc.scalar(1.0, unit='m') : sc.scalar(3.0, unit='m')],
+        da['xx', sc.scalar(1.0, unit='m') : sc.scalar(3.0, unit='m')],
+    )
+    sc.testing.assert_identical(
+        data['yy', sc.scalar(0.2, unit='m') : sc.scalar(0.01, unit='m')],
+        da['yy', sc.scalar(0.2, unit='m') : sc.scalar(0.01, unit='m')],
+    )
+
+
+def create_nxdata(h5root, dims, coords):
+    da = sc.DataArray(
+        sc.array(dims=dims, unit='m', values=np.random.randn(*(5 for _ in dims))),
+        coords={
+            coord: sc.linspace(dim, 0, 1, 5, unit='s')
+            for dim, coord in zip(dims, coords)
+        },
+    )
+    data = snx.create_class(h5root, 'data1', NXdata)
+    snx.create_field(data, 'signal', da.data)
+    for dim, coord in zip(dims, coords):
+        snx.create_field(data, dim, da.coords[coord])
+
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    data = snx.Group(data, definitions=snx.base_definitions())
+    return data
+
+
+@pytest.mark.parametrize(
+    '_slice',
+    (
+        ('time', sc.scalar(1, unit='s')),
+        ('time', slice(sc.scalar(1, unit='s'), None)),
+        ('time', slice(None, sc.scalar(1, unit='s'))),
+        ('time', slice(sc.scalar(1, unit='s'), sc.scalar(3, unit='s'))),
+        {'time': sc.scalar(1, unit='s'), 'x': sc.scalar(1, unit='s')},
+        {'x': sc.scalar(1, unit='s')},
+    ),
+)
+@pytest.mark.parametrize(
+    'dims, coords',
+    (
+        (('time',), ('time',)),
+        (('time',), ('time2',)),
+        (('time', 'x'), ('time2', 'x')),
+        (('x', 'y'), ('time2', 'time')),
+        (('x', 'y'), ('x', 'y')),
+    ),
+)
+def test_label_indexing_dataset_behaves_same_as_indexing_scipp_dataarray(
+    h5root, _slice, dims, coords
+):
+    nx = create_nxdata(h5root, dims, coords)
+    da = nx[()]
+
+    exception = None
+    try:
+        # Scipp does not support dict slicing,
+        # manually slice datagroup in multiple coords
+        if isinstance(_slice, dict):
+            for s in _slice.items():
+                da = da[s]
+        else:
+            da = da[_slice]
+    except Exception as e:
+        exception = type(e)
+
+    if exception:
+        with pytest.raises(exception):
+            nx[_slice]
+    else:
+        assert_identical(nx[_slice], da)
 
 
 def test_scalar_signal_without_unit_works(h5root):

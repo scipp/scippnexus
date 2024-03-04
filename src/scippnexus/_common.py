@@ -81,7 +81,7 @@ def _to_canonical_select(
                 "but multiple indices {select} were specified."
             )
         return {dims[0]: select[0]}
-    elif isinstance(select, int) or isinstance(select, slice):
+    elif isinstance(select, (int, sc.Variable)) or isinstance(select, slice):
         check_1d()
         return {dims[0]: select}
     if not isinstance(select, dict):

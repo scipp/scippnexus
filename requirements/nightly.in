@@ -4,4 +4,4 @@
 python-dateutil
 scipy
 h5py
-https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+https://github.com/scipp/scipp/releases/download/nightly/scipp-nightly-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl

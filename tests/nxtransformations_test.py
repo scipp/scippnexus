@@ -434,6 +434,43 @@ def test_slice_transformations(h5root):
     )
 
 
+def test_label_slice_transformations(h5root):
+    transformations = snx.create_class(h5root, 'transformations', NXtransformations)
+    log = sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2, 3.3], unit='m'),
+        coords={'time': sc.array(dims=['time'], values=[11, 22, 33], unit='s')},
+    )
+    log.coords['time'] = sc.epoch(unit='ns') + log.coords['time'].to(unit='ns')
+    offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
+    vector = sc.vector(value=[0, 0, 1])
+    t = log * vector
+    t.data = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit)
+    value1 = snx.create_class(transformations, 't1', snx.NXlog)
+    snx.create_field(value1, 'time', log.coords['time'] - sc.epoch(unit='ns'))
+    snx.create_field(value1, 'value', log.data)
+    value1.attrs['transformation_type'] = 'translation'
+    value1.attrs['offset'] = offset.values
+    value1.attrs['offset_units'] = str(offset.unit)
+    value1.attrs['vector'] = vector.value
+
+    expected = t * offset
+
+    assert sc.identical(
+        make_group(h5root)['transformations'][
+            'time',
+            sc.scalar(22, unit='s')
+            .to(unit='ns') : sc.scalar(44, unit='s')
+            .to(unit='ns'),
+        ]['t1'],
+        expected[
+            'time',
+            sc.datetime('1970-01-01T00:00:22', unit='ns') : sc.datetime(
+                '1970-01-01T00:00:44', unit='ns'
+            ),
+        ],
+    )
+
+
 def test_TransformationChainResolver_path_handling():
     tree = TransformationChainResolver.from_root({'a': {'b': {'c': 1}}})
     assert tree['a']['b']['c'].value == 1
