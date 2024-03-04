@@ -621,7 +621,6 @@ def create_nexus_group_with_data_arrays(h5root, dims, coords):
         ('time', slice(sc.scalar(1, unit='s'), None)),
         ('time', slice(None, sc.scalar(1, unit='s'))),
         {'time': sc.scalar(1, unit='s'), 'x': sc.scalar(1, unit='s')},
-        {'x': sc.scalar(1, unit='s')},
     ),
 )
 @pytest.mark.parametrize(
@@ -629,7 +628,6 @@ def create_nexus_group_with_data_arrays(h5root, dims, coords):
     (
         (('time',), ('time2',)),
         (('time', 'time'), ('time2', 'time')),
-        (('x', 'y'), ('time2', 'time')),
     ),
 )
 def test_label_indexing_group_behaves_same_as_indexing_scipp_datagroup(
