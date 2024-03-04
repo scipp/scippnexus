@@ -107,12 +107,7 @@ class NXobject:
         # TODO Could avoid determining sizes if sel is trivial. Merge with
         # NXdata.index_child?
         child_sel = to_child_select(tuple(self.sizes), child.dims, sel)
-        try:
-            return child[child_sel]
-        except sc.DimensionError as e:
-            if hasattr(e, 'slice_dimension_not_present_among_child_dims'):
-                return child[()]
-            raise e
+        return child[child_sel]
 
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
         """
@@ -146,10 +141,10 @@ class NXobject:
         """
         return dg
 
-    def _try_convert_label_index_to_positional(self, sel):
+    def convert_label_index_to_positional(self, sel):
         if isinstance(sel, dict):
             return dict(
-                (self._try_convert_label_index_to_positional(s) for s in sel.items())
+                (self.convert_label_index_to_positional(s) for s in sel.items())
             )
         if (
             isinstance(sel, tuple)
@@ -167,11 +162,22 @@ class NXobject:
                 )
             )
         ):
-            if (coord := sel[0]) in self._children and coord in self.sizes:
-                child = self._children[coord][()]
-                return label_based_index_to_positional_index(self.sizes, child, index)
+            if (dim := sel[0]) in self.sizes:
+                if (coord := self._children.get(dim)) is not None:
+                    return label_based_index_to_positional_index(
+                        self.sizes, coord[()], index
+                    )
+                if isinstance(self._signal, Field):
+                    # If it is *not* a field, the translation can happen in subgroup
+                    raise sc.DimensionError(
+                        (
+                            f'Invalid slice dimension: \'{dim}\': '
+                            f'no coordinate for that dimension. '
+                            f'Coordinates are {tuple(self._children.keys())}'
+                        )
+                    )
 
-        # It is not a label index, or the coord is not available in the children.
+        # It is not a label index, or the index will be translated in subgroup.
         # Either way, pass it on.
         return sel
 
