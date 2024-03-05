@@ -32,7 +32,7 @@ requires-python = ">=3.9"
 # Make sure to list one dependency per line.
 dependencies = [
     "python-dateutil",
-    "scipp>=23.07.0",
+    "scipp>=24.02.0",
     "scipy",
     "h5py",
 ]

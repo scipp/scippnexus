@@ -21,7 +21,7 @@ jedi==0.19.1
     # via ipython
 matplotlib-inline==0.1.6
     # via ipython
-numpy==1.26.2
+numpy==1.26.4
     # via
     #   h5py
     #   scipp
@@ -44,9 +44,9 @@ pygments==2.17.2
     # via ipython
 python-dateutil==2.8.2
     # via -r base.in
-scipp==23.12.0
+scipp==24.2.0
     # via -r base.in
-scipy==1.11.4
+scipy==1.12.0
     # via -r base.in
 six==1.16.0
     # via
@@ -54,9 +54,9 @@ six==1.16.0
     #   python-dateutil
 stack-data==0.6.3
     # via ipython
-traitlets==5.14.0
+traitlets==5.14.1
     # via
     #   ipython
     #   matplotlib-inline
-wcwidth==0.2.12
+wcwidth==0.2.13
     # via prompt-toolkit

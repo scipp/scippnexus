@@ -158,7 +158,7 @@ def test_nxlog_with_shape_0(nxroot):
     assert_identical(log[...], da.rename(ignored='dim_1'))
 
 
-def test_log_with_connection_status_raises_with_positional_indexing(h5root):
+def test_log_with_connection_status_raises_with_positional_and_label_indexing(h5root):
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
         coords={
@@ -176,6 +176,8 @@ def test_log_with_connection_status_raises_with_positional_indexing(h5root):
     log = snx.Group(log, definitions=snx.base_definitions())
     with pytest.raises(sc.DimensionError):
         log['time', :2]
+    with pytest.raises(sc.DimensionError):
+        log['time', : sc.scalar(60, unit='s')]
     with pytest.raises(sc.DimensionError):
         log[:2]
     with pytest.raises(sc.DimensionError):

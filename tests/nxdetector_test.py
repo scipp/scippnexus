@@ -310,6 +310,40 @@ def test_select_events_slices_underlying_event_data(nxroot):
     )
 
 
+def test_label_based_select_events_slices_underlying_event_data(nxroot):
+    detector = nxroot.create_class('detector0', NXdetector)
+    detector.create_field('detector_number', detector_numbers_xx_yy_1234())
+    create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
+    da = detector['event_time_zero', : sc.scalar(3, unit='s')]['events']
+    assert sc.identical(
+        da.bins.size().data,
+        sc.array(
+            dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[1, 1], [0, 1]]
+        ),
+    )
+    da = detector['event_time_zero', : sc.scalar(4, unit='s')]['events']
+    assert sc.identical(
+        da.bins.size().data,
+        sc.array(
+            dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[2, 2], [0, 1]]
+        ),
+    )
+    da = detector['event_time_zero', sc.scalar(4, unit='s')]['events']
+    assert sc.identical(
+        da.bins.size().data,
+        sc.array(
+            dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[0, 1], [0, 0]]
+        ),
+    )
+    da = detector[()]['events']
+    assert sc.identical(
+        da.bins.size().data,
+        sc.array(
+            dims=['dim_0', 'dim_1'], unit=None, dtype='int64', values=[[2, 3], [0, 1]]
+        ),
+    )
+
+
 def test_loading_event_data_without_detector_numbers_does_not_group_events(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
@@ -820,3 +854,78 @@ def test_pixel_masks_adds_mask_to_all_dataarrays_of_dataset(h5root):
     dg = detector[...]
     assert set(dg['data'].masks.keys()) == set(('gap_pixel', 'dead_pixel'))
     assert set(dg['data_2'].masks.keys()) == set(('gap_pixel', 'dead_pixel'))
+
+
+def test_detector_with_event_data_and_split_pulse_yields_identical_result(nxroot):
+    detector_numbers = sc.array(
+        dims=[''], unit=None, values=np.array([1, 2, 3, 4, 5, 6])
+    )
+    detector0 = nxroot.create_class('detector0', NXdetector)
+    detector0.create_field('detector_number', detector_numbers)
+    detector1 = nxroot.create_class('detector1', NXdetector)
+    detector1.create_field('detector_number', detector_numbers)
+    event_id = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2])
+    event_time_offset = sc.array(dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23])
+    event_data0 = detector0.create_class('events', snx.NXevent_data)
+    event_data0.create_field('event_id', event_id)
+    event_data0.create_field('event_time_offset', event_time_offset)
+    event_data0.create_field(
+        'event_time_zero', sc.array(dims=[''], unit='s', values=[1, 2, 3, 4])
+    )
+    event_data0.create_field(
+        'event_index', sc.array(dims=[''], unit='None', values=[0, 3, 3, 5])
+    )
+    # same event data in detector1, but first pulse of length 3 is split into 2+1
+    event_data1 = detector1.create_class('events', snx.NXevent_data)
+    event_data1.create_field('event_id', event_id)
+    event_data1.create_field('event_time_offset', event_time_offset)
+    event_data1.create_field(
+        'event_time_zero', sc.array(dims=[''], unit='s', values=[1, 1, 2, 3, 4])
+    )
+    event_data1.create_field(
+        'event_index', sc.array(dims=[''], unit='None', values=[0, 2, 3, 3, 5])
+    )
+    da0 = detector0[...]['events']
+    da1 = detector1[...]['events']
+    # Identical because loading NXdetector discards pulse-binning and groups by pixel
+    assert_identical(da0, da1)
+
+
+def test_detector_with_event_data_and_unordered_event_time_zero_can_be_loaded(nxroot):
+    detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2]))
+    detector0 = nxroot.create_class('detector0', NXdetector)
+    detector0.create_field('detector_number', detector_numbers)
+    event_id = sc.array(dims=[''], unit=None, values=[1, 2, 1, 1, 2, 2])
+    event_time_offset = sc.array(dims=[''], unit='s', values=[11, 22, 33, 44, 55, 66])
+    event_data0 = detector0.create_class('events', snx.NXevent_data)
+    event_data0.create_field('event_id', event_id)
+    event_data0.create_field('event_time_offset', event_time_offset)
+    event_data0.create_field(
+        'event_time_zero', sc.array(dims=[''], unit='s', values=[2, 1, 3, 4])
+    )
+    event_data0.create_field(
+        'event_index', sc.array(dims=[''], unit='None', values=[0, 3, 4, 5])
+    )
+    da = detector0[...]['events']
+    pixel1 = da.values[0]
+    ref1 = sc.DataArray(
+        data=sc.array(dims=['event'], values=[1, 1, 1], unit='counts', dtype='float32'),
+        coords={
+            'event_time_zero': sc.array(dims=['event'], values=[2, 2, 1], unit='s'),
+            'event_time_offset': sc.array(
+                dims=['event'], values=[11, 33, 44], unit='s'
+            ),
+        },
+    )
+    assert_identical(pixel1, ref1)
+    pixel2 = da.values[1]
+    ref2 = sc.DataArray(
+        data=sc.array(dims=['event'], values=[1, 1, 1], unit='counts', dtype='float32'),
+        coords={
+            'event_time_zero': sc.array(dims=['event'], values=[2, 3, 4], unit='s'),
+            'event_time_offset': sc.array(
+                dims=['event'], values=[22, 55, 66], unit='s'
+            ),
+        },
+    )
+    assert_identical(pixel2, ref2)

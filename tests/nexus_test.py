@@ -517,6 +517,34 @@ def test_nxdata_positional_indexing_returns_correct_slice(h5root):
     assert sc.identical(da, ref['time', 0:2])
 
 
+def test_nxdata_label_indexing_returns_correct_slice(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data.attrs['NX_class'] = 'NXdata'
+    data.attrs['signal'] = 'signal'
+    data.attrs['axes'] = ['time', 'temperature']
+    data.attrs['time_indices'] = [0]
+    data.attrs['temperature_indices'] = [1]
+    ref = sc.DataArray(
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m')
+    )
+    ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
+    ref.coords['temperature'] = sc.array(
+        dims=['temperature'], values=np.arange(4), unit='K'
+    )
+    data['signal'] = ref.values
+    data['signal'].attrs['units'] = str(ref.unit)
+    data['time'] = ref.coords['time'].values
+    data['time'].attrs['units'] = str(ref.coords['time'].unit)
+    data['temperature'] = ref.coords['temperature'].values
+    data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
+    obj = snx.Group(data, definitions=snx.base_definitions())
+    da = obj['time', sc.scalar(0, unit='s') : sc.scalar(2, unit='s')]
+    assert sc.identical(
+        da, ref['time', sc.scalar(0, unit='s') : sc.scalar(2, unit='s')]
+    )
+
+
 def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root):
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
@@ -541,6 +569,90 @@ def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root)
     obj = snx.Group(data, definitions=snx.base_definitions())
     da = obj['temperature', 0:2]
     assert sc.identical(da, ref['temperature', 0:2])
+
+
+def test_nxdata_with_bin_edges_label_indexing_returns_correct_slice(h5root):
+    entry = h5root.create_group('entry')
+    data = entry.create_group('data')
+    data.attrs['NX_class'] = 'NXdata'
+    data.attrs['signal'] = 'signal'
+    data.attrs['axes'] = ['time', 'temperature']
+    data.attrs['time_indices'] = [0]
+    data.attrs['temperature_indices'] = [1]
+    ref = sc.DataArray(
+        data=sc.ones(dims=['time', 'temperature'], shape=[3, 4], unit='m')
+    )
+    ref.coords['time'] = sc.array(dims=['time'], values=np.arange(3), unit='s')
+    ref.coords['temperature'] = sc.array(
+        dims=['temperature'], values=np.arange(5), unit='K'
+    )
+    data['signal'] = ref.values
+    data['signal'].attrs['units'] = str(ref.unit)
+    data['time'] = ref.coords['time'].values
+    data['time'].attrs['units'] = str(ref.coords['time'].unit)
+    data['temperature'] = ref.coords['temperature'].values
+    data['temperature'].attrs['units'] = str(ref.coords['temperature'].unit)
+    obj = snx.Group(data, definitions=snx.base_definitions())
+    da = obj['temperature', sc.scalar(0, unit='K') : sc.scalar(2, unit='K')]
+    assert sc.identical(
+        da, ref['temperature', sc.scalar(0, unit='K') : sc.scalar(2, unit='K')]
+    )
+
+
+def create_nexus_group_with_data_arrays(h5root, dims, coords):
+    entry = h5root.create_group('entry')
+    for i, (dim, coord) in enumerate(zip(dims, coords)):
+        data = entry.create_group(f'data_{i}')
+        data.attrs['NX_class'] = 'NXdata'
+        data['signal'] = np.arange(5)
+        data['signal'].attrs['units'] = 'm'
+        data[coord] = np.arange(5)
+        data[coord].attrs['units'] = 's'
+        data.attrs['signal'] = 'signal'
+        data.attrs['axes'] = [dim]
+        data.attrs[f'{dim}_indices'] = [0]
+    return snx.Group(h5root, definitions=snx.base_definitions())
+
+
+@pytest.mark.parametrize(
+    '_slice',
+    (
+        ('time', sc.scalar(1, unit='s')),
+        ('time', slice(sc.scalar(1, unit='s'), None)),
+        ('time', slice(None, sc.scalar(1, unit='s'))),
+        {'time': sc.scalar(1, unit='s'), 'x': sc.scalar(1, unit='s')},
+    ),
+)
+@pytest.mark.parametrize(
+    'dims, coords',
+    (
+        (('time',), ('time2',)),
+        (('time', 'time'), ('time2', 'time')),
+    ),
+)
+def test_label_indexing_group_behaves_same_as_indexing_scipp_datagroup(
+    h5root, _slice, dims, coords
+):
+    nx = create_nexus_group_with_data_arrays(h5root, dims, coords)
+    dg = nx[()]
+
+    exception = None
+    try:
+        # Scipp does not support dict slicing,
+        # manually slice datagroup in multiple coords
+        if isinstance(_slice, dict):
+            for s in _slice.items():
+                dg = dg[s]
+        else:
+            dg = dg[_slice]
+    except Exception as e:
+        exception = type(e)
+
+    if exception:
+        with pytest.raises(exception):
+            nx[_slice]
+    else:
+        assert_identical(nx[_slice], dg)
 
 
 def test_create_field_saves_errors(nxroot):

@@ -337,6 +337,10 @@ class NXdata(NXobject):
         )
         return child[child_sel]
 
+    def read_children(self, sel: ScippIndex) -> sc.DataGroup:
+        sel = self.convert_label_index_to_positional(sel)
+        return super().read_children(sel)
+
     def assemble(
         self, dg: sc.DataGroup
     ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
