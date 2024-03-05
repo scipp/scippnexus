@@ -37,6 +37,25 @@ def test_dense_monitor(h5root):
     assert sc.identical(monitor[...]['data'], da)
 
 
+def test_monitor_with_nested_nxdata_signal(h5root):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
+    )
+    da.coords['xx'] = da.data['yy', 0]
+    monitor = snx.create_class(h5root, 'monitor', snx.NXmonitor)
+    date = '2024-01-01T00:00:00'
+    snx.create_field(monitor, 'start_time', date)
+    data = snx.create_class(monitor, 'data', snx.NXdata)
+    data.attrs['axes'] = da.dims
+    data.attrs['signal'] = 'signal'
+    snx.create_field(data, 'signal', da.data)
+    snx.create_field(data, 'xx', da.coords['xx'])
+    group = snx.Group(monitor, definitions=snx.base_definitions())
+    dg = group[...]
+    assert dg['start_time'] == date
+    assert sc.identical(dg['data'], da)
+
+
 def create_event_data_no_ids(group):
     group.create_field(
         'event_time_offset',
