@@ -52,7 +52,14 @@ idna==3.6
     # via requests
 imagesize==1.4.1
     # via sphinx
-ipykernel==6.29.2
+importlib-metadata==7.0.1
+    # via
+    #   jupyter-client
+    #   nbconvert
+    #   sphinx
+importlib-resources==6.1.2
+    # via matplotlib
+ipykernel==6.29.3
     # via -r docs.in
 jinja2==3.1.3
     # via
@@ -101,7 +108,7 @@ myst-parser==2.0.0
     # via -r docs.in
 nbclient==0.9.0
     # via nbconvert
-nbconvert==7.16.0
+nbconvert==7.16.2
     # via nbsphinx
 nbformat==5.9.2
     # via
@@ -128,9 +135,9 @@ platformdirs==4.2.0
     # via
     #   jupyter-core
     #   pooch
-plopp==24.1.1
+plopp==24.2.0
     # via -r docs.in
-pooch==1.8.0
+pooch==1.8.1
     # via -r docs.in
 psutil==5.9.8
     # via ipykernel
@@ -193,7 +200,7 @@ tornado==6.4
     # via
     #   ipykernel
     #   jupyter-client
-typing-extensions==4.9.0
+typing-extensions==4.10.0
     # via pydata-sphinx-theme
 urllib3==2.2.1
     # via requests
@@ -201,3 +208,7 @@ webencodings==0.5.1
     # via
     #   bleach
     #   tinycss2
+zipp==3.17.0
+    # via
+    #   importlib-metadata
+    #   importlib-resources
