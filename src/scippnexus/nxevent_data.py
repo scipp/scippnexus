@@ -29,8 +29,11 @@ def _check_for_missing_fields(fields):
 
 
 class NXevent_data(NXobject):
-    mandatory_fields = ("event_time_zero", "event_index", "event_time_offset")
-    handled_fields = mandatory_fields + ("event_id",)
+    mandatory_fields = ("event_index", "event_time_offset")
+    handled_fields = mandatory_fields + (
+        "event_time_zero",
+        "event_id",
+    )
 
     def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
         super().__init__(attrs=attrs, children=children)
@@ -68,9 +71,12 @@ class NXevent_data(NXobject):
 
         select = self.convert_label_index_to_positional(select)
         index = to_plain_index([_pulse_dimension], select)
-        event_time_zero = children['event_time_zero'][index]
-        last_loaded, event_index = self._get_event_index(children, index)
 
+        coords = {}
+        if 'event_time_zero' in children:
+            coords['event_time_zero'] = children['event_time_zero'][index]
+
+        last_loaded, event_index = self._get_event_index(children, index)
         num_event = children["event_time_offset"].shape[0]
         # Some files contain uint64 "max" indices, which turn into negatives during
         # conversion to int64. This is a hack to get around this.
@@ -95,9 +101,9 @@ class NXevent_data(NXobject):
         event_index -= event_index.min()
 
         dg = sc.DataGroup(
-            event_time_zero=event_time_zero,
             event_index=event_index,
             event_time_offset=event_time_offset,
+            **coords,
         )
         if (event_id := children.get('event_id')) is not None:
             dg['event_id'] = event_id[event_select]
@@ -129,7 +135,10 @@ class NXevent_data(NXobject):
     def assemble(self, children: sc.DataGroup) -> sc.DataArray:
         _check_for_missing_fields(children)
         event_time_offset = children['event_time_offset']
-        event_time_zero = children['event_time_zero']
+
+        coords = {}
+        if 'event_time_zero' in children:
+            coords['event_time_zero'] = children['event_time_zero']
         event_index = children['event_index']
 
         # Weights are not stored in NeXus, so use 1s
@@ -150,7 +159,7 @@ class NXevent_data(NXobject):
         # different institutions. We try to make sure here that it is what would be the
         # first index of the next pulse. In other words, ensure that event_index
         # includes the bin edge for the last pulse.
-        if event_time_zero.ndim == 0:
+        if 'event_time_zero' in coords and coords['event_time_zero'].ndim == 0:
             begins = event_index[_pulse_dimension, 0]
         else:
             begins = event_index
@@ -161,7 +170,7 @@ class NXevent_data(NXobject):
             path = self._children['event_index'].name
             raise NexusStructureError(f"Invalid index in NXevent_data at {path}:\n{e}")
 
-        return sc.DataArray(data=binned, coords={'event_time_zero': event_time_zero})
+        return sc.DataArray(data=binned, coords=coords)
 
 
 base_definitions_dict['NXevent_data'] = NXevent_data
