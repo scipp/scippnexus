@@ -929,3 +929,38 @@ def test_detector_with_event_data_and_unordered_event_time_zero_can_be_loaded(nx
         },
     )
     assert_identical(pixel2, ref2)
+
+
+def test_detector_with_event_data_and_no_event_time_zero_can_be_loaded(nxroot):
+    detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2]))
+    detector0 = nxroot.create_class('detector0', NXdetector)
+    detector0.create_field('detector_number', detector_numbers)
+    event_id = sc.array(dims=[''], unit=None, values=[1, 2, 1, 1, 2, 2])
+    event_time_offset = sc.array(dims=[''], unit='s', values=[11, 22, 33, 44, 55, 66])
+    event_data0 = detector0.create_class('events', snx.NXevent_data)
+    event_data0.create_field('event_id', event_id)
+    event_data0.create_field('event_time_offset', event_time_offset)
+    event_data0.create_field(
+        'event_index', sc.array(dims=[''], unit='None', values=[0, 3, 4, 5])
+    )
+    da = detector0[...]['events']
+    pixel1 = da.values[0]
+    ref1 = sc.DataArray(
+        data=sc.array(dims=['event'], values=[1, 1, 1], unit='counts', dtype='float32'),
+        coords={
+            'event_time_offset': sc.array(
+                dims=['event'], values=[11, 33, 44], unit='s'
+            ),
+        },
+    )
+    assert_identical(pixel1, ref1)
+    pixel2 = da.values[1]
+    ref2 = sc.DataArray(
+        data=sc.array(dims=['event'], values=[1, 1, 1], unit='counts', dtype='float32'),
+        coords={
+            'event_time_offset': sc.array(
+                dims=['event'], values=[22, 55, 66], unit='s'
+            ),
+        },
+    )
+    assert_identical(pixel2, ref2)

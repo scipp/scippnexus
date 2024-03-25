@@ -68,6 +68,22 @@ def test_event_data_without_event_id_can_be_loaded(nxroot):
     assert 'event_time_offset' in da.bins.coords
 
 
+def create_event_data_without_event_time_zero(group):
+    group['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2, 2])
+    group['event_time_offset'] = sc.array(
+        dims=[''], unit='s', values=[456, 7, 3, 345, 632, 23]
+    )
+    group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
+
+
+def test_event_data_without_event_time_zero_can_be_loaded(nxroot):
+    event_data = nxroot['entry'].create_class('events_0', snx.NXevent_data)
+    create_event_data_without_event_time_zero(event_data)
+    da = event_data[...]
+    assert len(da.bins.coords) == 2
+    assert 'event_time_offset' in da.bins.coords
+
+
 def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot):
     monitor = nxroot['entry'].create_class('monitor', snx.NXmonitor)
     create_event_data_without_event_id(monitor)
