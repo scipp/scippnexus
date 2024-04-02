@@ -765,9 +765,10 @@ def _group_events(
         # copy since sc.bin cannot deal with a non-contiguous view
         grouping = asvariable(grouping)
         event_id = grouping.flatten(to='event_id').copy()
-    event_data.bins.coords['event_time_zero'] = sc.bins_like(
-        event_data, fill_value=event_data.coords['event_time_zero']
-    )
+    if 'event_time_zero' in event_data.coords:
+        event_data.bins.coords['event_time_zero'] = sc.bins_like(
+            event_data, fill_value=event_data.coords['event_time_zero']
+        )
     # After loading raw NXevent_data it is guaranteed that the event table
     # is contiguous and that there is no masking. We can therefore use the
     # more efficient approach of binning from scratch instead of erasing the
