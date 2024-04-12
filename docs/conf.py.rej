@@ -7,7 +7,7 @@ diff a/docs/conf.py b/docs/conf.py	(rejected hunks)
 +    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
 +    'xarray': ('https://xarray.pydata.org/en/stable/', None),
  }
- 
+
  # autodocs includes everything, even irrelevant API internals. autosummary
 @@ -134,7 +143,7 @@ html_theme_options = {
      "external_links": [

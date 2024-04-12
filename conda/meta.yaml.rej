@@ -7,6 +7,6 @@ diff a/conda/meta.yaml b/conda/meta.yaml	(rejected hunks)
 +    - scipp>=23.07.0
 +    - scipy
 +    - h5py
- 
+
  test:
    imports:
