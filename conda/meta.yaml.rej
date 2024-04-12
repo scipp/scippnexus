@@ -1,0 +1,12 @@
+diff a/conda/meta.yaml b/conda/meta.yaml	(rejected hunks)
+@@ -12,6 +12,10 @@ requirements:
+     - setuptools_scm
+   run:
+     - python>=3.9
++    - python-dateutil
++    - scipp>=23.07.0
++    - scipy
++    - h5py
+ 
+ test:
+   imports:

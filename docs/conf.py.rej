@@ -1,0 +1,20 @@
+diff a/docs/conf.py b/docs/conf.py	(rejected hunks)
+@@ -54,6 +56,9 @@ autodoc_type_aliases = {
+ intersphinx_mapping = {
+     'python': ('https://docs.python.org/3', None),
+     'numpy': ('https://numpy.org/doc/stable/', None),
++    'scipp': ('https://scipp.github.io/', None),
++    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
++    'xarray': ('https://xarray.pydata.org/en/stable/', None),
+ }
+ 
+ # autodocs includes everything, even irrelevant API internals. autosummary
+@@ -134,7 +143,7 @@ html_theme_options = {
+     "external_links": [
+         {"name": "Scipp", "url": "https://scipp.github.io"},
+         {"name": "ScippNeutron", "url": "https://scipp.github.io/scippneutron"},
+-        ],
++    ],
+     "icon_links": [
+         {
+             "name": "GitHub",

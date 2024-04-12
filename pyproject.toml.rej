@@ -1,0 +1,26 @@
+diff a/pyproject.toml b/pyproject.toml	(rejected hunks)
+@@ -44,15 +48,24 @@ dynamic = ["version"]
+ 
+ [tool.pytest.ini_options]
+ minversion = "7.0"
++# The custom `externalfile` marker runs tests that require passwordless
++# SSH access to login.esss.dk. We do not run it by default. Make sure to
++# setup keys in your SSH agent before running `pytest -m externalfile`.
+ addopts = """
+ --strict-config
+ --strict-markers
++--import-mode=importlib
+ -ra
+ -v
++-m 'not externalfile'
+ """
+ testpaths = "tests"
+ filterwarnings = [
+   "error",
++  "ignore:Failed to load :UserWarning",
++]
++markers = [
++    "externalfile",
+ ]
+ 
+ [tool.bandit]
