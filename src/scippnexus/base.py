@@ -382,6 +382,8 @@ class Group(Mapping):
             if '/' in sel:
                 if sel.startswith('/'):
                     return self.file[sel[1:]]
+                elif sel.endswith('/'):
+                    return self[sel[:-1]]
                 else:
                     grp, path = sel.split('/', 1)
                     return self[grp][path]
