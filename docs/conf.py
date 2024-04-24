@@ -3,14 +3,13 @@
 import doctest
 import os
 import sys
-
-import scippnexus
+from importlib.metadata import version as get_version
 
 sys.path.insert(0, os.path.abspath('.'))
 
 # General information about the project.
 project = u'ScippNexus'
-copyright = u'2023 Scipp contributors'
+copyright = u'2024 Scipp contributors'
 author = u'Scipp contributors'
 
 html_show_sourcelink = True
@@ -23,12 +22,21 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
     'sphinx_design',
     'nbsphinx',
     'myst_parser',
 ]
+
+try:
+    import sciline.sphinxext.domain_types  # noqa: F401
+
+    extensions.append('sciline.sphinxext.domain_types')
+except ModuleNotFoundError:
+    pass
+
 
 myst_enable_extensions = [
     "amsmath",
@@ -82,6 +90,18 @@ napoleon_type_aliases = {
 typehints_defaults = 'comma'
 typehints_use_rtype = False
 
+
+sciline_domain_types_prefix = 'scippnexus'
+sciline_domain_types_aliases = {
+    'scipp._scipp.core.DataArray': 'scipp.DataArray',
+    'scipp._scipp.core.Dataset': 'scipp.Dataset',
+    'scipp._scipp.core.DType': 'scipp.DType',
+    'scipp._scipp.core.Unit': 'scipp.Unit',
+    'scipp._scipp.core.Variable': 'scipp.Variable',
+    'scipp.core.data_group.DataGroup': 'scipp.DataGroup',
+}
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -99,10 +119,8 @@ master_doc = 'index'
 # built documents.
 #
 
-# The short X.Y version.
-version = scippnexus.__version__
-# The full version, including alpha/beta/rc tags.
-release = scippnexus.__version__
+release = get_version("scippnexus")
+version = ".".join(release.split('.')[:3])  # CalVer
 
 warning_is_error = True
 

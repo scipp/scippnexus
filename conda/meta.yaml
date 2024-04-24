@@ -6,16 +6,26 @@ package:
 source:
   path: ..
 
+
+{% set pyproject = load_file_data('pyproject.toml') %}
+{% set dependencies = pyproject.get('project', {}).get('dependencies', {}) %}
+
+
 requirements:
   build:
     - setuptools
     - setuptools_scm
   run:
-    - python>=3.9
     - python-dateutil
     - scipp>=23.07.0
     - scipy
     - h5py
+    - python>=3.10
+
+  {% for package in dependencies %}
+    - {% if package == "graphviz" %}python-graphviz{% else %}{{ package }}{% endif %}
+  {% endfor %}
+
 
 test:
   imports:
@@ -26,7 +36,8 @@ test:
     - pyproject.toml
     - tests/
   commands:
-    - python -m pytest tests
+    # We ignore warnings during release package builds
+    - python -m pytest -Wignore tests
 
 build:
   noarch: python
