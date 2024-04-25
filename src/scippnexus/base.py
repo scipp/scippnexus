@@ -7,6 +7,7 @@ import inspect
 import warnings
 from collections.abc import Mapping
 from functools import lru_cache
+from pathlib import PurePosixPath
 from types import MappingProxyType
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, overload
 
@@ -380,13 +381,15 @@ class Group(Mapping):
             # create the parent group, to ensure that fields get the correct properties
             # such as sizes and dtype.
             if '/' in sel:
-                if sel.startswith('/'):
-                    return self.file[sel[1:]]
-                elif sel.endswith('/'):
-                    return self[sel[:-1]]
+                sel_path = PurePosixPath(sel)
+                if sel_path.is_absolute():
+                    return self.file[sel_path.relative_to('/').as_posix()]
+                # If the path is a single name, we can directly access the child
+                elif len(sel_path.parts) == 1:
+                    return self[sel_path.as_posix()]
                 else:
-                    grp, path = sel.split('/', 1)
-                    return self[grp][path]
+                    grp = sel_path.parts[0]
+                    return self[grp][sel_path.relative_to(grp).as_posix()]
             child = self._children[sel]
             if isinstance(child, Field):
                 self._populate_fields()

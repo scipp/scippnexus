@@ -678,3 +678,9 @@ def test_empty_class_does_not_warn(nxroot, nxclass):
 
 def test_trailing_forward_slash_in_path_does_not_change_file_object(nxroot):
     assert id(nxroot['entry/']) == id(nxroot['entry'])
+
+
+def test_path_santization(nxroot):
+    nxroot['entry'].create_class('log', NXlog)
+    assert id(nxroot['/entry/log']) == id(nxroot['/entry//log'])
+    assert id(nxroot['entry/log']) == id(nxroot['entry//log'])
