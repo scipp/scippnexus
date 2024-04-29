@@ -97,7 +97,7 @@ pydantic-core==2.18.2
     # via pydantic
 python-json-logger==2.0.7
     # via jupyter-events
-questionary==2.0.1
+questionary==1.10.0
     # via copier
 rfc3339-validator==0.1.4
     # via
