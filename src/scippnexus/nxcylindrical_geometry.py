@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Any, Dict, Optional, Union
+from typing import Any, ClassVar, Dict, Optional, Union
 
 import scipp as sc
 
@@ -53,7 +53,7 @@ def _parse(
 
 
 class NXcylindrical_geometry(NXobject):
-    _dims = {
+    _dims: ClassVar[dict[str, tuple[str, ...]]] = {
         'vertices': ('vertex',),
         'detector_number': ('detector_number',),
         'cylinders': ('cylinder', 'vertex_index'),
@@ -63,9 +63,16 @@ class NXcylindrical_geometry(NXobject):
         super().__init__(attrs=attrs, children=children)
         for name, field in children.items():
             if isinstance(field, Field):
-                field.sizes = dict(zip(self._dims.get(name), field.dataset.shape))
                 if name == 'vertices':
+                    # Shape has one more entry than dims, the vector dim.
+                    field.sizes = dict(
+                        zip(self._dims.get(name), field.dataset.shape[:-1], strict=True)
+                    )
                     field.dtype = sc.DType.vector3
+                else:
+                    field.sizes = dict(
+                        zip(self._dims.get(name), field.dataset.shape, strict=True)
+                    )
 
     def load_as_array(
         self, detector_number: Optional[sc.Variable] = None

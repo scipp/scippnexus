@@ -719,10 +719,10 @@ def test_slicing_raises_given_invalid_index(h5root):
 def test_label_based_slicing(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]),
-        coords=dict(
-            xx=sc.array(dims=['xx'], unit='m', values=[1.0, 2.0]),
-            yy=sc.array(dims=['yy'], unit='m', values=[0.1, 0.0]),
-        ),
+        coords={
+            'xx': sc.array(dims=['xx'], unit='m', values=[1.0, 2.0]),
+            'yy': sc.array(dims=['yy'], unit='m', values=[0.1, 0.0]),
+        },
     )
     data = snx.create_class(h5root, 'data1', NXdata)
     snx.create_field(data, 'signal', da.data)
@@ -746,12 +746,12 @@ def create_nxdata(h5root, dims, coords):
         sc.array(dims=dims, unit='m', values=np.random.randn(*(5 for _ in dims))),
         coords={
             coord: sc.linspace(dim, 0, 1, 5, unit='s')
-            for dim, coord in zip(dims, coords)
+            for dim, coord in zip(dims, coords, strict=True)
         },
     )
     data = snx.create_class(h5root, 'data1', NXdata)
     snx.create_field(data, 'signal', da.data)
-    for dim, coord in zip(dims, coords):
+    for dim, coord in zip(dims, coords, strict=True):
         snx.create_field(data, dim, da.coords[coord])
 
     data.attrs['axes'] = da.dims
@@ -761,28 +761,28 @@ def create_nxdata(h5root, dims, coords):
 
 
 @pytest.mark.parametrize(
-    '_slice',
-    (
+    "slice_",
+    [
         ('time', sc.scalar(1, unit='s')),
         ('time', slice(sc.scalar(1, unit='s'), None)),
         ('time', slice(None, sc.scalar(1, unit='s'))),
         ('time', slice(sc.scalar(1, unit='s'), sc.scalar(3, unit='s'))),
         {'time': sc.scalar(1, unit='s'), 'x': sc.scalar(1, unit='s')},
         {'x': sc.scalar(1, unit='s')},
-    ),
+    ],
 )
 @pytest.mark.parametrize(
-    'dims, coords',
-    (
+    ('dims', 'coords'),
+    [
         (('time',), ('time',)),
         (('time',), ('time2',)),
         (('time', 'x'), ('time2', 'x')),
         (('x', 'y'), ('time2', 'time')),
         (('x', 'y'), ('x', 'y')),
-    ),
+    ],
 )
 def test_label_indexing_dataset_behaves_same_as_indexing_scipp_dataarray(
-    h5root, _slice, dims, coords
+    h5root, slice_, dims, coords
 ):
     nx = create_nxdata(h5root, dims, coords)
     da = nx[()]
@@ -791,19 +791,19 @@ def test_label_indexing_dataset_behaves_same_as_indexing_scipp_dataarray(
     try:
         # Scipp does not support dict slicing,
         # manually slice datagroup in multiple coords
-        if isinstance(_slice, dict):
-            for s in _slice.items():
+        if isinstance(slice_, dict):
+            for s in slice_.items():
                 da = da[s]
         else:
-            da = da[_slice]
+            da = da[slice_]
     except Exception as e:
         exception = type(e)
 
     if exception:
         with pytest.raises(exception):
-            nx[_slice]
+            nx[slice_]
     else:
-        assert_identical(nx[_slice], da)
+        assert_identical(nx[slice_], da)
 
 
 def test_scalar_signal_without_unit_works(h5root):

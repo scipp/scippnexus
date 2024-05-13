@@ -260,10 +260,12 @@ class TransformationChainResolver:
             except KeyError:
                 raise TransformationChainResolver.ChainError(
                     f"{base} not found in {self.name}"
-                )
+                ) from None
             node = TransformationChainResolver(
-                self._stack
-                + [TransformationChainResolver.Entry(name=base, value=child)]
+                [
+                    *self._stack,
+                    TransformationChainResolver.Entry(name=base, value=child),
+                ]
             )
         return node if len(remainder) == 0 else node[remainder[0]]
 
@@ -298,7 +300,7 @@ class TransformationChainResolver:
             transform = transform if transform.coords else transform.data
         if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
             transform = transform.to(unit='m', copy=False)
-        return [transform] + node.parent.get_chain(depends_on)
+        return [transform, *node.parent.get_chain(depends_on)]
 
 
 def compute_positions(

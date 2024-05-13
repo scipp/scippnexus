@@ -731,7 +731,7 @@ def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root):
     assert_identical(dg['z'], z)
 
 
-@pytest.mark.parametrize('dtype', ('bool', 'int8', 'int16', 'int32', 'int64'))
+@pytest.mark.parametrize('dtype', ['bool', 'int8', 'int16', 'int32', 'int64'])
 def test_pixel_masks_parses_masks_correctly(h5root, dtype):
     if dtype == 'bool':
         bitmask = np.array([[1, 0], [0, 0]], dtype=dtype)
@@ -852,8 +852,8 @@ def test_pixel_masks_adds_mask_to_all_dataarrays_of_dataset(h5root):
     detector.attrs['axes'] = ['xx', '.']
     detector = make_group(detector)
     dg = detector[...]
-    assert set(dg['data'].masks.keys()) == set(('gap_pixel', 'dead_pixel'))
-    assert set(dg['data_2'].masks.keys()) == set(('gap_pixel', 'dead_pixel'))
+    assert set(dg['data'].masks.keys()) == {'gap_pixel', 'dead_pixel'}
+    assert set(dg['data_2'].masks.keys()) == {'gap_pixel', 'dead_pixel'}
 
 
 def test_detector_with_event_data_and_split_pulse_yields_identical_result(nxroot):

@@ -36,10 +36,7 @@ def _guess_dims(dims, shape, dataset: H5Dataset):
         # sensors are square, this is a hopefully reasonable compromise.
         if dataset.shape == shape[-len(dataset.shape) :]:
             return dims[-len(dataset.shape) :]
-    lut = {}
-    for d, s in zip(dims, shape):
-        if shape.count(s) == 1:
-            lut[s] = d
+    lut = {s: d for d, s in zip(dims, shape, strict=True) if shape.count(s) == 1}
     try:
         return [lut[s] for s in dataset.shape]
     except KeyError:
@@ -104,7 +101,7 @@ class NXdata(NXobject):
             # starting from the left. So we only squeeze dimensions that are after
             # len(dims).
             shape = _squeeze_trailing(dims, field.dataset.shape)
-            field.sizes = dict(zip(dims, shape))
+            field.sizes = dict(zip(dims, shape, strict=True))
         elif self._valid:
             s1 = self._signal.sizes
             s2 = field.sizes
@@ -224,7 +221,7 @@ class NXdata(NXobject):
                 )
                 # If we have explicit group dims, we can drop trailing 1s.
                 shape = _squeeze_trailing(group_dims, shape)
-                self._signal.sizes = dict(zip(group_dims, shape))
+                self._signal.sizes = dict(zip(group_dims, shape, strict=True))
             elif isinstance(self._signal, Group):
                 group_dims = self._signal.dims
             elif fallback_dims is not None:
@@ -233,7 +230,7 @@ class NXdata(NXobject):
                     fallback_dims[i] if i < len(fallback_dims) else f'dim_{i}'
                     for i in range(len(shape))
                 ]
-                self._signal.sizes = dict(zip(group_dims, shape))
+                self._signal.sizes = dict(zip(group_dims, shape, strict=True))
 
         self._group_dims = group_dims
         self._named_axes = self._get_named_axes(fallback_dims)
@@ -265,7 +262,7 @@ class NXdata(NXobject):
                 hdf5_dims = self._dims_from_hdf5(field)
                 return tuple(
                     dim if dim != '.' else hdf5_dim
-                    for dim, hdf5_dim in zip(dims, hdf5_dims)
+                    for dim, hdf5_dim in zip(dims, hdf5_dims, strict=True)
                 )
             return dims
         # Older way of defining dims via axis attribute
@@ -325,7 +322,7 @@ class NXdata(NXobject):
         if not isinstance(coord, Field):
             return None
         sizes = self.sizes
-        for dim, size in zip(coord.dims, coord.shape):
+        for dim, size in zip(coord.dims, coord.shape, strict=True):
             if (sz := sizes.get(dim)) is not None and sz + 1 == size:
                 return dim
         return None
@@ -602,7 +599,7 @@ class EventField:
 
 
 class NXdetector(NXdata):
-    _detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
+    _detector_number_fields = ('detector_number', 'pixel_id', 'spectrum_index')
 
     @staticmethod
     def _detector_number(children: Iterable[str]) -> Optional[str]:
@@ -657,7 +654,8 @@ class NXdetector(NXdata):
 
         Override in subclasses to customize assembly of datasets into loaded output.
         """
-        return NXdetector._detector_number_fields + [
+        return [
+            *NXdetector._detector_number_fields,
             'time_of_flight',
             'raw_time_of_flight',
             'x_pixel_offset',
@@ -688,7 +686,7 @@ class NXdetector(NXdata):
 
         for suffix, bitmask in bitmasks.items():
             masks = self.transform_bitmask_to_dict_of_masks(bitmask, suffix)
-            for signal in [self._signal_name] + self._aux_signals:
+            for signal in (self._signal_name, *self._aux_signals):
                 for name, mask in masks.items():
                     out[signal].masks[name] = mask
         return out

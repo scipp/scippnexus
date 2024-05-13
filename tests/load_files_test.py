@@ -58,7 +58,7 @@ def bins_validator(item_type: type, sizes: Optional[Dict[str, int]] = None):
     return _validator
 
 
-@pytest.mark.externalfile
+@pytest.mark.externalfile()
 @pytest.mark.parametrize('name', all_files)
 def test_files_load_as_data_groups(name):
     with snx.File(externalfile.get_path(name)) as f:
@@ -66,7 +66,7 @@ def test_files_load_as_data_groups(name):
     assert isinstance(dg, sc.DataGroup)
 
 
-@pytest.mark.externalfile
+@pytest.mark.externalfile()
 @pytest.mark.parametrize('name', all_files)
 def test_files_load_as_data_groups_with_no_definitions(name):
     with snx.File(externalfile.get_path(name), definitions={}) as f:
@@ -74,7 +74,7 @@ def test_files_load_as_data_groups_with_no_definitions(name):
     assert isinstance(dg, sc.DataGroup)
 
 
-@pytest.mark.externalfile
+@pytest.mark.externalfile()
 def test_amor2020n000346_tweaked():
     with snx.File(externalfile.get_path('2023/amor2020n000346_tweaked.nxs')) as f:
         dg = f[()]
@@ -87,7 +87,7 @@ def test_amor2020n000346_tweaked():
     assert_schema(dg, schema)
 
 
-@pytest.mark.externalfile
+@pytest.mark.externalfile()
 def test_LOKI_60322_2022_03_02_2205_fixed():
     with snx.File(
         externalfile.get_path('2023/LOKI_60322-2022-03-02_2205_fixed.nxs')

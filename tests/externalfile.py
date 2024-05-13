@@ -33,7 +33,7 @@ def sshdownloader(url, output_file, pooch):
     from subprocess import call
 
     cmd = ['scp', f'{url}', f'{output_file}']
-    call(cmd)
+    call(cmd)  # noqa: S603
 
 
 def get_path(name: str) -> str:

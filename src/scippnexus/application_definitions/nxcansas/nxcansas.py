@@ -36,7 +36,7 @@ class SASdata:
     ):
         self.data = data
         valid = ('uncertainties', 'resolutions')
-        if Q_variances not in (None,) + valid:
+        if Q_variances not in (None, *valid):
             raise ValueError(f"Q_variances must be in {valid}")
         self._variances = Q_variances
 

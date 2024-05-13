@@ -40,7 +40,7 @@ def I_of_Q():
 
 
 def test_setitem_SASdata_raises_ValueError_when_given_bin_edges(nxroot, I_of_Q):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='Q is given as bin-edges'):
         nxroot['sasdata'] = nxcansas.SASdata(I_of_Q, Q_variances='resolutions')
 
 
@@ -59,9 +59,9 @@ def test_setitem_SASdata_raises_if_interpretation_of_variances_not_specified(nxr
         unit='1/counts',
     )
     da = sc.DataArray(data=data)
-    da.coords['Q'] = sc.linspace('Q', 0, 1, num=5, unit='1/angstrom')
-    da.coords['Q'].variances = sc.array(dims=['Q'], values=[1, 1, 4, 4, 1]).values
-    with pytest.raises(ValueError):
+    da.coords['Q'] = sc.linspace('Q', 0, 1, num=4, unit='1/angstrom')
+    da.coords['Q'].variances = sc.array(dims=['Q'], values=[1, 4, 4, 1]).values
+    with pytest.raises(ValueError, match='Q has variances, must specify whether these'):
         nxroot['sasdata'] = nxcansas.SASdata(da)
 
 

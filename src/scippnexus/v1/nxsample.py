@@ -9,7 +9,10 @@ from scipp.spatial import linear_transform
 from .leaf import Leaf
 from .nxobject import ScippIndex
 
-_matrix_units = dict(zip(['orientation_matrix', 'ub_matrix'], ['one', '1/Angstrom']))
+_matrix_units = {
+    "orientation_matrix": "one",
+    "ub_matrix": "1/Angstrom",
+}
 
 
 class NXsample(Leaf):

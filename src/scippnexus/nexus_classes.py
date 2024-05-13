@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from .base import NXobject, NXroot  # noqa F401
-from .nxcylindrical_geometry import NXcylindrical_geometry  # noqa F401
-from .nxdata import NXdata, NXdetector, NXlog, NXmonitor  # noqa F401
-from .nxevent_data import NXevent_data  # noqa F401
-from .nxoff_geometry import NXoff_geometry  # noqa F401
-from .nxsample import NXsample  # noqa F401
-from .nxtransformations import NXtransformations  # noqa F401
+from .base import NXobject, NXroot  # noqa: F401
+from .nxcylindrical_geometry import NXcylindrical_geometry  # noqa: F401
+from .nxdata import NXdata, NXdetector, NXlog, NXmonitor  # noqa: F401
+from .nxevent_data import NXevent_data  # noqa: F401
+from .nxoff_geometry import NXoff_geometry  # noqa: F401
+from .nxsample import NXsample  # noqa: F401
+from .nxtransformations import NXtransformations  # noqa: F401
 
 
 class NXentry(NXobject):

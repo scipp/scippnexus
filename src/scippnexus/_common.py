@@ -11,7 +11,7 @@ from .typing import ScippIndex
 
 def convert_time_to_datetime64(
     raw_times: sc.Variable,
-    start: str = None,
+    start: str | None = None,
     scaling_factor: Union[float, np.float_] = None,
 ) -> sc.Variable:
     """

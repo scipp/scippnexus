@@ -203,10 +203,11 @@ class Field:
 
     def _maybe_datetime(self, variable: sc.Variable) -> sc.Variable:
         if _is_time(variable):
-            starts = []
-            for name in self.attrs:
-                if (dt := _as_datetime(self.attrs[name])) is not None:
-                    starts.append(dt)
+            starts = [
+                dt
+                for name in self.attrs
+                if (dt := _as_datetime(self.attrs[name])) is not None
+            ]
             if len(starts) == 1:
                 variable = convert_time_to_datetime64(
                     variable,
