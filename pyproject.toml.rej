@@ -1,0 +1,17 @@
+diff a/pyproject.toml b/pyproject.toml	(rejected hunks)
+@@ -49,10 +56,15 @@ addopts = """
+ --import-mode=importlib
+ -ra
+ -v
++-m 'not externalfile'
+ """
+ testpaths = "tests"
+ filterwarnings = [
+   "error",
++  "ignore:Failed to load :UserWarning",
++]
++markers = [
++    "externalfile",
+ ]
+ 
+ [tool.bandit]
