@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Any, Callable, Dict, Literal, Optional, Union
+from collections.abc import Callable
+from typing import Any, Literal
 
 import scipp as sc
 
@@ -14,7 +15,7 @@ from ...typing import H5Group
 class SASentry:
     nx_class = 'NXentry'
 
-    def __init__(self, *, title: str, run: Union[str, int]):
+    def __init__(self, *, title: str, run: str | int):
         self.title = title
         self.run = run
 
@@ -32,7 +33,7 @@ class SASdata:
     def __init__(
         self,
         data: sc.DataArray,
-        Q_variances: Optional[Literal['uncertainties', 'resolutions']] = None,
+        Q_variances: Literal['uncertainties', 'resolutions'] | None = None,
     ):
         self.data = data
         valid = ('uncertainties', 'resolutions')
@@ -72,7 +73,7 @@ class SASdata:
 
 
 class _SASdata(NXdata):
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         fallback_dims = attrs.get('I_axes')
         if fallback_dims is not None:
             fallback_dims = (fallback_dims,)
@@ -85,12 +86,12 @@ class _SASdata(NXdata):
 
     # TODO Mechanism for custom error names
     @staticmethod
-    def signal_errors(group: NXobject) -> Optional[str]:
+    def signal_errors(group: NXobject) -> str | None:
         signal_name = group.attrs.get('signal', 'I')
         signal = group._group[signal_name]
         return signal.attrs.get('uncertainties')
 
-    def coord_errors(group: NXobject, name: str) -> Optional[str]:
+    def coord_errors(group: NXobject, name: str) -> str | None:
         if name != 'Q':
             return None
         # TODO This naively stores this as Scipp errors, which are just Gaussian.
@@ -105,7 +106,7 @@ class _SASdata(NXdata):
 
 
 class _SAStransmission_spectrum(NXdata):
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         # TODO A valid file should have T_axes, do we need to fallback?
         super().__init__(
             attrs=attrs,
@@ -118,7 +119,7 @@ class _SAStransmission_spectrum(NXdata):
 class NXcanSAS:
     def get(self, key: type, default: Callable) -> Callable:
         def _definition_factory(
-            attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]
+            attrs: dict[str, Any], children: dict[str, Field | Group]
         ) -> NXobject:
             if (cls := attrs.get('canSAS_class')) is not None:
                 if cls == 'SASdata':

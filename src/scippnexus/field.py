@@ -7,7 +7,7 @@ import re
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 import dateutil.parser
 import numpy as np
@@ -81,22 +81,22 @@ class Field:
 
     dataset: H5Dataset
     parent: 'Group'
-    sizes: Optional[Dict[str, int]] = None
-    dtype: Optional[sc.DType] = None
-    errors: Optional[H5Dataset] = None
+    sizes: dict[str, int] | None = None
+    dtype: sc.DType | None = None
+    errors: H5Dataset | None = None
 
     @cached_property
-    def attrs(self) -> Dict[str, Any]:
+    def attrs(self) -> dict[str, Any]:
         """The attributes of the dataset.
         Cannot be used for writing attributes, since they are cached for performance."""
         return MappingProxyType(Attrs(self.dataset.attrs))
 
     @property
-    def dims(self) -> Tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return tuple(self.sizes.keys())
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         return tuple(self.sizes.values())
 
     @cached_property
@@ -118,7 +118,7 @@ class Field:
             sc.pow(stddevs, sc.scalar(2)).values, shape=var.shape
         )
 
-    def __getitem__(self, select: ScippIndex) -> Union[Any, sc.Variable]:
+    def __getitem__(self, select: ScippIndex) -> Any | sc.Variable:
         """
         Load the field as a :py:class:`scipp.Variable` or Python object.
 
@@ -138,7 +138,7 @@ class Field:
         from .nxtransformations import maybe_transformation
 
         index = to_plain_index(self.dims, select)
-        if isinstance(index, (int, slice)):
+        if isinstance(index, int | slice):
             index = (index,)
 
         base_dims = self.dims
@@ -233,7 +233,7 @@ class Field:
         return len(self.shape)
 
     @cached_property
-    def unit(self) -> Union[sc.Unit, None]:
+    def unit(self) -> sc.Unit | None:
         if (unit := self.attrs.get('units')) is not None:
             try:
                 return sc.Unit(unit)

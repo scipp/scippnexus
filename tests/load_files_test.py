@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import pytest
 import scipp as sc
@@ -28,15 +28,15 @@ def get_item_at_path(dg: sc.DataGroup, path: str) -> sc.DataArray:
     return dg
 
 
-def assert_schema(dg: sc.DataGroup, schema: Dict[str, Any]) -> None:
+def assert_schema(dg: sc.DataGroup, schema: dict[str, Any]) -> None:
     for name, validate in schema.items():
         validate(get_item_at_path(dg, name))
 
 
 def validator(
     item_type: type,
-    sizes: Optional[Dict[str, int]] = None,
-    dtype: Optional[Union[str, sc.DType]] = None,
+    sizes: dict[str, int] | None = None,
+    dtype: str | sc.DType | None = None,
 ) -> None:
     def _validator(item):
         assert isinstance(item, item_type)
@@ -48,7 +48,7 @@ def validator(
     return _validator
 
 
-def bins_validator(item_type: type, sizes: Optional[Dict[str, int]] = None):
+def bins_validator(item_type: type, sizes: dict[str, int] | None = None):
     def _validator(item):
         assert isinstance(item, item_type)
         assert item.bins is not None

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Any, Dict, Tuple, Union
+from typing import Any
 
 import numpy as np
 import scipp as sc
@@ -36,7 +36,7 @@ class NXevent_data(NXobject):
         "event_id",
     )
 
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         super().__init__(attrs=attrs, children=children)
         for name, field in children.items():
             if name in ['event_time_zero', 'event_index']:
@@ -55,10 +55,10 @@ class NXevent_data(NXobject):
         return (_pulse_dimension,)[: len(self.shape)]
 
     @property
-    def sizes(self) -> Dict[str, int]:
+    def sizes(self) -> dict[str, int]:
         return dict(zip(self.dims, self.shape, strict=True))
 
-    def field_dims(self, name: str, field: Field) -> Tuple[str, ...]:
+    def field_dims(self, name: str, field: Field) -> tuple[str, ...]:
         if name in ['event_time_zero', 'event_index']:
             return (_pulse_dimension,)
         if name in ['event_time_offset', 'event_id']:

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Dict, List, Optional, Union
 
 import numpy as np
 import scipp as sc
@@ -12,7 +11,7 @@ from .typing import ScippIndex
 def convert_time_to_datetime64(
     raw_times: sc.Variable,
     start: str | None = None,
-    scaling_factor: Union[float, np.float_] = None,
+    scaling_factor: float | np.float_ = None,
 ) -> sc.Variable:
     """
     The nexus standard allows an arbitrary scaling factor to be inserted
@@ -54,9 +53,7 @@ def convert_time_to_datetime64(
     )
 
 
-def _to_canonical_select(
-    dims: List[str], select: ScippIndex
-) -> Dict[str, Union[int, slice]]:
+def _to_canonical_select(dims: list[str], select: ScippIndex) -> dict[str, int | slice]:
     """Return selection as dict with explicit dim labels"""
 
     def check_1d():
@@ -81,7 +78,7 @@ def _to_canonical_select(
                 "but multiple indices {select} were specified."
             )
         return {dims[0]: select[0]}
-    elif isinstance(select, (int, sc.Variable)) or isinstance(select, slice):
+    elif isinstance(select, int | sc.Variable) or isinstance(select, slice):
         check_1d()
         return {dims[0]: select}
     if not isinstance(select, dict):
@@ -89,7 +86,7 @@ def _to_canonical_select(
     return select.copy()
 
 
-def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, slice, tuple]:
+def to_plain_index(dims: list[str], select: ScippIndex) -> int | slice | tuple:
     """
     Given a valid "scipp" index 'select', return an equivalent plain numpy-style index.
     """
@@ -107,10 +104,10 @@ def to_plain_index(dims: List[str], select: ScippIndex) -> Union[int, slice, tup
 
 
 def to_child_select(
-    dims: List[str],
-    child_dims: List[str],
+    dims: list[str],
+    child_dims: list[str],
     select: ScippIndex,
-    bin_edge_dim: Optional[str] = None,
+    bin_edge_dim: str | None = None,
 ) -> ScippIndex:
     """
     Given a valid "scipp" index 'select' for a Nexus class, return a selection for a

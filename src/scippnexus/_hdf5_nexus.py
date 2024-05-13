@@ -2,7 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Matthew Jones
 import warnings
-from typing import Any, Union
+from typing import Any
 
 import h5py
 import numpy as np
@@ -44,7 +44,7 @@ def _warn_latin1_decode(obj, decoded, error):
     )
 
 
-def _ensure_str(str_or_bytes: Union[str, bytes], encoding: str) -> str:
+def _ensure_str(str_or_bytes: str | bytes, encoding: str) -> str:
     """
     See https://docs.h5py.org/en/stable/strings.html for justification about some of
     the operations performed in this method. In particular, variable-length strings

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Any, ClassVar, Dict, Optional, Union
+from typing import Any, ClassVar
 
 import scipp as sc
 
@@ -14,8 +14,8 @@ def off_to_shape(
     vertices: sc.Variable,
     winding_order: sc.Variable,
     faces: sc.Variable,
-    detector_faces: Optional[sc.Variable] = None,
-    detector_number: Optional[sc.Variable] = None,
+    detector_faces: sc.Variable | None = None,
+    detector_number: sc.Variable | None = None,
 ) -> sc.Variable:
     """
     Convert OFF shape description to simpler shape representation.
@@ -70,7 +70,7 @@ class NXoff_geometry(NXobject):
         'faces': ('face',),
     }
 
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         super().__init__(attrs=attrs, children=children)
         for name, field in children.items():
             if isinstance(field, Field):
@@ -85,14 +85,12 @@ class NXoff_geometry(NXobject):
                         zip(self._dims.get(name), field.dataset.shape, strict=True)
                     )
 
-    def load_as_array(
-        self, detector_number: Optional[sc.Variable] = None
-    ) -> sc.Variable:
+    def load_as_array(self, detector_number: sc.Variable | None = None) -> sc.Variable:
         return off_to_shape(**self[()], detector_number=detector_number)
 
     @staticmethod
     def assemble_as_child(
-        children: sc.DataGroup, detector_number: Optional[sc.Variable] = None
+        children: sc.DataGroup, detector_number: sc.Variable | None = None
     ) -> sc.Variable:
         return off_to_shape(**children, detector_number=detector_number)
 

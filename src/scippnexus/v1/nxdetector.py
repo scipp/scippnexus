@@ -30,11 +30,11 @@ class NXdetectorStrategy(NXdataStrategy):
         # avoid by checking if 'data' is a dataset.
         if (name := NXdataStrategy.signal(group)) is not None:
             return name
-        return 'data' if 'data' in group and is_dataset(group._group['data']) else None
+        return "data" if "data" in group and is_dataset(group._group["data"]) else None
 
 
 def group(da: sc.DataArray, groups: sc.Variable) -> sc.DataArray:
-    if hasattr(da, 'group'):
+    if hasattr(da, "group"):
         return da.group(groups)
     else:
         return sc.bin(da, groups=[groups])
@@ -64,8 +64,8 @@ class _EventField:
         self,
         nxevent_data: NXevent_data,
         event_select: ScippIndex,
-        grouping_key: Optional[str] = 'detector_number',
-        grouping: Optional[Field] = None,
+        grouping_key: str | None = "detector_number",
+        grouping: Field | None = None,
     ):
         self._nxevent_data = nxevent_data
         self._event_select = event_select
@@ -114,8 +114,8 @@ class _EventField:
             # that this can easily be 100x slower, so it is not an option. In
             # practice most files have contiguous event_id values within a bank
             # (NXevent_data).
-            id_min = event_data.bins.coords['event_id'].min()
-            id_max = event_data.bins.coords['event_id'].max()
+            id_min = event_data.bins.coords["event_id"].min()
+            id_max = event_data.bins.coords["event_id"].max()
             grouping = sc.arange(
                 dim=self._grouping_key,
                 unit=None,
@@ -130,20 +130,20 @@ class _EventField:
             ):
                 return event_data
         # copy since sc.bin cannot deal with a non-contiguous view
-        event_id = grouping.flatten(to='event_id').copy()
-        event_data.bins.coords['event_time_zero'] = sc.bins_like(
-            event_data, fill_value=event_data.coords['event_time_zero']
+        event_id = grouping.flatten(to="event_id").copy()
+        event_data.bins.coords["event_time_zero"] = sc.bins_like(
+            event_data, fill_value=event_data.coords["event_time_zero"]
         )
         # After loading raw NXevent_data it is guaranteed that the event table
         # is contiguous and that there is no masking. We can therefore use the
         # more efficient approach of binning from scratch instead of erasing the
         # 'pulse' binning defined by NXevent_data.
-        event_data = group(event_data.bins.constituents['data'], groups=event_id)
+        event_data = group(event_data.bins.constituents["data"], groups=event_id)
         if self._grouping is None:
-            event_data.coords[self._grouping_key] = event_data.coords.pop('event_id')
+            event_data.coords[self._grouping_key] = event_data.coords.pop("event_id")
         else:
-            del event_data.coords['event_id']
-        return event_data.fold(dim='event_id', sizes=grouping.sizes)
+            del event_data.coords["event_id"]
+        return event_data.fold(dim="event_id", sizes=grouping.sizes)
 
 
 class NXdetector(NXobject):
@@ -158,44 +158,44 @@ class NXdetector(NXobject):
         super().__init__(*args, **kwargs)
         self._event_select = tuple()
         self._nxevent_data_fields = [
-            'event_time_zero',
-            'event_index',
-            'event_time_offset',
-            'event_id',
-            'cue_timestamp_zero',
-            'cue_index',
-            'pulse_height',
+            "event_time_zero",
+            "event_index",
+            "event_time_offset",
+            "event_id",
+            "cue_timestamp_zero",
+            "cue_index",
+            "pulse_height",
         ]
-        self._detector_number_fields = ['detector_number', 'pixel_id', 'spectrum_index']
+        self._detector_number_fields = ["detector_number", "pixel_id", "spectrum_index"]
 
     @property
-    def shape(self) -> List[int]:
+    def shape(self) -> list[int]:
         return self._signal.shape
 
     @property
-    def dims(self) -> List[str]:
+    def dims(self) -> list[str]:
         return self._signal.dims
 
     @property
-    def unit(self) -> Union[sc.Unit, None]:
+    def unit(self) -> sc.Unit | None:
         return self._signal.unit
 
     @property
-    def detector_number(self) -> Optional[Field]:
+    def detector_number(self) -> Field | None:
         for key in self._detector_number_fields:
             if key in self:
                 return key
         return None
 
     @property
-    def _event_grouping(self) -> Union[None, Dict[str, Any]]:
+    def _event_grouping(self) -> None | dict[str, Any]:
         for key in self._detector_number_fields:
             if key in self:
-                return {'grouping_key': key, 'grouping': self[key]}
+                return {"grouping_key": key, "grouping": self[key]}
         return {}
 
     @property
-    def _signal(self) -> Union[Field, _EventField]:
+    def _signal(self) -> Field | _EventField:
         return self._nxdata()._signal
 
     def _nxdata(self, use_event_signal=True) -> NXdata:
@@ -209,13 +209,13 @@ class NXdetector(NXobject):
             if events.name == self.name:
                 skip = self._nxevent_data_fields
             else:
-                skip = [events.name.split('/')[-1]]  # name of the subgroup
+                skip = [events.name.split("/")[-1]]  # name of the subgroup
         return NXdata(
             self._group, strategy=NXdetectorStrategy, signal_override=signal, skip=skip
         )
 
     @property
-    def events(self) -> Union[None, NXevent_data]:
+    def events(self) -> None | NXevent_data:
         """Return the underlying NXevent_data group, None if not event data."""
         # The standard is unclear on whether the 'data' field may be NXevent_data or
         # whether the fields of NXevent_data should be stored directly within this
@@ -230,7 +230,7 @@ class NXdetector(NXobject):
             # If there is also a signal dataset (not events) it will be ignored
             # (except for possibly using it to deduce shape and dims).
             return next(iter(event_entries.values()))
-        if 'event_time_offset' in self:
+        if "event_time_offset" in self:
             return NXevent_data(self._group)
         return None
 
@@ -246,7 +246,7 @@ class NXdetector(NXobject):
             )
         return EventSelector(self)
 
-    def _get_field_dims(self, name: str) -> Union[None, List[str]]:
+    def _get_field_dims(self, name: str) -> None | list[str]:
         if self.events is not None:
             if name in self._nxevent_data_fields:
                 # Event field is direct child of this class

@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Iterable
 from itertools import chain
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 import scipp as sc
@@ -52,10 +53,10 @@ def _guess_dims(dims, shape, dataset: H5Dataset):
 class NXdata(NXobject):
     def __init__(
         self,
-        attrs: Dict[str, Any],
-        children: Dict[str, Union[Field, Group]],
-        fallback_dims: Optional[Tuple[str, ...]] = None,
-        fallback_signal_name: Optional[str] = None,
+        attrs: dict[str, Any],
+        children: dict[str, Field | Group],
+        fallback_dims: tuple[str, ...] | None = None,
+        fallback_signal_name: str | None = None,
     ):
         super().__init__(attrs=attrs, children=children)
         self._valid = True  # True if the children can be assembled
@@ -82,7 +83,7 @@ class NXdata(NXobject):
         for name, field in children.items():
             self._init_field_dims(name, field)
 
-    def _init_field_dims(self, name: str, field: Union[Field, Group]) -> None:
+    def _init_field_dims(self, name: str, field: Field | Group) -> None:
         if not isinstance(field, Field):
             # If the NXdata contains subgroups we can generally not define valid
             # sizes... except for some non-signal "special fields" that return
@@ -110,7 +111,7 @@ class NXdata(NXobject):
             elif any(s1[k] != s2[k] for k in s1.keys() & s2.keys()):
                 self._valid = False
 
-    def _init_signal(self, name: Optional[str], children):
+    def _init_signal(self, name: str | None, children):
         # There are multiple ways NeXus can define the "signal" dataset. The latest
         # version uses `signal` attribute on the group (passed as `name`). However,
         # we must give precedence to the `signal` attribute on the dataset, since
@@ -144,9 +145,7 @@ class NXdata(NXobject):
                 else:
                     self._aux_signals.append(name)
 
-    def _init_axes(
-        self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]
-    ):
+    def _init_axes(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         # Latest way of defining axes
         self._axes = attrs.get('axes')
         # Older way of defining axes
@@ -176,7 +175,7 @@ class NXdata(NXobject):
                 if (axis := field.attrs.get('axis')) is not None:
                     self._axis_index[name] = axis
 
-    def _get_named_axes(self, fallback_dims) -> Tuple[str, ...]:
+    def _get_named_axes(self, fallback_dims) -> tuple[str, ...]:
         if self._axes is not None:
             # Unlike self.dims we *drop* entries that are '.'
             return tuple(a for a in self._axes if a != '.')
@@ -187,7 +186,7 @@ class NXdata(NXobject):
         else:
             return ()
 
-    def _get_group_dims(self) -> Optional[Tuple[str, ...]]:
+    def _get_group_dims(self) -> tuple[str, ...] | None:
         """Try three ways of defining group dimensions."""
         # Apparently it is not possible to define dim labels unless there are
         # corresponding coords. Special case of '.' entries means "no coord".
@@ -204,7 +203,7 @@ class NXdata(NXobject):
         return None
 
     def _init_group_dims(
-        self, attrs: Dict[str, Any], fallback_dims: Optional[Tuple[str, ...]] = None
+        self, attrs: dict[str, Any], fallback_dims: tuple[str, ...] | None = None
     ):
         group_dims = self._get_group_dims()
 
@@ -306,7 +305,7 @@ class NXdata(NXobject):
             return [f'dim_{i}' if dim == '' else dim for i, dim in enumerate(hdf5_dims)]
 
     @cached_property
-    def sizes(self) -> Dict[str, int]:
+    def sizes(self) -> dict[str, int]:
         if not self._valid:
             return super().sizes
         sizes = dict(self._signal.sizes)
@@ -315,10 +314,10 @@ class NXdata(NXobject):
         return sizes
 
     @property
-    def unit(self) -> Union[None, sc.Unit]:
+    def unit(self) -> None | sc.Unit:
         return self._signal.unit if self._valid else super().unit
 
-    def _bin_edge_dim(self, coord: Union[Any, Field]) -> Union[None, str]:
+    def _bin_edge_dim(self, coord: Any | Field) -> None | str:
         if not isinstance(coord, Field):
             return None
         sizes = self.sizes
@@ -327,7 +326,7 @@ class NXdata(NXobject):
                 return dim
         return None
 
-    def index_child(self, child: Union[Field, Group], sel: ScippIndex) -> ScippIndex:
+    def index_child(self, child: Field | Group, sel: ScippIndex) -> ScippIndex:
         """Same as NXobject.index_child but also handles bin edges."""
         child_sel = to_child_select(
             tuple(self.sizes), child.dims, sel, bin_edge_dim=self._bin_edge_dim(child)
@@ -338,14 +337,12 @@ class NXdata(NXobject):
         sel = self.convert_label_index_to_positional(sel)
         return super().read_children(sel)
 
-    def assemble(
-        self, dg: sc.DataGroup
-    ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup | sc.DataArray | sc.Dataset:
         return self._assemble_as_data(dg)
 
     def _assemble_as_data(
         self, dg: sc.DataGroup
-    ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+    ) -> sc.DataGroup | sc.DataArray | sc.Dataset:
         if not self._valid:
             raise NexusStructureError("Could not determine signal field or dimensions.")
         dg = dg.copy(deep=False)
@@ -363,15 +360,13 @@ class NXdata(NXobject):
         if aux:
             signals = {self._signal_name: da}
             signals.update(aux)
-            if all(
-                isinstance(v, (sc.Variable, sc.DataArray)) for v in signals.values()
-            ):
+            if all(isinstance(v, sc.Variable | sc.DataArray) for v in signals.values()):
                 return sc.Dataset(signals)
             return sc.DataGroup(signals)
         return da
 
     def _assemble_as_physical_component(
-        self, dg: sc.DataGroup, allow_in_coords: List[str]
+        self, dg: sc.DataGroup, allow_in_coords: list[str]
     ) -> sc.DataGroup:
         """
         Assemble suitable for physical components such as NXdetector or NXmonitor.
@@ -412,7 +407,7 @@ class NXdata(NXobject):
         )
         return result
 
-    def _dim_of_coord(self, name: str, coord: sc.Variable) -> Union[None, str]:
+    def _dim_of_coord(self, name: str, coord: sc.Variable) -> None | str:
         if len(coord.dims) == 1:
             return coord.dims[0]
         if name in coord.dims and name in self.dims:
@@ -449,7 +444,7 @@ class NXdata(NXobject):
         return da
 
 
-def _squeeze_trailing(dims: Tuple[str, ...], shape: Tuple[int, ...]) -> Tuple[int, ...]:
+def _squeeze_trailing(dims: tuple[str, ...], shape: tuple[int, ...]) -> tuple[int, ...]:
     return shape[: len(dims)] + tuple(size for size in shape[len(dims) :] if size != 1)
 
 
@@ -466,7 +461,7 @@ class NXlog(NXdata):
     individual time-series (DataArrays).
     """
 
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         children = dict(children)
         self._sublogs = []
         self._sublog_children = {}
@@ -514,7 +509,7 @@ class NXlog(NXdata):
                 )
 
     def _assemble_sublog(
-        self, dg: sc.DataGroup, name: str, value_name: Optional[str] = None
+        self, dg: sc.DataGroup, name: str, value_name: str | None = None
     ) -> sc.DataArray:
         value_name = name if value_name is None else f'{name}_{value_name}'
         da = sc.DataArray(dg.pop(value_name), coords={'time': dg.pop(f'{name}_time')})
@@ -524,9 +519,7 @@ class NXlog(NXdata):
         self._time_to_datetime(da.coords)
         return da
 
-    def assemble(
-        self, dg: sc.DataGroup
-    ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup | sc.DataArray | sc.Dataset:
         self._time_to_datetime(dg)
         dg = sc.DataGroup(dg)
         sublogs = sc.DataGroup()
@@ -539,8 +532,8 @@ class NXlog(NXdata):
 
 
 def _find_embedded_nxevent_data(
-    children: Dict[str, Union[Field, Group]],
-) -> Optional[Group]:
+    children: dict[str, Field | Group],
+) -> Group | None:
     if all(name in children for name in NXevent_data.mandatory_fields):
         parent = children['event_index'].parent._group
         event_group = Group(
@@ -572,19 +565,19 @@ class EventField:
         self._grouping = grouping
 
     @property
-    def attrs(self) -> Dict[str, Any]:
+    def attrs(self) -> dict[str, Any]:
         return self._event_data.attrs
 
     @property
-    def sizes(self) -> Dict[str, int]:
+    def sizes(self) -> dict[str, int]:
         return {**self._grouping.sizes, **self._event_data.sizes}
 
     @property
-    def dims(self) -> Tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return self._grouping.dims + self._event_data.dims
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         return self._grouping.shape + self._event_data.shape
 
     def __getitem__(self, sel: ScippIndex) -> sc.DataArray:
@@ -602,12 +595,12 @@ class NXdetector(NXdata):
     _detector_number_fields = ('detector_number', 'pixel_id', 'spectrum_index')
 
     @staticmethod
-    def _detector_number(children: Iterable[str]) -> Optional[str]:
+    def _detector_number(children: Iterable[str]) -> str | None:
         for name in NXdetector._detector_number_fields:
             if name in children:
                 return name
 
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         fallback_dims = None
         if (det_num_name := NXdetector._detector_number(children)) is not None:
             if (detector_number := children[det_num_name]).dataset.ndim == 1:
@@ -620,7 +613,7 @@ class NXdetector(NXdata):
         else:
             embedded_events = None
 
-        def _maybe_event_field(name: str, child: Union[Field, Group]):
+        def _maybe_event_field(name: str, child: Field | Group):
             if (
                 name == embedded_events
                 or (isinstance(child, Group) and child.nx_class == NXevent_data)
@@ -644,7 +637,7 @@ class NXdetector(NXdata):
             fallback_signal_name='data',
         )
 
-    def coord_allow_list(self) -> List[str]:
+    def coord_allow_list(self) -> list[str]:
         """
         Names of datasets that will be treated as coordinates.
 
@@ -723,12 +716,12 @@ class NXdetector(NXdata):
         return masks
 
     @property
-    def detector_number(self) -> Optional[str]:
+    def detector_number(self) -> str | None:
         return self._detector_number(self._children)
 
 
 class NXmonitor(NXdata):
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         if (event_group := _find_embedded_nxevent_data(children)) is not None:
             signal = uuid.uuid4().hex if 'events' in children else 'events'
             children[signal] = event_group
@@ -736,7 +729,7 @@ class NXmonitor(NXdata):
             signal = 'data'
         super().__init__(attrs=attrs, children=children, fallback_signal_name=signal)
 
-    def coord_allow_list(self) -> List[str]:
+    def coord_allow_list(self) -> list[str]:
         """
         Names of datasets that will be treated as coordinates.
 
@@ -755,7 +748,7 @@ class NXmonitor(NXdata):
 
 
 def _group_events(
-    *, event_data: sc.DataArray, grouping: Optional[sc.Variable] = None
+    *, event_data: sc.DataArray, grouping: sc.Variable | None = None
 ) -> sc.DataArray:
     if grouping is None:
         event_id = 'event_id'

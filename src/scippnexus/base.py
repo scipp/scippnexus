@@ -5,11 +5,11 @@ from __future__ import annotations
 
 import inspect
 import warnings
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from functools import lru_cache
 from pathlib import PurePosixPath
 from types import MappingProxyType
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, overload
+from typing import Any, overload
 
 import numpy as np
 import scipp as sc
@@ -22,7 +22,7 @@ from .field import Field
 from .typing import H5Dataset, H5Group, ScippIndex
 
 
-def asvariable(obj: Union[Any, sc.Variable]) -> sc.Variable:
+def asvariable(obj: Any | sc.Variable) -> sc.Variable:
     return obj if isinstance(obj, sc.Variable) else sc.scalar(obj, unit=None)
 
 
@@ -32,7 +32,7 @@ class NexusStructureError(Exception):
     pass
 
 
-def is_dataset(obj: Union[H5Group, H5Dataset]) -> bool:
+def is_dataset(obj: H5Group | H5Dataset) -> bool:
     """Return true if the object is an h5py.Dataset or equivalent.
 
     Use this instead of isinstance(obj, h5py.Dataset) to ensure that code is compatible
@@ -60,7 +60,7 @@ def _dtype_fromdataset(dataset: H5Dataset) -> sc.DType:
     return _scipp_dtype.get(dataset.dtype, sc.DType.string)
 
 
-def _squeezed_field_sizes(dataset: H5Dataset) -> Dict[str, int]:
+def _squeezed_field_sizes(dataset: H5Dataset) -> dict[str, int]:
     if (shape := dataset.shape) == (1,):
         return {}
     return {f'dim_{i}': size for i, size in enumerate(shape)}
@@ -72,7 +72,7 @@ class NXobject:
             field.sizes = _squeezed_field_sizes(field.dataset)
         field.dtype = _dtype_fromdataset(field.dataset)
 
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         """Subclasses should call this in their __init__ method, or ensure that they
         initialize the fields in `children` with the correct sizes and dtypes."""
         self._attrs = attrs
@@ -82,18 +82,18 @@ class NXobject:
                 self._init_field(field)
 
     @property
-    def unit(self) -> Union[None, sc.Unit]:
+    def unit(self) -> None | sc.Unit:
         raise AttributeError(
             f"Group-like {self._attrs.get('NX_class')} has no well-defined unit"
         )
 
     @cached_property
-    def sizes(self) -> Dict[str, int]:
+    def sizes(self) -> dict[str, int]:
         return sc.DataGroup(self._children).sizes
 
     def index_child(
-        self, child: Union[Field, Group], sel: ScippIndex
-    ) -> Union[sc.Variable, sc.DataArray, sc.Dataset, sc.DataGroup]:
+        self, child: Field | Group, sel: ScippIndex
+    ) -> sc.Variable | sc.DataArray | sc.Dataset | sc.DataGroup:
         """
         When a Group is indexed, this method is called to index each child.
 
@@ -128,9 +128,7 @@ class NXobject:
             }
         )
 
-    def assemble(
-        self, dg: sc.DataGroup
-    ) -> Union[sc.DataGroup, sc.DataArray, sc.Dataset]:
+    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup | sc.DataArray | sc.Dataset:
         """
         When a Group is indexed, this method is called to assemble the read children
         into the result object.
@@ -144,9 +142,7 @@ class NXobject:
 
     def convert_label_index_to_positional(self, sel):
         if isinstance(sel, dict):
-            return dict(
-                (self.convert_label_index_to_positional(s) for s in sel.items())
-            )
+            return dict(self.convert_label_index_to_positional(s) for s in sel.items())
         if (
             isinstance(sel, tuple)
             and len(sel) > 1
@@ -171,11 +167,9 @@ class NXobject:
                 if isinstance(self._signal, Field):
                     # If it is *not* a field, the translation can happen in subgroup
                     raise sc.DimensionError(
-                        (
-                            f'Invalid slice dimension: \'{dim}\': '
-                            f'no coordinate for that dimension. '
-                            f'Coordinates are {tuple(self._children.keys())}'
-                        )
+                        f'Invalid slice dimension: \'{dim}\': '
+                        f'no coordinate for that dimension. '
+                        f'Coordinates are {tuple(self._children.keys())}'
                     )
 
         # It is not a label index, or the index will be translated in subgroup.
@@ -208,14 +202,14 @@ class Group(Mapping):
     #    interpretation of the file, but need to cache information. An earlier version
     #    of ScippNexus used such a mechanism without caching, which was very slow.
 
-    def __init__(self, group: H5Group, definitions: Optional[Dict[str, type]] = None):
+    def __init__(self, group: H5Group, definitions: dict[str, type] | None = None):
         self._group = group
         self._definitions = {} if definitions is None else definitions
         self._lazy_children = None
         self._lazy_nexus = None
 
     @property
-    def nx_class(self) -> Optional[type]:
+    def nx_class(self) -> type | None:
         """The value of the NX_class attribute of the group.
 
         In case of the subclass NXroot this returns :py:class:`NXroot` even if the attr
@@ -228,7 +222,7 @@ class Group(Mapping):
             return NXroot
 
     @cached_property
-    def attrs(self) -> Dict[str, Any]:
+    def attrs(self) -> dict[str, Any]:
         """The attributes of the group.
 
         Cannot be used for writing attributes, since they are cached for performance."""
@@ -243,7 +237,7 @@ class Group(Mapping):
         return self._group.name
 
     @property
-    def unit(self) -> Optional[sc.Unit]:
+    def unit(self) -> sc.Unit | None:
         return self._nexus.unit
 
     @property
@@ -255,14 +249,14 @@ class Group(Mapping):
         return Group(self._group.file, definitions=self._definitions)
 
     @property
-    def _children(self) -> Dict[str, Union[Field, Group]]:
+    def _children(self) -> dict[str, Field | Group]:
         """Lazily initialized children of the group."""
         if self._lazy_children is None:
             self._lazy_children = self._read_children()
         return self._lazy_children
 
-    def _read_children(self) -> Dict[str, Union[Field, Group]]:
-        def _make_child(obj: Union[H5Dataset, H5Group]) -> Union[Field, Group]:
+    def _read_children(self) -> dict[str, Field | Group]:
+        def _make_child(obj: H5Dataset | H5Group) -> Field | Group:
             if is_dataset(obj):
                 return Field(obj, parent=self)
             else:
@@ -327,8 +321,8 @@ class Group(Mapping):
         return self._children.__iter__()
 
     def _get_children_by_nx_class(
-        self, select: Union[type, List[type]]
-    ) -> Dict[str, Union[NXobject, Field]]:
+        self, select: type | list[type]
+    ) -> dict[str, NXobject | Field]:
         children = {}
         select = tuple(select) if isinstance(select, list) else select
         for key, child in self._children.items():
@@ -338,15 +332,15 @@ class Group(Mapping):
         return children
 
     @overload
-    def __getitem__(self, sel: str) -> Union[Group, Field]: ...
+    def __getitem__(self, sel: str) -> Group | Field: ...
 
     @overload
     def __getitem__(
         self, sel: ScippIndex
-    ) -> Union[sc.DataArray, sc.DataGroup, sc.Dataset]: ...
+    ) -> sc.DataArray | sc.DataGroup | sc.Dataset: ...
 
     @overload
-    def __getitem__(self, sel: Union[type, List[type]]) -> Dict[str, NXobject]: ...
+    def __getitem__(self, sel: type | list[type]) -> dict[str, NXobject]: ...
 
     def __getitem__(self, sel):
         """
@@ -393,7 +387,7 @@ class Group(Mapping):
             return child
 
         def isclass(x):
-            return inspect.isclass(x) and issubclass(x, (Field, NXobject))
+            return inspect.isclass(x) and issubclass(x, Field | NXobject)
 
         if isclass(sel) or (
             isinstance(sel, list) and len(sel) and all(isclass(x) for x in sel)
@@ -468,15 +462,15 @@ class Group(Mapping):
         )
 
     @cached_property
-    def sizes(self) -> Dict[str, int]:
+    def sizes(self) -> dict[str, int]:
         return self._nexus.sizes
 
     @property
-    def dims(self) -> Tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return tuple(self.sizes)
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         return tuple(self.sizes.values())
 
 
@@ -499,7 +493,7 @@ def _create_field_params_number(data: sc.Variable):
 
 
 def create_field(
-    group: H5Group, name: str, data: Union[np.ndarray, sc.Variable], **kwargs
+    group: H5Group, name: str, data: np.ndarray | sc.Variable, **kwargs
 ) -> H5Dataset:
     if not isinstance(data, sc.Variable):
         values, errors, attrs = _create_field_params_numpy(data)
@@ -522,7 +516,7 @@ def create_field(
     return values_dataset
 
 
-def create_class(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Group:
+def create_class(group: H5Group, name: str, nx_class: str | type) -> H5Group:
     """Create empty HDF5 group with given name and set the NX_class attribute.
 
     Parameters
@@ -534,12 +528,12 @@ def create_class(group: H5Group, name: str, nx_class: Union[str, type]) -> H5Gro
         subclass of NXobject, such as NXdata or NXlog.
     """
     group = group.create_group(name)
-    attr = nx_class if isinstance(nx_class, (str, bytes)) else nx_class.__name__
+    attr = nx_class if isinstance(nx_class, str | bytes) else nx_class.__name__
     group.attrs['NX_class'] = attr
     return group
 
 
-@lru_cache()
+@lru_cache
 def _nx_class_registry():
     from . import nexus_classes
 
@@ -549,7 +543,7 @@ def _nx_class_registry():
 base_definitions_dict = {}
 
 
-def base_definitions() -> Dict[str, type]:
+def base_definitions() -> dict[str, type]:
     """Return a dict of all base definitions.
 
     This is a copy of the base definitions dict, so that it can be modified without

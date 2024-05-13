@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+from collections.abc import Mapping
 from contextlib import AbstractContextManager
-from typing import Mapping
 
 import h5py
 
