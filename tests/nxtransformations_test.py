@@ -458,9 +458,9 @@ def test_label_slice_transformations(h5root):
     assert sc.identical(
         make_group(h5root)['transformations'][
             'time',
-            sc.scalar(22, unit='s')
-            .to(unit='ns') : sc.scalar(44, unit='s')
-            .to(unit='ns'),
+            sc.scalar(22, unit='s').to(unit='ns') : sc.scalar(44, unit='s').to(
+                unit='ns'
+            ),
         ]['t1'],
         expected[
             'time',

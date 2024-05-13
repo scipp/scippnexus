@@ -464,16 +464,13 @@ class NXobject:
         return children
 
     @overload
-    def __getitem__(self, name: str) -> Union['NXobject', Field]:
-        ...
+    def __getitem__(self, name: str) -> Union['NXobject', Field]: ...
 
     @overload
-    def __getitem__(self, name: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]:
-        ...
+    def __getitem__(self, name: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]: ...
 
     @overload
-    def __getitem__(self, name: Union[type, List[type]]) -> Dict[str, 'NXobject']:
-        ...
+    def __getitem__(self, name: Union[type, List[type]]) -> Dict[str, 'NXobject']: ...
 
     def __getitem__(self, name):
         """

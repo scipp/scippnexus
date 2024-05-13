@@ -135,7 +135,7 @@ def _smaller_unit(a, b):
 
 
 def combine_transformations(
-    chain: List[Union[sc.DataArray, sc.Variable]]
+    chain: List[Union[sc.DataArray, sc.Variable]],
 ) -> Union[sc.DataArray, sc.Variable]:
     """
     Take the product of a chain of transformations, handling potentially mismatching

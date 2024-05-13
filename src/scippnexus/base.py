@@ -338,18 +338,15 @@ class Group(Mapping):
         return children
 
     @overload
-    def __getitem__(self, sel: str) -> Union[Group, Field]:
-        ...
+    def __getitem__(self, sel: str) -> Union[Group, Field]: ...
 
     @overload
     def __getitem__(
         self, sel: ScippIndex
-    ) -> Union[sc.DataArray, sc.DataGroup, sc.Dataset]:
-        ...
+    ) -> Union[sc.DataArray, sc.DataGroup, sc.Dataset]: ...
 
     @overload
-    def __getitem__(self, sel: Union[type, List[type]]) -> Dict[str, NXobject]:
-        ...
+    def __getitem__(self, sel: Union[type, List[type]]) -> Dict[str, NXobject]: ...
 
     def __getitem__(self, sel):
         """

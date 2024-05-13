@@ -542,7 +542,7 @@ class NXlog(NXdata):
 
 
 def _find_embedded_nxevent_data(
-    children: Dict[str, Union[Field, Group]]
+    children: Dict[str, Union[Field, Group]],
 ) -> Optional[Group]:
     if all(name in children for name in NXevent_data.mandatory_fields):
         parent = children['event_index'].parent._group
