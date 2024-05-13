@@ -1,0 +1,4 @@
+exclude = ["."]
+lint.select = []
+format.exclude = ["."]
+format.quote-style = "preserve"
