@@ -7,6 +7,7 @@ Python 3.12, so we can remove this file once we drop support for Python 3.11.
 
 This file contains a 1:1 backport of Python 3.12's cached_property.
 """
+
 # flake8: noqa: E501
 from types import GenericAlias
 

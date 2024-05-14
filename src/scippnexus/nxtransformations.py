@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -24,7 +23,7 @@ class NXtransformations(NXobject):
 
 
 class Transformation:
-    def __init__(self, obj: Union[Field, Group]):  # could be an NXlog
+    def __init__(self, obj: Field | Group):  # could be an NXlog
         self._obj = obj
 
     @property
@@ -32,11 +31,11 @@ class Transformation:
         return self._obj.sizes
 
     @property
-    def dims(self) -> Tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return self._obj.dims
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         return self._obj.shape
 
     @property
@@ -72,7 +71,7 @@ class Transformation:
 
     def make_transformation(
         self,
-        value: Union[sc.Variable, sc.DataArray],
+        value: sc.Variable | sc.DataArray,
         transformation_type: str,
         select: ScippIndex,
     ):
@@ -135,8 +134,8 @@ def _smaller_unit(a, b):
 
 
 def combine_transformations(
-    chain: List[Union[sc.DataArray, sc.Variable]]
-) -> Union[sc.DataArray, sc.Variable]:
+    chain: list[sc.DataArray | sc.Variable],
+) -> sc.DataArray | sc.Variable:
     """
     Take the product of a chain of transformations, handling potentially mismatching
     time-dependence.
@@ -177,10 +176,10 @@ def combine_transformations(
 
 
 def maybe_transformation(
-    obj: Union[Field, Group],
-    value: Union[sc.Variable, sc.DataArray, sc.DataGroup],
+    obj: Field | Group,
+    value: sc.Variable | sc.DataArray | sc.DataGroup,
     sel: ScippIndex,
-) -> Union[sc.Variable, sc.DataArray, sc.DataGroup]:
+) -> sc.Variable | sc.DataArray | sc.DataGroup:
     """
     Return a loaded field, possibly modified if it is a transformation.
 
@@ -217,7 +216,7 @@ class TransformationChainResolver:
         name: str
         value: sc.DataGroup
 
-    def __init__(self, stack: List[TransformationChainResolver.Entry]):
+    def __init__(self, stack: list[TransformationChainResolver.Entry]):
         self._stack = stack
 
     @staticmethod
@@ -260,14 +259,16 @@ class TransformationChainResolver:
             except KeyError:
                 raise TransformationChainResolver.ChainError(
                     f"{base} not found in {self.name}"
-                )
+                ) from None
             node = TransformationChainResolver(
-                self._stack
-                + [TransformationChainResolver.Entry(name=base, value=child)]
+                [
+                    *self._stack,
+                    TransformationChainResolver.Entry(name=base, value=child),
+                ]
             )
         return node if len(remainder) == 0 else node[remainder[0]]
 
-    def resolve_depends_on(self) -> Optional[Union[sc.DataArray, sc.Variable]]:
+    def resolve_depends_on(self) -> sc.DataArray | sc.Variable | None:
         """
         Resolve the depends_on attribute of a transformation chain.
 
@@ -284,7 +285,7 @@ class TransformationChainResolver:
         # ignore potential time-dependence.
         return combine_transformations(self.get_chain(depends_on))
 
-    def get_chain(self, depends_on: str) -> List[Union[sc.DataArray, sc.Variable]]:
+    def get_chain(self, depends_on: str) -> list[sc.DataArray | sc.Variable]:
         if depends_on == '.':
             return []
         node = self[depends_on]
@@ -298,14 +299,14 @@ class TransformationChainResolver:
             transform = transform if transform.coords else transform.data
         if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
             transform = transform.to(unit='m', copy=False)
-        return [transform] + node.parent.get_chain(depends_on)
+        return [transform, *node.parent.get_chain(depends_on)]
 
 
 def compute_positions(
     dg: sc.DataGroup,
     *,
     store_position: str = 'position',
-    store_transform: Optional[str] = None,
+    store_transform: str | None = None,
 ) -> sc.DataGroup:
     """
     Recursively compute positions from depends_on attributes as well as the
@@ -356,7 +357,7 @@ def compute_positions(
     )
 
 
-def zip_pixel_offsets(x: Dict[str, sc.Variable], /) -> sc.Variable:
+def zip_pixel_offsets(x: dict[str, sc.Variable], /) -> sc.Variable:
     """
     Zip the x_pixel_offset, y_pixel_offset, and z_pixel_offset fields into a vector.
 
@@ -390,7 +391,7 @@ def _with_positions(
     dg: sc.DataGroup,
     *,
     store_position: str,
-    store_transform: Optional[str] = None,
+    store_transform: str | None = None,
     resolver: TransformationChainResolver,
 ) -> sc.DataGroup:
     out = sc.DataGroup()

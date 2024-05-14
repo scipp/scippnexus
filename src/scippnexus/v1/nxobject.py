@@ -27,7 +27,7 @@ from ..typing import H5Dataset, H5Group, ScippIndex
 NXobjectIndex = Union[str, ScippIndex]
 
 
-def asarray(obj: Union[Any, sc.Variable]) -> sc.Variable:
+def asarray(obj: Any | sc.Variable) -> sc.Variable:
     return obj if isinstance(obj, sc.Variable) else sc.scalar(obj, unit=None)
 
 
@@ -48,7 +48,7 @@ class DimensionedArray(Protocol):
         """Physical unit of the values"""
 
     @property
-    def dims(self) -> List[str]:
+    def dims(self) -> list[str]:
         """Dimension labels for the values"""
 
 
@@ -96,7 +96,7 @@ class Attrs:
 def _is_time(obj):
     dummy = sc.empty(dims=[], shape=[], unit=obj.unit)
     try:
-        dummy.to(unit='s')
+        dummy.to(unit="s")
         return True
     except sc.UnitError:
         return False
@@ -109,15 +109,15 @@ def _as_datetime(obj: Any):
             # i.e., convert to UTC.
             # Would like to use dateutil directly, but with Python's datetime we do not
             # get nanosecond precision. Therefore we combine numpy and dateutil parsing.
-            date_only = 'T' not in obj
+            date_only = "T" not in obj
             if date_only:
                 return sc.datetime(obj)
-            date, time = obj.split('T')
-            time_and_timezone_offset = re.split(r'Z|\+|-', time)
+            date, time = obj.split("T")
+            time_and_timezone_offset = re.split(r"Z|\+|-", time)
             time = time_and_timezone_offset[0]
             if len(time_and_timezone_offset) == 1:
                 # No timezone, parse directly (scipp based on numpy)
-                return sc.datetime(f'{date}T{time}')
+                return sc.datetime(f"{date}T{time}")
             else:
                 # There is timezone info. Parse with dateutil.
                 dt = dateutil.parser.isoparse(obj)
@@ -127,7 +127,7 @@ def _as_datetime(obj: Any):
                 # We operate with string operations here and thus end up parsing date
                 # and time twice. The reason is that the timezone-offset arithmetic
                 # cannot be done, e.g., in nanoseconds without causing rounding errors.
-                if '.' in time:
+                if "." in time:
                     dt += f".{time.split('.')[1]}"
                 return sc.datetime(dt)
         except ValueError:
@@ -137,7 +137,7 @@ def _as_datetime(obj: Any):
 
 def _dtype_from_dataset(dataset: H5Dataset) -> sc.DType:
     dtype = dataset.dtype
-    if str(dtype).startswith('str') or h5py.check_string_dtype(dtype):
+    if str(dtype).startswith("str") or h5py.check_string_dtype(dtype):
         dtype = sc.DType.string
     else:
         dtype = sc.DType(_ensure_supported_int_type(str(dtype)))
@@ -156,7 +156,7 @@ class Field:
         *,
         ancestor,
         dims=None,
-        dtype: Optional[sc.DType] = None,
+        dtype: sc.DType | None = None,
         is_time=None,
     ):
         self._ancestor = ancestor  # Usually the parent, but may be grandparent, etc.
@@ -179,17 +179,17 @@ class Field:
                 self._shape = self._shape[: len(self._dims)] + tuple(
                     size for size in self._shape[len(self._dims) :] if size != 1
                 )
-        elif (axes := self.attrs.get('axes')) is not None:
-            self._dims = tuple(axes.split(':'))
+        elif (axes := self.attrs.get("axes")) is not None:
+            self._dims = tuple(axes.split(":"))
             # The standard says that the axes should be colon-separated, but some
             # files use comma-separated.
             if len(self._dims) == 1 and self._dataset.ndim > 1:
-                self._dims = tuple(axes.split(','))
+                self._dims = tuple(axes.split(","))
         else:
             self._shape = tuple(size for size in self._shape if size != 1)
-            self._dims = tuple(f'dim_{i}' for i in range(self.ndim))
+            self._dims = tuple(f"dim_{i}" for i in range(self.ndim))
 
-    def __getitem__(self, select) -> Union[Any, sc.Variable]:
+    def __getitem__(self, select) -> Any | sc.Variable:
         """Load the field as a :py:class:`scipp.Variable` or Python object.
 
         If the shape is empty and no unit is given this returns a Python object, such
@@ -218,7 +218,7 @@ class Field:
             try:
                 strings = self._dataset.asstr()[index]
             except UnicodeDecodeError as e:
-                strings = self._dataset.asstr(encoding='latin-1')[index]
+                strings = self._dataset.asstr(encoding="latin-1")[index]
                 _warn_latin1_decode(self._dataset, strings, str(e))
             variable.values = np.asarray(strings).flatten()
         elif variable.values.flags["C_CONTIGUOUS"]:
@@ -248,11 +248,11 @@ class Field:
                 variable = convert_time_to_datetime64(
                     variable,
                     start=starts[0],
-                    scaling_factor=self.attrs.get('scaling_factor'),
+                    scaling_factor=self.attrs.get("scaling_factor"),
                 )
         if variable.ndim == 0 and variable.unit is None:
             # Work around scipp/scipp#2815, and avoid returning NumPy bool
-            if isinstance(variable.values, np.ndarray) and variable.dtype != 'bool':
+            if isinstance(variable.values, np.ndarray) and variable.dtype != "bool":
                 return variable.values[()]
             else:
                 return variable.value
@@ -291,7 +291,7 @@ class Field:
         return len(self.shape)
 
     @property
-    def shape(self) -> List[int]:
+    def shape(self) -> list[int]:
         """Shape of the field.
 
         NeXus may use extra dimensions of length one to store data, such as shape=[1]
@@ -302,16 +302,16 @@ class Field:
         return self._shape
 
     @property
-    def dims(self) -> List[str]:
+    def dims(self) -> list[str]:
         return self._dims
 
     @property
-    def sizes(self) -> Dict[str, int]:
+    def sizes(self) -> dict[str, int]:
         return dict(zip(self.dims, self.shape))
 
     @property
-    def unit(self) -> Union[sc.Unit, None]:
-        if (unit := self.attrs.get('units')) is not None:
+    def unit(self) -> sc.Unit | None:
+        if (unit := self.attrs.get("units")) is not None:
             try:
                 return sc.Unit(unit)
             except sc.UnitError:
@@ -324,13 +324,13 @@ class Field:
         return None
 
 
-def is_dataset(obj: Union[H5Group, H5Dataset]) -> bool:
+def is_dataset(obj: H5Group | H5Dataset) -> bool:
     """Return true if the object is an h5py.Dataset or equivalent.
 
     Use this instead of isinstance(obj, h5py.Dataset) to ensure that code is compatible
     with other h5py-alike interfaces.
     """
-    return hasattr(obj, 'shape')
+    return hasattr(obj, "shape")
 
 
 class NXobjectStrategy:
@@ -348,7 +348,7 @@ class NXobject:
         group: H5Group,
         *,
         definition: Any = None,
-        strategy: Optional[Callable] = None,
+        strategy: Callable | None = None,
     ):
         self._group = group
         # TODO can strategies replace child-params?
@@ -368,7 +368,7 @@ class NXobject:
         return NXobjectStrategy
 
     def _make(self, group) -> NXobject:
-        if (nx_class := Attrs(group.attrs).get('NX_class')) is not None:
+        if (nx_class := Attrs(group.attrs).get("NX_class")) is not None:
             return _nx_class_registry().get(nx_class, NXobject)(
                 group, definition=self._definition
             )
@@ -376,7 +376,7 @@ class NXobject:
 
     def _get_child(
         self, name: NXobjectIndex, use_field_dims: bool = False
-    ) -> Union['NXobject', Field, sc.DataArray]:
+    ) -> NXobject | Field | sc.DataArray:
         """Get item, with flag to control whether fields dims should be inferred"""
         if name is None:
             raise KeyError("None is not a valid index")
@@ -426,14 +426,14 @@ class NXobject:
         from .nxoff_geometry import NXoff_geometry
 
         def insert(container, name, obj):
-            if hasattr(container, 'coords'):
+            if hasattr(container, "coords"):
                 container.coords[name] = (
                     obj if isinstance(obj, sc.Variable) else sc.scalar(obj)
                 )
             else:
                 container[name] = obj
 
-        detector_number = getattr(self, 'detector_number', None)
+        detector_number = getattr(self, "detector_number", None)
         if detector_number is not None:
             detector_number = container.coords[detector_number]
         for key, child in self[[NXcylindrical_geometry, NXoff_geometry]].items():
@@ -441,7 +441,7 @@ class NXobject:
         for key, child in self[NXgeometry].items():
             insert(container, key, child[()])
         if (t := self.depends_on) is not None:
-            insert(container, 'depends_on', t)
+            insert(container, "depends_on", t)
             # If loading the transformation failed, 'depends_on' returns a string, the
             # path to the transformation. If this is a nested group, we load it here.
             # Note that this info is currently incomplete, since attributes are not
@@ -453,8 +453,8 @@ class NXobject:
                     insert(container, key, group[()])
 
     def _get_children_by_nx_class(
-        self, select: Union[type, List[type]]
-    ) -> Dict[str, Union['NXobject', Field]]:
+        self, select: type | list[type]
+    ) -> dict[str, NXobject | Field]:
         children = {}
         select = tuple(select) if isinstance(select, list) else select
         for key in self.keys():
@@ -464,16 +464,13 @@ class NXobject:
         return children
 
     @overload
-    def __getitem__(self, name: str) -> Union['NXobject', Field]:
-        ...
+    def __getitem__(self, name: str) -> NXobject | Field: ...
 
     @overload
-    def __getitem__(self, name: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]:
-        ...
+    def __getitem__(self, name: ScippIndex) -> sc.DataArray | sc.DataGroup: ...
 
     @overload
-    def __getitem__(self, name: Union[type, List[type]]) -> Dict[str, 'NXobject']:
-        ...
+    def __getitem__(self, name: type | list[type]) -> dict[str, NXobject]: ...
 
     def __getitem__(self, name):
         """
@@ -510,24 +507,24 @@ class NXobject:
             return self._get_children_by_nx_class(name)
         return self._get_child(name, use_field_dims=True)
 
-    def _getitem(self, index: ScippIndex) -> Union[sc.DataArray, sc.DataGroup]:
-        include = getattr(self._strategy, 'include_child', lambda x: True)
+    def _getitem(self, index: ScippIndex) -> sc.DataArray | sc.DataGroup:
+        include = getattr(self._strategy, "include_child", lambda x: True)
         return sc.DataGroup(
             {name: child[index] for name, child in self.items() if include(child)}
         )
 
-    def _get_field_dims(self, name: str) -> Union[None, List[str]]:
+    def _get_field_dims(self, name: str) -> None | list[str]:
         """Subclasses should reimplement this to provide dimension labels for fields."""
         return None
 
-    def _get_field_dtype(self, name: str) -> Union[None, sc.DType]:
+    def _get_field_dtype(self, name: str) -> None | sc.DType:
         """Subclasses should reimplement this to override the dtype for fields."""
         return None
 
     def __contains__(self, name: str) -> bool:
         return name in self._group
 
-    def get(self, name: str, default=None) -> Union['NXobject', Field, sc.DataArray]:
+    def get(self, name: str, default=None) -> NXobject | Field | sc.DataArray:
         return self[name] if name in self else default
 
     @property
@@ -546,35 +543,35 @@ class NXobject:
     def parent(self) -> NXobject:
         return self._make(self._group.parent)
 
-    def _ipython_key_completions_(self) -> List[str]:
+    def _ipython_key_completions_(self) -> list[str]:
         return list(self.keys())
 
     def __iter__(self):
         yield from self._group
 
-    def keys(self) -> List[str]:
+    def keys(self) -> list[str]:
         return self._group.keys()
 
-    def values(self) -> List[Union[Field, 'NXobject']]:
+    def values(self) -> list[Field | NXobject]:
         return [self[name] for name in self.keys()]
 
-    def items(self) -> List[Tuple[str, Union[Field, 'NXobject']]]:
+    def items(self) -> list[tuple[str, Field | NXobject]]:
         return list(zip(self.keys(), self.values()))
 
     @property
-    def nx_class(self) -> Optional[type]:
+    def nx_class(self) -> type | None:
         """The value of the NX_class attribute of the group.
 
         In case of the subclass NXroot this returns 'NXroot' even if the attribute
         is not actually set. This is to support the majority of all legacy files, which
         do not have this attribute.
         """
-        if (nxclass := self.attrs.get('NX_class')) is not None:
+        if (nxclass := self.attrs.get("NX_class")) is not None:
             return _nx_class_registry().get(nxclass)
 
     @property
-    def depends_on(self) -> Union[sc.Variable, sc.DataArray, None]:
-        if (depends_on := self.get('depends_on')) is not None:
+    def depends_on(self) -> sc.Variable | sc.DataArray | None:
+        if (depends_on := self.get("depends_on")) is not None:
             # Imported late to avoid cyclic import
             from .nxtransformations import TransformationError, get_full_transformation
 
@@ -603,12 +600,12 @@ class NXobject:
             values = (data - start).values
         dataset = self._group.create_dataset(name, data=values, **kwargs)
         if data.unit is not None:
-            dataset.attrs['units'] = str(data.unit)
+            dataset.attrs["units"] = str(data.unit)
         if data.dtype == sc.DType.datetime64:
-            dataset.attrs['start'] = str(start.value)
+            dataset.attrs["start"] = str(start.value)
         return Field(dataset, dims=data.dims, ancestor=self)
 
-    def create_class(self, name: str, nx_class: Union[str, type]) -> NXobject:
+    def create_class(self, name: str, nx_class: str | type) -> NXobject:
         """Create empty HDF5 group with given name and set the NX_class attribute.
 
         Parameters
@@ -621,23 +618,23 @@ class NXobject:
         """
         group = self._group.create_group(name)
         attr = nx_class if isinstance(nx_class, str) else nx_class.__name__
-        group.attrs['NX_class'] = attr
+        group.attrs["NX_class"] = attr
         return self._make(group)
 
-    def __setitem__(self, name: str, value: Union[Field, NXobject, DimensionedArray]):
+    def __setitem__(self, name: str, value: Field | NXobject | DimensionedArray):
         """Create a link or a new field."""
         if isinstance(value, Field):
             self._group[name] = value._dataset
         elif isinstance(value, NXobject):
             self._group[name] = value._group
-        elif hasattr(value, '__write_to_nexus_group__'):
+        elif hasattr(value, "__write_to_nexus_group__"):
             group = self.create_class(name, nx_class=value.nx_class)
             value.__write_to_nexus_group__(group)
         else:
             self.create_field(name, value)
 
-    def __getattr__(self, attr: str) -> Union[Any, 'NXobject']:
-        nxclass = _nx_class_registry().get(f'NX{attr}')
+    def __getattr__(self, attr: str) -> Any | NXobject:
+        nxclass = _nx_class_registry().get(f"NX{attr}")
         if nxclass is None:
             raise AttributeError(f"'NXobject' object has no attribute {attr}")
         matches = self[nxclass]
@@ -680,7 +677,7 @@ class NXroot(NXobject):
         return NXroot
 
 
-@functools.lru_cache()
+@functools.lru_cache
 def _nx_class_registry():
     from . import nexus_classes
 

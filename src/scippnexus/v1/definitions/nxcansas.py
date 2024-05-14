@@ -34,76 +34,76 @@ class ApplicationDefinition(BaseDef):
         return decorator
 
 
-NXcanSAS = ApplicationDefinition('canSAS_class', 'SASroot')
+NXcanSAS = ApplicationDefinition("canSAS_class", "SASroot")
 
 
 class SASdata:
-    nx_class = 'NXdata'
+    nx_class = "NXdata"
 
     def __init__(
         self,
         data: sc.DataArray,
-        Q_variances: Optional[Literal['uncertainties', 'resolutions']] = None,
+        Q_variances: Optional[Literal["uncertainties", "resolutions"]] = None,
     ):
         self.data = data
-        valid = ('uncertainties', 'resolutions')
+        valid = ("uncertainties", "resolutions")
         if Q_variances not in (None,) + valid:
             raise ValueError(f"Q_variances must be in {valid}")
         self._variances = Q_variances
 
     def __write_to_nexus_group__(self, group: NXobject):
         da = self.data
-        group.attrs['canSAS_class'] = 'SASdata'
-        group.attrs['signal'] = 'I'
-        group.attrs['axes'] = da.dims  # for NeXus compliance, same as I_axes
-        group.attrs['I_axes'] = da.dims
-        group.attrs['Q_indices'] = tuple(da.dims.index(d) for d in da.coords['Q'].dims)
-        signal = group.create_field('I', sc.values(da.data))
+        group.attrs["canSAS_class"] = "SASdata"
+        group.attrs["signal"] = "I"
+        group.attrs["axes"] = da.dims  # for NeXus compliance, same as I_axes
+        group.attrs["I_axes"] = da.dims
+        group.attrs["Q_indices"] = tuple(da.dims.index(d) for d in da.coords["Q"].dims)
+        signal = group.create_field("I", sc.values(da.data))
         # We use the _errors suffix for NeXus compliance, unlike the examples given in
         # NXcanSAS.
         if da.variances is not None:
-            signal.attrs['uncertainties'] = 'I_errors'
-            group.create_field('I_errors', sc.stddevs(da.data))
-        if da.coords.is_edges('Q'):
+            signal.attrs["uncertainties"] = "I_errors"
+            group.create_field("I_errors", sc.stddevs(da.data))
+        if da.coords.is_edges("Q"):
             raise ValueError(
                 "Q is given as bin-edges, but NXcanSAS requires Q points (such as "
                 "bin centers)."
             )
-        coord = group.create_field('Q', da.coords['Q'])
-        if da.coords['Q'].variances is not None:
+        coord = group.create_field("Q", da.coords["Q"])
+        if da.coords["Q"].variances is not None:
             if self._variances is None:
                 raise ValueError(
                     "Q has variances, must specify whether these represent "
                     "'uncertainties' or 'resolutions' using the 'Q_variances' option'"
                 )
 
-            coord.attrs[self._variances] = 'Q_errors'
-            group.create_field('Q_errors', sc.stddevs(da.coords['Q']))
+            coord.attrs[self._variances] = "Q_errors"
+            group.create_field("Q_errors", sc.stddevs(da.coords["Q"]))
 
 
-@NXcanSAS.register('SASdata')
+@NXcanSAS.register("SASdata")
 class SASdataStrategy:
     @staticmethod
     def axes(group: NXobject) -> Tuple[str]:
-        return group.attrs.get('I_axes')
+        return group.attrs.get("I_axes")
 
     @staticmethod
     def signal(group: NXobject) -> str:
-        return group.attrs.get('signal', 'I')
+        return group.attrs.get("signal", "I")
 
     @staticmethod
     def signal_errors(group: NXobject) -> Optional[str]:
-        signal_name = group.attrs.get('signal', 'I')
+        signal_name = group.attrs.get("signal", "I")
         signal = group._group[signal_name]
-        return signal.attrs.get('uncertainties')
+        return signal.attrs.get("uncertainties")
 
     def coord_errors(group: NXobject, name: str) -> Optional[str]:
-        if name != 'Q':
+        if name != "Q":
             return None
         # TODO This naively stores this as Scipp errors, which are just Gaussian.
         # This is probably not correct in all cases.
-        uncertainties = group[name].attrs.get('uncertainties')
-        resolutions = group[name].attrs.get('resolutions')
+        uncertainties = group[name].attrs.get("uncertainties")
+        resolutions = group[name].attrs.get("resolutions")
         if uncertainties is None:
             return resolutions
         elif resolutions is None:
@@ -111,36 +111,36 @@ class SASdataStrategy:
         raise RuntimeError("Cannot handle both uncertainties and resolutions for Q")
 
 
-@NXcanSAS.register('SAStransmission_spectrum')
+@NXcanSAS.register("SAStransmission_spectrum")
 class SAStransmission_spectrumStrategy:
     @staticmethod
     def dims(group: NXobject) -> Tuple[str]:
         # TODO A valid file should have T_axes, do we need to fallback?
-        if (axes := group.attrs.get('T_axes')) is not None:
+        if (axes := group.attrs.get("T_axes")) is not None:
             return (axes,)
-        return ('lambda',)
+        return ("lambda",)
 
 
 class SASentry:
-    nx_class = 'NXentry'
+    nx_class = "NXentry"
 
     def __init__(self, *, title: str, run: Union[str, int]):
         self.title = title
         self.run = run
 
     def __write_to_nexus_group__(self, group: NXobject):
-        group.attrs['canSAS_class'] = 'SASentry'
-        group.attrs['version'] = '1.0'
-        group.attrs['definition'] = 'NXcanSAS'
-        group.create_field('title', self.title)
-        group.create_field('run', self.run)
+        group.attrs["canSAS_class"] = "SASentry"
+        group.attrs["version"] = "1.0"
+        group.attrs["definition"] = "NXcanSAS"
+        group.create_field("title", self.title)
+        group.create_field("run", self.run)
 
 
-@NXcanSAS.register('SASentry')
+@NXcanSAS.register("SASentry")
 class SASentryStrategy:
     pass
 
 
-@NXcanSAS.register('SASroot')
+@NXcanSAS.register("SASroot")
 class SASrootStrategy:
     pass

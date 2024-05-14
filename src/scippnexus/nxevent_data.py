@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any
 
 import numpy as np
 import scipp as sc
@@ -30,12 +30,13 @@ def _check_for_missing_fields(fields):
 
 class NXevent_data(NXobject):
     mandatory_fields = ("event_index", "event_time_offset")
-    handled_fields = mandatory_fields + (
+    handled_fields = (
+        *mandatory_fields,
         "event_time_zero",
         "event_id",
     )
 
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         super().__init__(attrs=attrs, children=children)
         for name, field in children.items():
             if name in ['event_time_zero', 'event_index']:
@@ -44,20 +45,20 @@ class NXevent_data(NXobject):
                 field.sizes = {_event_dimension: field.dataset.shape[0]}
 
     @property
-    def shape(self) -> Tuple[int]:
+    def shape(self) -> tuple[int, ...]:
         if (event_index := self._children.get('event_index')) is not None:
             return event_index.shape
         return ()
 
     @property
-    def dims(self) -> List[str]:
+    def dims(self) -> tuple[str, ...]:
         return (_pulse_dimension,)[: len(self.shape)]
 
     @property
-    def sizes(self) -> Dict[str, int]:
-        return dict(zip(self.dims, self.shape))
+    def sizes(self) -> dict[str, int]:
+        return dict(zip(self.dims, self.shape, strict=True))
 
-    def field_dims(self, name: str, field: Field) -> Tuple[str, ...]:
+    def field_dims(self, name: str, field: Field) -> tuple[str, ...]:
         if name in ['event_time_zero', 'event_index']:
             return (_pulse_dimension,)
         if name in ['event_time_offset', 'event_id']:
@@ -111,7 +112,7 @@ class NXevent_data(NXobject):
 
     def _get_event_index(self, children: sc.DataGroup, index):
         max_index = self.shape[0]
-        if index is Ellipsis or index == tuple():
+        if index is Ellipsis or index == ():
             last_loaded = False
         else:
             if isinstance(index, int):
@@ -168,7 +169,9 @@ class NXevent_data(NXobject):
             binned = sc.bins(data=events, dim=_event_dimension, begin=begins)
         except IndexError as e:
             path = self._children['event_index'].name
-            raise NexusStructureError(f"Invalid index in NXevent_data at {path}:\n{e}")
+            raise NexusStructureError(
+                f"Invalid index in NXevent_data at {path}:\n{e}"
+            ) from None
 
         return sc.DataArray(data=binned, coords=coords)
 

@@ -16,10 +16,10 @@ class TransformationError(NexusStructureError):
     pass
 
 
-def make_transformation(obj, /, path) -> Optional[Transformation]:
-    if path.startswith('/'):
+def make_transformation(obj, /, path) -> Transformation | None:
+    if path.startswith("/"):
         return Transformation(obj.file[path])
-    elif path != '.':
+    elif path != ".":
         return Transformation(obj.parent[path])
     return None  # end of chain
 
@@ -39,7 +39,7 @@ class NXtransformations(NXobject):
 
 
 class Transformation:
-    def __init__(self, obj: Union[Field, NXobject]):  # could be an NXlog
+    def __init__(self, obj: Field | NXobject):  # could be an NXlog
         self._obj = obj
 
     @property
@@ -52,15 +52,15 @@ class Transformation:
 
     @property
     def depends_on(self):
-        if (path := self.attrs.get('depends_on')) is not None:
+        if (path := self.attrs.get("depends_on")) is not None:
             return make_transformation(self._obj, path)
         return None
 
     @property
     def offset(self):
-        if (offset := self.attrs.get('offset')) is None:
+        if (offset := self.attrs.get("offset")) is None:
             return None
-        if (offset_units := self.attrs.get('offset_units')) is None:
+        if (offset_units := self.attrs.get("offset_units")) is None:
             raise TransformationError(
                 f"Found {offset=} but no corresponding 'offset_units' "
                 f"attribute at {self.name}"
@@ -69,10 +69,10 @@ class Transformation:
 
     @property
     def vector(self) -> sc.Variable:
-        return sc.vector(value=self.attrs.get('vector'))
+        return sc.vector(value=self.attrs.get("vector"))
 
     def __getitem__(self, select: ScippIndex):
-        transformation_type = self.attrs.get('transformation_type')
+        transformation_type = self.attrs.get("transformation_type")
         # According to private communication with Tobias Richter, NeXus allows 0-D or
         # shape=[1] for single values. It is unclear how and if this could be
         # distinguished from a scan of length 1.
@@ -84,10 +84,10 @@ class Transformation:
                 )
             t = value * self.vector
             v = t if isinstance(t, sc.Variable) else t.data
-            if transformation_type == 'translation':
-                v = v.to(unit='m', copy=False)
+            if transformation_type == "translation":
+                v = v.to(unit="m", copy=False)
                 v = sc.spatial.translations(dims=v.dims, values=v.values, unit=v.unit)
-            elif transformation_type == 'rotation':
+            elif transformation_type == "rotation":
                 v = sc.spatial.rotations_from_rotvecs(v)
             else:
                 raise TransformationError(
@@ -100,7 +100,7 @@ class Transformation:
                 t.data = v
             if (offset := self.offset) is None:
                 return t
-            offset = sc.vector(value=offset.values, unit=offset.unit).to(unit='m')
+            offset = sc.vector(value=offset.values, unit=offset.unit).to(unit="m")
             offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
             return t * offset
         except (sc.DimensionError, sc.UnitError) as e:
@@ -130,7 +130,7 @@ def _smaller_unit(a, b):
 
 def get_full_transformation(
     depends_on: Field,
-) -> Union[None, sc.DataArray, sc.Variable]:
+) -> None | sc.DataArray | sc.Variable:
     """
     Get the 4x4 transformation matrix for a component, resulting
     from the full chain of transformations linked by "depends_on"
@@ -143,7 +143,7 @@ def get_full_transformation(
 
 def get_full_transformation_starting_at(
     t0: Transformation, *, index: ScippIndex = None
-) -> Union[None, sc.DataArray, sc.Variable]:
+) -> None | sc.DataArray | sc.Variable:
     transformations = _get_transformations(t0, index=() if index is None else index)
 
     total_transform = None
@@ -154,12 +154,12 @@ def get_full_transformation_starting_at(
             transform, sc.DataArray
         ):
             unit = _smaller_unit(
-                transform.coords['time'], total_transform.coords['time']
+                transform.coords["time"], total_transform.coords["time"]
             )
-            total_transform.coords['time'] = total_transform.coords['time'].to(
+            total_transform.coords["time"] = total_transform.coords["time"].to(
                 unit=unit, copy=False
             )
-            transform.coords['time'] = transform.coords['time'].to(
+            transform.coords["time"] = transform.coords["time"].to(
                 unit=unit, copy=False
             )
             time = sc.concat(
@@ -173,15 +173,15 @@ def get_full_transformation_starting_at(
             total_transform = transform * total_transform
     if isinstance(total_transform, sc.DataArray):
         time_dependent = [t for t in transformations if isinstance(t, sc.DataArray)]
-        times = [da.coords['time'][0] for da in time_dependent]
+        times = [da.coords["time"][0] for da in time_dependent]
         latest_log_start = sc.reduce(times).max()
-        return total_transform['time', latest_log_start:].copy()
+        return total_transform["time", latest_log_start:].copy()
     return total_transform
 
 
 def _get_transformations(
     transform: Transformation, *, index: ScippIndex
-) -> List[Union[sc.DataArray, sc.Variable]]:
+) -> list[sc.DataArray | sc.Variable]:
     """Get all transformations in the depends_on chain."""
     transformations = []
     t = transform

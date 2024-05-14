@@ -13,7 +13,7 @@ from scippnexus import NXentry, NXlog
 # representative sample of UTF-8 test strings from
 # https://www.w3.org/2001/06/utf-8-test/UTF-8-demo.html
 UTF8_TEST_STRINGS = (
-    "∮ E⋅da = Q,  n → ∞, ∑ f(i) = ∏ g(i), ∀x∈ℝ: ⌈x⌉ = −⌊−x⌋, α ∧ ¬β = ¬(¬α ∨ β)",
+    "∮ E⋅da = Q,  n → ∞, ∑ f(i) = ∏ g(i), ∀x∈ℝ: ⌈x⌉ = −⌊−x⌋, α ∧ ¬β = ¬(¬α ∨ β)",  # noqa: RUF001
     "2H₂ + O₂ ⇌ 2H₂O, R = 4.7 kΩ, ⌀ 200 mm",
     "Σὲ γνωρίζω ἀπὸ τὴν κόψη",
 )

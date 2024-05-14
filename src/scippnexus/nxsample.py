@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from typing import Any, Dict, Union
+from typing import Any
 
 import scipp as sc
 
@@ -20,7 +20,7 @@ def _fix_unit(name, value):
 class NXsample(NXobject):
     """NXsample"""
 
-    def __init__(self, attrs: Dict[str, Any], children: Dict[str, Union[Field, Group]]):
+    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         super().__init__(attrs=attrs, children=children)
         for key in _matrix_units:
             if (field := children.get(key)) is not None:

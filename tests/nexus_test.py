@@ -23,7 +23,7 @@ from scippnexus import (
 # representative sample of UTF-8 test strings from
 # https://www.w3.org/2001/06/utf-8-test/UTF-8-demo.html
 UTF8_TEST_STRINGS = (
-    "∮ E⋅da = Q,  n → ∞, ∑ f(i) = ∏ g(i), ∀x∈ℝ: ⌈x⌉ = −⌊−x⌋, α ∧ ¬β = ¬(¬α ∨ β)",
+    "∮ E⋅da = Q,  n → ∞, ∑ f(i) = ∏ g(i), ∀x∈ℝ: ⌈x⌉ = −⌊−x⌋, α ∧ ¬β = ¬(¬α ∨ β)",  # noqa: RUF001
     "2H₂ + O₂ ⇌ 2H₂O, R = 4.7 kΩ, ⌀ 200 mm",
     "Σὲ γνωρίζω ἀπὸ τὴν κόψη",
 )
@@ -226,7 +226,7 @@ def test_field_errors_with_different_unit_handles_them_individually(nxroot):
 
 
 @pytest.mark.parametrize(
-    'value,type_', [(1.2, np.float32), (123, np.int32), ('abc', str), (True, bool)]
+    ('value', 'type_'), [(1.2, np.float32), (123, np.int32), ('abc', str), (True, bool)]
 )
 def test_field_is_returned_as_python_object_if_shape_empty_and_no_unit(
     nxroot, value, type_
@@ -326,7 +326,7 @@ def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot):
 
 
 @pytest.mark.parametrize(
-    'timezone,hhmm',
+    ('timezone', 'hhmm'),
     [
         ('Z', '12:00'),
         ('+04', '08:00'),
@@ -601,7 +601,7 @@ def test_nxdata_with_bin_edges_label_indexing_returns_correct_slice(h5root):
 
 def create_nexus_group_with_data_arrays(h5root, dims, coords):
     entry = h5root.create_group('entry')
-    for i, (dim, coord) in enumerate(zip(dims, coords)):
+    for i, (dim, coord) in enumerate(zip(dims, coords, strict=True)):
         data = entry.create_group(f'data_{i}')
         data.attrs['NX_class'] = 'NXdata'
         data['signal'] = np.arange(5)
@@ -615,23 +615,23 @@ def create_nexus_group_with_data_arrays(h5root, dims, coords):
 
 
 @pytest.mark.parametrize(
-    '_slice',
-    (
+    "slice_",
+    [
         ('time', sc.scalar(1, unit='s')),
         ('time', slice(sc.scalar(1, unit='s'), None)),
         ('time', slice(None, sc.scalar(1, unit='s'))),
         {'time': sc.scalar(1, unit='s'), 'x': sc.scalar(1, unit='s')},
-    ),
+    ],
 )
 @pytest.mark.parametrize(
-    'dims, coords',
-    (
+    ('dims', 'coords'),
+    [
         (('time',), ('time2',)),
         (('time', 'time'), ('time2', 'time')),
-    ),
+    ],
 )
 def test_label_indexing_group_behaves_same_as_indexing_scipp_datagroup(
-    h5root, _slice, dims, coords
+    h5root, slice_, dims, coords
 ):
     nx = create_nexus_group_with_data_arrays(h5root, dims, coords)
     dg = nx[()]
@@ -640,19 +640,19 @@ def test_label_indexing_group_behaves_same_as_indexing_scipp_datagroup(
     try:
         # Scipp does not support dict slicing,
         # manually slice datagroup in multiple coords
-        if isinstance(_slice, dict):
-            for s in _slice.items():
+        if isinstance(slice_, dict):
+            for s in slice_.items():
                 dg = dg[s]
         else:
-            dg = dg[_slice]
+            dg = dg[slice_]
     except Exception as e:
         exception = type(e)
 
     if exception:
         with pytest.raises(exception):
-            nx[_slice]
+            nx[slice_]
     else:
-        assert_identical(nx[_slice], dg)
+        assert_identical(nx[slice_], dg)
 
 
 def test_create_field_saves_errors(nxroot):
