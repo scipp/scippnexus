@@ -14,7 +14,7 @@ numpy==1.26.4
     #   scipy
 python-dateutil==2.9.0.post0
     # via -r base.in
-scipp==24.2.0
+scipp==24.5.0
     # via -r base.in
 scipy==1.13.0
     # via -r base.in
