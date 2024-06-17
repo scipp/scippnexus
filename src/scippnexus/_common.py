@@ -11,7 +11,7 @@ from .typing import ScippIndex
 def convert_time_to_datetime64(
     raw_times: sc.Variable,
     start: str | None = None,
-    scaling_factor: float | np.float_ = None,
+    scaling_factor: float | np.float64 = None,
 ) -> sc.Variable:
     """
     The nexus standard allows an arbitrary scaling factor to be inserted
