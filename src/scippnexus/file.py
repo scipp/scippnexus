@@ -1,18 +1,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
-from collections.abc import Mapping
 from contextlib import AbstractContextManager
 
 import h5py
 
-from .base import Group, base_definitions
-
-_default_definitions = object()
+from .base import (
+    DefaultDefinitions,
+    DefaultDefinitionsType,
+    Group,
+    base_definitions,
+)
+from .typing import Definitions
 
 
 class File(AbstractContextManager, Group):
-    def __init__(self, *args, definitions: Mapping = _default_definitions, **kwargs):
+    def __init__(
+        self,
+        *args,
+        definitions: Definitions | DefaultDefinitionsType = DefaultDefinitions,
+        **kwargs,
+    ):
         """Context manager for NeXus files, similar to h5py.File.
 
         Arguments other than documented are as in :py:class:`h5py.File`.
@@ -24,7 +32,7 @@ class File(AbstractContextManager, Group):
             The default is to use the base definitions as defined in the
             NeXus standard.
         """
-        if definitions is _default_definitions:
+        if definitions is DefaultDefinitions:
             definitions = base_definitions()
         self._file = h5py.File(*args, **kwargs)
         super().__init__(self._file, definitions=definitions)

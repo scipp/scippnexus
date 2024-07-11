@@ -550,3 +550,9 @@ def base_definitions() -> dict[str, type]:
     affecting the original.
     """
     return dict(base_definitions_dict)
+
+
+class DefaultDefinitionsType: ...
+
+
+DefaultDefinitions = DefaultDefinitionsType()

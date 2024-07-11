@@ -152,3 +152,45 @@ def test_load_select_unknown_dim(
 ) -> None:
     with pytest.raises(sc.DimensionError):
         snx.load(nexus_buffer, select={'y': 3})
+
+
+class NXdetectorTimes10(snx.NXdetector):
+    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
+        return 10 * super().assemble(dg)
+
+
+def test_load_from_buffer_with_explicit_base_definitions(
+    nexus_buffer: io.BytesIO, reference_data: sc.DataGroup
+) -> None:
+    loaded = snx.load(nexus_buffer, definitions=snx.base_definitions())
+    sc.testing.assert_identical(loaded, reference_data)
+
+
+def test_load_from_buffer_with_custom_definitions(
+    nexus_buffer: io.BytesIO, reference_data: sc.DataGroup
+) -> None:
+    definitions = {**snx.base_definitions(), 'NXdetector': NXdetectorTimes10}
+    loaded = snx.load(nexus_buffer, definitions=definitions)
+    expected = reference_data.copy()
+    expected['entry']['instrument']['detector']['data'] *= 10
+    sc.testing.assert_identical(loaded, expected)
+
+
+def test_load_from_h5_group_with_custom_definitions(
+    nexus_buffer: io.BytesIO, reference_data: sc.DataGroup
+) -> None:
+    definitions = {**snx.base_definitions(), 'NXdetector': NXdetectorTimes10}
+    with h5.File(nexus_buffer, 'r') as f:
+        loaded = snx.load(f, definitions=definitions)
+    expected = reference_data.copy()
+    expected['entry']['instrument']['detector']['data'] *= 10
+    sc.testing.assert_identical(loaded, expected)
+
+
+def test_load_from_snx_group_rejects_new_definitions(
+    nexus_buffer: io.BytesIO, reference_data: sc.DataGroup
+) -> None:
+    definitions = {**snx.base_definitions(), 'NXdetector': NXdetectorTimes10}
+    with pytest.raises(TypeError, match='Cannot override application definitions'):
+        with snx.File(nexus_buffer, 'r') as f:
+            snx.load(f, definitions=definitions)
