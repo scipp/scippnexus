@@ -89,12 +89,28 @@ def test_load_all_from_snx_group(
     sc.testing.assert_identical(loaded, reference_data)
 
 
+def test_load_all_from_nested_snx_group(
+    nexus_buffer: io.BytesIO, reference_data: sc.DataGroup
+) -> None:
+    with snx.File(nexus_buffer, 'r') as f:
+        loaded = snx.load(f['entry'])
+    sc.testing.assert_identical(loaded, reference_data['entry'])
+
+
 def test_load_all_from_h5_group(
     nexus_buffer: io.BytesIO, reference_data: sc.DataGroup
 ) -> None:
     with h5.File(nexus_buffer, 'r') as f:
         loaded = snx.load(f)
     sc.testing.assert_identical(loaded, reference_data)
+
+
+def test_load_all_from_nested_h5_group(
+    nexus_buffer: io.BytesIO, reference_data: sc.DataGroup
+) -> None:
+    with h5.File(nexus_buffer, 'r') as f:
+        loaded = snx.load(f['entry'])
+    sc.testing.assert_identical(loaded, reference_data['entry'])
 
 
 def test_load_from_root_single_segment(

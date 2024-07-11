@@ -23,8 +23,70 @@ def load(
     root: str | None = None,
     select: ScippIndex = (),
     definitions: Definitions | DefaultDefinitionsType = DefaultDefinitions,
-) -> sc.DataGroup:
-    """TODO"""
+) -> sc.DataGroup | sc.DataArray | sc.Dataset:
+    """Load a NeXus file.
+
+    This function is a shorthand for opening a file manually.
+    That is
+
+    .. code-block:: python
+
+        loaded = snx.load('path/to/nexus_file.nxs')
+
+    is equivalent to
+
+    .. code-block:: python
+
+        with snx.File('path/to/nexus_file.nxs') as f:
+            loaded = f[()]
+
+    The additional arguments of ``load`` are used as:
+
+    .. code-block:: python
+
+        loaded = snx.load(
+            'path/to/nexus_file.nxs'
+            root='entry/instrument',
+            select={'x': slice(None, 100)},
+            definitions=my_definitions,
+        )
+
+    which corresponds to
+
+    .. code-block:: python
+
+        with snx.File('path/to/nexus_file.nxs', definitions=my_definitions) as f:
+            loaded = f['entry/instrument'][{'x': :100}]
+
+    Parameters
+    ----------
+    filename:
+        One of:
+
+        - A path to a NeXus file.
+        - A file-like object containing a NeXus file.
+        - A :class:`h5py.Group`.
+        - A :class:`scippnexus.Group`.
+    root:
+        The root group in the NeXus file to load.
+        If not provided
+
+        - Everything is loaded under the given group if ``filename`` is a group.
+        - Or the entire file is loaded otherwise.
+    select:
+        Selects a subset of the data to load.
+        Corresponds to the argument passed in brackets when using file objects:
+        ``loaded = group[select]``.
+        Defaults to ``()`` which selects the entire data.
+    definitions:
+        NeXus `application definitions <../../user-guide/application-definitions.rst>`_.
+        Defaults to the ScippNexus base definitions.
+
+    Returns
+    -------
+    :
+        The loaded data.
+    """
     with _open(filename, definitions=definitions) as group:
         if root is not None:
             group = group[root]

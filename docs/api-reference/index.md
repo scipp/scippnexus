@@ -113,13 +113,5 @@
    compute_positions
    create_field
    create_class
-```
-
-## Submodules
-
-```{eval-rst}
-.. autosummary::
-   :toctree: ../generated/modules
-   :template: module-template.rst
-   :recursive:
+   load
 ```

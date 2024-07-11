@@ -552,7 +552,9 @@ def base_definitions() -> dict[str, type]:
     return dict(base_definitions_dict)
 
 
-class DefaultDefinitionsType: ...
+class DefaultDefinitionsType:
+    def __repr__(self) -> str:
+        return "DefaultDefinitions"
 
 
 DefaultDefinitions = DefaultDefinitionsType()
