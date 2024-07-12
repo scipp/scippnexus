@@ -3,7 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, Any, Protocol
 
 
@@ -74,3 +74,5 @@ else:
 ScippIndex = (
     ellipsis | int | tuple | slice | tuple[str, int | slice] | dict[str, int | slice]
 )
+
+Definitions = Mapping[str, type]

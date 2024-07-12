@@ -550,3 +550,11 @@ def base_definitions() -> dict[str, type]:
     affecting the original.
     """
     return dict(base_definitions_dict)
+
+
+class DefaultDefinitionsType:
+    def __repr__(self) -> str:
+        return "DefaultDefinitions"
+
+
+DefaultDefinitions = DefaultDefinitionsType()

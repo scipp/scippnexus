@@ -60,6 +60,7 @@ autodoc_type_aliases = {
 }
 
 intersphinx_mapping = {
+    'h5py': ('https://docs.h5py.org/en/stable/', None),
     'python': ('https://docs.python.org/3', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'scipp': ('https://scipp.github.io/', None),
