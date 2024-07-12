@@ -56,7 +56,7 @@ def load(
     .. code-block:: python
 
         with snx.File('path/to/nexus_file.nxs', definitions=my_definitions) as f:
-            loaded = f['entry/instrument'][{'x': :100}]
+            loaded = f['entry/instrument']['x', :100]
 
     Parameters
     ----------
