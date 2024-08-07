@@ -234,9 +234,7 @@ def test_chain_with_multiple_values(h5root):
     detector = make_group(detector)[()]
     depends_on = detector['depends_on']
     assert depends_on == 'transformations/t1'
-    t1 = detector['transformations']['t1']
-    assert_identical(t1.coords.pop('resolved_depends_on').value, expected2)
-    assert_identical(t1, expected1)
+    assert_identical(detector['transformations']['t1'], expected1)
     assert_identical(detector['transformations']['t2'], expected2)
 
 
@@ -286,9 +284,7 @@ def test_chain_with_multiple_values_and_different_time_unit(h5root):
     loaded = detector[...]
     depends_on = loaded['depends_on']
     assert depends_on == 'transformations/t1'
-    t1 = loaded['transformations']['t1']
-    assert_identical(t1.coords.pop('resolved_depends_on').value, expected2)
-    assert_identical(t1, expected1)
+    assert_identical(loaded['transformations']['t1'], expected1)
     assert_identical(loaded['transformations']['t2'], expected2)
 
 

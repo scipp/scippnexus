@@ -104,10 +104,11 @@ class Transformation:
             if (depends_on := self.attrs.get('depends_on')) is not None:
                 if not isinstance(transform, sc.DataArray):
                     transform = sc.DataArray(transform)
-                transform.coords['depends_on'] = sc.scalar(
-                    depends_on_to_relative_path(depends_on, self._obj.parent.name)
+                relative = depends_on_to_relative_path(
+                    depends_on, self._obj.parent.name
                 )
-                if depends_on != ".":
+                transform.coords['depends_on'] = sc.scalar(relative)
+                if relative.startswith('..'):
                     try:
                         resolved = self._obj.parent[depends_on][()]
                     except Exception:  # noqa: S110
