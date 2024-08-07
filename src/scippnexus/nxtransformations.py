@@ -107,6 +107,14 @@ class Transformation:
                 transform.coords['depends_on'] = sc.scalar(
                     depends_on_to_relative_path(depends_on, self._obj.parent.name)
                 )
+                if depends_on != ".":
+                    try:
+                        resolved = self._obj.parent[depends_on][()]
+                    except Exception:  # noqa: S110
+                        # Catchall since resolving not strictly necessary
+                        pass
+                    else:
+                        transform.coords["resolved_depends_on"] = sc.scalar(resolved)
             return transform
         except (sc.DimensionError, sc.UnitError, TransformationError):
             # TODO We should probably try to return some other data structure and
@@ -296,6 +304,7 @@ class TransformationChainResolver:
                 depends_on = attr.value
             # If transform is time-dependent then we keep it is a DataArray, otherwise
             # we convert it to a Variable.
+            transform.coords.pop('resolved_depends_on', None)
             transform = transform if transform.coords else transform.data
         if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
             transform = transform.to(unit='m', copy=False)
