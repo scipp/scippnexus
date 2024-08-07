@@ -108,11 +108,15 @@ class Transformation:
                     depends_on, self._obj.parent.name
                 )
                 transform.coords['depends_on'] = sc.scalar(relative)
+                # When loading a subgroup of a file there can be transformation chains
+                # that lead outside the loaded group. In this case we cannot resolve the
+                # chain after loading, so we try to resolve it directly.
                 if relative.startswith('..'):
                     try:
                         resolved = self._obj.parent[depends_on][()]
                     except Exception:  # noqa: S110
-                        # Catchall since resolving not strictly necessary
+                        # Catchall since resolving not strictly necessary, we should not
+                        # fail the rest of the loading process.
                         pass
                     else:
                         transform.coords["resolved_depends_on"] = sc.scalar(resolved)
