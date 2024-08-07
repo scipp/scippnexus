@@ -293,22 +293,31 @@ class TransformationChainResolver:
         # ignore potential time-dependence.
         return combine_transformations(self.get_chain(depends_on))
 
-    def get_chain(self, depends_on: str) -> list[sc.DataArray | sc.Variable]:
+    def get_chain(
+        self, depends_on: str | sc.DataArray | sc.Variable
+    ) -> list[sc.DataArray | sc.Variable]:
         if depends_on == '.':
             return []
-        node = self[depends_on]
-        transform = node.value.copy(deep=False)
+        if isinstance(depends_on, str):
+            node = self[depends_on]
+            transform = node.value.copy(deep=False)
+            node = node.parent
+        else:
+            # Fake node, resolved_depends_on is recursive so this is actually ignored.
+            node = self
+            transform = depends_on
         depends_on = '.'
+        if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
+            transform = transform.to(unit='m', copy=False)
         if isinstance(transform, sc.DataArray):
-            if (attr := transform.coords.pop('depends_on', None)) is not None:
+            if (attr := transform.coords.pop('resolved_depends_on', None)) is not None:
+                depends_on = attr.value
+            elif (attr := transform.coords.pop('depends_on', None)) is not None:
                 depends_on = attr.value
             # If transform is time-dependent then we keep it is a DataArray, otherwise
             # we convert it to a Variable.
-            transform.coords.pop('resolved_depends_on', None)
-            transform = transform if transform.coords else transform.data
-        if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
-            transform = transform.to(unit='m', copy=False)
-        return [transform, *node.parent.get_chain(depends_on)]
+            transform = transform if 'time' in transform.coords else transform.data
+        return [transform, *node.get_chain(depends_on)]
 
 
 def compute_positions(
