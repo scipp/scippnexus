@@ -381,6 +381,8 @@ class Group(Mapping):
                 else:
                     grp = sel_path.parts[0]
                     return self[grp][sel_path.relative_to(grp).as_posix()]
+            elif sel == '..':
+                return self.parent
             child = self._children[sel]
             if isinstance(child, Field):
                 self._populate_fields()
@@ -407,7 +409,14 @@ class Group(Mapping):
         # For a time-dependent transformation in NXtransformations, an NXlog may
         # take the place of the `value` field. In this case, we need to read the
         # properties of the NXlog group to make the actual transformation.
-        from .nxtransformations import maybe_transformation
+        from .nxtransformations import maybe_resolve, maybe_transformation
+
+        if (
+            isinstance(dg, sc.DataGroup)
+            and (depends_on := dg.get('depends_on')) is not None
+        ):
+            if (resolved := maybe_resolve(self['depends_on'], depends_on)) is not None:
+                dg['resolved_depends_on'] = resolved
 
         return maybe_transformation(self, value=dg, sel=sel)
 
