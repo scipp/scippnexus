@@ -660,8 +660,7 @@ def test_compute_positions_with_rotation(h5root):
     )
 
 
-@pytest.mark.filterwarnings("ignore:depends_on chain references missing node")
-def test_compute_positions_skips_for_path_beyond_root(h5root):
+def test_compute_positions_works_for_path_beyond_root(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     value = sc.scalar(6.5, unit='m')
     vector = sc.vector(value=[0, 0, 1])
@@ -681,8 +680,37 @@ def test_compute_positions_skips_for_path_beyond_root(h5root):
     loaded = root[()]
     assert 'position' in snx.compute_positions(loaded)['instrument']['monitor1']
     assert 'position' in snx.compute_positions(loaded)['instrument']['monitor2']
-    assert 'position' not in snx.compute_positions(loaded['instrument'])['monitor1']
+    assert 'position' in snx.compute_positions(loaded['instrument'])['monitor1']
     assert 'position' in snx.compute_positions(loaded['instrument'])['monitor2']
+
+
+def test_path_beyond_root_is_fully_resolved_and_can_compute_positions(h5root):
+    instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
+    monitor1 = snx.create_class(instrument, 'monitor1', snx.NXmonitor)
+    monitor2 = snx.create_class(instrument, 'monitor2', snx.NXmonitor)
+    value = sc.scalar(6.5, unit='m')
+    vector = sc.vector(value=[0, 0, 1])
+    transform1 = snx.create_field(monitor1, 't1', value)
+    transform1.attrs['depends_on'] = '../t2'
+    transform1.attrs['transformation_type'] = 'translation'
+    transform1.attrs['vector'] = vector.value
+    transform2 = snx.create_field(instrument, 't2', value)
+    transform2.attrs['depends_on'] = 't3'
+    transform2.attrs['transformation_type'] = 'translation'
+    transform2.attrs['vector'] = vector.value
+    transform3 = snx.create_field(instrument, 't3', value)
+    transform3.attrs['depends_on'] = '.'
+    transform3.attrs['transformation_type'] = 'translation'
+    transform3.attrs['vector'] = vector.value
+    # Chain start in current group
+    snx.create_field(monitor1, 'depends_on', 't1')
+    # Chain start outside current group
+    snx.create_field(monitor2, 'depends_on', '../t2')
+    root = make_group(h5root)
+    mon1 = root['instrument/monitor1'][()]
+    assert_identical(snx.compute_positions(mon1)['position'], 3 * value * vector)
+    mon2 = root['instrument/monitor2'][()]
+    assert_identical(snx.compute_positions(mon2)['position'], 2 * value * vector)
 
 
 def test_compute_positions_returns_position_with_unit_meters(h5root):

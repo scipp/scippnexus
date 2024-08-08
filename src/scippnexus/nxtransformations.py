@@ -67,11 +67,14 @@ class Transformation:
         # shape=[1] for single values. It is unclear how and if this could be
         # distinguished from a scan of length 1.
         value = self._obj[select]
-        return self.make_transformation(value, transformation_type, select)
+        return self.make_transformation(
+            value, transformation_type=transformation_type, select=select
+        )
 
     def make_transformation(
         self,
         value: sc.Variable | sc.DataArray,
+        *,
         transformation_type: str,
         select: ScippIndex,
     ):
@@ -190,9 +193,51 @@ def maybe_transformation(
     Instead we use the presence of the attribute 'transformation_type' to identify
     transformation fields.
     """
-    if (transformation_type := obj.attrs.get('transformation_type')) is not None:
-        return Transformation(obj).make_transformation(value, transformation_type, sel)
-    return value
+    if (transformation_type := obj.attrs.get('transformation_type')) is None:
+        return value
+    transform = Transformation(obj).make_transformation(
+        value, transformation_type=transformation_type, select=sel
+    )
+    # When loading a subgroup of a file there can be transformation chains
+    # that lead outside the loaded group. In this case we cannot resolve the
+    # chain after loading, so we try to resolve it directly.
+    return assign_resolved(obj, transform)
+
+
+def assign_resolved(
+    obj: Field | Group,
+    transform: sc.DataArray | sc.Variable,
+    force_resolve: bool = False,
+) -> sc.DataArray | sc.Variable:
+    """Add resolved_depends_on coord to a transformation if resolve is performed."""
+    if (
+        isinstance(transform, sc.DataArray)
+        and (depends_on := transform.coords.get('depends_on')) is not None
+    ):
+        if (
+            resolved := maybe_resolve(
+                obj, depends_on.value, force_resolve=force_resolve
+            )
+        ) is not None:
+            transform.coords["resolved_depends_on"] = sc.scalar(resolved)
+    return transform
+
+
+def maybe_resolve(
+    obj: Field | Group, depends_on: str, force_resolve: bool = False
+) -> sc.DataArray | sc.Variable | None:
+    """Conditionally resolve a depend_on attribute."""
+    relative = depends_on_to_relative_path(depends_on, obj.parent.name)
+    if (force_resolve or relative.startswith('..')) and depends_on != '.':
+        try:
+            target = obj.parent[depends_on]
+            resolved = target[()]
+        except Exception:  # noqa: S110
+            # Catchall since resolving not strictly necessary, we should not
+            # fail the rest of the loading process.
+            pass
+        else:
+            return assign_resolved(target, resolved, force_resolve=True)
 
 
 class TransformationChainResolver:
@@ -277,7 +322,10 @@ class TransformationChainResolver:
         :
             The resolved position in meter, or None if no depends_on was found.
         """
-        depends_on = self.value.get('depends_on')
+        if 'resolved_depends_on' in self.value:
+            depends_on = self.value['resolved_depends_on']
+        else:
+            depends_on = self.value.get('depends_on')
         if depends_on is None:
             return None
         # Note that transformations have to be applied in "reverse" order, i.e.,
@@ -285,21 +333,31 @@ class TransformationChainResolver:
         # ignore potential time-dependence.
         return combine_transformations(self.get_chain(depends_on))
 
-    def get_chain(self, depends_on: str) -> list[sc.DataArray | sc.Variable]:
+    def get_chain(
+        self, depends_on: str | sc.DataArray | sc.Variable
+    ) -> list[sc.DataArray | sc.Variable]:
         if depends_on == '.':
             return []
-        node = self[depends_on]
-        transform = node.value.copy(deep=False)
+        if isinstance(depends_on, str):
+            node = self[depends_on]
+            transform = node.value.copy(deep=False)
+            node = node.parent
+        else:
+            # Fake node, resolved_depends_on is recursive so this is actually ignored.
+            node = self
+            transform = depends_on
         depends_on = '.'
+        if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
+            transform = transform.to(unit='m', copy=False)
         if isinstance(transform, sc.DataArray):
-            if (attr := transform.coords.pop('depends_on', None)) is not None:
+            if (attr := transform.coords.pop('resolved_depends_on', None)) is not None:
+                depends_on = attr.value
+            elif (attr := transform.coords.pop('depends_on', None)) is not None:
                 depends_on = attr.value
             # If transform is time-dependent then we keep it is a DataArray, otherwise
             # we convert it to a Variable.
-            transform = transform if transform.coords else transform.data
-        if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
-            transform = transform.to(unit='m', copy=False)
-        return [transform, *node.parent.get_chain(depends_on)]
+            transform = transform if 'time' in transform.coords else transform.data
+        return [transform, *node.get_chain(depends_on)]
 
 
 def compute_positions(
@@ -399,14 +457,15 @@ def _with_positions(
     if 'depends_on' in dg:
         try:
             transform = resolver.resolve_depends_on()
-            out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
-            if store_transform is not None:
-                out[store_transform] = transform
         except TransformationChainResolver.ChainError as e:
             warnings.warn(
                 UserWarning(f'depends_on chain references missing node:\n{e}'),
                 stacklevel=2,
             )
+        else:
+            out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
+            if store_transform is not None:
+                out[store_transform] = transform
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):
             value = _with_positions(
