@@ -107,10 +107,9 @@ class Transformation:
             if (depends_on := self.attrs.get('depends_on')) is not None:
                 if not isinstance(transform, sc.DataArray):
                     transform = sc.DataArray(transform)
-                relative = depends_on_to_relative_path(
-                    depends_on, self._obj.parent.name
+                transform.coords['depends_on'] = sc.scalar(
+                    depends_on_to_relative_path(depends_on, self._obj.parent.name)
                 )
-                transform.coords['depends_on'] = sc.scalar(relative)
             return transform
         except (sc.DimensionError, sc.UnitError, TransformationError):
             # TODO We should probably try to return some other data structure and
