@@ -9,7 +9,7 @@
 
 .. autosummary::
    :toctree: ../generated/classes
-   :template: scipp-class-template.rst
+   :template: class-template.rst
    :recursive:
 
    Attrs
