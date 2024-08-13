@@ -22,8 +22,9 @@ requirements:
     - h5py
     - python>=3.10
 
+  {# Conda does not allow spaces between package name and version, so remove them #}
   {% for package in dependencies %}
-    - {% if package == "graphviz" %}python-graphviz{% else %}{{ package }}{% endif %}
+    - {% if package == "graphviz" %}python-graphviz{% else %}{{ package|replace(" ", "") }}{% endif %}
   {% endfor %}
 
 
