@@ -91,6 +91,7 @@ class NXdata(NXobject):
             if name == self._signal_name or name in self._aux_signals:
                 return
             if field.attrs.get('NX_class') not in [
+                'NXcite',
                 'NXoff_geometry',
                 'NXcylindrical_geometry',
                 'NXgeometry',

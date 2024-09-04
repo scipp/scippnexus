@@ -145,6 +145,24 @@ def test_loads_data_with_coords(h5root):
     assert sc.identical(detector[...]['data'], da.rename_dims({'yy': 'dim_1'}))
 
 
+def test_nxcite_does_not_prevent_load_as_nxdetector(h5root):
+    da = sc.DataArray(
+        sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
+    )
+    da.coords['detector_number'] = detector_numbers_xx_yy_1234()
+    da.coords['xx'] = sc.array(dims=['xx'], unit='m', values=[0.1, 0.2])
+    detector = snx.create_class(h5root, 'detector0', NXdetector)
+    snx.create_field(detector, 'detector_number', da.coords['detector_number'])
+    snx.create_field(detector, 'xx', da.coords['xx'])
+    snx.create_field(detector, 'data', da.data)
+    snx.create_class(detector, 'cite', snx.NXcite)
+    detector.attrs['axes'] = ['xx', '.']
+    detector = make_group(detector)
+    loaded = detector[...]
+    assert 'cite' in loaded
+    assert sc.identical(loaded['data'], da.rename_dims({'yy': 'dim_1'}))
+
+
 def test_slicing_works_as_in_scipp(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2, 3.3], [3.3, 4.4, 5.5]])
