@@ -149,6 +149,7 @@ def test_guessed_dim_for_2d_coord_not_matching_axis_name(h5root):
     assert sc.identical(data[...], da)
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /data1:UserWarning")
 def test_skips_axis_if_dim_guessing_finds_ambiguous_shape(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]])
@@ -186,6 +187,7 @@ def test_dim_guessing_with_ambiguous_shape_accepts_multi_dim_match_at_end(h5root
     assert_identical(loaded.coords['3x3'], da.data['aux', 0])
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /data1:UserWarning")
 def test_dim_guessing_with_ambiguous_shape_rejects_1d_dim_match_at_end(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6], [7, 8, 9]])
@@ -348,6 +350,7 @@ def test_field_dims_match_NXdata_dims_when_selected_via_class_name(h5root):
     assert fields['yy'].dims == ('yy',)
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /data1:UserWarning")
 def test_uses_default_field_dims_if_inference_fails(h5root):
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
@@ -691,6 +694,7 @@ def test_guesses_dims_of_2d_bin_edge_fields(h5root, axis_sep):
     assert sc.identical(data[...], da)
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /data1:UserWarning")
 def test_nested_groups_trigger_fallback_to_load_as_data_group(h5root):
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2], [4, 5]]))
     data = snx.create_class(h5root, 'data1', NXdata)

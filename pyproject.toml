@@ -61,7 +61,6 @@ addopts = """
 testpaths = "tests"
 filterwarnings = [
   "error",
-  "ignore:Failed to load :UserWarning",
 ]
 markers = [
     "externalfile",

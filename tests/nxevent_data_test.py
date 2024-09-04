@@ -42,6 +42,7 @@ def test_negative_event_index_converted_to_num_event(nxroot):
     assert events.bins.size().values[3] == 0
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /entry/events_0:UserWarning")
 def test_bad_event_index_causes_load_as_DataGroup(nxroot):
     event_data = nxroot['entry'].create_class('events_0', snx.NXevent_data)
     event_data['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2])
