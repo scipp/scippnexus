@@ -28,6 +28,7 @@ def nxroot():
         yield root
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
 def test_returns_as_datagroup_if_no_signal_found(nxroot):
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)
@@ -675,6 +676,7 @@ def test_cylindrical_geometry_with_detector_numbers(nxroot):
         )
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
 def test_falls_back_to_hdf5_dim_labels(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     xy = sc.array(dims=['x', 'y'], values=[[1, 2], [3, 4]])
@@ -690,6 +692,7 @@ def test_falls_back_to_hdf5_dim_labels(nxroot):
     assert_identical(dg['z'], z)
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
 def test_falls_back_to_partial_hdf5_dim_labels(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     xyz = sc.ones(dims=['x', 'dim_1', 'z'], shape=(2, 2, 3))
@@ -701,6 +704,7 @@ def test_falls_back_to_partial_hdf5_dim_labels(nxroot):
     assert_identical(dg['xyz'], xyz)
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
 def test_squeezes_trailing_when_fall_back_to_partial_hdf5_dim_labels(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     x = sc.ones(dims=['x', 'dim_1'], shape=(2, 1))
@@ -711,6 +715,7 @@ def test_squeezes_trailing_when_fall_back_to_partial_hdf5_dim_labels(nxroot):
     assert_identical(dg['x'], sc.squeeze(x))
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
 def test_falls_back_to_hdf5_dim_labels_given_unnamed_axes(h5root):
     xy = sc.array(dims=['x', 'y'], values=[[1, 2], [3, 4]])
     z = sc.array(dims=['z'], values=[1, 2, 3])
@@ -730,6 +735,7 @@ def test_falls_back_to_hdf5_dim_labels_given_unnamed_axes(h5root):
     assert_identical(dg['z'], z)
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
 def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root):
     xy = sc.array(dims=['x', 'yy'], values=[[1, 2], [3, 4]])
     z = sc.array(dims=['zz'], values=[1, 2, 3])

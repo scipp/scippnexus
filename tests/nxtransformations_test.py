@@ -288,6 +288,9 @@ def test_chain_with_multiple_values_and_different_time_unit(h5root):
     assert_identical(loaded['transformations']['t2'], expected2)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:Failed to load /detector_0/transformations/t1:UserWarning"
+)
 def test_broken_time_dependent_transformation_returns_datagroup_but_sets_up_depends_on(
     h5root,
 ):
@@ -660,6 +663,7 @@ def test_compute_positions_with_rotation(h5root):
     )
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /instrument/monitor:UserWarning")
 def test_compute_positions_works_for_path_beyond_root(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     value = sc.scalar(6.5, unit='m')
@@ -684,6 +688,7 @@ def test_compute_positions_works_for_path_beyond_root(h5root):
     assert 'position' in snx.compute_positions(loaded['instrument'])['monitor2']
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /instrument/monitor:UserWarning")
 def test_path_beyond_root_is_fully_resolved_and_can_compute_positions(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     monitor1 = snx.create_class(instrument, 'monitor1', snx.NXmonitor)
@@ -713,6 +718,7 @@ def test_path_beyond_root_is_fully_resolved_and_can_compute_positions(h5root):
     assert_identical(snx.compute_positions(mon2)['position'], 2 * value * vector)
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /instrument/monitor:UserWarning")
 def test_compute_positions_returns_position_with_unit_meters(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     value = sc.scalar(6.5, unit='cm')
@@ -729,6 +735,7 @@ def test_compute_positions_returns_position_with_unit_meters(h5root):
     assert mon['position'].unit == 'm'
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /instrument/monitor:UserWarning")
 def test_compute_positions_handles_chains_with_mixed_units(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     vector = sc.vector(value=[0, 0, 1])

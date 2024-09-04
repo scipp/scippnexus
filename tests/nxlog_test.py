@@ -52,6 +52,7 @@ def test_nxobject_log(h5root):
     assert sc.identical(log[...], da)
 
 
+@pytest.mark.filterwarnings("ignore:Failed to load /entry/log:UserWarning")
 def test_nxlog_with_missing_value_triggers_fallback(nxroot):
     time = sc.epoch(unit='ns') + sc.array(
         dims=['time'], unit='s', values=[4.4, 5.5, 6.6]
