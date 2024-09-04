@@ -197,6 +197,45 @@ def test_Transformation_with_multiple_values(h5root):
     assert_identical(detector[depends_on][()], expected)
 
 
+def test_time_dependent_transform_uses_value_sublog(h5root):
+    detector = create_detector(h5root)
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
+    transformations = snx.create_class(detector, 'transformations', NXtransformations)
+    log = sc.DataArray(
+        sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
+        coords={'time': sc.array(dims=['time'], values=[11, 22], unit='s')},
+    )
+    log.coords['time'] = sc.epoch(unit='ns') + log.coords['time'].to(unit='ns')
+    offset = sc.spatial.translation(value=[1, 2, 3], unit='m')
+    vector = sc.vector(value=[0, 0, 1])
+    t = log * vector
+    t.data = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit)
+    value = snx.create_class(transformations, 't1', snx.NXlog)
+    snx.create_field(value, 'time', log.coords['time'] - sc.epoch(unit='ns'))
+    snx.create_field(value, 'value', log.data)
+    # Add alarms with shorter time axis. This will trigger loading as a DataGroup with
+    # multiple contained DataArrays.
+    alarm = log['time', :2].copy()
+    alarm.coords['message'] = sc.array(dims=['time'], values=['alarm 1', 'alarm 2'])
+    snx.create_field(value, 'alarm_severity', alarm.data)
+    snx.create_field(value, 'alarm_message', alarm.coords['message'])
+    snx.create_field(value, 'alarm_time', alarm.coords['time'])
+    value.attrs['depends_on'] = '.'
+    value.attrs['transformation_type'] = 'translation'
+    value.attrs['offset'] = offset.values
+    value.attrs['offset_units'] = str(offset.unit)
+    value.attrs['vector'] = vector.value
+
+    expected = t * offset
+    expected.coords['depends_on'] = sc.scalar('.')
+    detector = make_group(detector)
+    depends_on = detector['depends_on'][()]
+    assert depends_on == 'transformations/t1'
+    assert_identical(detector[depends_on][()], expected)
+
+
 def test_chain_with_multiple_values(h5root):
     detector = create_detector(h5root)
     snx.create_field(

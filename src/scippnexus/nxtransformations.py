@@ -79,6 +79,12 @@ class Transformation:
         select: ScippIndex,
     ):
         try:
+            if isinstance(value, sc.DataGroup) and (
+                isinstance(value.get('value'), sc.DataArray)
+            ):
+                # Some NXlog groups are split into value, alarm, and connection_status
+                # sublogs. We only care about the value.
+                value = value['value']
             if isinstance(value, sc.DataGroup):
                 return value
             t = value * self.vector
