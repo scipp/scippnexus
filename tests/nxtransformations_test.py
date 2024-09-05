@@ -894,7 +894,21 @@ def test_compute_positions_handles_empty_time_dependent_transform_without_error(
     loaded = root[()]
     with pytest.warns(UserWarning, match='depends_on chain contains empty time-series'):
         result = snx.compute_positions(loaded, store_transform='transform')
+
     # Even if only some of the logs are empty we cannot return any values.
-    assert result['detector_0']['transform'].sizes['time'] == 0
-    assert result['detector_0']['position'].sizes['time'] == 0
+
+    transform = result['detector_0']['transform']
+    assert transform.sizes == {'time': 0}
+    assert transform.dtype == 'float64'
+    assert transform.unit == ''
+    assert transform.coords['time'].sizes == {'time': 0}
+    assert transform.coords['time'].dtype == sc.DType.datetime64
+
+    position = result['detector_0']['position']
+    assert position.sizes == {'time': 0}
+    assert position.dtype == sc.DType.vector3
+    assert position.unit == 'm'
+    assert position.coords['time'].sizes == {'time': 0}
+    assert position.coords['time'].dtype == sc.DType.datetime64
+
     assert 'position' not in result['detector_0']['data'].coords
