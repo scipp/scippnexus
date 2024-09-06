@@ -151,6 +151,17 @@ def combine_transformations(
 
     Time-dependent transformations are interpolated to a common time-coordinate.
     """
+    if any((x.sizes.get('time') == 0) for x in chain):
+        warnings.warn(
+            UserWarning('depends_on chain contains empty time-series, '), stacklevel=2
+        )
+        # It is not clear what the dtype should be in this case. As transformations
+        # are commonly multiplied onto position vectors, we return an empty array of
+        # floats, which can be multiplied by Scipp's vector dtype.
+        return sc.DataArray(
+            sc.array(dims=['time'], values=[], dtype='float64', unit=''),
+            coords={'time': sc.datetimes(dims=['time'], values=[], unit='s')},
+        )
     total_transform = None
     for transform in chain:
         if total_transform is None:

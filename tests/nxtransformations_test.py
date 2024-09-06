@@ -842,3 +842,73 @@ def test_compute_positions_warns_if_depends_on_is_dead_link(h5root):
     loaded = root[()]
     with pytest.warns(UserWarning, match='depends_on chain references missing node'):
         snx.compute_positions(loaded)
+
+
+_log = sc.DataArray(
+    sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
+    coords={
+        'time': sc.epoch(unit='s') + sc.array(dims=['time'], values=[11, 22], unit='s')
+    },
+)
+_empty_log = _log[0:0].copy()
+
+
+@pytest.mark.parametrize(
+    'logs',
+    [(_log, _empty_log), (_empty_log, _log), (_empty_log, _empty_log)],
+    ids=['non-empty,empty', 'empty,non-empty', 'empty,empty'],
+)
+def test_compute_positions_handles_empty_time_dependent_transform_without_error(
+    h5root, logs
+) -> None:
+    log1, log2 = logs
+    detector = create_detector(h5root)
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
+    transformations = snx.create_class(detector, 'transformations', NXtransformations)
+
+    offset1 = sc.spatial.translation(value=[1, 2, 3], unit='m')
+    vector1 = sc.vector(value=[0, 0, 1])
+    value1 = snx.create_class(transformations, 't1', snx.NXlog)
+    snx.create_field(value1, 'time', log1.coords['time'] - sc.epoch(unit='s'))
+    snx.create_field(value1, 'value', log1.data)
+    value1.attrs['depends_on'] = 't2'
+    value1.attrs['transformation_type'] = 'translation'
+    value1.attrs['offset'] = offset1.values
+    value1.attrs['offset_units'] = str(offset1.unit)
+    value1.attrs['vector'] = vector1.value
+
+    offset2 = sc.spatial.translation(value=[4, 5, 6], unit='m')
+    vector2 = sc.vector(value=[0, 1, 1])
+    value2 = snx.create_class(transformations, 't2', snx.NXlog)
+    snx.create_field(value2, 'time', log2.coords['time'] - sc.epoch(unit='s'))
+    snx.create_field(value2, 'value', log2.data)
+    value2.attrs['depends_on'] = '.'
+    value2.attrs['transformation_type'] = 'translation'
+    value2.attrs['offset'] = offset2.values
+    value2.attrs['offset_units'] = str(offset2.unit)
+    value2.attrs['vector'] = vector2.value
+
+    root = make_group(h5root)
+    loaded = root[()]
+    with pytest.warns(UserWarning, match='depends_on chain contains empty time-series'):
+        result = snx.compute_positions(loaded, store_transform='transform')
+
+    # Even if only some of the logs are empty we cannot return any values.
+
+    transform = result['detector_0']['transform']
+    assert transform.sizes == {'time': 0}
+    assert transform.dtype == 'float64'
+    assert transform.unit == ''
+    assert transform.coords['time'].sizes == {'time': 0}
+    assert transform.coords['time'].dtype == sc.DType.datetime64
+
+    position = result['detector_0']['position']
+    assert position.sizes == {'time': 0}
+    assert position.dtype == sc.DType.vector3
+    assert position.unit == 'm'
+    assert position.coords['time'].sizes == {'time': 0}
+    assert position.coords['time'].dtype == sc.DType.datetime64
+
+    assert 'position' not in result['detector_0']['data'].coords
