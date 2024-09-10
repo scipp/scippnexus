@@ -39,7 +39,7 @@ def test_load_entry_from_buffer(tmp_path):
     assert is_closed(f)
 
 
-def test_load_entry_from_h5py_group_toor(tmp_path):
+def test_load_entry_from_h5py_group_root(tmp_path):
     with h5.File('test.nxs', 'w', driver='core', backing_store=False) as h5_file:
         snx.create_class(h5_file, 'entry', snx.NXentry)
         with snx.File(h5_file) as snx_file:
