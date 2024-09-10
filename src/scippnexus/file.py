@@ -31,8 +31,9 @@ class File(AbstractContextManager, Group):
         Parameters
         ----------
         name:
-            Path, Bytes object, or h5py.Group.
             Specifies the file to open.
+            If this is a :class:`hyp5.File` object, the `:class:`File` will wrap
+            this file handle but will not close it when used as a context manager.
         definitions:
             Mapping of NX_class names to application-specific definitions.
             The default is to use the base definitions as defined in the
