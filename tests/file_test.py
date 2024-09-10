@@ -61,5 +61,5 @@ def test_load_entry_from_h5py_group_not_root(tmp_path):
 def test_file_from_h5py_group_does_not_allow_extra_args(tmp_path):
     with h5.File('test.nxs', 'w', driver='core', backing_store=False) as h5_file:
         snx.create_class(h5_file, 'entry', snx.NXentry)
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match='Cannot provide both h5py.File and other arguments'):
             snx.File(h5_file, 'r')
