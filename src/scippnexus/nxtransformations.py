@@ -12,10 +12,7 @@ from scipp.scipy import interpolate
 
 from .base import Group, NexusStructureError, NXobject, ScippIndex
 from .field import Field, depends_on_to_relative_path
-
-
-class TransformationError(NexusStructureError):
-    pass
+from .transformations import Transform, TransformationError
 
 
 class NXtransformations(NXobject):
@@ -25,18 +22,6 @@ class NXtransformations(NXobject):
 class Transformation:
     def __init__(self, obj: Field | Group):  # could be an NXlog
         self._obj = obj
-
-    @property
-    def sizes(self) -> dict:
-        return self._obj.sizes
-
-    @property
-    def dims(self) -> tuple[str, ...]:
-        return self._obj.dims
-
-    @property
-    def shape(self) -> tuple[int, ...]:
-        return self._obj.shape
 
     @property
     def attrs(self):
@@ -219,6 +204,7 @@ def maybe_transformation(
     """
     if (transformation_type := obj.attrs.get('transformation_type')) is None:
         return value
+    # return Transform(obj, value)
     transform = Transformation(obj).make_transformation(
         value, transformation_type=transformation_type, select=sel
     )
@@ -278,8 +264,6 @@ class TransformationChainResolver:
     class ChainError(KeyError):
         """Raised when a transformation chain cannot be resolved."""
 
-        pass
-
     @dataclass
     class Entry:
         name: str
@@ -337,7 +321,9 @@ class TransformationChainResolver:
             )
         return node if len(remainder) == 0 else node[remainder[0]]
 
-    def resolve_depends_on(self) -> sc.DataArray | sc.Variable | None:
+    def resolve_depends_on(
+        self, depends_on: str | None = None
+    ) -> sc.DataArray | sc.Variable | None:
         """
         Resolve the depends_on attribute of a transformation chain.
 
@@ -348,7 +334,7 @@ class TransformationChainResolver:
         """
         if 'resolved_depends_on' in self.value:
             depends_on = self.value['resolved_depends_on']
-        else:
+        elif depends_on is None:
             depends_on = self.value.get('depends_on')
         if depends_on is None:
             return None
@@ -389,6 +375,7 @@ def compute_positions(
     *,
     store_position: str = 'position',
     store_transform: str | None = None,
+    transformations: sc.DataGroup | None = None,
 ) -> sc.DataGroup:
     """
     Recursively compute positions from depends_on attributes as well as the
@@ -422,6 +409,9 @@ def compute_positions(
         Name used to store result of resolving each depends_on chain.
     store_transform:
         If not None, store the resolved transformation chain in this field.
+    transformations:
+        Optional data group containing transformation chains. If not provided, the
+        transformations are looked up in the input data group.
 
     Returns
     -------
@@ -430,7 +420,9 @@ def compute_positions(
     """
     # Create resolver at root level, since any depends_on chain may lead to a parent,
     # i.e., we cannot use a resolver at the level of each chain's entry point.
-    resolver = TransformationChainResolver.from_root(dg)
+    # TODO need to be able to set root, would be better to construct resolver outside,
+    # see we can navigate to correct path?
+    resolver = TransformationChainResolver.from_root(transformations or dg)
     return _with_positions(
         dg,
         store_position=store_position,
@@ -480,7 +472,7 @@ def _with_positions(
     transform = None
     if 'depends_on' in dg:
         try:
-            transform = resolver.resolve_depends_on()
+            transform = resolver.resolve_depends_on(dg['depends_on'])
         except TransformationChainResolver.ChainError as e:
             warnings.warn(
                 UserWarning(f'depends_on chain references missing node:\n{e}'),
@@ -491,7 +483,8 @@ def _with_positions(
             if store_transform is not None:
                 out[store_transform] = transform
     for name, value in dg.items():
-        if isinstance(value, sc.DataGroup):
+        # Do not descend into groups that are not in the resolver.
+        if isinstance(value, sc.DataGroup) and name in resolver.value:
             value = _with_positions(
                 value,
                 store_position=store_position,
