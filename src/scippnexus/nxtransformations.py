@@ -122,7 +122,7 @@ class Transformation:
         except (sc.DimensionError, sc.UnitError, TransformationError) as e:
             msg = (
                 f"Failed to convert {self.name} into a transformation: {e} "
-                "Falling back to returning non underlying value."
+                "Falling back to returning underlying value."
             )
             warnings.warn(msg, stacklevel=2)
             # TODO We should probably try to return some other data structure and
