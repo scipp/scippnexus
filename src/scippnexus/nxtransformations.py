@@ -59,6 +59,8 @@ class Transformation:
 
     @property
     def vector(self) -> sc.Variable:
+        if self.attrs.get('vector') is None:
+            raise TransformationError('A transformation needs a vector attribute.')
         return sc.vector(value=self.attrs.get('vector'))
 
     def __getitem__(self, select: ScippIndex):
@@ -117,7 +119,12 @@ class Transformation:
                     depends_on_to_relative_path(depends_on, self._obj.parent.name)
                 )
             return transform
-        except (sc.DimensionError, sc.UnitError, TransformationError):
+        except (sc.DimensionError, sc.UnitError, TransformationError) as e:
+            msg = (
+                f"Failed to convert {self.name} into a transformation: {e} "
+                "Falling back to returning underlying value."
+            )
+            warnings.warn(msg, stacklevel=2)
             # TODO We should probably try to return some other data structure and
             # also insert offset and other attributes.
             return value
