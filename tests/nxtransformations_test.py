@@ -912,3 +912,26 @@ def test_compute_positions_handles_empty_time_dependent_transform_without_error(
     assert position.coords['time'].dtype == sc.DType.datetime64
 
     assert 'position' not in result['detector_0']['data'].coords
+
+
+def test_compute_transformation_warns_if_transformation_missing_vector_attr(
+    h5root,
+) -> None:
+    detector = create_detector(h5root)
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
+    )
+    transformations = snx.create_class(detector, 'transformations', NXtransformations)
+
+    offset1 = sc.spatial.translation(value=[1, 2, 3], unit='m')
+    value1 = snx.create_class(transformations, 't1', snx.NXlog)
+    snx.create_field(value1, 'time', _log.coords['time'] - sc.epoch(unit='s'))
+    snx.create_field(value1, 'value', _log.data)
+    value1.attrs['depends_on'] = 't2'
+    value1.attrs['transformation_type'] = 'rotation'
+    value1.attrs['offset'] = offset1.values
+    value1.attrs['offset_units'] = str(offset1.unit)
+
+    root = make_group(h5root)
+    with pytest.warns(UserWarning, match='transformation needs a vector attribute'):
+        root[()]
