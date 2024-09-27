@@ -106,14 +106,17 @@ def find_transformations(filename: str) -> list[str]:
     return transforms
 
 
-def _set_recursive(dg: sc.DataGroup, path: str, value: Any) -> None:
-    if '/' not in path:
-        dg[path] = value
-    else:
-        first, remainder = path.split('/', maxsplit=1)
-        if first not in dg:
-            dg[first] = sc.DataGroup()
-        _set_recursive(dg[first], remainder, value)
+def load_transformations(filename: str) -> sc.DataGroup:
+    groups = find_transformations(filename)
+    with File(filename, mode='r', maybe_transformation=_maybe_transformation) as f:
+        return sc.DataGroup({group: f[group][()] for group in groups})
+
+
+def as_nested(dg: sc.DataGroup) -> sc.DataGroup:
+    out = sc.DataGroup()
+    for path, value in dg.items():
+        _set_recursive(out, path, value)
+    return out
 
 
 def _maybe_transformation(
@@ -132,11 +135,11 @@ def _maybe_transformation(
         return value
 
 
-def load_transformations(filename: str) -> sc.DataGroup:
-    groups = find_transformations(filename)
-    with File(filename, mode='r', maybe_transformation=_maybe_transformation) as f:
-        transforms = sc.DataGroup({group: f[group][()] for group in groups})
-    dg = sc.DataGroup()
-    for path, value in transforms.items():
-        _set_recursive(dg, path, value)
-    return dg
+def _set_recursive(dg: sc.DataGroup, path: str, value: Any) -> None:
+    if '/' not in path:
+        dg[path] = value
+    else:
+        first, remainder = path.split('/', maxsplit=1)
+        if first not in dg:
+            dg[first] = sc.DataGroup()
+        _set_recursive(dg[first], remainder, value)

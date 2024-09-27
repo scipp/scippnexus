@@ -29,6 +29,7 @@ def test_find_transformation_groups_finds_expected_groups() -> None:
 def test_load_transformations_loads_as_flat_datagroup() -> None:
     filename = externalfile.get_path('2023/LOKI_60322-2022-03-02_2205_fixed.nxs')
     dg = transformations.load_transformations(filename)
+    dg = transformations.as_nested(dg)
     assert list(dg) == ['entry']
     entry = dg['entry']
     assert list(entry) == ['instrument']
@@ -44,6 +45,7 @@ def test_positions_consistent_with_separate_load() -> None:
     # The Bifrost instrument has complex transformation chains so this is a good test.
     filename = externalfile.get_path('2023/BIFROST_873855_00000015.hdf')
     transforms = transformations.load_transformations(filename)
+    transforms = transformations.as_nested(transforms)
     dg = snx.load(filename)
     expected = snx.compute_positions(
         dg, store_position='position', store_transform='transform'
