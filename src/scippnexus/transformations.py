@@ -1,6 +1,36 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+"""
+Utilities for loading and working with NeXus transformations.
+
+Transformation chains in NeXus files can be non-local and can thus be challenging to
+work with. Additionally, values of transformations can be time-dependent, with each
+chain link potentially having a different time-dependent value. In practice the user is
+interested in the position and orientation of a component at a specific time or time
+range. This may involve evaluating the transformation chain at a specific time, or
+applying some heuristic to determine if the changes in the transformation value are
+significant or just noise. In combination, the above means that we need to remain
+flexible in how we handle transformations, preserving all necessary information from
+the source files. This module is therefore structured as follows:
+
+1. :py:class:`Transform` is a dataclass representing a transformation. The raw `value`
+   dataset is preserved (instead of directly converting to, e.g., a rotation matrix) to
+   facilitate further processing such as computing the mean or variance.
+2. :py:func:`load_transformations` loads transformations from a NeXus file into a flat
+   :py:class:`scipp.DataGroup`. It can optionally be followed by
+   :py:func:`as_nested` to convert the flat structure to a nested one.
+3. :py:func:`apply_to_transformations` applies a function to each transformation in a
+   :py:class:`scipp.DataGroup`. We imagine that this can be used to
+   - Evaluate the transformation at a specific time.
+   - Apply filters to remove noise, to avoid having to deal with very small time
+     intervals when processing data.
+
+By keeping the loaded transformations in a simple and modifiable format, we can
+furthermore manually update the transformations with information from other sources,
+such as streamed NXlog values received from a data acquisition system.
+"""
+
 from __future__ import annotations
 
 import warnings
