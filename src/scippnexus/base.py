@@ -246,11 +246,19 @@ class Group(Mapping):
 
     @property
     def parent(self) -> Group:
-        return Group(self._group.parent, definitions=self._definitions)
+        return Group(
+            self._group.parent,
+            definitions=self._definitions,
+            maybe_transformation=self._maybe_transformation,
+        )
 
     @cached_property
     def file(self) -> Group:
-        return Group(self._group.file, definitions=self._definitions)
+        return Group(
+            self._group.file,
+            definitions=self._definitions,
+            maybe_transformation=self._maybe_transformation,
+        )
 
     @property
     def _children(self) -> dict[str, Field | Group]:

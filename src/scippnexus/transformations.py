@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 from __future__ import annotations
 
 import warnings
-from typing import Any
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Any, Literal
 
 import h5py
 import scipp as sc
@@ -19,22 +21,37 @@ class TransformationError(NexusStructureError):
     pass
 
 
+@dataclass
 class Transform:
-    def __init__(
-        self, obj: Field | Group, value: sc.Variable | sc.DataArray | sc.DataGroup
-    ):
-        self.offset = _parse_offset(obj)
-        self.vector = sc.vector(value=obj.attrs.get('vector'))
-        self.depends_on = depends_on_to_relative_path(
-            obj.attrs['depends_on'], obj.parent.name
-        )
-        self.transformation_type = obj.attrs.get('transformation_type')
+    name: str
+    transformation_type: Literal['translation', 'rotation']
+    value: sc.DataArray | sc.Variable
+    vector: sc.Variable
+    depends_on: str
+    offset: sc.Variable | None
+
+    def __post_init__(self):
         if self.transformation_type not in ['translation', 'rotation']:
             raise TransformationError(
-                f"{self.transformation_type=} attribute at {obj.name},"
+                f"{self.transformation_type=} attribute at {self.name},"
                 " expected 'translation' or 'rotation'."
             )
-        self.value = _parse_value(obj, value)
+
+    @staticmethod
+    def from_object(
+        obj: Field | Group, value: sc.Variable | sc.DataArray | sc.DataGroup
+    ) -> Transform:
+        depends_on = depends_on_to_relative_path(
+            obj.attrs['depends_on'], obj.parent.name
+        )
+        return Transform(
+            name=obj.name,
+            transformation_type=obj.attrs.get('transformation_type'),
+            value=_parse_value(obj, value),
+            vector=sc.vector(value=obj.attrs.get('vector')),
+            depends_on=depends_on,
+            offset=_parse_offset(obj),
+        )
 
     def build(self) -> sc.Variable | sc.DataArray:
         t = self.value * self.vector
@@ -59,7 +76,7 @@ def find_transformations(filename: str) -> list[str]:
 
     def _collect_transforms(name: str, obj: H5Base) -> None:
         if name.endswith('/depends_on') or 'transformation_type' in obj.attrs:
-            transforms.append(name)
+            transforms.append(f'/{name}')
 
     with h5py.File(filename, 'r') as f:
         f.visititems(_collect_transforms)
@@ -83,6 +100,19 @@ def load_transformations(filename: str) -> sc.DataGroup:
     groups = find_transformations(filename)
     with File(filename, mode='r', maybe_transformation=_maybe_transformation) as f:
         return sc.DataGroup({group: f[group][()] for group in groups})
+
+
+def apply_to_transformations(
+    dg: sc.DataGroup, func: Callable[[Transform], Transform]
+) -> sc.DataGroup:
+    def apply_nested(node: Any) -> Any:
+        if isinstance(node, sc.DataGroup):
+            return node.apply(apply_nested)
+        if isinstance(node, Transform):
+            return func(node)
+        return node
+
+    return dg.apply(apply_nested)
 
 
 def as_nested(dg: sc.DataGroup) -> sc.DataGroup:
@@ -116,7 +146,7 @@ def _maybe_transformation(
     if obj.attrs.get('transformation_type') is None:
         return value
     try:
-        return Transform(obj, value)
+        return Transform.from_object(obj, value)
     except KeyError as e:
         warnings.warn(
             UserWarning(f'Invalid transformation, missing attribute {e}'), stacklevel=2
@@ -128,6 +158,7 @@ def _set_recursive(dg: sc.DataGroup, path: str, value: Any) -> None:
     if '/' not in path:
         dg[path] = value
     else:
+        path = path.lstrip('/')
         first, remainder = path.split('/', maxsplit=1)
         if first not in dg:
             dg[first] = sc.DataGroup()
