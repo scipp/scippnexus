@@ -27,10 +27,6 @@ class TransformationError(NexusStructureError):
 # - have raw Transform (with vector and offset)
 # - translate into scipp transform when building transform
 
-# TODO
-# - remove resolved_depends_on mechanism
-# - remove Transformation
-
 
 def _parse_offset(obj: Field | Group) -> sc.Variable | None:
     if (offset := obj.attrs.get('offset')) is None:
