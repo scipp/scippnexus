@@ -19,6 +19,7 @@ from scippnexus.typing import H5Dataset, ScippIndex
 
 from ._cache import cached_property
 from .attrs import Attrs
+from .typing import MaybeTransformation
 
 if TYPE_CHECKING:
     from .base import Group
@@ -84,6 +85,7 @@ class Field:
     sizes: dict[str, int] | None = None
     dtype: sc.DType | None = None
     errors: H5Dataset | None = None
+    _maybe_transformation: MaybeTransformation = None
 
     @cached_property
     def attrs(self) -> dict[str, Any]:
@@ -135,7 +137,10 @@ class Field:
         :
             Loaded data.
         """
-        from .nxtransformations import maybe_transformation
+        if self._maybe_transformation is not None:
+            maybe_transformation = self._maybe_transformation
+        else:
+            from .nxtransformations import maybe_transformation
 
         index = to_plain_index(self.dims, select)
         if isinstance(index, int | slice):

@@ -19,7 +19,7 @@ from ._cache import cached_property
 from ._common import to_child_select
 from .attrs import Attrs
 from .field import Field
-from .typing import H5Dataset, H5Group, ScippIndex
+from .typing import H5Dataset, H5Group, MaybeTransformation, ScippIndex
 
 
 def asvariable(obj: Any | sc.Variable) -> sc.Variable:
@@ -28,8 +28,6 @@ def asvariable(obj: Any | sc.Variable) -> sc.Variable:
 
 class NexusStructureError(Exception):
     """Invalid or unsupported class and field structure in Nexus."""
-
-    pass
 
 
 def is_dataset(obj: H5Group | H5Dataset) -> bool:
@@ -202,11 +200,17 @@ class Group(Mapping):
     #    interpretation of the file, but need to cache information. An earlier version
     #    of ScippNexus used such a mechanism without caching, which was very slow.
 
-    def __init__(self, group: H5Group, definitions: dict[str, type] | None = None):
+    def __init__(
+        self,
+        group: H5Group,
+        definitions: dict[str, type] | None = None,
+        maybe_transformation: MaybeTransformation = None,
+    ):
         self._group = group
         self._definitions = {} if definitions is None else definitions
         self._lazy_children = None
         self._lazy_nexus = None
+        self._maybe_transformation = maybe_transformation
 
     @property
     def nx_class(self) -> type | None:
@@ -258,9 +262,15 @@ class Group(Mapping):
     def _read_children(self) -> dict[str, Field | Group]:
         def _make_child(obj: H5Dataset | H5Group) -> Field | Group:
             if is_dataset(obj):
-                return Field(obj, parent=self)
+                return Field(
+                    obj, parent=self, _maybe_transformation=self._maybe_transformation
+                )
             else:
-                return Group(obj, definitions=self._definitions)
+                return Group(
+                    obj,
+                    definitions=self._definitions,
+                    maybe_transformation=self._maybe_transformation,
+                )
 
         items = {name: _make_child(obj) for name, obj in self._group.items()}
         # In the case of NXevent_data, the `cue_` fields are unusable, since
@@ -409,7 +419,12 @@ class Group(Mapping):
         # For a time-dependent transformation in NXtransformations, an NXlog may
         # take the place of the `value` field. In this case, we need to read the
         # properties of the NXlog group to make the actual transformation.
-        from .nxtransformations import maybe_resolve, maybe_transformation
+        from .nxtransformations import maybe_resolve
+
+        if self._maybe_transformation is not None:
+            maybe_transformation = self._maybe_transformation
+        else:
+            from .nxtransformations import maybe_transformation
 
         if (
             isinstance(dg, sc.DataGroup)
