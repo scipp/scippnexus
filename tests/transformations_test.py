@@ -1,15 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 import pytest
-from ess.reduce import data
-from scipp.testing import assert_identical
+import scipp as sc
 
 import scippnexus as snx
 from scippnexus import transformations
 
+externalfile = pytest.importorskip('externalfile')
 
+
+@pytest.mark.externalfile()
 def test_find_transformation_groups_finds_expected_groups() -> None:
-    filename = data.loki_tutorial_sample_run_60250()
+    filename = externalfile.get_path('2023/LOKI_60322-2022-03-02_2205_fixed.nxs')
     paths = transformations.find_transformations(filename)
     assert paths == [
         'entry/instrument/larmor_detector/depends_on',
@@ -23,8 +25,9 @@ def test_find_transformation_groups_finds_expected_groups() -> None:
     ]
 
 
+@pytest.mark.externalfile()
 def test_load_transformations_loads_as_flat_datagroup() -> None:
-    filename = data.loki_tutorial_sample_run_60250()
+    filename = externalfile.get_path('2023/LOKI_60322-2022-03-02_2205_fixed.nxs')
     dg = transformations.load_transformations(filename)
     assert list(dg) == ['entry']
     entry = dg['entry']
@@ -35,34 +38,11 @@ def test_load_transformations_loads_as_flat_datagroup() -> None:
         assert list(group) == ['depends_on', 'transformations']
 
 
-def test_find_transformations_bifrost() -> None:
-    filename = '/home/simon/instruments/bifrost/BIFROST_20240905T122604.h5'
-    transformations.find_transformations(filename)
-
-
-def test_load_transformations_bifrost() -> None:
-    filename = '/home/simon/instruments/bifrost/BIFROST_20240905T122604.h5'
-    transformations.load_transformations(filename)
-
-
-def test_scippnexus_can_parse_transformation_chain() -> None:
-    filename = data.loki_tutorial_sample_run_60250()
-    transforms = transformations.load_transformations(filename)
-    dg = snx.load(filename)
-    result = snx.compute_positions(
-        dg,
-        store_position='position',
-        store_transform='transform',
-        transformations=transforms,
-    )
-    detector = result['entry']['instrument']['larmor_detector']
-    assert 'position' in detector['larmor_detector_events'].coords
-
-
 @pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.externalfile()
 def test_positions_consistent_with_separate_load() -> None:
-    filename = '/home/simon/instruments/bifrost/BIFROST_20240905T122604.h5'
-    filename = '/home/simon/instruments/bifrost/268227_00021671.hdf'
+    # The Bifrost instrument has complex transformation chains so this is a good test.
+    filename = externalfile.get_path('2023/BIFROST_873855_00000015.hdf')
     transforms = transformations.load_transformations(filename)
     dg = snx.load(filename)
     expected = snx.compute_positions(
@@ -74,4 +54,4 @@ def test_positions_consistent_with_separate_load() -> None:
         store_transform='transform',
         transformations=transforms,
     )
-    assert_identical(result, expected)
+    assert sc.identical(result, expected)

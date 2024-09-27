@@ -3,6 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 import h5py
@@ -64,7 +65,7 @@ class Transform:
         # and index before returning?
         # TODO Change NXobject.__getitem__ to never descend into NXtransformations?
         self.depends_on = depends_on_to_relative_path(
-            obj.attrs.get('depends_on'), obj.parent.name
+            obj.attrs['depends_on'], obj.parent.name
         )
         self.transformation_type = obj.attrs.get('transformation_type')
         if self.transformation_type not in ['translation', 'rotation']:
@@ -122,7 +123,14 @@ def _maybe_transformation(
 ) -> sc.Variable | sc.DataArray | sc.DataGroup:
     if obj.attrs.get('transformation_type') is None:
         return value
-    return Transform(obj, value)
+    try:
+        return Transform(obj, value)
+    except KeyError as e:
+        warnings.warn(
+            UserWarning(f'Invalid transformation, missing attribute {e}'),
+            stacklevel=2,
+        )
+        return value
 
 
 def load_transformations(filename: str) -> sc.DataGroup:
