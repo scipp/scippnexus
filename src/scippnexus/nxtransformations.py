@@ -12,7 +12,7 @@ from scipp.scipy import interpolate
 
 from .base import Group, NXobject, ScippIndex
 from .field import Field, depends_on_to_relative_path
-from .transformations import TransformationError
+from .transformations import Transform, TransformationError
 
 
 class NXtransformations(NXobject):
@@ -320,9 +320,7 @@ class TransformationChainResolver:
             )
         return node if len(remainder) == 0 else node[remainder[0]]
 
-    def resolve_depends_on(
-        self, depends_on: str | None = None
-    ) -> sc.DataArray | sc.Variable | None:
+    def resolve_depends_on(self) -> sc.DataArray | sc.Variable | None:
         """
         Resolve the depends_on attribute of a transformation chain.
 
@@ -333,7 +331,7 @@ class TransformationChainResolver:
         """
         if 'resolved_depends_on' in self.value:
             depends_on = self.value['resolved_depends_on']
-        elif depends_on is None:
+        else:
             depends_on = self.value.get('depends_on')
         if depends_on is None:
             return None
@@ -347,18 +345,25 @@ class TransformationChainResolver:
     ) -> list[sc.DataArray | sc.Variable]:
         if depends_on == '.':
             return []
+        new_style_transform = False
         if isinstance(depends_on, str):
             node = self[depends_on]
-            transform = node.value.copy(deep=False)
+            if isinstance(node.value, Transform):
+                transform = node.value.build().copy(deep=False)
+                depends_on = node.value.depends_on
+                new_style_transform = True
+            else:
+                transform = node.value.copy(deep=False)
+                depends_on = '.'
             node = node.parent
         else:
             # Fake node, resolved_depends_on is recursive so this is actually ignored.
             node = self
             transform = depends_on
-        depends_on = '.'
+            depends_on = '.'
         if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
             transform = transform.to(unit='m', copy=False)
-        if isinstance(transform, sc.DataArray):
+        if not new_style_transform and isinstance(transform, sc.DataArray):
             if (attr := transform.coords.pop('resolved_depends_on', None)) is not None:
                 depends_on = attr.value
             elif (attr := transform.coords.pop('depends_on', None)) is not None:
@@ -471,7 +476,7 @@ def _with_positions(
     transform = None
     if 'depends_on' in dg:
         try:
-            transform = resolver.resolve_depends_on(dg['depends_on'])
+            transform = resolver.resolve_depends_on()
         except TransformationChainResolver.ChainError as e:
             warnings.warn(
                 UserWarning(f'depends_on chain references missing node:\n{e}'),
@@ -482,7 +487,9 @@ def _with_positions(
             if store_transform is not None:
                 out[store_transform] = transform
     for name, value in dg.items():
-        # Do not descend into groups that are not in the resolver.
+        # If the resolver was constructed from an external tree of transformations it
+        # will not contain groups that do not contain any transformations or depends_on
+        # field. Do not descend into such groups.
         if isinstance(value, sc.DataGroup) and name in resolver.value:
             value = _with_positions(
                 value,

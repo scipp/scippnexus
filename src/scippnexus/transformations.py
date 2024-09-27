@@ -3,18 +3,15 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-import warnings
-from dataclasses import dataclass
+from typing import Any
 
-import numpy as np
+import h5py
 import scipp as sc
-from scipp.scipy import interpolate
 
-from .base import Group, NexusStructureError, NXobject, ScippIndex
+from .base import Group, NexusStructureError, ScippIndex
 from .field import Field, depends_on_to_relative_path
 from .file import File
-import h5py
-from typing import Any
+from .typing import H5Base
 
 
 class TransformationError(NexusStructureError):
@@ -108,8 +105,8 @@ class Transform:
 def find_transformation_groups(filename: str) -> list[str]:
     transforms: list[str] = []
 
-    def _collect_transforms(name: str, group: h5py.Group) -> None:
-        if group.attrs.get('NX_class') == 'NXtransformations':
+    def _collect_transforms(name: str, obj: H5Base) -> None:
+        if name.endswith('/depends_on') or 'transformation_type' in obj.attrs:
             transforms.append(name)
 
     with h5py.File(filename, 'r') as f:
@@ -128,9 +125,19 @@ def _set_recursive(dg: sc.DataGroup, path: str, value: Any) -> None:
         _set_recursive(dg[first], remainder, value)
 
 
+def _maybe_transformation(
+    obj: Field | Group,
+    value: sc.Variable | sc.DataArray | sc.DataGroup,
+    sel: ScippIndex,
+) -> sc.Variable | sc.DataArray | sc.DataGroup:
+    if obj.attrs.get('transformation_type') is None:
+        return value
+    return Transform(obj, value)
+
+
 def load_transformations(filename: str) -> sc.DataGroup:
     groups = find_transformation_groups(filename)
-    with File(filename, mode='r') as f:
+    with File(filename, mode='r', maybe_transformation=_maybe_transformation) as f:
         transforms = sc.DataGroup({group: f[group][()] for group in groups})
     dg = sc.DataGroup()
     for path, value in transforms.items():
