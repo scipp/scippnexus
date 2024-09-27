@@ -93,7 +93,7 @@ class Transform:
         return t * self.offset
 
 
-def find_transformation_groups(filename: str) -> list[str]:
+def find_transformations(filename: str) -> list[str]:
     transforms: list[str] = []
 
     def _collect_transforms(name: str, obj: H5Base) -> None:
@@ -101,7 +101,6 @@ def find_transformation_groups(filename: str) -> list[str]:
             transforms.append(name)
 
     with h5py.File(filename, 'r') as f:
-        # TODO This is slow! No need to visit everything, just recurse groups?
         f.visititems(_collect_transforms)
     return transforms
 
@@ -127,7 +126,7 @@ def _maybe_transformation(
 
 
 def load_transformations(filename: str) -> sc.DataGroup:
-    groups = find_transformation_groups(filename)
+    groups = find_transformations(filename)
     with File(filename, mode='r', maybe_transformation=_maybe_transformation) as f:
         transforms = sc.DataGroup({group: f[group][()] for group in groups})
     dg = sc.DataGroup()

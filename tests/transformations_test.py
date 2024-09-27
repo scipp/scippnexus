@@ -10,7 +10,7 @@ from scippnexus import transformations
 
 def test_find_transformation_groups_finds_expected_groups() -> None:
     filename = data.loki_tutorial_sample_run_60250()
-    paths = transformations.find_transformation_groups(filename)
+    paths = transformations.find_transformations(filename)
     assert paths == [
         'entry/instrument/larmor_detector/depends_on',
         'entry/instrument/larmor_detector/transformations/trans_1',
@@ -37,7 +37,7 @@ def test_load_transformations_loads_as_flat_datagroup() -> None:
 
 def test_find_transformations_bifrost() -> None:
     filename = '/home/simon/instruments/bifrost/BIFROST_20240905T122604.h5'
-    transformations.find_transformation_groups(filename)
+    transformations.find_transformations(filename)
 
 
 def test_load_transformations_bifrost() -> None:
