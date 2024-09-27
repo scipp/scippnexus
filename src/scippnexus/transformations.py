@@ -76,26 +76,21 @@ class Transform:
 
     # TODO can cache this
     def build(self) -> sc.Variable | sc.DataArray:
-        try:
-            t = self.value * self.vector
-            v = t if isinstance(t, sc.Variable) else t.data
-            if self.transformation_type == 'translation':
-                v = sc.spatial.translations(dims=v.dims, values=v.values, unit=v.unit)
-            elif self.transformation_type == 'rotation':
-                v = sc.spatial.rotations_from_rotvecs(v)
-            if isinstance(t, sc.Variable):
-                t = v
-            else:
-                t.data = v
-            if self.offset is None:
-                return t
-            if self.transformation_type == 'translation':
-                return t * self.offset.to(unit=t.unit, copy=False)
-            return t * self.offset
-        except (sc.DimensionError, sc.UnitError, TransformationError):
-            # TODO We should probably try to return some other data structure and
-            # also insert offset and other attributes.
-            return self.value
+        t = self.value * self.vector
+        v = t if isinstance(t, sc.Variable) else t.data
+        if self.transformation_type == 'translation':
+            v = sc.spatial.translations(dims=v.dims, values=v.values, unit=v.unit)
+        elif self.transformation_type == 'rotation':
+            v = sc.spatial.rotations_from_rotvecs(v)
+        if isinstance(t, sc.Variable):
+            t = v
+        else:
+            t.data = v
+        if self.offset is None:
+            return t
+        if self.transformation_type == 'translation':
+            return t * self.offset.to(unit=t.unit, copy=False)
+        return t * self.offset
 
 
 def find_transformation_groups(filename: str) -> list[str]:
