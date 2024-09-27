@@ -127,8 +127,7 @@ def _maybe_transformation(
         return Transform(obj, value)
     except KeyError as e:
         warnings.warn(
-            UserWarning(f'Invalid transformation, missing attribute {e}'),
-            stacklevel=2,
+            UserWarning(f'Invalid transformation, missing attribute {e}'), stacklevel=2
         )
         return value
 
