@@ -37,13 +37,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Literal
 
-import h5py
 import scipp as sc
 
 from .base import Group, NexusStructureError
 from .field import DependsOn, Field
-from .file import File
-from .typing import H5Base
 
 
 class TransformationError(NexusStructureError):
@@ -98,37 +95,6 @@ class Transform:
         return t * self.offset
 
 
-def find_transformations(filename: str) -> list[str]:
-    transforms: list[str] = []
-
-    def _collect_transforms(name: str, obj: H5Base) -> None:
-        if name.endswith('/depends_on') or 'transformation_type' in obj.attrs:
-            transforms.append(f'/{name}')
-
-    with h5py.File(filename, 'r') as f:
-        f.visititems(_collect_transforms)
-    return transforms
-
-
-def load_transformations(filename: str) -> sc.DataGroup:
-    """
-    Load transformations and depends_on fields from a NeXus file.
-
-    Parameters
-    ----------
-    filename:
-        The path to the NeXus file.
-
-    Returns
-    -------
-    :
-        A flat DataGroup with the transformations and depends_on fields.
-    """
-    groups = find_transformations(filename)
-    with File(filename, mode='r') as f:
-        return sc.DataGroup({group: f[group][()] for group in groups})
-
-
 def apply_to_transformations(
     dg: sc.DataGroup, func: Callable[[Transform], Transform]
 ) -> sc.DataGroup:
@@ -140,40 +106,6 @@ def apply_to_transformations(
         return node
 
     return dg.apply(apply_nested)
-
-
-def as_nested(dg: sc.DataGroup) -> sc.DataGroup:
-    """
-    Convert a flat DataGroup with paths as keys to a nested DataGroup.
-
-    This is useful when loading transformations from a NeXus file, where the
-    paths are used as keys to represent the structure of the NeXus file.
-
-    Parameters
-    ----------
-    dg:
-        The flat DataGroup to convert.
-
-    Returns
-    -------
-    :
-        The nested DataGroup.
-    """
-    out = sc.DataGroup()
-    for path, value in dg.items():
-        _set_recursive(out, path, value)
-    return out
-
-
-def _set_recursive(dg: sc.DataGroup, path: str, value: Any) -> None:
-    if '/' not in path:
-        dg[path] = value
-    else:
-        path = path.lstrip('/')
-        first, remainder = path.split('/', maxsplit=1)
-        if first not in dg:
-            dg[first] = sc.DataGroup()
-        _set_recursive(dg[first], remainder, value)
 
 
 def _parse_offset(obj: Field | Group) -> sc.Variable | None:

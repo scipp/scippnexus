@@ -9,15 +9,18 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import Group, NXobject
+from .base import Group, NXobject, base_definitions_dict
 from .field import DependsOn, Field
 from .transformations import Transform
 
-# TODO skip loading?!
-
 
 class NXtransformations(NXobject):
-    """Group of transformations."""
+    """
+    Group of transformations.
+
+    Currently all transformations in the group are loaded. This may lead to redundant
+    loads as transformations are also loaded by following depends_on chains.
+    """
 
 
 def _interpolate_transform(transform, xnew):
@@ -268,3 +271,6 @@ def _with_positions(
             value = value.assign_coords({store_position: transform * offset})
         out[name] = value
     return out
+
+
+base_definitions_dict['NXtransformations'] = NXtransformations
