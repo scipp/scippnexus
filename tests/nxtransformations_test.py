@@ -5,7 +5,7 @@ import scipp as sc
 from scipp.testing import assert_identical
 
 import scippnexus as snx
-from scippnexus.nxtransformations import NXtransformations, TransformationChainResolver
+from scippnexus.nxtransformations import NXtransformations
 
 
 def make_group(group: h5py.Group) -> snx.Group:
@@ -513,106 +513,9 @@ def test_label_slice_transformations(h5root):
     )
 
 
-def test_TransformationChainResolver_path_handling():
-    tree = TransformationChainResolver.from_root({'a': {'b': {'c': 1}}})
-    assert tree['a']['b']['c'].value == 1
-    assert tree['a/b/c'].value == 1
-    assert tree['/a/b/c'].value == 1
-    assert tree['a']['../a/b/c'].value == 1
-    assert tree['a/b']['../../a/b/c'].value == 1
-    assert tree['a/b']['./c'].value == 1
-
-
-def test_TransformationChainResolver_name():
-    tree = TransformationChainResolver.from_root({'a': {'b': {'c': 1}}})
-    assert tree['a']['b']['c'].name == '/a/b/c'
-    assert tree['a/b/c'].name == '/a/b/c'
-    assert tree['/a/b/c'].name == '/a/b/c'
-    assert tree['a']['../a/b/c'].name == '/a/b/c'
-    assert tree['a/b']['../../a/b/c'].name == '/a/b/c'
-    assert tree['a/b']['./c'].name == '/a/b/c'
-
-
-def test_TransformationChainResolver_raises_ChainError_if_child_does_not_exists():
-    tree = TransformationChainResolver.from_root({'a': {'b': {'c': 1}}})
-    with pytest.raises(TransformationChainResolver.ChainError):
-        tree['a']['b']['d']
-
-
-def test_TransformationChainResolver_raises_ChainError_if_path_leads_beyond_root():
-    tree = TransformationChainResolver.from_root({'a': {'b': {'c': 1}}})
-    with pytest.raises(TransformationChainResolver.ChainError):
-        tree['..']
-    with pytest.raises(TransformationChainResolver.ChainError):
-        tree['a']['../..']
-    with pytest.raises(TransformationChainResolver.ChainError):
-        tree['../a']
-
-
 origin = sc.vector([0, 0, 0], unit='m')
 shiftX = sc.spatial.translation(value=[1, 0, 0], unit='m')
 rotZ = sc.spatial.rotations_from_rotvecs(sc.vector([0, 0, 90], unit='deg'))
-
-
-def test_resolve_depends_on_dot():
-    tree = TransformationChainResolver.from_root({'depends_on': '.'})
-    assert sc.identical(tree.resolve_depends_on() * origin, origin)
-
-
-def test_resolve_depends_on_child():
-    transform = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {'depends_on': 'child', 'child': transform}
-    )
-    expected = sc.vector([1, 0, 0], unit='m')
-    assert sc.identical(tree.resolve_depends_on() * origin, expected)
-
-
-def test_resolve_depends_on_grandchild():
-    transform = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {'depends_on': 'child/grandchild', 'child': {'grandchild': transform}}
-    )
-    expected = sc.vector([1, 0, 0], unit='m')
-    assert sc.identical(tree.resolve_depends_on() * origin, expected)
-
-
-def test_resolve_depends_on_child1_depends_on_child2():
-    transform1 = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('child2')})
-    transform2 = sc.DataArray(rotZ, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {'depends_on': 'child1', 'child1': transform1, 'child2': transform2}
-    )
-    # Note order
-    expected = transform2.data * transform1.data
-    assert sc.identical(tree.resolve_depends_on(), expected)
-
-
-def test_resolve_depends_on_grandchild1_depends_on_grandchild2():
-    transform1 = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('grandchild2')})
-    transform2 = sc.DataArray(rotZ, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {
-            'depends_on': 'child/grandchild1',
-            'child': {'grandchild1': transform1, 'grandchild2': transform2},
-        }
-    )
-    expected = transform2.data * transform1.data
-    assert sc.identical(tree.resolve_depends_on(), expected)
-
-
-def test_resolve_depends_on_grandchild1_depends_on_child2():
-    transform1 = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('../child2')})
-    transform2 = sc.DataArray(rotZ, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {
-            'depends_on': 'child1/grandchild1',
-            'child1': {'grandchild1': transform1},
-            'child2': transform2,
-        }
-    )
-    expected = transform2.data * transform1.data
-    assert sc.identical(tree.resolve_depends_on(), expected)
 
 
 def test_compute_positions(h5root):
