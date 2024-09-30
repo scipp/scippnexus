@@ -418,7 +418,7 @@ class Group(Mapping):
             if (resolved := maybe_resolve(self['depends_on'], depends_on)) is not None:
                 dg['resolved_transformations'] = resolved
 
-        return maybe_transformation(self, value=dg, sel=sel)
+        return maybe_transformation(self, value=dg)
 
     def _warn_fallback(self, e: Exception) -> None:
         msg = (

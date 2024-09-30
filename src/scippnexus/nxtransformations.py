@@ -9,7 +9,7 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import Group, NXobject, ScippIndex
+from .base import Group, NXobject
 from .field import DependsOn, Field
 from .transformations import Transform
 
@@ -95,9 +95,7 @@ def combine_transformations(
 
 
 def maybe_transformation(
-    obj: Field | Group,
-    value: sc.Variable | sc.DataArray | sc.DataGroup,
-    sel: ScippIndex,
+    obj: Field | Group, value: sc.Variable | sc.DataArray | sc.DataGroup
 ) -> sc.Variable | sc.DataArray | sc.DataGroup:
     """
     Return a loaded field, possibly modified if it is a transformation.

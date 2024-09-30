@@ -169,7 +169,7 @@ class Field:
         # If the variable is empty, return early
         if np.prod(shape) == 0:
             variable = self._maybe_datetime(variable)
-            return maybe_transformation(self, value=variable, sel=select)
+            return maybe_transformation(self, value=variable)
 
         if self.dtype == sc.DType.string:
             try:
@@ -205,7 +205,7 @@ class Field:
             else:
                 return variable.value
         variable = self._maybe_datetime(variable)
-        return maybe_transformation(self, value=variable, sel=select)
+        return maybe_transformation(self, value=variable)
 
     def _maybe_datetime(self, variable: sc.Variable) -> sc.Variable:
         if _is_time(variable):
