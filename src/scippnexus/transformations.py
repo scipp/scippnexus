@@ -33,7 +33,6 @@ such as streamed NXlog values received from a data acquisition system.
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Literal
@@ -41,7 +40,7 @@ from typing import Any, Literal
 import h5py
 import scipp as sc
 
-from .base import Group, NexusStructureError, ScippIndex
+from .base import Group, NexusStructureError
 from .field import DependsOn, Field
 from .file import File
 from .typing import H5Base
@@ -55,7 +54,7 @@ class TransformationError(NexusStructureError):
 class Transform:
     name: str
     transformation_type: Literal['translation', 'rotation']
-    value: sc.DataArray | sc.Variable
+    value: sc.Variable | sc.DataArray | sc.DataGroup
     vector: sc.Variable
     depends_on: DependsOn
     offset: sc.Variable | None
@@ -75,8 +74,8 @@ class Transform:
         return Transform(
             name=obj.name,
             transformation_type=obj.attrs.get('transformation_type'),
-            value=_parse_value(obj, value),
-            vector=sc.vector(value=obj.attrs.get('vector')),
+            value=_parse_value(value),
+            vector=sc.vector(value=obj.attrs['vector']),
             depends_on=depends_on,
             offset=_parse_offset(obj),
         )
@@ -126,7 +125,7 @@ def load_transformations(filename: str) -> sc.DataGroup:
         A flat DataGroup with the transformations and depends_on fields.
     """
     groups = find_transformations(filename)
-    with File(filename, mode='r', maybe_transformation=_maybe_transformation) as f:
+    with File(filename, mode='r') as f:
         return sc.DataGroup({group: f[group][()] for group in groups})
 
 
@@ -166,20 +165,6 @@ def as_nested(dg: sc.DataGroup) -> sc.DataGroup:
     return out
 
 
-def _maybe_transformation(
-    obj: Field | Group,
-    value: sc.Variable | sc.DataArray | sc.DataGroup,
-    sel: ScippIndex,
-) -> sc.Variable | sc.DataArray | sc.DataGroup:
-    if obj.attrs.get('transformation_type') is None:
-        return value
-    try:
-        return Transform.from_object(obj, value)
-    except KeyError as e:
-        warnings.warn(
-            UserWarning(f'Invalid transformation, missing attribute {e}'), stacklevel=2
-        )
-        return value
 
 
 def _set_recursive(dg: sc.DataGroup, path: str, value: Any) -> None:
@@ -205,15 +190,12 @@ def _parse_offset(obj: Field | Group) -> sc.Variable | None:
 
 
 def _parse_value(
-    obj: Field | Group,
     value: sc.Variable | sc.DataArray | sc.DataGroup,
-) -> sc.Variable | sc.DataArray:
+) -> sc.Variable | sc.DataArray | sc.DataGroup:
     if isinstance(value, sc.DataGroup) and (
         isinstance(value.get('value'), sc.DataArray)
     ):
         # Some NXlog groups are split into value, alarm, and connection_status
         # sublogs. We only care about the value.
         value = value['value']
-    if not isinstance(value, sc.Variable | sc.DataArray):
-        raise TransformationError(f"Failed to load transformation value at {obj.name}")
     return value

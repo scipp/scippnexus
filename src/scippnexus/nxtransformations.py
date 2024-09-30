@@ -132,7 +132,9 @@ def maybe_resolve(
             depends_on = transform.attrs['depends_on']
             transforms[transform.name] = transform[()]
     except KeyError as e:
-        warnings.warn(UserWarning(f'{obj.name=} missing {e}'), stacklevel=2)
+        warnings.warn(
+            UserWarning(f'depends_on chain references missing node {e}'), stacklevel=2
+        )
         return None
     return transforms
 
@@ -178,7 +180,8 @@ def compute_positions(
         If not None, store the resolved transformation chain in this field.
     transformations:
         Optional data group containing transformation chains. If not provided, the
-        transformations are looked up in the input data group.
+        transformations are looked up in the 'resolved_transformations' subgroups of the
+        input data group.
 
     Returns
     -------
