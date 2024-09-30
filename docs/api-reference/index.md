@@ -115,15 +115,3 @@
    create_class
    load
 ```
-
-
-## Submodules
-
-```{eval-rst}
-.. autosummary::
-   :toctree: ../generated/modules
-   :template: module-template.rst
-   :recursive:
-
-   transformations
-```
