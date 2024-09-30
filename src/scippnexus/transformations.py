@@ -42,7 +42,7 @@ import h5py
 import scipp as sc
 
 from .base import Group, NexusStructureError, ScippIndex
-from .field import Field, depends_on_to_relative_path
+from .field import DependsOn, Field
 from .file import File
 from .typing import H5Base
 
@@ -57,7 +57,7 @@ class Transform:
     transformation_type: Literal['translation', 'rotation']
     value: sc.DataArray | sc.Variable
     vector: sc.Variable
-    depends_on: str
+    depends_on: DependsOn
     offset: sc.Variable | None
 
     def __post_init__(self):
@@ -71,9 +71,7 @@ class Transform:
     def from_object(
         obj: Field | Group, value: sc.Variable | sc.DataArray | sc.DataGroup
     ) -> Transform:
-        depends_on = depends_on_to_relative_path(
-            obj.attrs['depends_on'], obj.parent.name
-        )
+        depends_on = DependsOn(parent=obj.parent.name, value=obj.attrs['depends_on'])
         return Transform(
             name=obj.name,
             transformation_type=obj.attrs.get('transformation_type'),

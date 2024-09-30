@@ -11,7 +11,7 @@ import scipp as sc
 from scipp.scipy import interpolate
 
 from .base import Group, NXobject, ScippIndex
-from .field import Field
+from .field import DependsOn, Field
 from .transformations import Transform
 
 # TODO skip loading?!
@@ -123,11 +123,12 @@ def maybe_transformation(
 
 
 def maybe_resolve(
-    obj: Field | Group, depends_on: str
+    obj: Field | Group, depends_on: DependsOn
 ) -> sc.DataArray | sc.Variable | None:
     """Conditionally resolve a depend_on attribute."""
     transforms = sc.DataGroup()
     parent = obj.parent
+    depends_on = depends_on.value
     try:
         while depends_on != '.':
             transform = parent[depends_on]
@@ -310,16 +311,11 @@ def compute_positions(
     :
         New data group with added positions.
     """
-    # Create resolver at root level, since any depends_on chain may lead to a parent,
-    # i.e., we cannot use a resolver at the level of each chain's entry point.
-    # TODO need to be able to set root, would be better to construct resolver outside,
-    # see we can navigate to correct path?
-    resolver = TransformationChainResolver.from_root(transformations or dg)
     return _with_positions(
         dg,
         store_position=store_position,
         store_transform=store_transform,
-        resolver=resolver,
+        transformations=transformations,
     )
 
 
@@ -358,14 +354,19 @@ def _with_positions(
     *,
     store_position: str,
     store_transform: str | None = None,
-    resolver: TransformationChainResolver,
+    transformations: sc.DataGroup | None = None,
 ) -> sc.DataGroup:
     out = sc.DataGroup()
     transform = None
-    if 'depends_on' in dg:
+    transformations = transformations or dg.get('resolved_transformations', {})
+    if (depends_on := dg.get('depends_on')) is not None:
+        path = depends_on.absolute_path()
         try:
-            chain = list(dg['resolved_transformations'].values())
-            # TODO chain should be correct as is, but could add consistency check
+            chain = []
+            while path is not None:
+                transform = transformations[path]
+                chain.append(transform)
+                path = transform.depends_on.absolute_path()
             transform = combine_transformations([t.build() for t in chain])
         except KeyError as e:
             warnings.warn(
@@ -377,15 +378,9 @@ def _with_positions(
             if store_transform is not None:
                 out[store_transform] = transform
     for name, value in dg.items():
-        # If the resolver was constructed from an external tree of transformations it
-        # will not contain groups that do not contain any transformations or depends_on
-        # field. Do not descend into such groups.
-        if isinstance(value, sc.DataGroup) and name in resolver.value:
+        if isinstance(value, sc.DataGroup):
             value = _with_positions(
-                value,
-                store_position=store_position,
-                store_transform=store_transform,
-                resolver=resolver[name],
+                value, store_position=store_position, store_transform=store_transform
             )
         elif (
             isinstance(value, sc.DataArray)
