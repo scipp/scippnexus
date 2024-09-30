@@ -27,9 +27,9 @@ if TYPE_CHECKING:
 @dataclass
 class DependsOn:
     """
-    Represents a depends_on field in a NeXus file.
+    Represents a depends_on reference in a NeXus file.
 
-    The parent (the full path within the NeXus file) is stored as the value may be
+    The parent (the full path within the NeXus file) is stored, as the value may be
     relative or absolute, so having the path available after loading is essential.
     """
 
