@@ -33,9 +33,8 @@ such as streamed NXlog values received from a data acquisition system.
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Literal
 
 import scipp as sc
 
@@ -93,19 +92,6 @@ class Transform:
         if self.transformation_type == 'translation':
             return t * self.offset.to(unit=t.unit, copy=False)
         return t * self.offset
-
-
-def apply_to_transformations(
-    dg: sc.DataGroup, func: Callable[[Transform], Transform]
-) -> sc.DataGroup:
-    def apply_nested(node: Any) -> Any:
-        if isinstance(node, sc.DataGroup):
-            return node.apply(apply_nested)
-        if isinstance(node, Transform):
-            return func(node)
-        return node
-
-    return dg.apply(apply_nested)
 
 
 def _parse_offset(obj: Field | Group) -> sc.Variable | None:
