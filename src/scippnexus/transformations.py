@@ -165,8 +165,6 @@ def as_nested(dg: sc.DataGroup) -> sc.DataGroup:
     return out
 
 
-
-
 def _set_recursive(dg: sc.DataGroup, path: str, value: Any) -> None:
     if '/' not in path:
         dg[path] = value
