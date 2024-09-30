@@ -349,12 +349,12 @@ def _with_positions(
     transformations: sc.DataGroup | None = None,
 ) -> sc.DataGroup:
     out = sc.DataGroup()
-    transformations = transformations or dg.get('resolved_transformations', {})
     if (depends_on := dg.get('depends_on')) is not None:
+        registry = transformations or dg.get('resolved_transformations', {})
         try:
             chain = []
             while (path := depends_on.absolute_path()) is not None:
-                chain.append(transformations[path])
+                chain.append(registry[path])
                 depends_on = chain[-1].depends_on
             transform = combine_transformations([t.build() for t in chain])
         except KeyError as e:
@@ -369,7 +369,10 @@ def _with_positions(
     for name, value in dg.items():
         if isinstance(value, sc.DataGroup):
             value = _with_positions(
-                value, store_position=store_position, store_transform=store_transform
+                value,
+                store_position=store_position,
+                store_transform=store_transform,
+                transformations=transformations,
             )
         elif (
             isinstance(value, sc.DataArray)
