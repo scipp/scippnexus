@@ -6,8 +6,6 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, Any, Protocol
 
-import scipp as sc
-
 
 class H5Base(Protocol):
     @property
@@ -68,8 +66,6 @@ if TYPE_CHECKING:
     class ellipsis(Enum):
         Ellipsis = "..."
 
-    from .base import Field, Group
-
 else:
     ellipsis = type(Ellipsis)
 
@@ -80,11 +76,3 @@ ScippIndex = (
 )
 
 Definitions = Mapping[str, type]
-
-MaybeTransformation = (
-    Callable[
-        ['Field | Group', sc.Variable | sc.DataArray | sc.DataGroup, ScippIndex],
-        sc.Variable | sc.DataArray | sc.DataGroup,
-    ]
-    | None
-)

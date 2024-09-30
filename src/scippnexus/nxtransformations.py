@@ -10,7 +10,7 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import Group, NXobject, ScippIndex
+from .base import Group, NexusStructureError, NXobject, ScippIndex
 from .field import Field, depends_on_to_relative_path
 from .transformations import Transform, TransformationError
 
@@ -204,6 +204,7 @@ def maybe_transformation(
     """
     if (transformation_type := obj.attrs.get('transformation_type')) is None:
         return value
+    # return Transform(obj, value)
     transform = Transformation(obj).make_transformation(
         value, transformation_type=transformation_type, select=sel
     )

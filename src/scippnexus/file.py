@@ -13,7 +13,7 @@ from .base import (
     Group,
     base_definitions,
 )
-from .typing import Definitions, MaybeTransformation
+from .typing import Definitions
 
 
 class File(AbstractContextManager, Group):
@@ -22,7 +22,6 @@ class File(AbstractContextManager, Group):
         name: str | os.PathLike[str] | io.BytesIO | h5py.Group,
         *args,
         definitions: Definitions | DefaultDefinitionsType = DefaultDefinitions,
-        maybe_transformation: MaybeTransformation = None,
         **kwargs,
     ):
         """Context manager for NeXus files, similar to h5py.File.
@@ -51,11 +50,7 @@ class File(AbstractContextManager, Group):
         else:
             self._file = h5py.File(name, *args, **kwargs)
             self._manage_file_context = True
-        super().__init__(
-            self._file,
-            definitions=definitions,
-            maybe_transformation=maybe_transformation,
-        )
+        super().__init__(self._file, definitions=definitions)
 
     def __enter__(self):
         if self._manage_file_context:
