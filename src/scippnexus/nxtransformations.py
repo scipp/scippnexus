@@ -18,7 +18,8 @@ the source files. Therefore:
    dataset is preserved (instead of directly converting to, e.g., a rotation matrix) to
    facilitate further processing such as computing the mean or variance.
 2. Loading a :py:class:`Group` will follow depends_on chains and place them in a
-   subgroup 'resolved_transformations'. This is done by :py:func:`maybe_resolve`.
+   subgroup 'resolved_transformations'. This is done by
+   :py:func:`parse_depends_on_chain`.
 3. :py:func:`compute_positions` computes component positions (and transformations). By
    making this an explicit separate step, transformations can be applied to the
    'resolved_transformations' subgroup before doing so. We imagine that this can be used
@@ -62,6 +63,8 @@ class TransformationError(NexusStructureError):
 
 @dataclass
 class Transform:
+    """In-memory component translation or rotation as described by NXtransformations."""
+
     name: str
     transformation_type: Literal['translation', 'rotation']
     value: sc.Variable | sc.DataArray | sc.DataGroup
@@ -91,6 +94,7 @@ class Transform:
         )
 
     def build(self) -> sc.Variable | sc.DataArray:
+        """Convert the raw transform into a rotation or translation matrix."""
         t = self.value * self.vector
         v = t if isinstance(t, sc.Variable) else t.data
         if self.transformation_type == 'translation':
@@ -229,10 +233,10 @@ def maybe_transformation(
         return value
 
 
-def maybe_resolve(
+def parse_depends_on_chain(
     obj: Field | Group, depends_on: DependsOn
-) -> sc.DataArray | sc.Variable | None:
-    """Conditionally resolve a depend_on attribute."""
+) -> sc.DataGroup | None:
+    """Follow a depends_on chain and return the transformations."""
     transforms = sc.DataGroup()
     parent = obj.parent
     depends_on = depends_on.value
