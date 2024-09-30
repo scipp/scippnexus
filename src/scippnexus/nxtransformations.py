@@ -10,109 +10,16 @@ import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import Group, NexusStructureError, NXobject, ScippIndex
-from .field import Field, depends_on_to_relative_path
-from .transformations import Transform, TransformationError
+from .base import Group, NXobject, ScippIndex
+from .field import Field
+from .transformations import Transform
+
+# TODO skip loading?!
+# TODO convert depends_on to absolute path!
 
 
 class NXtransformations(NXobject):
     """Group of transformations."""
-
-
-class Transformation:
-    def __init__(self, obj: Field | Group):  # could be an NXlog
-        self._obj = obj
-
-    @property
-    def attrs(self):
-        return self._obj.attrs
-
-    @property
-    def name(self):
-        return self._obj.name
-
-    @property
-    def offset(self):
-        if (offset := self.attrs.get('offset')) is None:
-            return None
-        if (offset_units := self.attrs.get('offset_units')) is None:
-            raise TransformationError(
-                f"Found {offset=} but no corresponding 'offset_units' "
-                f"attribute at {self.name}"
-            )
-        return sc.spatial.translation(value=offset, unit=offset_units)
-
-    @property
-    def vector(self) -> sc.Variable:
-        if self.attrs.get('vector') is None:
-            raise TransformationError('A transformation needs a vector attribute.')
-        return sc.vector(value=self.attrs.get('vector'))
-
-    def __getitem__(self, select: ScippIndex):
-        transformation_type = self.attrs.get('transformation_type')
-        # According to private communication with Tobias Richter, NeXus allows 0-D or
-        # shape=[1] for single values. It is unclear how and if this could be
-        # distinguished from a scan of length 1.
-        value = self._obj[select]
-        return self.make_transformation(
-            value, transformation_type=transformation_type, select=select
-        )
-
-    def make_transformation(
-        self,
-        value: sc.Variable | sc.DataArray,
-        *,
-        transformation_type: str,
-        select: ScippIndex,
-    ):
-        try:
-            if isinstance(value, sc.DataGroup) and (
-                isinstance(value.get('value'), sc.DataArray)
-            ):
-                # Some NXlog groups are split into value, alarm, and connection_status
-                # sublogs. We only care about the value.
-                value = value['value']
-            if isinstance(value, sc.DataGroup):
-                return value
-            t = value * self.vector
-            v = t if isinstance(t, sc.Variable) else t.data
-            if transformation_type == 'translation':
-                v = sc.spatial.translations(dims=v.dims, values=v.values, unit=v.unit)
-            elif transformation_type == 'rotation':
-                v = sc.spatial.rotations_from_rotvecs(v)
-            else:
-                raise TransformationError(
-                    f"{transformation_type=} attribute at {self.name},"
-                    " expected 'translation' or 'rotation'."
-                )
-            if isinstance(t, sc.Variable):
-                t = v
-            else:
-                t.data = v
-            if (offset := self.offset) is None:
-                transform = t
-            else:
-                offset = sc.vector(value=offset.values, unit=offset.unit)
-                offset = sc.spatial.translation(value=offset.value, unit=offset.unit)
-                if transformation_type == 'translation':
-                    offset = offset.to(unit=t.unit, copy=False)
-                transform = t * offset
-            if (depends_on := self.attrs.get('depends_on')) is not None:
-                if not isinstance(transform, sc.DataArray):
-                    transform = sc.DataArray(transform)
-                transform.coords['depends_on'] = sc.scalar(
-                    depends_on_to_relative_path(depends_on, self._obj.parent.name)
-                )
-            return transform
-        except (sc.DimensionError, sc.UnitError, TransformationError) as e:
-            msg = (
-                f"Failed to convert {self.name} into a transformation: {e} "
-                "Falling back to returning underlying value."
-            )
-            warnings.warn(msg, stacklevel=2)
-            # TODO We should probably try to return some other data structure and
-            # also insert offset and other attributes.
-            return value
 
 
 def _interpolate_transform(transform, xnew):
@@ -156,6 +63,8 @@ def combine_transformations(
         )
     total_transform = None
     for transform in chain:
+        if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
+            transform = transform.to(unit='m', copy=False)
         if total_transform is None:
             total_transform = transform
         elif isinstance(total_transform, sc.DataArray) and isinstance(
@@ -202,52 +111,33 @@ def maybe_transformation(
     Instead we use the presence of the attribute 'transformation_type' to identify
     transformation fields.
     """
-    if (transformation_type := obj.attrs.get('transformation_type')) is None:
+    if obj.attrs.get('transformation_type') is None:
         return value
-    # return Transform(obj, value)
-    transform = Transformation(obj).make_transformation(
-        value, transformation_type=transformation_type, select=sel
-    )
-    # When loading a subgroup of a file there can be transformation chains
-    # that lead outside the loaded group. In this case we cannot resolve the
-    # chain after loading, so we try to resolve it directly.
-    return assign_resolved(obj, transform)
-
-
-def assign_resolved(
-    obj: Field | Group,
-    transform: sc.DataArray | sc.Variable,
-    force_resolve: bool = False,
-) -> sc.DataArray | sc.Variable:
-    """Add resolved_depends_on coord to a transformation if resolve is performed."""
-    if (
-        isinstance(transform, sc.DataArray)
-        and (depends_on := transform.coords.get('depends_on')) is not None
-    ):
-        if (
-            resolved := maybe_resolve(
-                obj, depends_on.value, force_resolve=force_resolve
-            )
-        ) is not None:
-            transform.coords["resolved_depends_on"] = sc.scalar(resolved)
-    return transform
+    try:
+        return Transform.from_object(obj, value)
+    except KeyError as e:
+        warnings.warn(
+            UserWarning(f'Invalid transformation, missing attribute {e}'), stacklevel=2
+        )
+        return value
 
 
 def maybe_resolve(
-    obj: Field | Group, depends_on: str, force_resolve: bool = False
+    obj: Field | Group, depends_on: str
 ) -> sc.DataArray | sc.Variable | None:
     """Conditionally resolve a depend_on attribute."""
-    relative = depends_on_to_relative_path(depends_on, obj.parent.name)
-    if (force_resolve or relative.startswith('..')) and depends_on != '.':
-        try:
-            target = obj.parent[depends_on]
-            resolved = target[()]
-        except Exception:  # noqa: S110
-            # Catchall since resolving not strictly necessary, we should not
-            # fail the rest of the loading process.
-            pass
-        else:
-            return assign_resolved(target, resolved, force_resolve=True)
+    transforms = sc.DataGroup()
+    parent = obj.parent
+    try:
+        while depends_on != '.':
+            transform = parent[depends_on]
+            parent = transform.parent
+            depends_on = transform.attrs['depends_on']
+            transforms[transform.name] = transform[()]
+    except KeyError as e:
+        warnings.warn(UserWarning(f'{obj.name=} missing {e}'), stacklevel=2)
+        return None
+    return transforms
 
 
 class TransformationChainResolver:
@@ -330,10 +220,7 @@ class TransformationChainResolver:
         :
             The resolved position in meter, or None if no depends_on was found.
         """
-        if 'resolved_depends_on' in self.value:
-            depends_on = self.value['resolved_depends_on']
-        else:
-            depends_on = self.value.get('depends_on')
+        depends_on = self.value.get('depends_on')
         if depends_on is None:
             return None
         # Note that transformations have to be applied in "reverse" order, i.e.,
@@ -477,8 +364,10 @@ def _with_positions(
     transform = None
     if 'depends_on' in dg:
         try:
-            transform = resolver.resolve_depends_on()
-        except TransformationChainResolver.ChainError as e:
+            chain = list(dg['resolved_transformations'].values())
+            # TODO chain should be correct as is, but could add consistency check
+            transform = combine_transformations([t.build() for t in chain])
+        except KeyError as e:
             warnings.warn(
                 UserWarning(f'depends_on chain references missing node:\n{e}'),
                 stacklevel=2,

@@ -242,19 +242,11 @@ class Group(Mapping):
 
     @property
     def parent(self) -> Group:
-        return Group(
-            self._group.parent,
-            definitions=self._definitions,
-            maybe_transformation=self._maybe_transformation,
-        )
+        return Group(self._group.parent, definitions=self._definitions)
 
     @cached_property
     def file(self) -> Group:
-        return Group(
-            self._group.file,
-            definitions=self._definitions,
-            maybe_transformation=self._maybe_transformation,
-        )
+        return Group(self._group.file, definitions=self._definitions)
 
     @property
     def _children(self) -> dict[str, Field | Group]:
@@ -424,7 +416,7 @@ class Group(Mapping):
             and (depends_on := dg.get('depends_on')) is not None
         ):
             if (resolved := maybe_resolve(self['depends_on'], depends_on)) is not None:
-                dg['resolved_depends_on'] = resolved
+                dg['resolved_transformations'] = resolved
 
         return maybe_transformation(self, value=dg, sel=sel)
 
