@@ -231,16 +231,13 @@ def _with_positions(
     transformations: sc.DataGroup | None = None,
 ) -> sc.DataGroup:
     out = sc.DataGroup()
-    transform = None
     transformations = transformations or dg.get('resolved_transformations', {})
     if (depends_on := dg.get('depends_on')) is not None:
-        path = depends_on.absolute_path()
         try:
             chain = []
-            while path is not None:
-                transform = transformations[path]
-                chain.append(transform)
-                path = transform.depends_on.absolute_path()
+            while (path := depends_on.absolute_path()) is not None:
+                chain.append(transformations[path])
+                depends_on = chain[-1].depends_on
             transform = combine_transformations([t.build() for t in chain])
         except KeyError as e:
             warnings.warn(
