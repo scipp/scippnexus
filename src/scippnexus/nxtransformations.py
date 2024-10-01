@@ -234,6 +234,14 @@ def maybe_transformation(
 
 @dataclass
 class TransformationChain(DependsOn):
+    """
+    Represents a chain of transformations references by a depends_on field.
+
+    Loading a group with a depends_on field will try to follow the chain and store the
+    transformations as an additional attribute of the in-memory representation of the
+    depends_on field.
+    """
+
     transformations: sc.DataGroup = field(default_factory=sc.DataGroup)
 
     def compute(self) -> sc.Variable | sc.DataArray:
