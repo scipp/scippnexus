@@ -36,7 +36,7 @@ such as streamed NXlog values received from a data acquisition system.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Literal
 
 import numpy as np
@@ -237,13 +237,20 @@ class TransformationChain(DependsOn):
     transformations: sc.DataGroup = field(default_factory=sc.DataGroup)
 
     def compute(self) -> sc.Variable | sc.DataArray:
-        dg = compute_positions(
-            sc.DataGroup(depends_on=self),
-            store_position='position',
-            store_transform='transform',
-            transformations=self.transformations,
-        )
-        return dg['transform']
+        depends_on = self
+        try:
+            chain = []
+            while (path := depends_on.absolute_path()) is not None:
+                chain.append(self.transformations[path])
+                depends_on = chain[-1].depends_on
+            transform = combine_transformations([t.build() for t in chain])
+        except KeyError as e:
+            warnings.warn(
+                UserWarning(f'depends_on chain references missing node:\n{e}'),
+                stacklevel=2,
+            )
+        else:
+            return transform
 
 
 def parse_depends_on_chain(
@@ -360,23 +367,12 @@ def _with_positions(
     transformations: sc.DataGroup | None = None,
 ) -> sc.DataGroup:
     out = sc.DataGroup()
-    if (depends_on := dg.get('depends_on')) is not None:
-        if isinstance(depends_on, TransformationChain):
-            registry = transformations or depends_on.transformations
-        else:
-            registry = transformations or sc.DataGroup()
-        try:
-            chain = []
-            while (path := depends_on.absolute_path()) is not None:
-                chain.append(registry[path])
-                depends_on = chain[-1].depends_on
-            transform = combine_transformations([t.build() for t in chain])
-        except KeyError as e:
-            warnings.warn(
-                UserWarning(f'depends_on chain references missing node:\n{e}'),
-                stacklevel=2,
-            )
-        else:
+    if (chain := dg.get('depends_on')) is not None:
+        if not isinstance(chain, TransformationChain):
+            chain = TransformationChain(chain.parent, chain.value)
+        if transformations is not None:
+            chain = replace(chain, transformations=transformations)
+        if (transform := chain.compute()) is not None:
             out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
             if store_transform is not None:
                 out[store_transform] = transform
