@@ -17,13 +17,12 @@ the source files. Therefore:
 1. :py:class:`Transform` is a dataclass representing a transformation. The raw `value`
    dataset is preserved (instead of directly converting to, e.g., a rotation matrix) to
    facilitate further processing such as computing the mean or variance.
-2. Loading a :py:class:`Group` will follow depends_on chains and place them in a
-   subgroup 'resolved_transformations'. This is done by
-   :py:func:`parse_depends_on_chain`.
+2. Loading a :py:class:`Group` will follow depends_on chains and store them as an
+   attribute of thr depends_on field. This is done by :py:func:`parse_depends_on_chain`.
 3. :py:func:`compute_positions` computes component positions (and transformations). By
    making this an explicit separate step, transformations can be applied to the
-   'resolved_transformations' subgroup before doing so. We imagine that this can be used
-   to
+   transformations stored by thr depends_on field before doing so. We imagine that this
+   can be used to
 
    - Evaluate the transformation at a specific time.
    - Apply filters to remove noise, to avoid having to deal with very small time
@@ -37,7 +36,7 @@ such as streamed NXlog values received from a data acquisition system.
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
 
 import numpy as np
@@ -233,25 +232,38 @@ def maybe_transformation(
         return value
 
 
+@dataclass
+class TransformationChain(DependsOn):
+    transformations: sc.DataGroup = field(default_factory=sc.DataGroup)
+
+    def compute(self) -> sc.Variable | sc.DataArray:
+        dg = compute_positions(
+            sc.DataGroup(depends_on=self),
+            store_position='position',
+            store_transform='transform',
+            transformations=self.transformations,
+        )
+        return dg['transform']
+
+
 def parse_depends_on_chain(
-    obj: Field | Group, depends_on: DependsOn
-) -> sc.DataGroup | None:
+    parent: Field | Group, depends_on: DependsOn
+) -> TransformationChain | None:
     """Follow a depends_on chain and return the transformations."""
-    transforms = sc.DataGroup()
-    parent = obj.parent
+    chain = TransformationChain(depends_on.parent, depends_on.value)
     depends_on = depends_on.value
     try:
         while depends_on != '.':
             transform = parent[depends_on]
             parent = transform.parent
             depends_on = transform.attrs['depends_on']
-            transforms[transform.name] = transform[()]
+            chain.transformations[transform.name] = transform[()]
     except KeyError as e:
         warnings.warn(
             UserWarning(f'depends_on chain references missing node {e}'), stacklevel=2
         )
         return None
-    return transforms
+    return chain
 
 
 def compute_positions(
@@ -295,8 +307,7 @@ def compute_positions(
         If not None, store the resolved transformation chain in this field.
     transformations:
         Optional data group containing transformation chains. If not provided, the
-        transformations are looked up in the 'resolved_transformations' subgroups of the
-        input data group.
+        transformations are looked up in the chains stored within the depends_on field.
 
     Returns
     -------
@@ -350,7 +361,10 @@ def _with_positions(
 ) -> sc.DataGroup:
     out = sc.DataGroup()
     if (depends_on := dg.get('depends_on')) is not None:
-        registry = transformations or dg.get('resolved_transformations', {})
+        if isinstance(depends_on, TransformationChain):
+            registry = transformations or depends_on.transformations
+        else:
+            registry = transformations or sc.DataGroup()
         try:
             chain = []
             while (path := depends_on.absolute_path()) is not None:

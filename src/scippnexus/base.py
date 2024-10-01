@@ -411,14 +411,9 @@ class Group(Mapping):
         # properties of the NXlog group to make the actual transformation.
         from .nxtransformations import maybe_transformation, parse_depends_on_chain
 
-        if (
-            isinstance(dg, sc.DataGroup)
-            and (depends_on := dg.get('depends_on')) is not None
-        ):
-            if (
-                resolved := parse_depends_on_chain(self['depends_on'], depends_on)
-            ) is not None:
-                dg['resolved_transformations'] = resolved
+        if isinstance(dg, sc.DataGroup) and 'depends_on' in dg:
+            if (chain := parse_depends_on_chain(self, dg['depends_on'])) is not None:
+                dg['depends_on'] = chain
 
         return maybe_transformation(self, value=dg)
 
