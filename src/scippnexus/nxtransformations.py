@@ -18,7 +18,7 @@ the source files. Therefore:
    dataset is preserved (instead of directly converting to, e.g., a rotation matrix) to
    facilitate further processing such as computing the mean or variance.
 2. Loading a :py:class:`Group` will follow depends_on chains and store them as an
-   attribute of thr depends_on field. This is done by :py:func:`parse_depends_on_chain`.
+   attribute of the depends_on field. This is done by :py:func:`parse_depends_on_chain`.
 3. :py:func:`compute_positions` computes component positions (and transformations). By
    making this an explicit separate step, transformations can be applied to the
    transformations stored by the depends_on field before doing so. We imagine that this
