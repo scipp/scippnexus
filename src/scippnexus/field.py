@@ -24,14 +24,22 @@ if TYPE_CHECKING:
     from .base import Group
 
 
-def depends_on_to_relative_path(depends_on: str, parent_path: str) -> str:
-    """Replace depends_on paths with relative paths.
+@dataclass
+class DependsOn:
+    """
+    Represents a depends_on reference in a NeXus file.
 
-    After loading we will generally not have the same root so absolute paths
-    cannot be resolved after loading."""
-    if depends_on.startswith('/'):
-        return posixpath.relpath(depends_on, parent_path)
-    return depends_on
+    The parent (the full path within the NeXus file) is stored, as the value may be
+    relative or absolute, so having the path available after loading is essential.
+    """
+
+    parent: str
+    value: str
+
+    def absolute_path(self) -> str | None:
+        if self.value == '.':
+            return None
+        return posixpath.normpath(posixpath.join(self.parent, self.value))
 
 
 def _is_time(obj):
@@ -161,7 +169,7 @@ class Field:
         # If the variable is empty, return early
         if np.prod(shape) == 0:
             variable = self._maybe_datetime(variable)
-            return maybe_transformation(self, value=variable, sel=select)
+            return maybe_transformation(self, value=variable)
 
         if self.dtype == sc.DType.string:
             try:
@@ -170,10 +178,8 @@ class Field:
                 strings = self.dataset.asstr(encoding='latin-1')[index]
                 _warn_latin1_decode(self.dataset, strings, str(e))
             variable.values = np.asarray(strings).flatten()
-            if self.dataset.name.endswith('depends_on') and variable.ndim == 0:
-                variable.value = depends_on_to_relative_path(
-                    variable.value, self.dataset.parent.name
-                )
+            if self.dataset.name.endswith('/depends_on') and variable.ndim == 0:
+                return DependsOn(parent=self.dataset.parent.name, value=variable.value)
         elif variable.values.flags["C_CONTIGUOUS"]:
             # On versions of h5py prior to 3.2, a TypeError occurs in some cases
             # where h5py cannot broadcast data with e.g. shape (20, 1) to a buffer
@@ -199,7 +205,7 @@ class Field:
             else:
                 return variable.value
         variable = self._maybe_datetime(variable)
-        return maybe_transformation(self, value=variable, sel=select)
+        return maybe_transformation(self, value=variable)
 
     def _maybe_datetime(self, variable: sc.Variable) -> sc.Variable:
         if _is_time(variable):

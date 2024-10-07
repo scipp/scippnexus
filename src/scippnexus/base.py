@@ -409,16 +409,13 @@ class Group(Mapping):
         # For a time-dependent transformation in NXtransformations, an NXlog may
         # take the place of the `value` field. In this case, we need to read the
         # properties of the NXlog group to make the actual transformation.
-        from .nxtransformations import maybe_resolve, maybe_transformation
+        from .nxtransformations import maybe_transformation, parse_depends_on_chain
 
-        if (
-            isinstance(dg, sc.DataGroup)
-            and (depends_on := dg.get('depends_on')) is not None
-        ):
-            if (resolved := maybe_resolve(self['depends_on'], depends_on)) is not None:
-                dg['resolved_depends_on'] = resolved
+        if isinstance(dg, sc.DataGroup) and 'depends_on' in dg:
+            if (chain := parse_depends_on_chain(self, dg['depends_on'])) is not None:
+                dg['depends_on'] = chain
 
-        return maybe_transformation(self, value=dg, sel=sel)
+        return maybe_transformation(self, value=dg)
 
     def _warn_fallback(self, e: Exception) -> None:
         msg = (

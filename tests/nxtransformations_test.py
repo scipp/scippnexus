@@ -5,7 +5,7 @@ import scipp as sc
 from scipp.testing import assert_identical
 
 import scippnexus as snx
-from scippnexus.nxtransformations import NXtransformations, TransformationChainResolver
+from scippnexus.nxtransformations import NXtransformations
 
 
 def make_group(group: h5py.Group) -> snx.Group:
@@ -32,9 +32,7 @@ def create_detector(group):
 
 def test_Transformation_with_single_value(h5root):
     detector = create_detector(h5root)
-    snx.create_field(
-        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
-    )
+    snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     value = sc.scalar(6.5, unit='mm')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
@@ -49,19 +47,16 @@ def test_Transformation_with_single_value(h5root):
     value.attrs['offset_units'] = str(offset.unit)
     value.attrs['vector'] = vector.value
 
-    expected = sc.DataArray(data=expected, coords={'depends_on': sc.scalar('.')})
     detector = make_group(detector)
-    depends_on = detector['depends_on'][()]
+    depends_on = detector['depends_on'][()].value
     assert depends_on == 'transformations/t1'
-    t = detector[depends_on][()]
+    t = detector[depends_on][()].build()
     assert_identical(t, expected)
 
 
 def test_time_independent_Transformation_with_length_0(h5root):
     detector = create_detector(h5root)
-    snx.create_field(
-        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
-    )
+    snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     value = sc.array(dims=['dim_0'], values=[], unit='mm')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
@@ -76,20 +71,25 @@ def test_time_independent_Transformation_with_length_0(h5root):
     value.attrs['offset_units'] = str(offset.unit)
     value.attrs['vector'] = vector.value
 
-    expected = sc.DataArray(data=expected, coords={'depends_on': sc.scalar('.')})
     detector = make_group(detector)
-    depends_on = detector['depends_on'][()]
+    depends_on = detector['depends_on'][()].value
     assert depends_on == 'transformations/t1'
-    t = detector[depends_on][()]
+    t = detector[depends_on][()].build()
     assert_identical(t, expected)
 
 
-def test_depends_on_absolute_path_to_sibling_group_resolved_to_relative_path(h5root):
+def test_depends_on_absolute_path_to_sibling_group_resolved_correctly(h5root):
     det1 = snx.create_class(h5root, 'det1', NXtransformations)
     snx.create_field(det1, 'depends_on', sc.scalar('/det2/transformations/t1'))
-
     depends_on = make_group(det1)['depends_on'][()]
-    assert depends_on == '../det2/transformations/t1'
+    assert depends_on.absolute_path() == '/det2/transformations/t1'
+
+
+def test_depends_on_relative_path_to_sibling_group_resolved_correctly(h5root):
+    det1 = snx.create_class(h5root, 'det1', NXtransformations)
+    snx.create_field(det1, 'depends_on', sc.scalar('../det2/transformations/t1'))
+    depends_on = make_group(det1)['depends_on'][()]
+    assert depends_on.absolute_path() == '/det2/transformations/t1'
 
 
 def test_depends_on_relative_path_unchanged(h5root):
@@ -97,12 +97,10 @@ def test_depends_on_relative_path_unchanged(h5root):
     snx.create_field(det1, 'depends_on', sc.scalar('transformations/t1'))
 
     depends_on = make_group(det1)['depends_on'][()]
-    assert depends_on == 'transformations/t1'
+    assert depends_on.value == 'transformations/t1'
 
 
-def test_depends_on_attr_absolute_path_to_sibling_group_resolved_to_relative_path(
-    h5root,
-):
+def test_depends_on_attr_absolute_path_to_sibling_group_preserved(h5root):
     det1 = snx.create_class(h5root, 'det1', NXtransformations)
     transformations = snx.create_class(det1, 'transformations', NXtransformations)
     t1 = snx.create_field(transformations, 't1', sc.scalar(0.1, unit='cm'))
@@ -111,7 +109,7 @@ def test_depends_on_attr_absolute_path_to_sibling_group_resolved_to_relative_pat
     t1.attrs['vector'] = [0, 0, 1]
 
     loaded = make_group(det1)['transformations/t1'][()]
-    assert loaded.coords['depends_on'].value == '../../det2/transformations/t2'
+    assert loaded.depends_on.value == '/det2/transformations/t2'
 
 
 def test_depends_on_attr_relative_path_unchanged(h5root):
@@ -123,17 +121,15 @@ def test_depends_on_attr_relative_path_unchanged(h5root):
     t1.attrs['vector'] = [0, 0, 1]
 
     loaded = make_group(det)['transformations/t1'][()]
-    assert loaded.coords['depends_on'].value == '.'
+    assert loaded.depends_on.value == '.'
     t1.attrs['depends_on'] = 't2'
     loaded = make_group(det)['transformations/t1'][()]
-    assert loaded.coords['depends_on'].value == 't2'
+    assert loaded.depends_on.value == 't2'
 
 
 def test_chain_with_single_values_and_different_unit(h5root):
     detector = create_detector(h5root)
-    snx.create_field(
-        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
-    )
+    snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     value = sc.scalar(6.5, unit='mm')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
@@ -157,19 +153,17 @@ def test_chain_with_single_values_and_different_unit(h5root):
     detector = make_group(h5root['detector_0'])
     loaded = detector[()]
     depends_on = loaded['depends_on']
-    assert depends_on == 'transformations/t1'
+    assert depends_on.value == 'transformations/t1'
     transforms = loaded['transformations']
-    assert_identical(transforms['t1'].data, t1)
-    assert transforms['t1'].coords['depends_on'].value == 't2'
-    assert_identical(transforms['t2'].data, t2)
-    assert transforms['t2'].coords['depends_on'].value == '.'
+    assert_identical(transforms['t1'].build(), t1)
+    assert transforms['t1'].depends_on.value == 't2'
+    assert_identical(transforms['t2'].build(), t2)
+    assert transforms['t2'].depends_on.value == '.'
 
 
 def test_Transformation_with_multiple_values(h5root):
     detector = create_detector(h5root)
-    snx.create_field(
-        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
-    )
+    snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
@@ -190,18 +184,15 @@ def test_Transformation_with_multiple_values(h5root):
     value.attrs['vector'] = vector.value
 
     expected = t * offset
-    expected.coords['depends_on'] = sc.scalar('.')
     detector = make_group(detector)
     depends_on = detector['depends_on'][()]
-    assert depends_on == 'transformations/t1'
-    assert_identical(detector[depends_on][()], expected)
+    assert depends_on.value == 'transformations/t1'
+    assert_identical(detector[depends_on.absolute_path()][()].build(), expected)
 
 
 def test_time_dependent_transform_uses_value_sublog(h5root):
     detector = create_detector(h5root)
-    snx.create_field(
-        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
-    )
+    snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
@@ -229,18 +220,15 @@ def test_time_dependent_transform_uses_value_sublog(h5root):
     value.attrs['vector'] = vector.value
 
     expected = t * offset
-    expected.coords['depends_on'] = sc.scalar('.')
     detector = make_group(detector)
     depends_on = detector['depends_on'][()]
-    assert depends_on == 'transformations/t1'
-    assert_identical(detector[depends_on][()], expected)
+    assert depends_on.value == 'transformations/t1'
+    assert_identical(detector[depends_on.absolute_path()][()].build(), expected)
 
 
 def test_chain_with_multiple_values(h5root):
     detector = create_detector(h5root)
-    snx.create_field(
-        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
-    )
+    snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
@@ -267,21 +255,17 @@ def test_chain_with_multiple_values(h5root):
     value2.attrs['vector'] = vector.value
 
     expected1 = t * offset
-    expected1.coords['depends_on'] = sc.scalar('t2')
     expected2 = t
-    expected2.coords['depends_on'] = sc.scalar('.')
     detector = make_group(detector)[()]
     depends_on = detector['depends_on']
-    assert depends_on == 'transformations/t1'
-    assert_identical(detector['transformations']['t1'], expected1)
-    assert_identical(detector['transformations']['t2'], expected2)
+    assert depends_on.value == 'transformations/t1'
+    assert_identical(detector['transformations']['t1'].build(), expected1)
+    assert_identical(detector['transformations']['t2'].build(), expected2)
 
 
 def test_chain_with_multiple_values_and_different_time_unit(h5root):
     detector = create_detector(h5root)
-    snx.create_field(
-        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
-    )
+    snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     # Making sure to not use nanoseconds since that is used internally and may thus
     # mask bugs.
@@ -312,19 +296,17 @@ def test_chain_with_multiple_values_and_different_time_unit(h5root):
     value2.attrs['vector'] = vector.value
 
     expected1 = t * offset
-    expected1.coords['depends_on'] = sc.scalar('t2')
 
     t2 = t.copy()
     t2.coords['time'] = t2.coords['time'].to(unit='ms')
     expected2 = t2
-    expected2.coords['depends_on'] = sc.scalar('.')
 
     detector = make_group(detector)
     loaded = detector[...]
     depends_on = loaded['depends_on']
-    assert depends_on == 'transformations/t1'
-    assert_identical(loaded['transformations']['t1'], expected1)
-    assert_identical(loaded['transformations']['t2'], expected2)
+    assert depends_on.value == 'transformations/t1'
+    assert_identical(loaded['transformations']['t1'].build(), expected1)
+    assert_identical(loaded['transformations']['t2'].build(), expected2)
 
 
 @pytest.mark.filterwarnings(
@@ -334,9 +316,7 @@ def test_broken_time_dependent_transformation_returns_datagroup_but_sets_up_depe
     h5root,
 ):
     detector = create_detector(h5root)
-    snx.create_field(
-        detector, 'depends_on', sc.scalar('/detector_0/transformations/t1')
-    )
+    snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))
     transformations = snx.create_class(detector, 'transformations', NXtransformations)
     log = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2], unit='m'),
@@ -364,11 +344,11 @@ def test_broken_time_dependent_transformation_returns_datagroup_but_sets_up_depe
     # Due to the way NXtransformations works, vital information is stored in the
     # attributes. DataGroup does currently not support attributes, so this information
     # is mostly useless until that is addressed.
-    t1 = t['t1']
+    t1 = t['t1'].value
     assert isinstance(t1, sc.DataGroup)
     assert t1.keys() == {'time', 'value'}
-    assert loaded['depends_on'] == 'transformations/t1'
-    assert_identical(loaded['transformations']['t1'], t1)
+    assert loaded['depends_on'].value == 'transformations/t1'
+    assert_identical(loaded['transformations']['t1'].value, t1)
 
 
 def write_translation(
@@ -392,10 +372,11 @@ def test_nxtransformations_group_single_item(h5root):
 
     transformations = snx.create_class(h5root, 'transformations', NXtransformations)
     write_translation(transformations, 't1', value, offset, vector)
+    transformations['t1'].attrs['depends_on'] = '.'
 
     loaded = make_group(h5root)['transformations'][()]
     assert set(loaded.keys()) == {'t1'}
-    assert sc.identical(loaded['t1'], expected)
+    assert sc.identical(loaded['t1'].build(), expected)
 
 
 def test_nxtransformations_group_two_independent_items(h5root):
@@ -406,6 +387,7 @@ def test_nxtransformations_group_two_independent_items(h5root):
     vector = sc.vector(value=[0, 1, 1])
     t = value * vector
     write_translation(transformations, 't1', value, offset, vector)
+    transformations['t1'].attrs['depends_on'] = '.'
     expected1 = (
         sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
     )
@@ -413,14 +395,15 @@ def test_nxtransformations_group_two_independent_items(h5root):
     value = value * 0.1
     t = value * vector
     write_translation(transformations, 't2', value, offset, vector)
+    transformations['t2'].attrs['depends_on'] = '.'
     expected2 = (
         sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
     )
 
     loaded = make_group(h5root)['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
-    assert sc.identical(loaded['t1'], expected1)
-    assert sc.identical(loaded['t2'], expected2)
+    assert sc.identical(loaded['t1'].build(), expected1)
+    assert sc.identical(loaded['t2'].build(), expected2)
 
 
 def test_nxtransformations_group_single_chain(h5root):
@@ -431,6 +414,7 @@ def test_nxtransformations_group_single_chain(h5root):
     vector = sc.vector(value=[0, 1, 1])
     t = value * vector
     write_translation(transformations, 't1', value, offset, vector)
+    transformations['t1'].attrs['depends_on'] = '.'
     expected1 = (
         sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
     )
@@ -445,9 +429,9 @@ def test_nxtransformations_group_single_chain(h5root):
 
     loaded = make_group(h5root)['transformations'][()]
     assert set(loaded.keys()) == {'t1', 't2'}
-    assert_identical(loaded['t1'], expected1)
-    assert_identical(loaded['t2'].data, expected2)
-    assert loaded['t2'].coords['depends_on'].value == 't1'
+    assert_identical(loaded['t1'].build(), expected1)
+    assert_identical(loaded['t2'].build(), expected2)
+    assert loaded['t2'].depends_on.value == 't1'
 
 
 def test_slice_transformations(h5root):
@@ -468,11 +452,13 @@ def test_slice_transformations(h5root):
     value1.attrs['offset'] = offset.values
     value1.attrs['offset_units'] = str(offset.unit)
     value1.attrs['vector'] = vector.value
+    value1.attrs['depends_on'] = '.'
 
     expected = t * offset
 
     assert sc.identical(
-        make_group(h5root)['transformations']['time', 1:3]['t1'], expected['time', 1:3]
+        make_group(h5root)['transformations']['time', 1:3]['t1'].build(),
+        expected['time', 1:3],
     )
 
 
@@ -494,6 +480,7 @@ def test_label_slice_transformations(h5root):
     value1.attrs['offset'] = offset.values
     value1.attrs['offset_units'] = str(offset.unit)
     value1.attrs['vector'] = vector.value
+    value1.attrs['depends_on'] = '.'
 
     expected = t * offset
 
@@ -503,7 +490,7 @@ def test_label_slice_transformations(h5root):
             sc.scalar(22, unit='s').to(unit='ns') : sc.scalar(44, unit='s').to(
                 unit='ns'
             ),
-        ]['t1'],
+        ]['t1'].build(),
         expected[
             'time',
             sc.datetime('1970-01-01T00:00:22', unit='ns') : sc.datetime(
@@ -513,106 +500,9 @@ def test_label_slice_transformations(h5root):
     )
 
 
-def test_TransformationChainResolver_path_handling():
-    tree = TransformationChainResolver.from_root({'a': {'b': {'c': 1}}})
-    assert tree['a']['b']['c'].value == 1
-    assert tree['a/b/c'].value == 1
-    assert tree['/a/b/c'].value == 1
-    assert tree['a']['../a/b/c'].value == 1
-    assert tree['a/b']['../../a/b/c'].value == 1
-    assert tree['a/b']['./c'].value == 1
-
-
-def test_TransformationChainResolver_name():
-    tree = TransformationChainResolver.from_root({'a': {'b': {'c': 1}}})
-    assert tree['a']['b']['c'].name == '/a/b/c'
-    assert tree['a/b/c'].name == '/a/b/c'
-    assert tree['/a/b/c'].name == '/a/b/c'
-    assert tree['a']['../a/b/c'].name == '/a/b/c'
-    assert tree['a/b']['../../a/b/c'].name == '/a/b/c'
-    assert tree['a/b']['./c'].name == '/a/b/c'
-
-
-def test_TransformationChainResolver_raises_ChainError_if_child_does_not_exists():
-    tree = TransformationChainResolver.from_root({'a': {'b': {'c': 1}}})
-    with pytest.raises(TransformationChainResolver.ChainError):
-        tree['a']['b']['d']
-
-
-def test_TransformationChainResolver_raises_ChainError_if_path_leads_beyond_root():
-    tree = TransformationChainResolver.from_root({'a': {'b': {'c': 1}}})
-    with pytest.raises(TransformationChainResolver.ChainError):
-        tree['..']
-    with pytest.raises(TransformationChainResolver.ChainError):
-        tree['a']['../..']
-    with pytest.raises(TransformationChainResolver.ChainError):
-        tree['../a']
-
-
 origin = sc.vector([0, 0, 0], unit='m')
 shiftX = sc.spatial.translation(value=[1, 0, 0], unit='m')
 rotZ = sc.spatial.rotations_from_rotvecs(sc.vector([0, 0, 90], unit='deg'))
-
-
-def test_resolve_depends_on_dot():
-    tree = TransformationChainResolver.from_root({'depends_on': '.'})
-    assert sc.identical(tree.resolve_depends_on() * origin, origin)
-
-
-def test_resolve_depends_on_child():
-    transform = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {'depends_on': 'child', 'child': transform}
-    )
-    expected = sc.vector([1, 0, 0], unit='m')
-    assert sc.identical(tree.resolve_depends_on() * origin, expected)
-
-
-def test_resolve_depends_on_grandchild():
-    transform = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {'depends_on': 'child/grandchild', 'child': {'grandchild': transform}}
-    )
-    expected = sc.vector([1, 0, 0], unit='m')
-    assert sc.identical(tree.resolve_depends_on() * origin, expected)
-
-
-def test_resolve_depends_on_child1_depends_on_child2():
-    transform1 = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('child2')})
-    transform2 = sc.DataArray(rotZ, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {'depends_on': 'child1', 'child1': transform1, 'child2': transform2}
-    )
-    # Note order
-    expected = transform2.data * transform1.data
-    assert sc.identical(tree.resolve_depends_on(), expected)
-
-
-def test_resolve_depends_on_grandchild1_depends_on_grandchild2():
-    transform1 = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('grandchild2')})
-    transform2 = sc.DataArray(rotZ, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {
-            'depends_on': 'child/grandchild1',
-            'child': {'grandchild1': transform1, 'grandchild2': transform2},
-        }
-    )
-    expected = transform2.data * transform1.data
-    assert sc.identical(tree.resolve_depends_on(), expected)
-
-
-def test_resolve_depends_on_grandchild1_depends_on_child2():
-    transform1 = sc.DataArray(shiftX, coords={'depends_on': sc.scalar('../child2')})
-    transform2 = sc.DataArray(rotZ, coords={'depends_on': sc.scalar('.')})
-    tree = TransformationChainResolver.from_root(
-        {
-            'depends_on': 'child1/grandchild1',
-            'child1': {'grandchild1': transform1},
-            'child2': transform2,
-        }
-    )
-    expected = transform2.data * transform1.data
-    assert sc.identical(tree.resolve_depends_on(), expected)
 
 
 def test_compute_positions(h5root):
@@ -839,7 +729,8 @@ def test_compute_positions_warns_if_depends_on_is_dead_link(h5root):
     detector = create_detector(instrument)
     snx.create_field(detector, 'depends_on', sc.scalar('transform'))
     root = make_group(h5root)
-    loaded = root[()]
+    with pytest.warns(UserWarning, match='depends_on chain references missing node'):
+        loaded = root[()]
     with pytest.warns(UserWarning, match='depends_on chain references missing node'):
         snx.compute_positions(loaded)
 
@@ -927,11 +818,13 @@ def test_compute_transformation_warns_if_transformation_missing_vector_attr(
     value1 = snx.create_class(transformations, 't1', snx.NXlog)
     snx.create_field(value1, 'time', _log.coords['time'] - sc.epoch(unit='s'))
     snx.create_field(value1, 'value', _log.data)
-    value1.attrs['depends_on'] = 't2'
+    value1.attrs['depends_on'] = '.'
     value1.attrs['transformation_type'] = 'rotation'
     value1.attrs['offset'] = offset1.values
     value1.attrs['offset_units'] = str(offset1.unit)
 
     root = make_group(h5root)
-    with pytest.warns(UserWarning, match='transformation needs a vector attribute'):
+    with pytest.warns(
+        UserWarning, match="Invalid transformation, missing attribute 'vector'"
+    ):
         root[()]

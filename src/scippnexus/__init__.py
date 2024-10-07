@@ -18,8 +18,26 @@ from .base import (
     create_class,
     create_field,
 )
-from .field import Attrs, Field
+from .field import Attrs, DependsOn, Field
 from .file import File
 from ._load import load
 from .nexus_classes import *
-from .nxtransformations import compute_positions, zip_pixel_offsets
+from .nxtransformations import compute_positions, zip_pixel_offsets, TransformationChain
+
+__all__ = [
+    'Attrs',
+    'DependsOn',
+    'Field',
+    'File',
+    'Group',
+    'NXobject',
+    'NexusStructureError',
+    'TransformationChain',
+    'base_definitions',
+    'compute_positions',
+    'create_class',
+    'create_field',
+    'load',
+    'typing',
+    'zip_pixel_offsets',
+]
