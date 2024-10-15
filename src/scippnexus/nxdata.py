@@ -486,7 +486,7 @@ class NXlog(NXdata):
             attrs=attrs,
             children=children,
             fallback_dims=('time',),
-            fallback_signal_name='value',
+            fallback_signal_name='value' if 'value' in children else 'time',
         )
 
     def read_children(self, sel: ScippIndex) -> sc.DataGroup:
