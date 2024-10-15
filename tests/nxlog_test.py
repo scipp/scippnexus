@@ -52,16 +52,14 @@ def test_nxobject_log(h5root):
     assert sc.identical(log[...], da)
 
 
-@pytest.mark.filterwarnings("ignore:Failed to load /entry/log:UserWarning")
-def test_nxlog_with_missing_value_triggers_fallback(nxroot):
+def test_nxlog_with_missing_value_uses_time_as_value(nxroot):
     time = sc.epoch(unit='ns') + sc.array(
         dims=['time'], unit='s', values=[4.4, 5.5, 6.6]
     ).to(unit='ns', dtype='int64')
     log = nxroot['entry'].create_class('log', NXlog)
     log['time'] = time - sc.epoch(unit='ns')
     loaded = log[()]
-    # Fallback to DataGroup, but we still have partial info from NXlog: dim is time
-    assert_identical(loaded, sc.DataGroup(time=time))
+    assert_identical(loaded, sc.DataArray(data=time))
 
 
 def test_nxlog_length_1(h5root):
