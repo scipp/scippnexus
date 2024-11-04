@@ -69,7 +69,12 @@ class Transform:
     value: sc.Variable | sc.DataArray | sc.DataGroup
     vector: sc.Variable
     depends_on: DependsOn
-    offset: sc.Variable | None
+    offset: sc.Variable | None = None
+
+    @property
+    def sizes(self) -> dict[str, int]:
+        """Convenience property to access sizes of the value."""
+        return self.value.sizes
 
     def __post_init__(self):
         if self.transformation_type not in ['translation', 'rotation']:
