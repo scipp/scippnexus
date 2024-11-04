@@ -271,6 +271,20 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     )
 
 
+def test_loads_event_data_with_2d_detector_numbers_and_explicit_axes(h5root):
+    detector = snx.create_class(h5root, 'detector0', NXdetector)
+    detector = make_group(detector)
+    detector.create_field('detector_number', detector_numbers_xx_yy_1234())
+    h5root['detector0'].attrs['axes'] = ['y', 'x']
+    create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
+    assert detector.sizes == {'y': 2, 'x': 2, 'event_time_zero': 4}
+    da = detector[...]['events']
+    assert sc.identical(
+        da.bins.size().data,
+        sc.array(dims=['y', 'x'], unit=None, dtype='int64', values=[[2, 3], [0, 1]]),
+    )
+
+
 def test_selecting_pixels_works_with_event_signal(nxroot):
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
