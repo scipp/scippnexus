@@ -280,7 +280,8 @@ def parse_depends_on_chain(
             chain.transformations[transform.name] = transform[()]
     except KeyError as e:
         warnings.warn(
-            UserWarning(f'depends_on chain {depends_on} references missing node {e}'), stacklevel=2
+            UserWarning(f'depends_on chain {depends_on} references missing node {e}'),
+            stacklevel=2,
         )
         return None
     return chain
