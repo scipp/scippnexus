@@ -732,7 +732,7 @@ def test_compute_positions_warns_if_depends_on_is_dead_link(h5root):
     warning_regex = r"depends_on chain .* missing node"
     with pytest.warns(UserWarning, match=warning_regex):
         loaded = root[()]
-    with pytest.warns(UserWarning, match='depends_on chain .* references missing node'):
+    with pytest.warns(UserWarning, match=warning_regex):
         snx.compute_positions(loaded)
 
 
