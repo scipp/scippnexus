@@ -222,7 +222,7 @@ class Group(Mapping):
             return NXroot
 
     @cached_property
-    def attrs(self) -> dict[str, Any]:
+    def attrs(self) -> MappingProxyType[str, Any]:
         """The attributes of the group.
 
         Cannot be used for writing attributes, since they are cached for performance."""
@@ -478,6 +478,16 @@ class Group(Mapping):
     @property
     def shape(self) -> tuple[int, ...]:
         return tuple(self.sizes.values())
+
+    @property
+    def definitions(self) -> MappingProxyType[str, str | type] | None:
+        return (
+            None if self._definitions is None else MappingProxyType(self._definitions)
+        )
+
+    @property
+    def underlying(self) -> H5Group:
+        return self._group
 
 
 def _create_field_params_numpy(data: np.ndarray):

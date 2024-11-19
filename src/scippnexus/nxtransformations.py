@@ -37,13 +37,20 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass, field, replace
+from pathlib import PurePosixPath
 from typing import Literal
 
 import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import Group, NexusStructureError, NXobject, base_definitions_dict
+from .base import (
+    Group,
+    NexusStructureError,
+    NXobject,
+    base_definitions_dict,
+    is_dataset,
+)
 from .field import DependsOn, Field
 
 
@@ -266,6 +273,55 @@ class TransformationChain(DependsOn):
             return transform
 
 
+def _resolve_path(cwd: str, path: str) -> str:
+    """Resolve a path as if in a working directory, based only on strings.
+
+    ``base`` must be absolute.
+    ``path`` is resolved as if ``base`` is the current working directory.
+    Returns an absolute path.
+    """
+    p = PurePosixPath(path)
+    if p.is_absolute():
+        return p.as_posix()
+
+    base_parts = list(PurePosixPath(cwd).parts)
+    path_parts = [segment for segment in p.parts if segment != '.']
+    while path_parts[0] == '..':
+        if not path_parts:
+            raise ValueError(f"Relative path beyond root: '{p}'")
+        base_parts.pop(-1)
+        path_parts.pop(0)
+    return PurePosixPath(*base_parts, *path_parts).as_posix()
+
+
+def _locate_depends_on_target(parent: Field | Group, depends_on: str) -> Field | Group:
+    """Find the target of a depends_on link.
+
+    The returned object is equivalent to calling ``parent[depends_on]``
+    in the context of transformations.
+    This function does not work in general because it does not handle NXdata attributes.
+
+    The method used here uses the underlying h5py groups to find the target group or
+    field to avoid constructing expensive intermediate snx.Group objects.
+    """
+    raw = parent.underlying
+    target_path = _resolve_path(raw.name, depends_on)
+    target = raw.file[target_path]
+
+    if is_dataset(target):
+        from .base import _dtype_fromdataset, _squeezed_field_sizes
+
+        res = Field(
+            target,
+            parent=Group(target.parent, definitions=parent.definitions),
+            sizes=_squeezed_field_sizes(target),
+            dtype=_dtype_fromdataset(target),
+        )
+    else:
+        res = Group(target, definitions=parent.definitions)
+    return res
+
+
 def parse_depends_on_chain(
     parent: Field | Group, depends_on: DependsOn
 ) -> TransformationChain | None:
@@ -274,7 +330,7 @@ def parse_depends_on_chain(
     depends_on = depends_on.value
     try:
         while depends_on != '.':
-            transform = parent[depends_on]
+            transform = _locate_depends_on_target(parent, depends_on)
             parent = transform.parent
             depends_on = transform.attrs['depends_on']
             chain.transformations[transform.name] = transform[()]
