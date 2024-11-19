@@ -36,10 +36,12 @@ such as streamed NXlog values received from a data acquisition system.
 from __future__ import annotations
 
 import warnings
+from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from pathlib import PurePosixPath
 from typing import Literal
 
+import h5py
 import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
@@ -273,28 +275,32 @@ class TransformationChain(DependsOn):
             return transform
 
 
-def _resolve_path(cwd: str, path: str) -> str:
+def _resolve_path(cwd: PurePosixPath, path: PurePosixPath) -> PurePosixPath:
     """Resolve a path as if in a working directory, based only on strings.
 
     ``base`` must be absolute.
     ``path`` is resolved as if ``base`` is the current working directory.
     Returns an absolute path.
     """
-    p = PurePosixPath(path)
-    if p.is_absolute():
-        return p.as_posix()
+    if path.is_absolute():
+        return path
 
-    base_parts = list(PurePosixPath(cwd).parts)
-    path_parts = [segment for segment in p.parts if segment != '.']
+    base_parts = list(cwd.parts)
+    path_parts = [segment for segment in path.parts if segment != '.']
     while path_parts[0] == '..':
         if not path_parts:
-            raise ValueError(f"Relative path beyond root: '{p}'")
+            raise ValueError(f"Relative path beyond root: '{path}'")
         base_parts.pop(-1)
         path_parts.pop(0)
-    return PurePosixPath(*base_parts, *path_parts).as_posix()
+    return PurePosixPath(*base_parts, *path_parts)
 
 
-def _locate_depends_on_target(parent: Field | Group, depends_on: str) -> Field | Group:
+def _locate_depends_on_target(
+    file: h5py.File,
+    base_path: PurePosixPath,
+    depends_on: PurePosixPath,
+    definitions: Mapping[str, type] | None,
+) -> tuple[Field | Group, PurePosixPath]:
     """Find the target of a depends_on link.
 
     The returned object is equivalent to calling ``parent[depends_on]``
@@ -304,22 +310,21 @@ def _locate_depends_on_target(parent: Field | Group, depends_on: str) -> Field |
     The method used here uses the underlying h5py groups to find the target group or
     field to avoid constructing expensive intermediate snx.Group objects.
     """
-    raw = parent.underlying
-    target_path = _resolve_path(raw.name, depends_on)
-    target = raw.file[target_path]
+    target_path = _resolve_path(base_path, depends_on)
+    target = file[target_path.as_posix()]
 
     if is_dataset(target):
         from .base import _dtype_fromdataset, _squeezed_field_sizes
 
         res = Field(
             target,
-            parent=Group(target.parent, definitions=parent.definitions),
+            parent=Group(target.parent, definitions=definitions),
             sizes=_squeezed_field_sizes(target),
             dtype=_dtype_fromdataset(target),
         )
     else:
-        res = Group(target, definitions=parent.definitions)
-    return res
+        res = Group(target, definitions=definitions)
+    return res, target_path.parent
 
 
 def parse_depends_on_chain(
@@ -328,10 +333,13 @@ def parse_depends_on_chain(
     """Follow a depends_on chain and return the transformations."""
     chain = TransformationChain(depends_on.parent, depends_on.value)
     depends_on = depends_on.value
+    file = parent.underlying.file
+    base_path = PurePosixPath(parent.underlying.name)
     try:
         while depends_on != '.':
-            transform = _locate_depends_on_target(parent, depends_on)
-            parent = transform.parent
+            transform, base_path = _locate_depends_on_target(
+                file, base_path, PurePosixPath(depends_on), parent.definitions
+            )
             depends_on = transform.attrs['depends_on']
             chain.transformations[transform.name] = transform[()]
     except KeyError as e:

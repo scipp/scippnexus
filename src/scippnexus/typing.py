@@ -17,7 +17,7 @@ class H5Base(Protocol):
         """Name of dataset or group"""
 
     @property
-    def file(self) -> list[int]:
+    def file(self) -> Any:
         """File of dataset or group"""
 
     @property
