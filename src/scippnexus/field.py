@@ -81,6 +81,31 @@ def _as_datetime(obj: Any):
     return None
 
 
+_scipp_dtype = {
+    np.dtype('int8'): sc.DType.int32,
+    np.dtype('int16'): sc.DType.int32,
+    np.dtype('uint8'): sc.DType.int32,
+    np.dtype('uint16'): sc.DType.int32,
+    np.dtype('uint32'): sc.DType.int32,
+    np.dtype('uint64'): sc.DType.int64,
+    np.dtype('int32'): sc.DType.int32,
+    np.dtype('int64'): sc.DType.int64,
+    np.dtype('float32'): sc.DType.float32,
+    np.dtype('float64'): sc.DType.float64,
+    np.dtype('bool'): sc.DType.bool,
+}
+
+
+def _dtype_fromdataset(dataset: H5Dataset) -> sc.DType:
+    return _scipp_dtype.get(dataset.dtype, sc.DType.string)
+
+
+def _squeezed_field_sizes(dataset: H5Dataset) -> dict[str, int]:
+    if (shape := dataset.shape) == (1,):
+        return {}
+    return {f'dim_{i}': size for i, size in enumerate(shape)}
+
+
 @dataclass
 class Field:
     """NeXus field.
@@ -92,6 +117,12 @@ class Field:
     sizes: dict[str, int] | None = None
     dtype: sc.DType | None = None
     errors: H5Dataset | None = None
+
+    def __post_init__(self) -> None:
+        if self.sizes is None:
+            self.sizes = _squeezed_field_sizes(self.dataset)
+        if self.dtype is None:
+            self.dtype = _dtype_fromdataset(self.dataset)
 
     @cached_property
     def attrs(self) -> dict[str, Any]:

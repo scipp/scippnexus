@@ -314,13 +314,9 @@ def _locate_depends_on_target(
     target = file[target_path.as_posix()]
 
     if is_dataset(target):
-        from .base import _dtype_fromdataset, _squeezed_field_sizes
-
         res = Field(
             target,
             parent=Group(target.parent, definitions=definitions),
-            sizes=_squeezed_field_sizes(target),
-            dtype=_dtype_fromdataset(target),
         )
     else:
         res = Group(target, definitions=definitions)

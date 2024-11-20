@@ -481,7 +481,6 @@ class NXlog(NXdata):
             for k in list(children):
                 if k.startswith(name):
                     field = children.pop(k)
-                    self._init_field(field)
                     field.sizes = {
                         'time' if i == 0 else f'dim_{i}': size
                         for i, size in enumerate(field.dataset.shape)

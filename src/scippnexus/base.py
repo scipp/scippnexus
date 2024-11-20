@@ -41,45 +41,12 @@ def is_dataset(obj: H5Group | H5Dataset) -> bool:
     return hasattr(obj, 'shape')
 
 
-_scipp_dtype = {
-    np.dtype('int8'): sc.DType.int32,
-    np.dtype('int16'): sc.DType.int32,
-    np.dtype('uint8'): sc.DType.int32,
-    np.dtype('uint16'): sc.DType.int32,
-    np.dtype('uint32'): sc.DType.int32,
-    np.dtype('uint64'): sc.DType.int64,
-    np.dtype('int32'): sc.DType.int32,
-    np.dtype('int64'): sc.DType.int64,
-    np.dtype('float32'): sc.DType.float32,
-    np.dtype('float64'): sc.DType.float64,
-    np.dtype('bool'): sc.DType.bool,
-}
-
-
-def _dtype_fromdataset(dataset: H5Dataset) -> sc.DType:
-    return _scipp_dtype.get(dataset.dtype, sc.DType.string)
-
-
-def _squeezed_field_sizes(dataset: H5Dataset) -> dict[str, int]:
-    if (shape := dataset.shape) == (1,):
-        return {}
-    return {f'dim_{i}': size for i, size in enumerate(shape)}
-
-
 class NXobject:
-    def _init_field(self, field: Field):
-        if field.sizes is None:
-            field.sizes = _squeezed_field_sizes(field.dataset)
-        field.dtype = _dtype_fromdataset(field.dataset)
-
     def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
         """Subclasses should call this in their __init__ method, or ensure that they
         initialize the fields in `children` with the correct sizes and dtypes."""
         self._attrs = attrs
         self._children = children
-        for field in children.values():
-            if isinstance(field, Field):
-                self._init_field(field)
 
     @property
     def unit(self) -> None | sc.Unit:
