@@ -308,6 +308,7 @@ def parse_depends_on_chain(
     # Use raw h5py objects to follow the chain because that avoids constructing
     # expensive intermediate snx.Group objects.
     file = parent.underlying.file
+    visited = [depends_on]
     try:
         while depends_on.value != '.':
             transform, base = _locate_depends_on_target(
@@ -315,6 +316,13 @@ def parse_depends_on_chain(
             )
             depends_on = DependsOn(parent=base, value=transform.attrs['depends_on'])
             chain.transformations[transform.name] = transform[()]
+            if depends_on == visited[-1]:
+                depends_on.value = '.'
+                # Transform.from_object does not see the full chain, so it cannot
+                # detect this case.
+                chain.transformations[transform.name].depends_on = depends_on
+
+            visited.append(depends_on)
     except KeyError as e:
         warnings.warn(
             UserWarning(f'depends_on chain {depends_on} references missing node {e}'),

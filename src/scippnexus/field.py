@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+from __future__ import annotations
+
 import datetime
 import posixpath
 import re
@@ -40,6 +42,11 @@ class DependsOn:
         if self.value == '.':
             return None
         return posixpath.normpath(posixpath.join(self.parent, self.value))
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DependsOn):
+            return NotImplemented
+        return self.absolute_path() == other.absolute_path()
 
 
 def _is_time(obj):
@@ -113,7 +120,7 @@ class Field:
     """
 
     dataset: H5Dataset
-    parent: 'Group'
+    parent: Group
     sizes: dict[str, int] | None = None
     dtype: sc.DType | None = None
     errors: H5Dataset | None = None
@@ -139,7 +146,7 @@ class Field:
         return tuple(self.sizes.values())
 
     @cached_property
-    def file(self) -> 'Group':
+    def file(self) -> Group:
         return self.parent.file
 
     def _load_variances(self, var, index):
