@@ -35,15 +35,24 @@ such as streamed NXlog values received from a data acquisition system.
 
 from __future__ import annotations
 
+import posixpath
 import warnings
+from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from typing import Literal
 
+import h5py
 import numpy as np
 import scipp as sc
 from scipp.scipy import interpolate
 
-from .base import Group, NexusStructureError, NXobject, base_definitions_dict
+from .base import (
+    Group,
+    NexusStructureError,
+    NXobject,
+    base_definitions_dict,
+    is_dataset,
+)
 from .field import DependsOn, Field
 
 
@@ -266,17 +275,45 @@ class TransformationChain(DependsOn):
             return transform
 
 
+def _locate_depends_on_target(
+    file: h5py.File,
+    depends_on: DependsOn,
+    definitions: Mapping[str, type] | None,
+) -> tuple[Field | Group, str]:
+    """Find the target of a depends_on link.
+
+    The returned object is equivalent to calling ``parent[depends_on]``
+    in the context of transformations.
+    This function does not work in general because it does not process any attributes
+    of parents which is required to fully load some groups.
+    """
+    target_path = depends_on.absolute_path()
+    target = file[target_path]
+
+    if is_dataset(target):
+        res = Field(
+            target,
+            parent=Group(target.parent, definitions=definitions),
+        )
+    else:
+        res = Group(target, definitions=definitions)
+    return res, posixpath.dirname(target_path)
+
+
 def parse_depends_on_chain(
     parent: Field | Group, depends_on: DependsOn
 ) -> TransformationChain | None:
     """Follow a depends_on chain and return the transformations."""
     chain = TransformationChain(depends_on.parent, depends_on.value)
-    depends_on = depends_on.value
+    # Use raw h5py objects to follow the chain because that avoids constructing
+    # expensive intermediate snx.Group objects.
+    file = parent.underlying.file
     try:
-        while depends_on != '.':
-            transform = parent[depends_on]
-            parent = transform.parent
-            depends_on = transform.attrs['depends_on']
+        while depends_on.value != '.':
+            transform, base = _locate_depends_on_target(
+                file, depends_on, parent.definitions
+            )
+            depends_on = DependsOn(parent=base, value=transform.attrs['depends_on'])
             chain.transformations[transform.name] = transform[()]
     except KeyError as e:
         warnings.warn(
