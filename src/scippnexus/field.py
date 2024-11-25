@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+from __future__ import annotations
+
 import datetime
 import posixpath
 import re
@@ -113,7 +115,7 @@ class Field:
     """
 
     dataset: H5Dataset
-    parent: 'Group'
+    parent: Group
     sizes: dict[str, int] | None = None
     dtype: sc.DType | None = None
     errors: H5Dataset | None = None
@@ -139,7 +141,7 @@ class Field:
         return tuple(self.sizes.values())
 
     @cached_property
-    def file(self) -> 'Group':
+    def file(self) -> Group:
         return self.parent.file
 
     def _load_variances(self, var, index):
