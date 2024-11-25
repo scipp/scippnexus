@@ -931,3 +931,34 @@ def test_compute_positions_terminates_with_depends_on_to_self_relative(h5root):
             unit='m',
         ),
     )
+
+
+def test_compute_positions_raises_for_depends_on_cycle(h5root):
+    instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
+    detector = create_detector(instrument)
+    snx.create_field(detector, 'x_pixel_offset', sc.linspace('xx', -1, 1, 2, unit='m'))
+    snx.create_field(detector, 'y_pixel_offset', sc.linspace('yy', -1, 1, 2, unit='m'))
+    detector.attrs['axes'] = ['xx', 'yy']
+    detector.attrs['x_pixel_offset_indices'] = [0]
+    detector.attrs['y_pixel_offset_indices'] = [1]
+    snx.create_field(
+        detector, 'depends_on', sc.scalar('/instrument/detector_0/transformations/t1')
+    )
+    transformations = snx.create_class(detector, 'transformations', NXtransformations)
+    value = sc.scalar(6.5, unit='mm')
+    offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
+    vector = sc.vector(value=[0, 0, 1])
+    value1 = snx.create_field(transformations, 't1', value)
+    value1.attrs['depends_on'] = 't2'
+    value1.attrs['transformation_type'] = 'translation'
+    value1.attrs['offset'] = offset.values
+    value1.attrs['offset_units'] = str(offset.unit)
+    value1.attrs['vector'] = vector.value
+    value2 = snx.create_field(transformations, 't2', value.to(unit='cm'))
+    value2.attrs['depends_on'] = 't1'
+    value2.attrs['transformation_type'] = 'translation'
+    value2.attrs['vector'] = vector.value
+
+    root = make_group(h5root)
+    with pytest.raises(ValueError, match="Circular depends_on"):
+        _ = root[()]

@@ -43,11 +43,6 @@ class DependsOn:
             return None
         return posixpath.normpath(posixpath.join(self.parent, self.value))
 
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, DependsOn):
-            return NotImplemented
-        return self.absolute_path() == other.absolute_path()
-
 
 def _is_time(obj):
     if (unit := obj.unit) is None:
