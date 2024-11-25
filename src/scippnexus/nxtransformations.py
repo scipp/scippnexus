@@ -322,7 +322,10 @@ def parse_depends_on_chain(
                 # detect this case.
                 chain.transformations[transform.name].depends_on = depends_on
             elif depends_on.absolute_path() in visited:
-                raise ValueError(f'Circular depends_on chain detected: {visited}')
+                raise ValueError(
+                    'Circular depends_on chain detected: '
+                    f'{[*visited, depends_on.absolute_path()]}'
+                )
             visited.append(depends_on.absolute_path())
     except KeyError as e:
         warnings.warn(
