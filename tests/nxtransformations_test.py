@@ -831,7 +831,7 @@ def test_compute_transformation_warns_if_transformation_missing_vector_attr(
         root[()]
 
 
-def test_compute_positions_terminates_with_depends_on_to_self_absolute(h5root):
+def test_compute_positions_raises_for_depends_on_self_absolute(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     detector = create_detector(instrument)
     snx.create_field(detector, 'x_pixel_offset', sc.linspace('xx', -1, 1, 2, unit='m'))
@@ -846,7 +846,6 @@ def test_compute_positions_terminates_with_depends_on_to_self_absolute(h5root):
     value = sc.scalar(6.5, unit='mm')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
     vector = sc.vector(value=[0, 0, 1])
-    t = value * vector
     value1 = snx.create_field(transformations, 't1', value)
     value1.attrs['depends_on'] = 't2'
     value1.attrs['transformation_type'] = 'translation'
@@ -858,31 +857,12 @@ def test_compute_positions_terminates_with_depends_on_to_self_absolute(h5root):
     value2.attrs['transformation_type'] = 'translation'
     value2.attrs['vector'] = vector.value
 
-    t1 = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
-    t2 = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit).to(
-        unit='cm'
-    )
     root = make_group(h5root)
-    loaded = root[()]
-    result = snx.compute_positions(loaded)
-    origin = sc.vector([0, 0, 0], unit='m')
-    assert_identical(
-        result['instrument']['detector_0']['position'],
-        t2.to(unit='m') * t1.to(unit='m') * origin,
-    )
-    assert_identical(
-        result['instrument']['detector_0']['data'].coords['position'],
-        t2.to(unit='m')
-        * t1.to(unit='m')
-        * sc.vectors(
-            dims=['xx', 'yy'],
-            values=[[[-1, -1, 0], [-1, 1, 0]], [[1, -1, 0], [1, 1, 0]]],
-            unit='m',
-        ),
-    )
+    with pytest.raises(ValueError, match="Circular depends_on"):
+        _ = root[()]
 
 
-def test_compute_positions_terminates_with_depends_on_to_self_relative(h5root):
+def test_compute_positions_raises_for_depends_on_self_relative(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     detector = create_detector(instrument)
     snx.create_field(detector, 'x_pixel_offset', sc.linspace('xx', -1, 1, 2, unit='m'))
@@ -897,7 +877,6 @@ def test_compute_positions_terminates_with_depends_on_to_self_relative(h5root):
     value = sc.scalar(6.5, unit='mm')
     offset = sc.spatial.translation(value=[1, 2, 3], unit='mm')
     vector = sc.vector(value=[0, 0, 1])
-    t = value * vector
     value1 = snx.create_field(transformations, 't1', value)
     value1.attrs['depends_on'] = 't2'
     value1.attrs['transformation_type'] = 'translation'
@@ -909,28 +888,9 @@ def test_compute_positions_terminates_with_depends_on_to_self_relative(h5root):
     value2.attrs['transformation_type'] = 'translation'
     value2.attrs['vector'] = vector.value
 
-    t1 = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit) * offset
-    t2 = sc.spatial.translations(dims=t.dims, values=t.values, unit=t.unit).to(
-        unit='cm'
-    )
     root = make_group(h5root)
-    loaded = root[()]
-    result = snx.compute_positions(loaded)
-    origin = sc.vector([0, 0, 0], unit='m')
-    assert_identical(
-        result['instrument']['detector_0']['position'],
-        t2.to(unit='m') * t1.to(unit='m') * origin,
-    )
-    assert_identical(
-        result['instrument']['detector_0']['data'].coords['position'],
-        t2.to(unit='m')
-        * t1.to(unit='m')
-        * sc.vectors(
-            dims=['xx', 'yy'],
-            values=[[[-1, -1, 0], [-1, 1, 0]], [[1, -1, 0], [1, 1, 0]]],
-            unit='m',
-        ),
-    )
+    with pytest.raises(ValueError, match="Circular depends_on"):
+        _ = root[()]
 
 
 def test_compute_positions_raises_for_depends_on_cycle(h5root):

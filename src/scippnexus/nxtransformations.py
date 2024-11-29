@@ -310,18 +310,13 @@ def parse_depends_on_chain(
     file = parent.underlying.file
     visited = [depends_on.absolute_path()]
     try:
-        while depends_on.value != '.':
+        while not depends_on.is_terminal:
             transform, base = _locate_depends_on_target(
                 file, depends_on, parent.definitions
             )
             depends_on = DependsOn(parent=base, value=transform.attrs['depends_on'])
             chain.transformations[transform.name] = transform[()]
-            if depends_on.absolute_path() == visited[-1]:
-                depends_on.value = '.'
-                # Transform.from_object does not see the full chain, so it cannot
-                # detect this case.
-                chain.transformations[transform.name].depends_on = depends_on
-            elif depends_on.absolute_path() in visited:
+            if depends_on.absolute_path() in visited:
                 raise ValueError(
                     'Circular depends_on chain detected: '
                     f'{[*visited, depends_on.absolute_path()]}'

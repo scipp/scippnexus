@@ -39,9 +39,13 @@ class DependsOn:
     value: str
 
     def absolute_path(self) -> str | None:
-        if self.value == '.':
+        if self.is_terminal:
             return None
         return posixpath.normpath(posixpath.join(self.parent, self.value))
+
+    @property
+    def is_terminal(self) -> bool:
+        return self.value == '.'
 
 
 def _is_time(obj):
