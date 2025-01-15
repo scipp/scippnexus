@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import inspect
 import warnings
-from collections.abc import Iterator, Mapping
+from collections.abc import ItemsView, Iterator, KeysView, Mapping, ValuesView
 from functools import lru_cache
 from pathlib import PurePosixPath
 from types import MappingProxyType
@@ -286,6 +286,18 @@ class Group(Mapping):
 
     def __iter__(self) -> Iterator[str]:
         return self._children.__iter__()
+
+    def keys(self) -> KeysView[str]:
+        """Return a view of the keys of the group's elements."""
+        return self._children.keys()
+
+    def values(self) -> ValuesView[Field | Group]:
+        """Return a view of the group's elements."""
+        return self._children.values()
+
+    def items(self) -> ItemsView[str, Field | Group]:
+        """Return a view of pairs of the keys and the group's elements."""
+        return self._children.items()
 
     def _get_children_by_nx_class(
         self, select: type | list[type]
