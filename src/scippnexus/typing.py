@@ -3,7 +3,7 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, KeysView, Mapping
 from typing import TYPE_CHECKING, Any, Protocol
 
 
@@ -47,7 +47,7 @@ class H5Group(H5Base, Protocol):
     def __getitem__(self, index: str | Any) -> H5Dataset | H5Group:
         """Keys in the group"""
 
-    def keys(self) -> list[str]:
+    def keys(self) -> KeysView[str]:
         """Keys in the group"""
 
     def create_dataset(self) -> H5Dataset:
