@@ -216,4 +216,4 @@ def test_load_suppress_warnings():
     from scippnexus import data
 
     filename = data.get_path('PG3_4844_event.nxs')
-    snx.load(filename, quiet=False)
+    snx.load(filename, quiet=True)
