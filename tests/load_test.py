@@ -210,3 +210,10 @@ def test_load_from_snx_group_rejects_new_definitions(
     with pytest.raises(TypeError, match='Cannot override application definitions'):
         with snx.File(nexus_buffer, 'r') as f:
             snx.load(f, definitions=definitions)
+
+
+def test_load_suppress_warnings():
+    from scippnexus import data
+
+    filename = data.get_path('PG3_4844_event.nxs')
+    snx.load(filename, quiet=False)
