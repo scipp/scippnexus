@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import contextlib
 import io
+import warnings
 from os import PathLike
 
 import h5py as h5
@@ -23,6 +24,7 @@ def load(
     root: str | None = None,
     select: ScippIndex = (),
     definitions: Definitions | DefaultDefinitionsType = DefaultDefinitions,
+    quiet: bool = False,
 ) -> sc.DataGroup | sc.DataArray | sc.Dataset:
     """Load a NeXus file.
 
@@ -83,16 +85,20 @@ def load(
     definitions:
         NeXus `application definitions <../../user-guide/application-definitions.rst>`_.
         Defaults to the ScippNexus base definitions.
+    quiet:
+        If ``True``, suppresses warnings while loading.
 
     Returns
     -------
     :
         The loaded data.
     """
-    with _open(filename, definitions=definitions) as group:
-        if root is not None:
-            group = group[root]
-        return group[select]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore" if quiet else "default")
+        with _open(filename, definitions=definitions) as group:
+            if root is not None:
+                group = group[root]
+            return group[select]
 
 
 def _open(
