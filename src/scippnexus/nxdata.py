@@ -215,7 +215,7 @@ class NXdata(NXobject):
             # data. The former may be defined by the group dims.
             if group_dims is not None:
                 self._signal._grouping.sizes = dict(
-                    zip(group_dims, self._signal.shape, strict=False)
+                    zip(group_dims, self._signal._grouping.shape, strict=False)
                 )
             group_dims = self._signal.dims
         else:
