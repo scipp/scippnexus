@@ -211,11 +211,9 @@ class NXdata(NXobject):
         if self._signal is None:
             self._valid = False
         elif isinstance(self._signal, EventField):
-            # EventField uses dims of detector_number (the grouping) plus dims of event
-            # data. The former may be defined by the group dims.
             if group_dims is not None:
                 self._signal._grouping.sizes = dict(
-                    zip(group_dims, self._signal.shape, strict=False)
+                    zip(group_dims, self._signal._grouping.shape, strict=False)
                 )
             group_dims = self._signal.dims
         else:
