@@ -826,7 +826,7 @@ def test_compute_transformation_warns_if_transformation_missing_vector_attr(
 
     root = make_group(h5root)
     with pytest.warns(
-        UserWarning, match="Invalid transformation, missing attribute 'vector'"
+        UserWarning, match="Invalid transformation, /detector_0/transformations/t1 missing attribute 'vector'"
     ):
         root[()]
 
