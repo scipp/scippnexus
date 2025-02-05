@@ -179,7 +179,7 @@ def combine_transformations(
     if any((x.sizes.get('time') == 0) for x in chain):
         warnings.warn(
             UserWarning('depends_on chain {x} contains empty time-series, '),
-            stacklevel=2
+            stacklevel=2,
         )
         # It is not clear what the dtype should be in this case. As transformations
         # are commonly multiplied onto position vectors, we return an empty array of
@@ -243,7 +243,7 @@ def maybe_transformation(
     except KeyError as e:
         warnings.warn(
             UserWarning(f'Invalid transformation, {obj.name} missing attribute {e}'),
-            stacklevel=2
+            stacklevel=2,
         )
         return value
 
