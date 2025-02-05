@@ -271,7 +271,9 @@ class TransformationChain(DependsOn):
         except KeyError as e:
             warnings.warn(
                 UserWarning(
-                    f'depends_on chain {depends_on} references missing node {e}'
+                    f'depends_on chain {depends_on} references missing node {e}'.replace(
+                        '\r\n', ''
+                    )
                 ),
                 stacklevel=2,
             )
@@ -328,7 +330,11 @@ def parse_depends_on_chain(
             visited.append(depends_on.absolute_path())
     except KeyError as e:
         warnings.warn(
-            UserWarning(f'depends_on chain {depends_on} references missing node {e}'),
+            UserWarning(
+                f'depends_on chain {depends_on} references missing node {e}'.replace(
+                    '\r\n', ''
+                )
+            ),
             stacklevel=2,
         )
         return None
