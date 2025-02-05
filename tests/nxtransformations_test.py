@@ -784,7 +784,8 @@ def test_compute_positions_handles_empty_time_dependent_transform_without_error(
 
     root = make_group(h5root)
     loaded = root[()]
-    with pytest.warns(UserWarning, match='depends_on chain contains empty time-series'):
+    warning_regex = r"depends_on chain .* contains empty time-series"
+    with pytest.warns(UserWarning, match=warning_regex):
         result = snx.compute_positions(loaded, store_transform='transform')
 
     # Even if only some of the logs are empty we cannot return any values.
@@ -826,7 +827,9 @@ def test_compute_transformation_warns_if_transformation_missing_vector_attr(
 
     root = make_group(h5root)
     with pytest.warns(
-        UserWarning, match="Invalid transformation, missing attribute 'vector'"
+        UserWarning,
+        match="Invalid transformation, "
+        "/detector_0/transformations/t1 missing attribute 'vector'",
     ):
         root[()]
 
