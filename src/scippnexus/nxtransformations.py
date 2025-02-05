@@ -271,8 +271,9 @@ class TransformationChain(DependsOn):
         except KeyError as e:
             warnings.warn(
                 UserWarning(
-                    f'depends_on chain {depends_on} references '
-                    'missing node {e}'.replace('\r\n', '')
+                  f'depends_on chain {depends_on} references missing node {e}'.replace(
+                      '\r\n', ''
+                  )
                 ),
                 stacklevel=2,
             )
