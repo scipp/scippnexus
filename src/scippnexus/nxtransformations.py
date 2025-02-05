@@ -74,7 +74,7 @@ class Transform:
     """In-memory component translation or rotation as described by NXtransformations."""
 
     name: str
-    transformation_type: Literal["translation", "rotation"]
+    transformation_type: Literal['translation', 'rotation']
     value: sc.Variable | sc.DataArray | sc.DataGroup
     vector: sc.Variable
     depends_on: DependsOn
@@ -86,7 +86,7 @@ class Transform:
         return self.value.sizes
 
     def __post_init__(self):
-        if self.transformation_type not in ["translation", "rotation"]:
+        if self.transformation_type not in ['translation', 'rotation']:
             raise TransformationError(
                 f"{self.transformation_type=} attribute at {self.name},"
                 " expected 'translation' or 'rotation'."
@@ -96,12 +96,12 @@ class Transform:
     def from_object(
         obj: Field | Group, value: sc.Variable | sc.DataArray | sc.DataGroup
     ) -> Transform:
-        depends_on = DependsOn(parent=obj.parent.name, value=obj.attrs["depends_on"])
+        depends_on = DependsOn(parent=obj.parent.name, value=obj.attrs['depends_on'])
         return Transform(
             name=obj.name,
-            transformation_type=obj.attrs.get("transformation_type"),
+            transformation_type=obj.attrs.get('transformation_type'),
             value=_parse_value(value),
-            vector=sc.vector(value=obj.attrs["vector"]),
+            vector=sc.vector(value=obj.attrs['vector']),
             depends_on=depends_on,
             offset=_parse_offset(obj),
         )
@@ -110,9 +110,9 @@ class Transform:
         """Convert the raw transform into a rotation or translation matrix."""
         t = self.value * self.vector
         v = t if isinstance(t, sc.Variable) else t.data
-        if self.transformation_type == "translation":
+        if self.transformation_type == 'translation':
             v = sc.spatial.translations(dims=v.dims, values=v.values, unit=v.unit)
-        elif self.transformation_type == "rotation":
+        elif self.transformation_type == 'rotation':
             v = sc.spatial.rotations_from_rotvecs(v)
         if isinstance(t, sc.Variable):
             t = v
@@ -120,15 +120,15 @@ class Transform:
             t.data = v
         if self.offset is None:
             return t
-        if self.transformation_type == "translation":
+        if self.transformation_type == 'translation':
             return t * self.offset.to(unit=t.unit, copy=False)
         return t * self.offset
 
 
 def _parse_offset(obj: Field | Group) -> sc.Variable | None:
-    if (offset := obj.attrs.get("offset")) is None:
+    if (offset := obj.attrs.get('offset')) is None:
         return None
-    if (offset_units := obj.attrs.get("offset_units")) is None:
+    if (offset_units := obj.attrs.get('offset_units')) is None:
         raise TransformationError(
             f"Found {offset=} but no corresponding 'offset_units' "
             f"attribute at {obj.name}"
@@ -140,11 +140,11 @@ def _parse_value(
     value: sc.Variable | sc.DataArray | sc.DataGroup,
 ) -> sc.Variable | sc.DataArray | sc.DataGroup:
     if isinstance(value, sc.DataGroup) and (
-        isinstance(value.get("value"), sc.DataArray)
+        isinstance(value.get('value'), sc.DataArray)
     ):
         # Some NXlog groups are split into value, alarm, and connection_status
         # sublogs. We only care about the value.
-        value = value["value"]
+        value = value['value']
     return value
 
 
@@ -176,33 +176,34 @@ def combine_transformations(
 
     Time-dependent transformations are interpolated to a common time-coordinate.
     """
-    if any((x.sizes.get("time") == 0) for x in chain):
+    if any((x.sizes.get('time') == 0) for x in chain):
         warnings.warn(
-            UserWarning("depends_on chain contains empty time-series, "), stacklevel=2
+            UserWarning('depends_on chain {x} contains empty time-series, '),
+            stacklevel=2
         )
         # It is not clear what the dtype should be in this case. As transformations
         # are commonly multiplied onto position vectors, we return an empty array of
         # floats, which can be multiplied by Scipp's vector dtype.
         return sc.DataArray(
-            sc.array(dims=["time"], values=[], dtype="float64", unit=""),
-            coords={"time": sc.datetimes(dims=["time"], values=[], unit="s")},
+            sc.array(dims=['time'], values=[], dtype='float64', unit=''),
+            coords={'time': sc.datetimes(dims=['time'], values=[], unit='s')},
         )
     total_transform = None
     for transform in chain:
         if transform.dtype in (sc.DType.translation3, sc.DType.affine_transform3):
-            transform = transform.to(unit="m", copy=False)
+            transform = transform.to(unit='m', copy=False)
         if total_transform is None:
             total_transform = transform
         elif isinstance(total_transform, sc.DataArray) and isinstance(
             transform, sc.DataArray
         ):
             unit = _smaller_unit(
-                transform.coords["time"], total_transform.coords["time"]
+                transform.coords['time'], total_transform.coords['time']
             )
-            total_transform.coords["time"] = total_transform.coords["time"].to(
+            total_transform.coords['time'] = total_transform.coords['time'].to(
                 unit=unit, copy=False
             )
-            transform.coords["time"] = transform.coords["time"].to(
+            transform.coords['time'] = transform.coords['time'].to(
                 unit=unit, copy=False
             )
             time = sc.concat(
@@ -216,9 +217,9 @@ def combine_transformations(
             total_transform = transform * total_transform
     if isinstance(total_transform, sc.DataArray):
         time_dependent = [t for t in chain if isinstance(t, sc.DataArray)]
-        times = [da.coords["time"][0] for da in time_dependent]
+        times = [da.coords['time'][0] for da in time_dependent]
         latest_log_start = sc.reduce(times).max()
-        return total_transform["time", latest_log_start:].copy()
+        return total_transform['time', latest_log_start:].copy()
     return sc.scalar(1) if total_transform is None else total_transform
 
 
@@ -235,14 +236,14 @@ def maybe_transformation(
     Instead we use the presence of the attribute 'transformation_type' to identify
     transformation fields.
     """
-    if obj.attrs.get("transformation_type") is None:
+    if obj.attrs.get('transformation_type') is None:
         return value
     try:
         return Transform.from_object(obj, value)
     except KeyError as e:
         warnings.warn(
-            UserWarning(f"Invalid transformation, {obj.name} missing attribute {e}"),
-            stacklevel=2,
+            UserWarning(f'Invalid transformation, {obj.name} missing attribute {e}'),
+            stacklevel=2
         )
         return value
 
@@ -269,7 +270,9 @@ class TransformationChain(DependsOn):
             transform = combine_transformations([t.build() for t in chain])
         except KeyError as e:
             warnings.warn(
-                UserWarning(f"depends_on chain references missing node:\n{e}"),
+                UserWarning(
+                    f'depends_on chain {depends_on} references missing node:\n{e}'
+                ),
                 stacklevel=2,
             )
         else:
@@ -315,17 +318,17 @@ def parse_depends_on_chain(
             transform, base = _locate_depends_on_target(
                 file, depends_on, parent.definitions
             )
-            depends_on = DependsOn(parent=base, value=transform.attrs["depends_on"])
+            depends_on = DependsOn(parent=base, value=transform.attrs['depends_on'])
             chain.transformations[transform.name] = transform[()]
             if depends_on.absolute_path() in visited:
                 raise ValueError(
-                    "Circular depends_on chain detected: "
-                    f"{[*visited, depends_on.absolute_path()]}"
+                    'Circular depends_on chain detected: '
+                    f'{[*visited, depends_on.absolute_path()]}'
                 )
             visited.append(depends_on.absolute_path())
     except KeyError as e:
         warnings.warn(
-            UserWarning(f"depends_on chain {depends_on} references missing node {e}"),
+            UserWarning(f'depends_on chain {depends_on} references missing node {e}'),
             stacklevel=2,
         )
         return None
@@ -335,7 +338,7 @@ def parse_depends_on_chain(
 def compute_positions(
     dg: sc.DataGroup,
     *,
-    store_position: str = "position",
+    store_position: str = 'position',
     store_transform: str | None = None,
     transformations: sc.DataGroup | None = None,
 ) -> sc.DataGroup:
@@ -410,11 +413,11 @@ def zip_pixel_offsets(x: dict[str, sc.Variable], /) -> sc.Variable:
     --------
     compute_positions
     """
-    zero = sc.scalar(0.0, unit=x["x_pixel_offset"].unit)
+    zero = sc.scalar(0.0, unit=x['x_pixel_offset'].unit)
     return sc.spatial.as_vectors(
-        x["x_pixel_offset"],
-        x.get("y_pixel_offset", zero),
-        x.get("z_pixel_offset", zero),
+        x['x_pixel_offset'],
+        x.get('y_pixel_offset', zero),
+        x.get('z_pixel_offset', zero),
     )
 
 
@@ -426,13 +429,13 @@ def _with_positions(
     transformations: sc.DataGroup | None = None,
 ) -> sc.DataGroup:
     out = sc.DataGroup()
-    if (chain := dg.get("depends_on")) is not None:
+    if (chain := dg.get('depends_on')) is not None:
         if not isinstance(chain, TransformationChain):
             chain = TransformationChain(chain.parent, chain.value)
         if transformations is not None:
             chain = replace(chain, transformations=transformations)
         if (transform := chain.compute()) is not None:
-            out[store_position] = transform * sc.vector([0, 0, 0], unit="m")
+            out[store_position] = transform * sc.vector([0, 0, 0], unit='m')
             if store_transform is not None:
                 out[store_transform] = transform
     for name, value in dg.items():
@@ -445,16 +448,16 @@ def _with_positions(
             )
         elif (
             isinstance(value, sc.DataArray)
-            and "x_pixel_offset" in value.coords
+            and 'x_pixel_offset' in value.coords
             # Transform can be time-dependent, do not apply it to offsets since
             # result can be massive and is in general not compatible with the shape
             # of the data.
             and (transform is not None and transform.dims == ())
         ):
-            offset = zip_pixel_offsets(value.coords).to(unit="m", copy=False)
+            offset = zip_pixel_offsets(value.coords).to(unit='m', copy=False)
             value = value.assign_coords({store_position: transform * offset})
         out[name] = value
     return out
 
 
-base_definitions_dict["NXtransformations"] = NXtransformations
+base_definitions_dict['NXtransformations'] = NXtransformations
