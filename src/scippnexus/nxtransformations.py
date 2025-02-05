@@ -269,12 +269,11 @@ class TransformationChain(DependsOn):
                 depends_on = chain[-1].depends_on
             transform = combine_transformations([t.build() for t in chain])
         except KeyError as e:
+            m = f"depends_on chain {depends_on} references missing node {e}".replace(
+                "\r\n", ""
+            )
             warnings.warn(
-                UserWarning(
-                  f'depends_on chain {depends_on} references missing node {e}'.replace(
-                      '\r\n', ''
-                  )
-                ),
+                UserWarning(m),
                 stacklevel=2,
             )
         else:
