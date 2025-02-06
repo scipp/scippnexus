@@ -178,7 +178,8 @@ def combine_transformations(
     """
     if any((x.sizes.get('time') == 0) for x in chain):
         warnings.warn(
-            UserWarning('depends_on chain contains empty time-series, '), stacklevel=2
+            UserWarning('depends_on chain {x} contains empty time-series, '),
+            stacklevel=2,
         )
         # It is not clear what the dtype should be in this case. As transformations
         # are commonly multiplied onto position vectors, we return an empty array of
@@ -241,7 +242,8 @@ def maybe_transformation(
         return Transform.from_object(obj, value)
     except KeyError as e:
         warnings.warn(
-            UserWarning(f'Invalid transformation, missing attribute {e}'), stacklevel=2
+            UserWarning(f'Invalid transformation, {obj.name} missing attribute {e}'),
+            stacklevel=2,
         )
         return value
 
@@ -267,8 +269,11 @@ class TransformationChain(DependsOn):
                 depends_on = chain[-1].depends_on
             transform = combine_transformations([t.build() for t in chain])
         except KeyError as e:
+            m = f'depends_on chain {depends_on} references missing node {e}'.replace(
+                '\n', ''
+            )
             warnings.warn(
-                UserWarning(f'depends_on chain references missing node:\n{e}'),
+                UserWarning(m),
                 stacklevel=2,
             )
         else:
@@ -324,7 +329,11 @@ def parse_depends_on_chain(
             visited.append(depends_on.absolute_path())
     except KeyError as e:
         warnings.warn(
-            UserWarning(f'depends_on chain {depends_on} references missing node {e}'),
+            UserWarning(
+                f'depends_on chain {depends_on} references missing node {e}'.replace(
+                    '\n', ''
+                )
+            ),
             stacklevel=2,
         )
         return None
