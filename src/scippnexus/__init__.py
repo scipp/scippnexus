@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-# ruff: noqa: E402, F401, F403
+# Copyright (c) 2025 Scipp contributors (https://github.com/scipp)
+# ruff: noqa: E402, F401, I
 
 import importlib.metadata
 
@@ -10,6 +10,7 @@ except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 from . import typing
+from ._load import load
 from .base import (
     Group,
     NexusStructureError,
@@ -20,9 +21,8 @@ from .base import (
 )
 from .field import Attrs, DependsOn, Field
 from .file import File
-from ._load import load
-from .nexus_classes import *
-from .nxtransformations import compute_positions, zip_pixel_offsets, TransformationChain
+from .nexus_classes import *  # noqa: F403
+from .nxtransformations import TransformationChain, compute_positions, zip_pixel_offsets
 
 __all__ = [
     'Attrs',
