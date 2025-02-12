@@ -5,12 +5,12 @@ from scippnexus import DependsOn
 from scippnexus.nxtransformations import Transform, TransformationError
 
 
-@pytest.fixture()
+@pytest.fixture
 def depends_on() -> DependsOn:
     return DependsOn(parent='/', value='.')
 
 
-@pytest.fixture()
+@pytest.fixture
 def z_vector() -> sc.Variable:
     return sc.vector(value=[0, 0, 1], unit='m')
 

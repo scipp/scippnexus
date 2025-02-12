@@ -7,7 +7,7 @@ import scippnexus as snx
 from scippnexus.application_definitions import nxcansas
 
 
-@pytest.fixture()
+@pytest.fixture
 def nxroot():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:
@@ -25,7 +25,7 @@ def test_setitem_SASentry(nxroot):
     assert entry['run'][()] == 12345
 
 
-@pytest.fixture()
+@pytest.fixture
 def I_of_Q():
     data = sc.array(
         dims=['Q'],
