@@ -9,6 +9,7 @@ source:
 
 {% set pyproject = load_file_data('pyproject.toml') %}
 {% set dependencies = pyproject.get('project', {}).get('dependencies', {}) %}
+{% set test_dependencies = pyproject.get('project', {}).get('optional-dependencies', {}).get('test', {}) %}
 
 
 requirements:
@@ -32,7 +33,13 @@ test:
   imports:
     - scippnexus
   requires:
-    - pytest
+
+  {# Conda does not allow spaces between package name and version, so remove them #}
+  {% for package in test_dependencies %}
+    - {% if package == "graphviz" %}python-graphviz{% else %}{{ package|replace(" ", "") }}{% endif %}
+  {% endfor %}
+
+
   source_files:
     - pyproject.toml
     - tests/
