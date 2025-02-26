@@ -1004,7 +1004,7 @@ def test_detector_with_event_data_and_no_event_time_zero_can_be_loaded(nxroot):
     assert_identical(pixel2, ref2)
 
 
-def test_nxdetector_can_load_detector_with_extra_length_1_axis(h5root):
+def test_nxdetector_can_load_event_detector_with_extra_length_1_axis(h5root):
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     detector_numbers = sc.array(
         dims=['xx', 'yy'], unit=None, values=np.array([[1, 2], [3, 4]])
@@ -1020,6 +1020,34 @@ def test_nxdetector_can_load_detector_with_extra_length_1_axis(h5root):
     snx.create_field(
         event_data, 'event_index', sc.array(dims=[''], unit='None', values=[0, 3, 4, 5])
     )
+
+    xpo = snx.create_field(
+        detector, 'x_pixel_offset', sc.linspace('xx', -1, 1, 2, unit='m')
+    )
+    ypo = snx.create_field(
+        detector, 'y_pixel_offset', sc.linspace('yy', -1, 1, 2, unit='m')
+    )
+    zpo = snx.create_field(
+        detector, 'z_pixel_offset', sc.array(dims=('zz',), values=[0.0], unit='m')
+    )
+    xpo.attrs['axis'] = 1
+    ypo.attrs['axis'] = 2
+    zpo.attrs['axis'] = 3
+
+    make_group(instrument)[()]
+
+
+def test_nxdetector_can_load_hist_detector_with_extra_length_1_axis(h5root):
+    instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
+    detector_numbers = sc.array(
+        dims=['xx', 'yy'], unit=None, values=np.array([[1, 2], [3, 4]])
+    )
+
+    detector = snx.create_class(instrument, 'detector_0', snx.NXdetector)
+    snx.create_field(detector, 'detector_number', detector_numbers)
+
+    data = sc.array(dims=['xx', 'yy'], values=np.array([[1.0, 2.0], [3.0, 4.0]]))
+    snx.create_field(detector, 'data', data)
 
     xpo = snx.create_field(
         detector, 'x_pixel_offset', sc.linspace('xx', -1, 1, 2, unit='m')
