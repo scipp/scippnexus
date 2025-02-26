@@ -103,7 +103,7 @@ class NXdata(NXobject):
             # starting from the left. So we only squeeze dimensions that are after
             # len(dims).
             shape = _squeeze_trailing(dims, field.dataset.shape)
-            field.sizes = dict(zip(dims, shape, strict=True))
+            field.sizes = dict(zip(dims, shape, strict=False))
         elif self._valid:
             s1 = self._signal.sizes
             s2 = field.sizes
@@ -227,7 +227,7 @@ class NXdata(NXobject):
                 )
                 # If we have explicit group dims, we can drop trailing 1s.
                 shape = _squeeze_trailing(group_dims, shape)
-                self._signal.sizes = dict(zip(group_dims, shape, strict=True))
+                self._signal.sizes = dict(zip(group_dims, shape, strict=False))
             elif isinstance(self._signal, Group):
                 group_dims = self._signal.dims
             elif fallback_dims is not None:
