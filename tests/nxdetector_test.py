@@ -1011,7 +1011,6 @@ def test_nxdetector_can_load_event_detector_with_extra_length_1_axis(h5root):
     )
     detector = snx.create_class(instrument, 'detector_0', snx.NXdetector)
     snx.create_field(detector, 'detector_number', detector_numbers)
-
     event_id = sc.array(dims=[''], unit=None, values=[1, 2, 1, 1, 2, 2])
     event_time_offset = sc.array(dims=[''], unit='s', values=[11, 22, 33, 44, 55, 66])
     event_data = snx.create_class(detector, 'events', snx.NXevent_data)
@@ -1034,7 +1033,8 @@ def test_nxdetector_can_load_event_detector_with_extra_length_1_axis(h5root):
     ypo.attrs['axis'] = 2
     zpo.attrs['axis'] = 3
 
-    make_group(instrument)[()]
+    dg = make_group(instrument)[()]
+    assert dg['detector_0']['events'].coords['z_pixel_offset'].shape == ()
 
 
 def test_nxdetector_can_load_hist_detector_with_extra_length_1_axis(h5root):
@@ -1042,10 +1042,8 @@ def test_nxdetector_can_load_hist_detector_with_extra_length_1_axis(h5root):
     detector_numbers = sc.array(
         dims=['xx', 'yy'], unit=None, values=np.array([[1, 2], [3, 4]])
     )
-
     detector = snx.create_class(instrument, 'detector_0', snx.NXdetector)
     snx.create_field(detector, 'detector_number', detector_numbers)
-
     data = sc.array(dims=['xx', 'yy'], values=np.array([[1.0, 2.0], [3.0, 4.0]]))
     snx.create_field(detector, 'data', data)
 
@@ -1062,4 +1060,5 @@ def test_nxdetector_can_load_hist_detector_with_extra_length_1_axis(h5root):
     ypo.attrs['axis'] = 2
     zpo.attrs['axis'] = 3
 
-    make_group(instrument)[()]
+    dg = make_group(instrument)[()]
+    assert dg['detector_0']['data'].coords['z_pixel_offset'].shape == ()
