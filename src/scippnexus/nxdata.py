@@ -442,7 +442,10 @@ class NXdata(NXobject):
             if not isinstance(coord, sc.Variable):
                 da.coords[name] = sc.scalar(coord)
             else:
-                da.coords[name] = coord
+                if coord.shape == (1,) and not set(coord.dims).issubset(da.dims):
+                    da.coords[name] = coord[0]
+                else:
+                    da.coords[name] = coord
                 # We need the shape *before* slicing to determine dims, so we get the
                 # field from the group for the conditional.
                 da.coords.set_aligned(
