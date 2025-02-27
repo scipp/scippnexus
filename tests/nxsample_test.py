@@ -8,7 +8,7 @@ from scipp.testing import assert_identical
 import scippnexus as snx
 
 
-@pytest.fixture()
+@pytest.fixture
 def nxroot():
     """Yield NXroot containing a single NXentry named 'entry'"""
     with h5py.File('dummy.nxs', mode='w', driver="core", backing_store=False) as f:

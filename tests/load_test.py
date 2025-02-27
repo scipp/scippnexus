@@ -11,7 +11,7 @@ import scipp.testing
 import scippnexus as snx
 
 
-@pytest.fixture()
+@pytest.fixture
 def reference_data() -> sc.DataGroup:
     return sc.DataGroup(
         entry=sc.DataGroup(
@@ -42,7 +42,7 @@ def reference_data() -> sc.DataGroup:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def nexus_buffer(reference_data) -> io.BytesIO:
     buffer = io.BytesIO()
     with snx.File(buffer, 'w') as root:

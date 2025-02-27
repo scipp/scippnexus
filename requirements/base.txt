@@ -5,9 +5,9 @@
 #
 #    pip-compile-multi
 #
-h5py==3.11.0
+h5py==3.12.1
     # via -r base.in
-numpy==2.1.1
+numpy==2.2.2
     # via
     #   h5py
     #   scipp
@@ -16,7 +16,7 @@ python-dateutil==2.9.0.post0
     # via -r base.in
 scipp==25.2.0
     # via -r base.in
-scipy==1.14.1
+scipy==1.15.1
     # via -r base.in
-six==1.16.0
+six==1.17.0
     # via python-dateutil
