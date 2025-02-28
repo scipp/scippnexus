@@ -103,7 +103,7 @@ class NXdata(NXobject):
             # starting from the left. So we only squeeze dimensions that are after
             # len(dims).
             shape = _squeeze_trailing(dims, field.dataset.shape)
-            field.sizes = dict(zip(dims, shape, strict=True))
+            field.sizes = dict(zip(dims, shape, strict=False))
         elif self._valid:
             s1 = self._signal.sizes
             s2 = field.sizes
@@ -215,7 +215,7 @@ class NXdata(NXobject):
             # data. The former may be defined by the group dims.
             if group_dims is not None:
                 self._signal._grouping.sizes = dict(
-                    zip(group_dims, self._signal.shape, strict=False)
+                    zip(group_dims, self._signal._grouping.shape, strict=False)
                 )
             group_dims = self._signal.dims
         else:
@@ -227,7 +227,7 @@ class NXdata(NXobject):
                 )
                 # If we have explicit group dims, we can drop trailing 1s.
                 shape = _squeeze_trailing(group_dims, shape)
-                self._signal.sizes = dict(zip(group_dims, shape, strict=True))
+                self._signal.sizes = dict(zip(group_dims, shape, strict=False))
             elif isinstance(self._signal, Group):
                 group_dims = self._signal.dims
             elif fallback_dims is not None:
@@ -442,7 +442,10 @@ class NXdata(NXobject):
             if not isinstance(coord, sc.Variable):
                 da.coords[name] = sc.scalar(coord)
             else:
-                da.coords[name] = coord
+                if coord.shape == (1,) and not set(coord.dims).issubset(da.dims):
+                    da.coords[name] = coord[0]
+                else:
+                    da.coords[name] = coord
                 # We need the shape *before* slicing to determine dims, so we get the
                 # field from the group for the conditional.
                 da.coords.set_aligned(
