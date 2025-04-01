@@ -1,6 +1,29 @@
-# ScippNexus
+:::{image} _static/logo.svg
+:class: only-light
+:alt: ScippNexus
+:width: 60%
+:align: center
+:::
+:::{image} _static/logo-dark.svg
+:class: only-dark
+:alt: ScippNexus
+:width: 60%
+:align: center
+:::
 
-<span style="font-size:1.2em;font-style:italic;color:#5a5a5a">
+```{raw} html
+   <style>
+    .transparent {display: none; visibility: hidden;}
+    .transparent + a.headerlink {display: none; visibility: hidden;}
+   </style>
+```
+
+```{role} transparent
+```
+
+# {transparent}`ScippNexus`
+
+<span style="font-size:1.2em;font-style:italic;color:var(--pst-color-text-muted)">
   An h5py-like utility for NeXus files with seamless Scipp integration
   </br></br>
 </span>
@@ -21,20 +44,13 @@ This is especially powerful since a number of concepts of Scipp map well to conc
   This is modelled after h5py's support for loading slices of datasets but provides the same convenience and safety as [scipp's slicing](https://scipp.github.io/user-guide/slicing.html) by requiring specification of the dimension to slice by its name, rather than plain axis order.
 - **Physical units** are stored with most datasets in a NeXus class and are loaded as unit of the [scipp.DataArray](https://scipp.github.io/user-guide/data-structures/data-structures.html#DataArray) values or coordinates.
 
-## News
-
-- [August 2023] scippnexus-23.08.0 has been released.
-  The "v2" API is now the default.
-- [April 2023] scippnexus-23.04.0 has been released.
-  This adds `scippnexus.v2`, which provides the future API of `scippnexus`.
-  The new API avoids performance bottlenecks when working with small files that contain many groups and datasets.
-  The new behavior is also more faithful to the file content.
-  `v2` will become the default in the near future.
+:::{include} user-guide/installation.md
+:heading-offset: 1
+:::
 
 ## Get in touch
 
-- If you have questions that are not answered by these documentation pages, ask on [GitHub discussions](https://github.com/scipp/scippnexus/discussions).
-  Please include a self-contained reproducible example if possible.
+- If you have questions that are not answered by these documentation pages, ask on [discussions](https://github.com/scipp/scippnexus/discussions). Please include a self-contained reproducible example if possible.
 - Report bugs (including unclear, missing, or wrong documentation!), suggest features or view the source code [on GitHub](https://github.com/scipp/scippnexus).
 
 ```{toctree}
