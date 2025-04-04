@@ -27,7 +27,7 @@ pytest==8.3.4
     # via -r nightly.in
 python-dateutil==2.9.0.post0
     # via -r nightly.in
-scipp==100.0.0.dev0
+scipp==25.4.0
     # via -r nightly.in
 scipy==1.15.1
     # via -r nightly.in
