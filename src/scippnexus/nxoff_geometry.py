@@ -49,8 +49,7 @@ def off_to_shape(
         return sc.bins(begin=sc.index(0), dim=faces.dim, data=shapes)
     if detector_number is None:
         raise NexusStructureError(
-            "`detector_number` not given but NXoff_geometry "
-            "contains `detector_faces`."
+            "`detector_number` not given but NXoff_geometry contains `detector_faces`."
         )
     shape_index = detector_faces['face_index|detector_number', 0].copy()
     detid = detector_faces['face_index|detector_number', 1].copy()

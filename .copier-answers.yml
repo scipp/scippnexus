@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: a021314
+_commit: fb67133
 _src_path: gh:scipp/copier_template
 description: An h5py-like utility for NeXus files with seamless Scipp integration
 max_python: '3.13'
