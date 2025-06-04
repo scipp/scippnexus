@@ -78,7 +78,7 @@ def load(
         Corresponds to the argument passed in brackets when using file objects:
         ``loaded = group[select]``.
         See `Loading groups and datasets
-        <../../user-guide/quick-start-guide.html#Loading-groups-and-datasets>`_.
+        <../../user-guide/quick-start-guide.ipynb#Loading-groups-and-datasets>`_.
         Defaults to ``()`` which selects the entire data.
     definitions:
         NeXus `application definitions <../../user-guide/application-definitions.rst>`_.
