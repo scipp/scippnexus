@@ -303,10 +303,10 @@ class Group(Mapping):
         self, select: type | list[type]
     ) -> dict[str, NXobject | Field]:
         children = {}
-        select = tuple(select) if isinstance(select, list) else select
+        select = (select,) if isinstance(select, type) else select
         for key, child in self._children.items():
             nx_class = Field if isinstance(child, Field) else child.nx_class
-            if nx_class is not None and issubclass(nx_class, select):
+            if nx_class is not None and any(nx_class == sel for sel in select):
                 children[key] = self[key]
         return children
 
