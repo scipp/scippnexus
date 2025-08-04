@@ -194,7 +194,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://anaconda.org/scipp/scippnexus",
+            "url": "https://anaconda.org/conda-forge/scippnexus",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },

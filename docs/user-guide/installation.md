@@ -10,7 +10,7 @@ pip install scippnexus
 ````
 ````{tab-item} conda
 ```sh
-conda install -c conda-forge -c scipp scippnexus
+conda install -c conda-forge scippnexus
 ```
 ````
 `````
