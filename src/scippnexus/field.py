@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
-import dateutil.parser
 import numpy as np
 import scipp as sc
 
@@ -59,8 +58,8 @@ def _as_datetime(obj: Any):
         try:
             # NumPy and scipp cannot handle timezone information. We therefore apply it,
             # i.e., convert to UTC.
-            # Would like to use dateutil directly, but with Python's datetime we do not
-            # get nanosecond precision. Therefore we combine numpy and dateutil parsing.
+            # Would like to use datetime directly, but with Python's datetime we do not
+            # get nanosecond precision. Therefore we combine numpy and datetime parsing.
             date_only = 'T' not in obj
             if date_only:
                 return sc.datetime(obj)
@@ -71,8 +70,8 @@ def _as_datetime(obj: Any):
                 # No timezone, parse directly (scipp based on numpy)
                 return sc.datetime(obj)
             else:
-                # There is timezone info. Parse with dateutil.
-                dt = dateutil.parser.isoparse(obj)
+                # There is timezone info. Parse with datetime.
+                dt = datetime.datetime.fromisoformat(obj)
                 dt = dt.replace(microsecond=0)  # handled by numpy
                 dt = dt.astimezone(datetime.UTC)
                 dt = dt.replace(tzinfo=None).isoformat()
