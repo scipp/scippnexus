@@ -3,7 +3,7 @@ _commit: c3214e6
 _src_path: gh:scipp/copier_template
 description: An h5py-like utility for NeXus files with seamless Scipp integration
 max_python: '3.13'
-min_python: '3.10'
+min_python: '3.11'
 namespace_package: ''
 nightly_deps: scipp
 orgname: scipp
