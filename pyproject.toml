@@ -30,7 +30,6 @@ requires-python = ">=3.11"
 # Run 'tox -e deps' after making changes here. This will update requirement files.
 # Make sure to list one dependency per line.
 dependencies = [
-    "python-dateutil>=2.8",
     "scipp>=24.02.0",
     "scipy>=1.10.0",
     "h5py>=3.12",

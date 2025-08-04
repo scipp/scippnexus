@@ -6,9 +6,11 @@
 #    requirements upgrade
 #
 -r test.txt
-mypy==1.17.0
+mypy==1.17.1
     # via -r mypy.in
 mypy-extensions==1.1.0
     # via mypy
 pathspec==0.12.1
+    # via mypy
+typing-extensions==4.14.1
     # via mypy
