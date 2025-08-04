@@ -74,7 +74,7 @@ def _as_datetime(obj: Any):
                 # There is timezone info. Parse with dateutil.
                 dt = dateutil.parser.isoparse(obj)
                 dt = dt.replace(microsecond=0)  # handled by numpy
-                dt = dt.astimezone(datetime.timezone.utc)
+                dt = dt.astimezone(datetime.UTC)
                 dt = dt.replace(tzinfo=None).isoformat()
                 # We operate with string operations here and thus end up parsing date
                 # and time twice. The reason is that the timezone-offset arithmetic
