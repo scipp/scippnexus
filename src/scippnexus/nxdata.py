@@ -4,15 +4,21 @@
 from __future__ import annotations
 
 import uuid
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from itertools import chain
 from typing import Any
 
+import h5py as h5
 import numpy as np
 import scipp as sc
 
 from ._cache import cached_property
-from ._common import _to_canonical_select, convert_time_to_datetime64, to_child_select
+from ._common import (
+    _to_canonical_select,
+    convert_time_to_datetime64,
+    has_time_unit,
+    to_child_select,
+)
 from .base import (
     Group,
     NexusStructureError,
@@ -20,12 +26,14 @@ from .base import (
     asvariable,
     base_definitions_dict,
 )
-from .field import Field, _is_time
+from .field import Field
 from .nxevent_data import NXevent_data
-from .typing import H5Dataset, ScippIndex
+from .typing import ScippIndex
 
 
-def _guess_dims(dims, shape, dataset: H5Dataset):
+def _guess_dims(
+    dims: Sequence[str], shape: Sequence[int] | None, dataset: h5.Dataset
+) -> Sequence[str] | None:
     """Guess dims of non-signal dataset based on shape."""
     if shape is None:
         return None
@@ -57,7 +65,7 @@ class NXdata(NXobject):
         children: dict[str, Field | Group],
         fallback_dims: tuple[str, ...] | None = None,
         fallback_signal_name: str | None = None,
-    ):
+    ) -> None:
         super().__init__(attrs=attrs, children=children)
         self._valid = True  # True if the children can be assembled
         self._signal_name = None
@@ -512,7 +520,7 @@ class NXlog(NXdata):
 
     def _time_to_datetime(self, mapping):
         if (time := mapping.get('time')) is not None:
-            if time.dtype != sc.DType.datetime64 and _is_time(time):
+            if time.dtype != sc.DType.datetime64 and has_time_unit(time):
                 mapping['time'] = convert_time_to_datetime64(
                     time, start=sc.epoch(unit=time.unit)
                 )

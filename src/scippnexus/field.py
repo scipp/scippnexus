@@ -8,9 +8,9 @@ import posixpath
 import re
 import warnings
 from dataclasses import dataclass
-from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
+import h5py as h5
 import numpy as np
 import scipp as sc
 
@@ -19,6 +19,7 @@ from scippnexus._string import warn_latin1_decode
 from scippnexus.typing import H5Dataset, ScippIndex
 
 from ._cache import cached_property
+from ._common import has_time_unit
 from .attrs import Attrs
 
 if TYPE_CHECKING:
@@ -47,13 +48,7 @@ class DependsOn:
         return self.value == '.'
 
 
-def _is_time(obj: sc.Variable | sc.Unit) -> bool:
-    if (unit := obj.unit) is None:
-        return False
-    return unit.to_dict().get('powers') == {'s': 1}
-
-
-def _as_datetime(obj: Any):
+def _as_datetime(obj: Any) -> sc.Variable | None:
     if isinstance(obj, str):
         try:
             # NumPy and scipp cannot handle timezone information. We therefore apply it,
@@ -63,7 +58,7 @@ def _as_datetime(obj: Any):
             date_only = 'T' not in obj
             if date_only:
                 return sc.datetime(obj)
-            date, time = obj.split('T')
+            _, time = obj.split('T')
             time_and_timezone_offset = re.split(r'Z|\+|-', time)
             time = time_and_timezone_offset[0]
             if len(time_and_timezone_offset) == 1:
@@ -71,10 +66,13 @@ def _as_datetime(obj: Any):
                 return sc.datetime(obj)
             else:
                 # There is timezone info. Parse with datetime.
-                dt = datetime.datetime.fromisoformat(obj)
-                dt = dt.replace(microsecond=0)  # handled by numpy
-                dt = dt.astimezone(datetime.UTC)
-                dt = dt.replace(tzinfo=None).isoformat()
+                dt = (
+                    datetime.datetime.fromisoformat(obj)
+                    .replace(microsecond=0)  # handled by numpy
+                    .astimezone(datetime.UTC)
+                    .replace(tzinfo=None)
+                    .isoformat()
+                )
                 # We operate with string operations here and thus end up parsing date
                 # and time twice. The reason is that the timezone-offset arithmetic
                 # cannot be done, e.g., in nanoseconds without causing rounding errors.
@@ -111,29 +109,40 @@ def _squeezed_field_sizes(dataset: H5Dataset) -> dict[str, int]:
     return {f'dim_{i}': size for i, size in enumerate(shape)}
 
 
-@dataclass
+@dataclass(init=False)
 class Field:
     """NeXus field.
-    In HDF5 fields are represented as dataset.
+
+    In HDF5 fields are represented as datasets.
     """
 
-    dataset: H5Dataset
+    dataset: h5.Dataset
     parent: Group
-    sizes: dict[str, int] | None = None
-    dtype: sc.DType | None = None
-    errors: H5Dataset | None = None
+    sizes: dict[str, int]
+    dtype: sc.DType
+    errors: h5.Dataset | None
 
-    def __post_init__(self) -> None:
-        if self.sizes is None:
-            self.sizes = _squeezed_field_sizes(self.dataset)
-        if self.dtype is None:
-            self.dtype = _dtype_fromdataset(self.dataset)
+    def __init__(
+        self,
+        dataset: h5.Dataset,
+        parent: Group,
+        sizes: dict[str, int] | None = None,
+        dtype: sc.DType | None = None,
+        errors: h5.Dataset | None = None,
+    ) -> None:
+        self.dataset = dataset
+        self.parent = parent
+        self.sizes = sizes if sizes is not None else _squeezed_field_sizes(dataset)
+        self.dtype = dtype if dtype is not None else _dtype_fromdataset(dataset)
+        self.errors = errors
 
     @cached_property
-    def attrs(self) -> dict[str, Any]:
+    def attrs(self) -> Attrs:
         """The attributes of the dataset.
-        Cannot be used for writing attributes, since they are cached for performance."""
-        return MappingProxyType(Attrs(self.dataset.attrs))
+
+        Cannot be used for writing attributes, since they are cached for performance.
+        """
+        return Attrs(self.dataset.attrs)
 
     @property
     def dims(self) -> tuple[str, ...]:
@@ -146,21 +155,6 @@ class Field:
     @cached_property
     def file(self) -> Group:
         return self.parent.file
-
-    def _load_variances(self, var, index):
-        stddevs = sc.empty(
-            dims=var.dims, shape=var.shape, dtype=var.dtype, unit=var.unit
-        )
-        try:
-            self.errors.read_direct(stddevs.values, source_sel=index)
-        except TypeError:
-            stddevs.values = self.errors[index].squeeze()
-        # According to the standard, errors must have the same shape as the data.
-        # This is not the case in all files we observed, is there any harm in
-        # attempting a broadcast?
-        var.variances = np.broadcast_to(
-            sc.pow(stddevs, sc.scalar(2)).values, shape=var.shape
-        )
 
     def __getitem__(self, select: ScippIndex) -> Any | sc.Variable:
         """
@@ -212,7 +206,7 @@ class Field:
                 strings = self.dataset.asstr()[index]
             except UnicodeDecodeError as e:
                 strings = self.dataset.asstr(encoding='latin-1')[index]
-                warn_latin1_decode(self.dataset, strings, str(e))
+                warn_latin1_decode(self.dataset, strings, e)
             variable.values = np.asarray(strings).flatten()
             if self.dataset.name.endswith('/depends_on') and variable.ndim == 0:
                 return DependsOn(parent=self.dataset.parent.name, value=variable.value)
@@ -231,7 +225,7 @@ class Field:
             except TypeError:
                 variable.values = self.dataset[index].squeeze()
             if self.errors is not None:
-                self._load_variances(variable, index)
+                _load_variances(self.errors, variable, index)
         else:
             variable.values = self.dataset[index]
         if variable.ndim == 0 and variable.unit is None and variable.fields is None:
@@ -244,7 +238,7 @@ class Field:
         return maybe_transformation(self, value=variable)
 
     def _maybe_datetime(self, variable: sc.Variable) -> sc.Variable:
-        if _is_time(variable):
+        if has_time_unit(variable):
             starts = [
                 dt
                 for name in self.attrs
@@ -264,7 +258,7 @@ class Field:
 
     @property
     def name(self) -> str:
-        return self.dataset.name
+        return self.dataset.name  # type: ignore[no-any-return]
 
     @property
     def ndim(self) -> int:
@@ -285,5 +279,21 @@ class Field:
                     f"in '{self.name}'; setting unit as 'dimensionless'",
                     stacklevel=2,
                 )
-                return sc.units.one
+                return sc.units.one  # type: ignore[no-any-return]
         return None
+
+
+def _load_variances(
+    dataset: h5.Dataset, var: sc.Variable, index: int | slice | tuple[int | slice, ...]
+) -> None:
+    stddevs = sc.empty(dims=var.dims, shape=var.shape, dtype=var.dtype, unit=var.unit)
+    try:
+        dataset.read_direct(stddevs.values, source_sel=index)
+    except TypeError:
+        stddevs.values = dataset[index].squeeze()
+    # According to the standard, errors must have the same shape as the data.
+    # This is not the case in all files we observed, is there any harm in
+    # attempting a broadcast?
+    var.variances = np.broadcast_to(
+        sc.pow(stddevs, sc.scalar(2)).values, shape=var.shape
+    )

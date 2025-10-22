@@ -30,9 +30,9 @@ def cset_to_encoding(cset: int) -> str:
         )
 
 
-def warn_latin1_decode(obj, decoded, error):
+def warn_latin1_decode(obj: object, decoded: str, error: Exception) -> None:
     warnings.warn(
-        f"Encoding for bytes '{obj}' declared as ascii, "
+        f"Encoding for bytes '{obj!r}' declared as ascii, "
         f"but contains characters in extended ascii range. Assuming "
         f"extended ASCII (latin-1), but this behavior is not "
         f"specified by the HDF5 or nexus standards and may therefore "
@@ -64,7 +64,7 @@ def ensure_str(str_or_bytes: str | bytes, encoding: str) -> str:
             return str(str_or_bytes, encoding="ascii")
         except UnicodeDecodeError as e:
             decoded = str(str_or_bytes, encoding="latin-1")
-            warn_latin1_decode(str_or_bytes, decoded, str(e))
+            warn_latin1_decode(str_or_bytes, decoded, e)
             return decoded
     else:
         return str(str_or_bytes, encoding)

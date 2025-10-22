@@ -3,13 +3,16 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
+import types
 from collections.abc import Callable, KeysView, Mapping
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import Any, Protocol, TypeAlias
+
+import numpy.typing as npt
 
 
 class H5Base(Protocol):
     @property
-    def attrs(self) -> dict:
+    def attrs(self) -> dict[str, object]:  # TODO better type hint
         """Attributes of dataset or group"""
 
     @property
@@ -30,14 +33,14 @@ class H5Dataset(H5Base, Protocol):
     """h5py.Dataset-like"""
 
     @property
-    def shape(self) -> list[int]:
+    def shape(self) -> tuple[int, ...]:
         """Shape of a dataset"""
 
     @property
     def dtype(self) -> list[int]:
         """dtype of a dataset"""
 
-    def read_direct(self, array) -> None:
+    def read_direct(self, array: npt.NDArray[Any]) -> None:
         """Read dataset into given buffer"""
 
 
@@ -56,23 +59,26 @@ class H5Group(H5Base, Protocol):
     def create_group(self) -> H5Group:
         """Create a group"""
 
-    def visititems(self, func: Callable) -> None:
+    def visititems(
+        self,
+        func: Callable[
+            [
+                str,
+            ]
+        ],
+    ) -> None:
         """Apply callable to all items, recursively"""
 
 
-if TYPE_CHECKING:
-    from enum import Enum
-
-    class ellipsis(Enum):
-        Ellipsis = "..."
-
-else:
-    ellipsis = type(Ellipsis)
-
 # Note that scipp does not support dicts yet, but this HDF5 code does, to
 # allow for loading blocks of 2d (or higher) data efficiently.
-ScippIndex = (
-    ellipsis | int | tuple | slice | tuple[str, int | slice] | dict[str, int | slice]
+ScippIndex: TypeAlias = (
+    types.EllipsisType
+    | int
+    | tuple
+    | slice
+    | tuple[str, int | slice]
+    | dict[str, int | slice]
 )
 
 Definitions = Mapping[str, type]

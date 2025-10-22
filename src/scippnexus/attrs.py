@@ -4,11 +4,13 @@
 from collections.abc import Iterator, Mapping
 from typing import Any
 
+import h5py as h5
+
 from ._string import cset_to_encoding, ensure_str
 
 
 class Attrs(Mapping[str, Any]):
-    def __init__(self, attrs: Mapping[str, Any]) -> None:
+    def __init__(self, attrs: h5.AttributeManager) -> None:
         self._base_attrs = attrs
         self._attrs = dict(attrs)
 
