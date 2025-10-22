@@ -63,7 +63,7 @@ def has_time_unit(obj: sc.Variable) -> bool:
     return unit.to_dict().get('powers') == {'s': 1}
 
 
-def _to_canonical_select(
+def to_canonical_select(
     dims: Sequence[str], select: ScippIndex
 ) -> dict[str, int | slice]:
     """Return selection as dict with explicit dim labels"""
@@ -104,7 +104,7 @@ def to_plain_index(
     """
     Given a valid "scipp" index 'select', return an equivalent plain numpy-style index.
     """
-    select = _to_canonical_select(dims, select)
+    select = to_canonical_select(dims, select)
     index: list[int | slice] = [slice(None)] * len(dims)
     for key, sel in select.items():
         if key not in dims:
@@ -129,7 +129,7 @@ def to_child_select(
 
     This removes any selections that apply to the parent but not the child.
     """
-    select = _to_canonical_select(dims, select)
+    select = to_canonical_select(dims, select)
     for d in dims:
         if d not in child_dims and d in select:
             del select[d]

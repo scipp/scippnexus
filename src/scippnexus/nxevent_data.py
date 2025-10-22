@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+import uuid
 from typing import Any
 
 import numpy as np
@@ -174,6 +175,27 @@ class NXevent_data(NXobject):
             ) from None
 
         return sc.DataArray(data=binned, coords=coords)
+
+
+def collect_embedded_nxevent_data(
+    children: dict[str, Field | Group],
+) -> tuple[str | None, dict[str, Field | Group]]:
+    if all(name in children for name in NXevent_data.mandatory_fields):
+        parent = children['event_index'].parent._group
+        event_group = Group(
+            parent, definitions={'NXmonitor': NXevent_data, 'NXdetector': NXevent_data}
+        )
+        events_key = uuid.uuid4().hex if 'events' in children else 'events'
+        new_children = {
+            **{
+                key: child
+                for key, child in children.items()
+                if key not in NXevent_data.handled_fields
+            },
+            events_key: event_group,
+        }
+        return events_key, new_children
+    return None, children
 
 
 base_definitions_dict['NXevent_data'] = NXevent_data
