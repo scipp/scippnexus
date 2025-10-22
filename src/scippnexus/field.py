@@ -15,7 +15,7 @@ import numpy as np
 import scipp as sc
 
 from scippnexus._common import convert_time_to_datetime64, to_plain_index
-from scippnexus._hdf5_nexus import _warn_latin1_decode
+from scippnexus._string import warn_latin1_decode
 from scippnexus.typing import H5Dataset, ScippIndex
 
 from ._cache import cached_property
@@ -47,7 +47,7 @@ class DependsOn:
         return self.value == '.'
 
 
-def _is_time(obj):
+def _is_time(obj: sc.Variable | sc.Unit) -> bool:
     if (unit := obj.unit) is None:
         return False
     return unit.to_dict().get('powers') == {'s': 1}
@@ -212,7 +212,7 @@ class Field:
                 strings = self.dataset.asstr()[index]
             except UnicodeDecodeError as e:
                 strings = self.dataset.asstr(encoding='latin-1')[index]
-                _warn_latin1_decode(self.dataset, strings, str(e))
+                warn_latin1_decode(self.dataset, strings, str(e))
             variable.values = np.asarray(strings).flatten()
             if self.dataset.name.endswith('/depends_on') and variable.ndim == 0:
                 return DependsOn(parent=self.dataset.parent.name, value=variable.value)

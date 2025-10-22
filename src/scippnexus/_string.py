@@ -2,13 +2,11 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Matthew Jones
 import warnings
-from typing import Any
 
 import h5py
-import numpy as np
 
 
-def _cset_to_encoding(cset: int) -> str:
+def cset_to_encoding(cset: int) -> str:
     """
     Converts a HDF5 cset into a python encoding. Allowed values for cset are
     h5py.h5t.CSET_ASCII and h5py.h5t.CSET_UTF8.
@@ -32,7 +30,7 @@ def _cset_to_encoding(cset: int) -> str:
         )
 
 
-def _warn_latin1_decode(obj, decoded, error):
+def warn_latin1_decode(obj, decoded, error):
     warnings.warn(
         f"Encoding for bytes '{obj}' declared as ascii, "
         f"but contains characters in extended ascii range. Assuming "
@@ -44,7 +42,7 @@ def _warn_latin1_decode(obj, decoded, error):
     )
 
 
-def _ensure_str(str_or_bytes: str | bytes, encoding: str) -> str:
+def ensure_str(str_or_bytes: str | bytes, encoding: str) -> str:
     """
     See https://docs.h5py.org/en/stable/strings.html for justification about some of
     the operations performed in this method. In particular, variable-length strings
@@ -66,21 +64,7 @@ def _ensure_str(str_or_bytes: str | bytes, encoding: str) -> str:
             return str(str_or_bytes, encoding="ascii")
         except UnicodeDecodeError as e:
             decoded = str(str_or_bytes, encoding="latin-1")
-            _warn_latin1_decode(str_or_bytes, decoded, str(e))
+            warn_latin1_decode(str_or_bytes, decoded, str(e))
             return decoded
     else:
         return str(str_or_bytes, encoding)
-
-
-_map_to_supported_type = {
-    'int8': np.int32,
-    'int16': np.int32,
-    'uint8': np.int32,
-    'uint16': np.int32,
-    'uint32': np.int32,
-    'uint64': np.int64,
-}
-
-
-def _ensure_supported_int_type(dataset_type: Any):
-    return _map_to_supported_type.get(dataset_type, dataset_type)
