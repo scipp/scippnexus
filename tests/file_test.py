@@ -19,7 +19,7 @@ def is_closed(file: snx.File) -> bool:
 
 
 @pytest.mark.parametrize('path_type', [str, Path])
-def test_load_entry_from_filename(tmp_path, path_type):
+def test_load_entry_from_filename(tmp_path, path_type) -> None:
     with h5.File(tmp_path / 'test.nxs', 'w') as f:
         snx.create_class(f, 'entry', snx.NXentry)
 
@@ -28,7 +28,7 @@ def test_load_entry_from_filename(tmp_path, path_type):
     assert is_closed(f)
 
 
-def test_load_entry_from_buffer(tmp_path):
+def test_load_entry_from_buffer(tmp_path) -> None:
     buffer = io.BytesIO()
     with h5.File(buffer, 'w') as f:
         snx.create_class(f, 'entry', snx.NXentry)
@@ -39,7 +39,7 @@ def test_load_entry_from_buffer(tmp_path):
     assert is_closed(f)
 
 
-def test_load_entry_from_h5py_group_root(tmp_path):
+def test_load_entry_from_h5py_group_root(tmp_path) -> None:
     with h5.File('test.nxs', 'w', driver='core', backing_store=False) as h5_file:
         snx.create_class(h5_file, 'entry', snx.NXentry)
         with snx.File(h5_file) as snx_file:
@@ -48,7 +48,7 @@ def test_load_entry_from_h5py_group_root(tmp_path):
         assert not is_closed(snx_file)
 
 
-def test_load_entry_from_h5py_group_not_root(tmp_path):
+def test_load_entry_from_h5py_group_not_root(tmp_path) -> None:
     with h5.File('test.nxs', 'w', driver='core', backing_store=False) as h5_file:
         entry = snx.create_class(h5_file, 'entry', snx.NXentry)
         snx.create_class(entry, 'user', snx.NXuser)
@@ -58,7 +58,7 @@ def test_load_entry_from_h5py_group_not_root(tmp_path):
         assert not is_closed(snx_file)
 
 
-def test_file_from_h5py_group_does_not_allow_extra_args(tmp_path):
+def test_file_from_h5py_group_does_not_allow_extra_args(tmp_path) -> None:
     with h5.File('test.nxs', 'w', driver='core', backing_store=False) as h5_file:
         snx.create_class(h5_file, 'entry', snx.NXentry)
         with pytest.raises(
