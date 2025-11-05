@@ -79,8 +79,8 @@ def to_canonical_select(
         return {}
     if isinstance(select, tuple) and len(select) == 0:
         return {}
-    if isinstance(select, tuple) and isinstance(select[0], str):
-        key, sel = select
+    if isinstance(select, tuple) and isinstance(select[0], str):  # type: ignore[misc]  # incorrect narrowing
+        key, sel = select  # type: ignore[misc]  # incorrect narrowing
         return {key: sel}
     if isinstance(select, tuple):
         check_1d()
@@ -89,7 +89,7 @@ def to_canonical_select(
                 f"Dataset has single dimension {dims}, "
                 "but multiple indices {select} were specified."
             )
-        return {dims[0]: select[0]}
+        return {dims[0]: select[0]}  # type: ignore[unreachable]  # incorrect narrowing
     elif isinstance(select, int | sc.Variable) or isinstance(select, slice):
         check_1d()
         return {dims[0]: select}

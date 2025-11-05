@@ -61,11 +61,7 @@ class H5Group(H5Base, Protocol):
 
     def visititems(
         self,
-        func: Callable[
-            [
-                str,
-            ]
-        ],
+        func: Callable[[str], None],
     ) -> None:
         """Apply callable to all items, recursively"""
 
@@ -75,7 +71,7 @@ class H5Group(H5Base, Protocol):
 ScippIndex: TypeAlias = (
     types.EllipsisType
     | int
-    | tuple
+    | tuple[()]
     | slice
     | tuple[str, int | slice]
     | dict[str, int | slice]
