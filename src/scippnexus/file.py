@@ -4,6 +4,7 @@
 import io
 import os
 from contextlib import AbstractContextManager
+from typing import Any
 
 import h5py
 
@@ -16,14 +17,14 @@ from .base import (
 from .typing import Definitions
 
 
-class File(AbstractContextManager, Group):
+class File(AbstractContextManager[Group], Group):
     def __init__(
         self,
         name: str | os.PathLike[str] | io.BytesIO | h5py.Group,
-        *args,
+        *args: Any,
         definitions: Definitions | DefaultDefinitionsType = DefaultDefinitions,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Context manager for NeXus files, similar to h5py.File.
 
         Arguments other than documented are as in :py:class:`h5py.File`.
@@ -39,8 +40,9 @@ class File(AbstractContextManager, Group):
             The default is to use the base definitions as defined in the
             NeXus standard.
         """
-        if definitions is DefaultDefinitions:
-            definitions = base_definitions()
+        defs: Definitions = (
+            base_definitions() if definitions is DefaultDefinitions else definitions  # type: ignore[assignment]
+        )
 
         if isinstance(name, h5py.File | h5py.Group):
             if args or kwargs:
@@ -50,16 +52,16 @@ class File(AbstractContextManager, Group):
         else:
             self._file = h5py.File(name, *args, **kwargs)
             self._manage_file_context = True
-        super().__init__(self._file, definitions=definitions)
+        super().__init__(self._file, definitions=defs)
 
-    def __enter__(self):
+    def __enter__(self) -> Group:
         if self._manage_file_context:
             self._file.__enter__()
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type: object, exc_value: object, traceback: object) -> None:
         if self._manage_file_context:
             self._file.close()
 
-    def close(self):
+    def close(self) -> None:
         self._file.close()

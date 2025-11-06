@@ -2,6 +2,8 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
 
+from collections.abc import Sequence
+
 import numpy as np
 import scipp as sc
 
@@ -10,8 +12,8 @@ from .typing import ScippIndex
 
 def convert_time_to_datetime64(
     raw_times: sc.Variable,
-    start: str | None = None,
-    scaling_factor: float | np.float64 = None,
+    start: sc.Variable,
+    scaling_factor: float | np.float64 | None = None,
 ) -> sc.Variable:
     """
     The nexus standard allows an arbitrary scaling factor to be inserted
@@ -24,14 +26,16 @@ def convert_time_to_datetime64(
 
     See https://manual.nexusformat.org/classes/base_classes/NXlog.html
 
-    Args:
-        raw_times: The raw time data from a nexus file.
-        start: Optional, the start time of the log in an ISO8601
-            string. If not provided, defaults to the beginning of the
-            unix epoch (1970-01-01T00:00:00).
-        scaling_factor: Optional, the scaling factor between the provided
-            time series data and the unit of the raw_times Variable. If
-            not provided, defaults to 1 (a no-op scaling factor).
+    Parameters
+    ----------
+    raw_times:
+        The raw time data from a nexus file.
+    start:
+        The start time of the log.
+    scaling_factor:
+        Optional, the scaling factor between the provided
+        time series data and the unit of the raw_times Variable. If
+        not provided, defaults to 1 (a no-op scaling factor).
     """
     if (
         raw_times.dtype in (sc.DType.float64, sc.DType.float32)
@@ -53,10 +57,18 @@ def convert_time_to_datetime64(
     )
 
 
-def _to_canonical_select(dims: list[str], select: ScippIndex) -> dict[str, int | slice]:
+def has_time_unit(obj: sc.Variable) -> bool:
+    if (unit := obj.unit) is None:
+        return False
+    return unit.to_dict().get('powers') == {'s': 1}
+
+
+def to_canonical_select(
+    dims: Sequence[str], select: ScippIndex
+) -> dict[str, int | slice]:
     """Return selection as dict with explicit dim labels"""
 
-    def check_1d():
+    def check_1d() -> None:
         if len(dims) != 1:
             raise sc.DimensionError(
                 f"Dataset has multiple dimensions {dims}, "
@@ -67,8 +79,8 @@ def _to_canonical_select(dims: list[str], select: ScippIndex) -> dict[str, int |
         return {}
     if isinstance(select, tuple) and len(select) == 0:
         return {}
-    if isinstance(select, tuple) and isinstance(select[0], str):
-        key, sel = select
+    if isinstance(select, tuple) and isinstance(select[0], str):  # type: ignore[misc]  # incorrect narrowing
+        key, sel = select  # type: ignore[misc]  # incorrect narrowing
         return {key: sel}
     if isinstance(select, tuple):
         check_1d()
@@ -77,7 +89,7 @@ def _to_canonical_select(dims: list[str], select: ScippIndex) -> dict[str, int |
                 f"Dataset has single dimension {dims}, "
                 "but multiple indices {select} were specified."
             )
-        return {dims[0]: select[0]}
+        return {dims[0]: select[0]}  # type: ignore[unreachable]  # incorrect narrowing
     elif isinstance(select, int | sc.Variable) or isinstance(select, slice):
         check_1d()
         return {dims[0]: select}
@@ -86,12 +98,14 @@ def _to_canonical_select(dims: list[str], select: ScippIndex) -> dict[str, int |
     return select.copy()
 
 
-def to_plain_index(dims: list[str], select: ScippIndex) -> int | slice | tuple:
+def to_plain_index(
+    dims: Sequence[str], select: ScippIndex
+) -> int | slice | tuple[int | slice, ...]:
     """
     Given a valid "scipp" index 'select', return an equivalent plain numpy-style index.
     """
-    select = _to_canonical_select(dims, select)
-    index = [slice(None)] * len(dims)
+    select = to_canonical_select(dims, select)
+    index: list[int | slice] = [slice(None)] * len(dims)
     for key, sel in select.items():
         if key not in dims:
             raise sc.DimensionError(
@@ -104,8 +118,8 @@ def to_plain_index(dims: list[str], select: ScippIndex) -> int | slice | tuple:
 
 
 def to_child_select(
-    dims: list[str],
-    child_dims: list[str],
+    dims: Sequence[str],
+    child_dims: Sequence[str],
     select: ScippIndex,
     bin_edge_dim: str | None = None,
 ) -> ScippIndex:
@@ -115,7 +129,7 @@ def to_child_select(
 
     This removes any selections that apply to the parent but not the child.
     """
-    select = _to_canonical_select(dims, select)
+    select = to_canonical_select(dims, select)
     for d in dims:
         if d not in child_dims and d in select:
             del select[d]

@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 # @author Simon Heybrock
+from typing import Any
+
 _version = '1'
 
 __all__ = ['get_path']
 
 
-def _make_pooch():
+def _make_pooch() -> Any:
     import pooch
 
     return pooch.create(
@@ -31,4 +33,4 @@ def get_path(name: str) -> str:
     This function only works with example data and cannot handle
     paths to custom files.
     """
-    return _pooch.fetch(name)
+    return _pooch.fetch(name)  # type: ignore[no-any-return]

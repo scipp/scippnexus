@@ -17,7 +17,9 @@ def nxroot():
         yield root
 
 
-def test_ub_matrix_loaded_as_linear_transform_with_inverse_angstrom_unit(nxroot):
+def test_ub_matrix_loaded_as_linear_transform_with_inverse_angstrom_unit(
+    nxroot,
+) -> None:
     sample = nxroot.create_class('data1', snx.NXsample)
     matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     sample['ub_matrix'] = matrix
@@ -30,7 +32,7 @@ def test_ub_matrix_loaded_as_linear_transform_with_inverse_angstrom_unit(nxroot)
     )
 
 
-def test_ub_matrix_array_can_be_loaded(nxroot):
+def test_ub_matrix_array_can_be_loaded(nxroot) -> None:
     sample = nxroot.create_class('data1', snx.NXsample)
     matrices = np.array(
         [[[1, 2, 3], [4, 5, 6], [7, 8, 9]], [[2, 3, 4], [5, 6, 7], [8, 9, 10]]]
@@ -47,7 +49,9 @@ def test_ub_matrix_array_can_be_loaded(nxroot):
     )
 
 
-def test_orientation_matrix_loaded_as_linear_transform_with_dimensionless_unit(nxroot):
+def test_orientation_matrix_loaded_as_linear_transform_with_dimensionless_unit(
+    nxroot,
+) -> None:
     sample = nxroot.create_class('data1', snx.NXsample)
     matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     sample['orientation_matrix'] = matrix

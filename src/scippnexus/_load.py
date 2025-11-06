@@ -2,7 +2,9 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 import contextlib
 import io
+from contextlib import AbstractContextManager
 from os import PathLike
+from typing import Any
 
 import h5py as h5
 import scipp as sc
@@ -23,7 +25,11 @@ def load(
     root: str | None = None,
     select: ScippIndex = (),
     definitions: Definitions | DefaultDefinitionsType = DefaultDefinitions,
-) -> sc.DataGroup | sc.DataArray | sc.Dataset:
+) -> (
+    sc.DataGroup[sc.DataGroup[Any] | sc.DataArray | sc.Dataset]
+    | sc.DataArray
+    | sc.Dataset
+):
     """Load a NeXus file.
 
     This function is a shorthand for opening a file manually.
@@ -98,7 +104,7 @@ def load(
 def _open(
     filename: str | PathLike[str] | io.BytesIO | h5.Group | Group,
     definitions: Definitions | DefaultDefinitionsType = DefaultDefinitions,
-):
+) -> AbstractContextManager[Group | File]:
     if isinstance(filename, h5.Group):
         return contextlib.nullcontext(
             Group(

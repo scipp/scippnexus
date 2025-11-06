@@ -45,22 +45,22 @@ def nxroot():
         yield root
 
 
-def test_nxobject_root(nxroot):
+def test_nxobject_root(nxroot) -> None:
     assert nxroot.nx_class == NXroot
     assert set(nxroot.keys()) == {'entry'}
 
 
-def test_nxobject_create_class_creates_keys(nxroot):
+def test_nxobject_create_class_creates_keys(nxroot) -> None:
     nxroot.create_class('log', NXlog)
     assert set(nxroot.keys()) == {'entry', 'log'}
 
 
-def test_nxobject_create_class_with_string_nx_class(nxroot):
+def test_nxobject_create_class_with_string_nx_class(nxroot) -> None:
     nxroot.create_class('log', 'NXlog')
     assert set(nxroot.keys()) == {'entry', 'log'}
 
 
-def test_nxobject_items(nxroot):
+def test_nxobject_items(nxroot) -> None:
     items = nxroot.items()
     assert len(items) == 1
     name, entry = next(iter(items))
@@ -73,7 +73,7 @@ def test_nxobject_items(nxroot):
     }
 
 
-def test_nxobject_iter(nxroot):
+def test_nxobject_iter(nxroot) -> None:
     nxroot.create_class('entry2', NXentry)
     # With missing __iter__ this used to raise since Python just calls __getitem__
     # with an int range.
@@ -82,7 +82,7 @@ def test_nxobject_iter(nxroot):
         pass
 
 
-def test_nxobject_entry(nxroot):
+def test_nxobject_entry(nxroot) -> None:
     entry = nxroot['entry']
     assert entry.nx_class == NXentry
     entry.create_class('events_0', NXevent_data)
@@ -91,7 +91,7 @@ def test_nxobject_entry(nxroot):
     assert set(entry.keys()) == {'events_0', 'events_1', 'log'}
 
 
-def test_nx_class_can_be_bytes(h5root):
+def test_nx_class_can_be_bytes(h5root) -> None:
     log = h5root.create_group('log')
     attr = np.array(b'NXlog', dtype='|S5')
     log.attrs['NX_class'] = attr
@@ -99,17 +99,17 @@ def test_nx_class_can_be_bytes(h5root):
     assert group.nx_class == NXlog
 
 
-def test_nxobject_event_data(nxroot):
+def test_nxobject_event_data(nxroot) -> None:
     event_data = nxroot['entry'].create_class('events_0', NXevent_data)
     assert event_data.nx_class == NXevent_data
 
 
-def test_nxobject_getting_item_that_does_not_exists_raises_KeyError(nxroot):
+def test_nxobject_getting_item_that_does_not_exists_raises_KeyError(nxroot) -> None:
     with pytest.raises(KeyError):
         nxroot['abcde']
 
 
-def test_nxobject_name_property_is_full_path(nxroot):
+def test_nxobject_name_property_is_full_path(nxroot) -> None:
     nxroot.create_class('monitor', NXmonitor)
     nxroot['entry'].create_class('log', NXlog)
     nxroot['entry'].create_class('events_0', NXevent_data)
@@ -120,13 +120,13 @@ def test_nxobject_name_property_is_full_path(nxroot):
     assert nxroot['entry']['events_0'].name == '/entry/events_0'
 
 
-def test_nxobject_grandchild_can_be_accessed_using_path(nxroot):
+def test_nxobject_grandchild_can_be_accessed_using_path(nxroot) -> None:
     nxroot['entry'].create_class('log', NXlog)
     assert nxroot['entry/log'].name == '/entry/log'
     assert nxroot['/entry/log'].name == '/entry/log'
 
 
-def test_nxobject_getitem_by_class(nxroot):
+def test_nxobject_getitem_by_class(nxroot) -> None:
     nxroot.create_class('monitor', NXmonitor)
     nxroot['entry'].create_class('log', NXlog)
     nxroot['entry'].create_class('events_0', NXevent_data)
@@ -139,7 +139,7 @@ def test_nxobject_getitem_by_class(nxroot):
     assert set(nxroot['entry'][NXevent_data]) == {'events_0', 'events_1'}
 
 
-def test_nxobject_getitem_by_class_get_fields(nxroot):
+def test_nxobject_getitem_by_class_get_fields(nxroot) -> None:
     nxroot['entry'].create_class('log', NXlog)
     nxroot['entry'].create_class('events_0', NXevent_data)
     nxroot['entry']['field1'] = sc.arange('event', 4.0, unit='ns')
@@ -148,7 +148,7 @@ def test_nxobject_getitem_by_class_get_fields(nxroot):
     assert set(nxroot['entry'][snx.Field]) == {'field1', 'field2'}
 
 
-def test_nxobject_getitem_by_class_list(nxroot):
+def test_nxobject_getitem_by_class_list(nxroot) -> None:
     nxroot['entry'].create_class('log', NXlog)
     nxroot['entry'].create_class('events_0', NXevent_data)
     nxroot['entry'].create_class('events_1', NXevent_data)
@@ -161,14 +161,14 @@ def test_nxobject_getitem_by_class_list(nxroot):
     assert set(nxroot['entry'][[NXlog, snx.Field]]) == {'log', 'field1'}
 
 
-def test_nxobject_dataset_items_are_returned_as_Field(nxroot):
+def test_nxobject_dataset_items_are_returned_as_Field(nxroot) -> None:
     events = nxroot['entry'].create_class('events_0', NXevent_data)
     events['event_time_offset'] = sc.arange('event', 5)
     field = nxroot['entry/events_0/event_time_offset']
     assert isinstance(field, snx.Field)
 
 
-def test_field_properties(nxroot):
+def test_field_properties(nxroot) -> None:
     events = nxroot['entry'].create_class('events_0', NXevent_data)
     events['event_time_offset'] = sc.arange('event', 6, dtype='int64', unit='ns')
     field = nxroot['entry/events_0/event_time_offset']
@@ -178,7 +178,7 @@ def test_field_properties(nxroot):
     assert field.unit == sc.Unit('ns')
 
 
-def test_field_dim_labels(nxroot):
+def test_field_dim_labels(nxroot) -> None:
     events = nxroot['entry'].create_class('events_0', NXevent_data)
     events['event_time_offset'] = sc.arange('ignored', 2)
     events['event_time_zero'] = sc.arange('ignored', 2)
@@ -196,7 +196,7 @@ def test_field_dim_labels(nxroot):
     assert log['value'].dims == ('time',)
 
 
-def test_field_unit_is_none_if_no_units_attribute(nxroot):
+def test_field_unit_is_none_if_no_units_attribute(nxroot) -> None:
     log = nxroot.create_class('log', NXlog)
     log['value'] = sc.arange('ignored', 2, unit=None)
     log['time'] = sc.arange('ignored', 2)
@@ -205,7 +205,7 @@ def test_field_unit_is_none_if_no_units_attribute(nxroot):
     assert field.unit is None
 
 
-def test_field_errors_with_same_unit_handles_them_with_value(nxroot):
+def test_field_errors_with_same_unit_handles_them_with_value(nxroot) -> None:
     entry = nxroot.create_class('group', snx.NXentry)
     entry['value'] = sc.array(dims=['ignored'], values=[10.0], unit='m')
     entry['value_errors'] = sc.array(dims=['ignored'], values=[2.0], unit='m')
@@ -213,7 +213,7 @@ def test_field_errors_with_same_unit_handles_them_with_value(nxroot):
     assert_identical(value, sc.scalar(value=10.0, variance=4.0, unit='m'))
 
 
-def test_field_errors_with_different_unit_handles_them_individually(nxroot):
+def test_field_errors_with_different_unit_handles_them_individually(nxroot) -> None:
     entry = nxroot.create_class('group', snx.NXentry)
     entry['value'] = sc.array(dims=['ignored'], values=[10.0], unit='m')
     entry['value_errors'] = sc.array(dims=['ignored'], values=[200.0], unit='cm')
@@ -237,13 +237,13 @@ def test_field_is_returned_as_python_object_if_shape_empty_and_no_unit(
 
 
 @pytest.mark.parametrize('value', [1.2, 123, True, 'abc'])
-def test_field_is_returned_as_variable_if_shape_empty_and_unit(nxroot, value):
+def test_field_is_returned_as_variable_if_shape_empty_and_unit(nxroot, value) -> None:
     nxroot['field1'] = sc.scalar(value, unit='K')
     field = nxroot['field1'][()]
     assert isinstance(field, sc.Variable)
 
 
-def test_field_getitem_returns_variable_with_correct_size_and_values(nxroot):
+def test_field_getitem_returns_variable_with_correct_size_and_values(nxroot) -> None:
     nxroot['field'] = sc.arange('ignored', 6, dtype='int64', unit='ns')
     field = nxroot['field']
     assert sc.identical(
@@ -261,7 +261,7 @@ def test_field_getitem_returns_variable_with_correct_size_and_values(nxroot):
 
 
 @pytest.mark.parametrize("string", UTF8_TEST_STRINGS)
-def test_field_of_utf8_encoded_dataset_is_loaded_correctly(nxroot, string):
+def test_field_of_utf8_encoded_dataset_is_loaded_correctly(nxroot, string) -> None:
     nxroot['entry']['title'] = sc.array(
         dims=['ignored'], values=[string, string + string]
     )
@@ -272,7 +272,7 @@ def test_field_of_utf8_encoded_dataset_is_loaded_correctly(nxroot, string):
 
 
 @pytest.mark.filterwarnings("ignore:Encoding for bytes")
-def test_field_of_extended_ascii_in_ascii_encoded_dataset_is_loaded_correctly():
+def test_field_of_extended_ascii_in_ascii_encoded_dataset_is_loaded_correctly() -> None:
     # When writing, if we use bytes h5py will write as ascii encoding
     # 0xb0 = degrees symbol in latin-1 encoding.
     string = b"run at rot=90" + bytes([0xB0])
@@ -285,7 +285,7 @@ def test_field_of_extended_ascii_in_ascii_encoded_dataset_is_loaded_correctly():
         )
 
 
-def test_ms_field_with_second_datetime_attribute_loaded_as_ms_datetime(nxroot):
+def test_ms_field_with_second_datetime_attribute_loaded_as_ms_datetime(nxroot) -> None:
     nxroot['mytime'] = sc.arange('ignored', 2, unit='ms')
     nxroot['mytime'].dataset.attrs['start_time'] = '2022-12-12T12:13:14'
     assert sc.identical(
@@ -298,7 +298,7 @@ def test_ms_field_with_second_datetime_attribute_loaded_as_ms_datetime(nxroot):
     )
 
 
-def test_ns_field_with_second_datetime_attribute_loaded_as_ns_datetime(nxroot):
+def test_ns_field_with_second_datetime_attribute_loaded_as_ns_datetime(nxroot) -> None:
     nxroot['mytime'] = sc.arange('ignored', 2, unit='ns')
     nxroot['mytime'].dataset.attrs['start_time'] = '1970-01-01T00:00:00'
     assert sc.identical(
@@ -311,7 +311,7 @@ def test_ns_field_with_second_datetime_attribute_loaded_as_ns_datetime(nxroot):
     )
 
 
-def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot):
+def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot) -> None:
     nxroot['mytime'] = sc.arange('ignored', 2, unit='s')
     nxroot['mytime'].dataset.attrs['start_time'] = '1984-01-01T00:00:00.000000000'
     assert sc.identical(
@@ -337,7 +337,9 @@ def test_second_field_with_ns_datetime_attribute_loaded_as_ns_datetime(nxroot):
         ('-09:30', '21:30'),
     ],
 )
-def test_timezone_information_in_datetime_attribute_is_applied(nxroot, timezone, hhmm):
+def test_timezone_information_in_datetime_attribute_is_applied(
+    nxroot, timezone, hhmm
+) -> None:
     nxroot['mytime'] = sc.scalar(value=3, unit='s')
     nxroot['mytime'].dataset.attrs['start_time'] = f'1984-01-01T12:00:00{timezone}'
     assert sc.identical(
@@ -345,7 +347,9 @@ def test_timezone_information_in_datetime_attribute_is_applied(nxroot, timezone,
     )
 
 
-def test_timezone_information_in_datetime_attribute_preserves_ns_precision(nxroot):
+def test_timezone_information_in_datetime_attribute_preserves_ns_precision(
+    nxroot,
+) -> None:
     nxroot['mytime'] = sc.scalar(value=3, unit='s')
     nxroot['mytime'].dataset.attrs['start_time'] = '1984-01-01T12:00:00.123456789+0200'
     assert sc.identical(
@@ -354,7 +358,9 @@ def test_timezone_information_in_datetime_attribute_preserves_ns_precision(nxroo
     )
 
 
-def test_loads_bare_timestamps_if_multiple_candidate_datetime_offsets_found(nxroot):
+def test_loads_bare_timestamps_if_multiple_candidate_datetime_offsets_found(
+    nxroot,
+) -> None:
     offsets = sc.arange('ignored', 2, unit='ms')
     nxroot['mytime'] = offsets
     nxroot['mytime'].dataset.attrs['offset'] = '2022-12-12T12:13:14'
@@ -362,7 +368,7 @@ def test_loads_bare_timestamps_if_multiple_candidate_datetime_offsets_found(nxro
     assert sc.identical(nxroot['mytime'][...], offsets.rename(ignored='dim_0'))
 
 
-def test_length_0_field_with_datetime_attribute_loaded_as_datetime(nxroot):
+def test_length_0_field_with_datetime_attribute_loaded_as_datetime(nxroot) -> None:
     nxroot['mytime'] = sc.arange('ignored', 0, unit='ms')
     nxroot['mytime'].dataset.attrs['start_time'] = '2022-12-12T12:13:14'
     assert_identical(
@@ -371,7 +377,7 @@ def test_length_0_field_with_datetime_attribute_loaded_as_datetime(nxroot):
 
 
 @pytest.mark.skip(reason='Special attributes disabled for now. Do we keep them?')
-def test___getattr__for_unique_child_groups(nxroot):
+def test___getattr__for_unique_child_groups(nxroot) -> None:
     entry = nxroot['entry']
     with pytest.raises(NexusStructureError):
         entry.log
@@ -386,7 +392,7 @@ def test___getattr__for_unique_child_groups(nxroot):
 
 
 @pytest.mark.skip(reason='Special attributes disabled for now. Do we keep them?')
-def test___dir__(nxroot):
+def test___dir__(nxroot) -> None:
     entry = nxroot['entry']
     assert 'log' not in entry.__dir__()
     entry.create_class('log1', NXlog)
@@ -395,7 +401,7 @@ def test___dir__(nxroot):
     assert 'log' not in entry.__dir__()
 
 
-def test___dir__includes_non_dynamic_properties(nxroot):
+def test___dir__includes_non_dynamic_properties(nxroot) -> None:
     entry = nxroot['entry']
     det = entry.create_class('det', NXdetector)
     det.create_class('events', NXevent_data)
@@ -403,7 +409,7 @@ def test___dir__includes_non_dynamic_properties(nxroot):
     assert 'unit' in det.__dir__()
 
 
-def test_read_recursive(h5root):
+def test_read_recursive(h5root) -> None:
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
     data['signal'] = np.arange(4)
@@ -416,7 +422,7 @@ def test_read_recursive(h5root):
     assert 'data' in dg
 
 
-def test_errors_read_as_variances(h5root):
+def test_errors_read_as_variances(h5root) -> None:
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
     data['signal'] = np.arange(4.0)
@@ -436,7 +442,7 @@ def test_errors_read_as_variances(h5root):
     assert np.array_equal(dg['time'].variances, np.arange(5.0) ** 2)
 
 
-def test_does_not_require_unit_of_errors(h5root):
+def test_does_not_require_unit_of_errors(h5root) -> None:
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
     data['signal'] = np.arange(4.0)
@@ -454,7 +460,7 @@ def test_does_not_require_unit_of_errors(h5root):
     assert dg['time'].unit == 's'
 
 
-def test_read_field(h5root):
+def test_read_field(h5root) -> None:
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
     data['signal'] = np.arange(4)
@@ -464,7 +470,7 @@ def test_read_field(h5root):
     assert sc.identical(var, sc.array(dims=['dim_0'], values=np.arange(4), unit='m'))
 
 
-def test_nxdata_with_signal_axes_indices_reads_as_data_array(h5root):
+def test_nxdata_with_signal_axes_indices_reads_as_data_array(h5root) -> None:
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
     data.attrs['NX_class'] = 'NXdata'
@@ -490,7 +496,7 @@ def test_nxdata_with_signal_axes_indices_reads_as_data_array(h5root):
     assert sc.identical(da, ref)
 
 
-def test_nxdata_positional_indexing_returns_correct_slice(h5root):
+def test_nxdata_positional_indexing_returns_correct_slice(h5root) -> None:
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
     data.attrs['NX_class'] = 'NXdata'
@@ -516,7 +522,7 @@ def test_nxdata_positional_indexing_returns_correct_slice(h5root):
     assert sc.identical(da, ref['time', 0:2])
 
 
-def test_nxdata_label_indexing_returns_correct_slice(h5root):
+def test_nxdata_label_indexing_returns_correct_slice(h5root) -> None:
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
     data.attrs['NX_class'] = 'NXdata'
@@ -544,7 +550,9 @@ def test_nxdata_label_indexing_returns_correct_slice(h5root):
     )
 
 
-def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root):
+def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(
+    h5root,
+) -> None:
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
     data.attrs['NX_class'] = 'NXdata'
@@ -570,7 +578,7 @@ def test_nxdata_with_bin_edges_positional_indexing_returns_correct_slice(h5root)
     assert sc.identical(da, ref['temperature', 0:2])
 
 
-def test_nxdata_with_bin_edges_label_indexing_returns_correct_slice(h5root):
+def test_nxdata_with_bin_edges_label_indexing_returns_correct_slice(h5root) -> None:
     entry = h5root.create_group('entry')
     data = entry.create_group('data')
     data.attrs['NX_class'] = 'NXdata'
@@ -654,7 +662,7 @@ def test_label_indexing_group_behaves_same_as_indexing_scipp_datagroup(
         assert_identical(nx[slice_], dg)
 
 
-def test_create_field_saves_errors(nxroot):
+def test_create_field_saves_errors(nxroot) -> None:
     entry = nxroot['entry']
     data = sc.array(
         dims=['d0'], values=[1.2, 3.4, 5.6], variances=[0.9, 0.8, 0.7], unit='cm'
@@ -668,18 +676,18 @@ def test_create_field_saves_errors(nxroot):
 
 
 @pytest.mark.parametrize('nxclass', [NXlog, NXmonitor, NXdetector, NXevent_data])
-def test_empty_class_does_not_warn(nxroot, nxclass):
+def test_empty_class_does_not_warn(nxroot, nxclass) -> None:
     log = nxroot['entry'].create_class('log', nxclass)
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         log[()]
 
 
-def test_trailing_forward_slash_in_path_does_not_change_file_object(nxroot):
+def test_trailing_forward_slash_in_path_does_not_change_file_object(nxroot) -> None:
     assert id(nxroot['entry/']) == id(nxroot['entry'])
 
 
-def test_path_santization(nxroot):
+def test_path_santization(nxroot) -> None:
     nxroot['entry'].create_class('log', NXlog)
     assert id(nxroot['/entry/log']) == id(nxroot['/entry//log'])
     assert id(nxroot['entry/log']) == id(nxroot['entry//log'])

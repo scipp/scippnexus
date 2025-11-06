@@ -9,18 +9,23 @@ This file contains a 1:1 backport of Python 3.12's cached_property.
 """
 
 # flake8: noqa: E501
+from __future__ import annotations
+
+from collections.abc import Callable
 from types import GenericAlias
+from typing import Generic, TypeVar
 
 _NOT_FOUND = object()
+R = TypeVar("R")
 
 
-class cached_property:
-    def __init__(self, func):
+class cached_property(Generic[R]):
+    def __init__(self, func: Callable[..., R]) -> None:
         self.func = func
-        self.attrname = None
+        self.attrname: str | None = None
         self.__doc__ = func.__doc__
 
-    def __set_name__(self, owner, name):
+    def __set_name__(self, owner: object, name: str) -> None:
         if self.attrname is None:
             self.attrname = name
         elif name != self.attrname:
@@ -29,9 +34,9 @@ class cached_property:
                 f"({self.attrname!r} and {name!r})."
             )
 
-    def __get__(self, instance, owner=None):
+    def __get__(self, instance: object, owner: object = None) -> R:
         if instance is None:
-            return self
+            return self  # type: ignore[return-value]
         if self.attrname is None:
             raise TypeError(
                 "Cannot use cached_property instance without calling __set_name__ on it."
@@ -46,7 +51,7 @@ class cached_property:
                 f"instance to cache {self.attrname!r} property."
             )
             raise TypeError(msg) from None
-        val = cache.get(self.attrname, _NOT_FOUND)
+        val: R = cache.get(self.attrname, _NOT_FOUND)
         if val is _NOT_FOUND:
             val = self.func(instance)
             try:
@@ -59,4 +64,4 @@ class cached_property:
                 raise TypeError(msg) from None
         return val
 
-    __class_getitem__ = classmethod(GenericAlias)
+    __class_getitem__ = classmethod(GenericAlias)  # type: ignore[var-annotated]

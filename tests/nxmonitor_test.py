@@ -24,7 +24,7 @@ def group():
         yield snx.Group(f, definitions=snx.base_definitions())
 
 
-def test_dense_monitor(h5root):
+def test_dense_monitor(h5root) -> None:
     monitor = snx.create_class(h5root, 'monitor', snx.NXmonitor)
     da = sc.DataArray(
         sc.array(dims=['time_of_flight'], values=[1.0]),
@@ -37,7 +37,7 @@ def test_dense_monitor(h5root):
     assert sc.identical(monitor[...]['data'], da)
 
 
-def test_monitor_with_nested_nxdata_signal(h5root):
+def test_monitor_with_nested_nxdata_signal(h5root) -> None:
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='m', values=[[1, 2, 3], [4, 5, 6]])
     )
@@ -69,7 +69,7 @@ def create_event_data_no_ids(group):
     )
 
 
-def test_loads_event_data_in_current_group_as_data_array(group):
+def test_loads_event_data_in_current_group_as_data_array(group) -> None:
     monitor = group.create_class('monitor1', snx.NXmonitor)
     create_event_data_no_ids(monitor)
     assert monitor.dims == ('event_time_zero',)
@@ -83,7 +83,7 @@ def test_loads_event_data_in_current_group_as_data_array(group):
     )
 
 
-def test_loads_event_data_in_child_group_as_data_array(group):
+def test_loads_event_data_in_child_group_as_data_array(group) -> None:
     monitor = group.create_class('monitor1', snx.NXmonitor)
     create_event_data_no_ids(monitor.create_class('events', snx.NXevent_data))
     assert monitor.dims == ('event_time_zero',)

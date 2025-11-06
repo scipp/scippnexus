@@ -16,7 +16,7 @@ def nxroot():
         yield root
 
 
-def test_setitem_SASentry(nxroot):
+def test_setitem_SASentry(nxroot) -> None:
     nxroot['sasentry'] = nxcansas.SASentry(title='A test', run=12345)
     assert 'sasentry' in nxroot
     entry = nxroot['sasentry']
@@ -39,19 +39,21 @@ def I_of_Q():
     return da
 
 
-def test_setitem_SASdata_raises_ValueError_when_given_bin_edges(nxroot, I_of_Q):
+def test_setitem_SASdata_raises_ValueError_when_given_bin_edges(nxroot, I_of_Q) -> None:
     with pytest.raises(ValueError, match='Q is given as bin-edges'):
         nxroot['sasdata'] = nxcansas.SASdata(I_of_Q, Q_variances='resolutions')
 
 
-def test_setitem_SASdata(nxroot, I_of_Q):
+def test_setitem_SASdata(nxroot, I_of_Q) -> None:
     I_of_Q.coords['Q'] = I_of_Q.coords['Q'][1:]
     nxroot['sasdata'] = nxcansas.SASdata(I_of_Q, Q_variances='resolutions')
     data = nxroot['sasdata']
     assert sc.identical(data[...], I_of_Q)
 
 
-def test_setitem_SASdata_raises_if_interpretation_of_variances_not_specified(nxroot):
+def test_setitem_SASdata_raises_if_interpretation_of_variances_not_specified(
+    nxroot,
+) -> None:
     data = sc.array(
         dims=['Q'],
         values=[0.1, 0.2, 0.1, 0.4],
@@ -65,7 +67,7 @@ def test_setitem_SASdata_raises_if_interpretation_of_variances_not_specified(nxr
         nxroot['sasdata'] = nxcansas.SASdata(da)
 
 
-def test_load_SASdata(nxroot):
+def test_load_SASdata(nxroot) -> None:
     nxroot['sasentry'] = nxcansas.SASentry(title='A test', run=12345)
     entry = nxroot['sasentry']
     da = sc.DataArray(
@@ -83,7 +85,7 @@ def test_load_SASdata(nxroot):
     assert_identical(loaded, da)
 
 
-def test_load_SAStransmission_spectrum(nxroot):
+def test_load_SAStransmission_spectrum(nxroot) -> None:
     nxroot['sasentry'] = nxcansas.SASentry(title='A test', run=12345)
     entry = nxroot['sasentry']
     spectrum = sc.DataArray(
