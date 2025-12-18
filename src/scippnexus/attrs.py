@@ -4,11 +4,13 @@
 from collections.abc import Iterator, Mapping
 from typing import Any
 
-from ._hdf5_nexus import _cset_to_encoding, _ensure_str
+import h5py as h5
+
+from ._string import cset_to_encoding, ensure_str
 
 
-class Attrs(Mapping):
-    def __init__(self, attrs: Mapping):
+class Attrs(Mapping[str, Any]):
+    def __init__(self, attrs: h5.AttributeManager) -> None:
         self._base_attrs = attrs
         self._attrs = dict(attrs)
 
@@ -17,7 +19,7 @@ class Attrs(Mapping):
         # Is this check for string attributes sufficient? Is there a better way?
         if isinstance(attr, str | bytes):
             cset = self._base_attrs.get_id(name.encode("utf-8")).get_type().get_cset()
-            return _ensure_str(attr, _cset_to_encoding(cset))
+            return ensure_str(attr, cset_to_encoding(cset))
         return attr
 
     def __iter__(self) -> Iterator[str]:

@@ -3,8 +3,11 @@
 # @author Simon Heybrock
 from .base import NXobject, NXroot  # noqa: F401
 from .nxcylindrical_geometry import NXcylindrical_geometry  # noqa: F401
-from .nxdata import NXdata, NXdetector, NXlog, NXmonitor  # noqa: F401
+from .nxdata import NXdata  # noqa: F401
+from .nxdetector import NXdetector  # noqa: F401
 from .nxevent_data import NXevent_data  # noqa: F401
+from .nxlog import NXlog  # noqa: F401
+from .nxmonitor import NXmonitor  # noqa: F401
 from .nxoff_geometry import NXoff_geometry  # noqa: F401
 from .nxsample import NXsample  # noqa: F401
 from .nxtransformations import NXtransformations  # noqa: F401

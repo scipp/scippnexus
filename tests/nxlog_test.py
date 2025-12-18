@@ -35,7 +35,7 @@ def nxroot():
         yield root
 
 
-def test_nxobject_log(h5root):
+def test_nxobject_log(h5root) -> None:
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
         coords={
@@ -52,7 +52,7 @@ def test_nxobject_log(h5root):
     assert sc.identical(log[...], da)
 
 
-def test_nxlog_with_missing_value_uses_time_as_value(nxroot):
+def test_nxlog_with_missing_value_uses_time_as_value(nxroot) -> None:
     time = sc.epoch(unit='ns') + sc.array(
         dims=['time'], unit='s', values=[4.4, 5.5, 6.6]
     ).to(unit='ns', dtype='int64')
@@ -62,7 +62,7 @@ def test_nxlog_with_missing_value_uses_time_as_value(nxroot):
     assert_identical(loaded, sc.DataArray(data=time))
 
 
-def test_nxlog_length_1(h5root):
+def test_nxlog_length_1(h5root) -> None:
     nxroot = snx.Group(h5root, definitions=snx.base_definitions())
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1]),
@@ -79,14 +79,14 @@ def test_nxlog_length_1(h5root):
     assert sc.identical(log[...], da)
 
 
-def test_nxlog_length_1_two_dims_no_time_defaults_inner_dim_name(nxroot):
+def test_nxlog_length_1_two_dims_no_time_defaults_inner_dim_name(nxroot) -> None:
     var = sc.array(dims=['time', 'ignored'], values=[[1.1]])
     log = nxroot['entry'].create_class('log', NXlog)
     log['value'] = var
     assert_identical(log[...], sc.DataArray(var.rename(ignored='dim_1')))
 
 
-def test_nxlog_length_1_two_dims_with_time_defaults_inner_dim_name(nxroot):
+def test_nxlog_length_1_two_dims_with_time_defaults_inner_dim_name(nxroot) -> None:
     da = sc.DataArray(
         sc.array(dims=['time', 'ignored'], values=[[1.1]]),
         coords={
@@ -102,7 +102,7 @@ def test_nxlog_length_1_two_dims_with_time_defaults_inner_dim_name(nxroot):
     assert sc.identical(log[...], da.rename(ignored='dim_1'))
 
 
-def test_nxlog_axes_replaces_time_dim(nxroot):
+def test_nxlog_axes_replaces_time_dim(nxroot) -> None:
     da = sc.DataArray(
         sc.array(dims=['time', 'ignored'], values=[[1.1]]),
         coords={
@@ -123,7 +123,7 @@ def test_nxlog_axes_replaces_time_dim(nxroot):
     assert sc.identical(log[...], expected)
 
 
-def test_nxlog_three_dims_with_time_of_length_1(nxroot):
+def test_nxlog_three_dims_with_time_of_length_1(nxroot) -> None:
     da = sc.DataArray(
         sc.array(dims=['time', 'a', 'b'], values=np.arange(9.0).reshape(1, 3, 3)),
         coords={
@@ -145,7 +145,7 @@ def test_nxlog_three_dims_with_time_of_length_1(nxroot):
     )
 
 
-def test_nxlog_with_shape_0(nxroot):
+def test_nxlog_with_shape_0(nxroot) -> None:
     da = sc.DataArray(
         sc.ones(dims=['time', 'ignored'], shape=(0, 1)),
         coords={'time': sc.ones(dims=['time'], shape=(0,), unit='s')},
@@ -157,7 +157,9 @@ def test_nxlog_with_shape_0(nxroot):
     assert_identical(log[...], da.rename(ignored='dim_1'))
 
 
-def test_log_with_connection_status_raises_with_positional_and_label_indexing(h5root):
+def test_log_with_connection_status_raises_with_positional_and_label_indexing(
+    h5root,
+) -> None:
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
         coords={
@@ -211,7 +213,7 @@ def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(
     assert_identical(loaded['connection_status'], connection_status)
 
 
-def test_log_with_alarm_loaded_as_datagroup_containing_data_arrays(h5root):
+def test_log_with_alarm_loaded_as_datagroup_containing_data_arrays(h5root) -> None:
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
         coords={

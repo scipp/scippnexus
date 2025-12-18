@@ -34,7 +34,7 @@ def create_event_data_ids_1234(group):
     group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, -1000])
 
 
-def test_negative_event_index_converted_to_num_event(nxroot):
+def test_negative_event_index_converted_to_num_event(nxroot) -> None:
     event_data = nxroot['entry'].create_class('events_0', snx.NXevent_data)
     create_event_data_ids_1234(event_data)
     events = nxroot['entry/events_0'][...]
@@ -43,7 +43,7 @@ def test_negative_event_index_converted_to_num_event(nxroot):
 
 
 @pytest.mark.filterwarnings("ignore:Failed to load /entry/events_0:UserWarning")
-def test_bad_event_index_causes_load_as_DataGroup(nxroot):
+def test_bad_event_index_causes_load_as_DataGroup(nxroot) -> None:
     event_data = nxroot['entry'].create_class('events_0', snx.NXevent_data)
     event_data['event_id'] = sc.array(dims=[''], unit=None, values=[1, 2, 4, 1, 2])
     event_data['event_time_offset'] = sc.array(dims=[''], unit='s', values=[0, 0, 0, 0])
@@ -61,7 +61,7 @@ def create_event_data_without_event_id(group):
     group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
 
 
-def test_event_data_without_event_id_can_be_loaded(nxroot):
+def test_event_data_without_event_id_can_be_loaded(nxroot) -> None:
     event_data = nxroot['entry'].create_class('events_0', snx.NXevent_data)
     create_event_data_without_event_id(event_data)
     da = event_data[...]
@@ -77,7 +77,7 @@ def create_event_data_without_event_time_zero(group):
     group['event_index'] = sc.array(dims=[''], unit=None, values=[0, 3, 3, 5])
 
 
-def test_event_data_without_event_time_zero_can_be_loaded(nxroot):
+def test_event_data_without_event_time_zero_can_be_loaded(nxroot) -> None:
     event_data = nxroot['entry'].create_class('events_0', snx.NXevent_data)
     create_event_data_without_event_time_zero(event_data)
     da = event_data[...]
@@ -85,14 +85,14 @@ def test_event_data_without_event_time_zero_can_be_loaded(nxroot):
     assert 'event_time_offset' in da.bins.coords
 
 
-def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot):
+def test_event_mode_monitor_without_event_id_can_be_loaded(nxroot) -> None:
     monitor = nxroot['entry'].create_class('monitor', snx.NXmonitor)
     create_event_data_without_event_id(monitor)
     da = monitor[...]['events']
     assert 'event_time_offset' in da.bins.coords
 
 
-def test_read_empty_nxevent_data(h5root):
+def test_read_empty_nxevent_data(h5root) -> None:
     entry = h5root.create_group('entry')
     events = entry.create_group('events')
     events.attrs['NX_class'] = 'NXevent_data'
@@ -116,7 +116,7 @@ def make_event_data(h5root):
     return entry
 
 
-def test_nxevent_data_keys(h5root):
+def test_nxevent_data_keys(h5root) -> None:
     entry = make_event_data(h5root)
     root = snx.Group(entry)
     event_data = root['events']
@@ -128,7 +128,7 @@ def test_nxevent_data_keys(h5root):
     }
 
 
-def test_nxevent_data_children_read_as_variables_with_correct_dims(h5root):
+def test_nxevent_data_children_read_as_variables_with_correct_dims(h5root) -> None:
     entry = make_event_data(h5root)
     root = snx.Group(entry, definitions=snx.base_definitions())
     event_data = root['events']
@@ -150,7 +150,7 @@ def test_nxevent_data_children_read_as_variables_with_correct_dims(h5root):
     )
 
 
-def test_nxevent_data_dims_and_sizes_ignore_pulse_contents(h5root):
+def test_nxevent_data_dims_and_sizes_ignore_pulse_contents(h5root) -> None:
     entry = make_event_data(h5root)
     root = snx.Group(entry, definitions=snx.base_definitions())
     event_data = root['events']
@@ -158,7 +158,7 @@ def test_nxevent_data_dims_and_sizes_ignore_pulse_contents(h5root):
     assert event_data.sizes == {'event_time_zero': 2}
 
 
-def test_read_nxevent_data(h5root):
+def test_read_nxevent_data(h5root) -> None:
     entry = make_event_data(h5root)
     root = snx.Group(entry, definitions=snx.base_definitions())
     event_data = root['events']

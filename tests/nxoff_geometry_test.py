@@ -14,7 +14,7 @@ def group():
         yield snx.Group(f, definitions=snx.base_definitions())
 
 
-def test_vertices_loaded_as_vector3(group):
+def test_vertices_loaded_as_vector3(group) -> None:
     shape = group.create_class('shape', NXoff_geometry)
     values = [[1, 2, 3], [4, 5, 6]]
     shape['vertices'] = sc.array(dims=['ignored', 'comp'], values=values, unit='mm')
@@ -24,7 +24,7 @@ def test_vertices_loaded_as_vector3(group):
     )
 
 
-def test_field_properties(group):
+def test_field_properties(group) -> None:
     shape = group.create_class('shape', NXoff_geometry)
     values = [[1, 2, 3], [4, 5, 6]]
     shape['vertices'] = sc.array(dims=['ignored', 'comp'], values=values, unit='m')
@@ -38,7 +38,9 @@ def test_field_properties(group):
     assert loaded['faces'].unit is None
 
 
-def test_off_to_shape_without_detector_faces_yields_scalar_shape_with_all_faces(group):
+def test_off_to_shape_without_detector_faces_yields_scalar_shape_with_all_faces(
+    group,
+) -> None:
     off = group.create_class('off', NXoff_geometry)
     values = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
@@ -50,7 +52,9 @@ def test_off_to_shape_without_detector_faces_yields_scalar_shape_with_all_faces(
     assert sc.identical(shape.bins.size(), sc.index(2))
 
 
-def test_off_to_shape_raises_if_detector_faces_but_not_detector_numbers_given(group):
+def test_off_to_shape_raises_if_detector_faces_but_not_detector_numbers_given(
+    group,
+) -> None:
     off = group.create_class('off', NXoff_geometry)
     values = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
@@ -66,7 +70,7 @@ def test_off_to_shape_raises_if_detector_faces_but_not_detector_numbers_given(gr
         off_to_shape(**loaded)
 
 
-def test_off_to_shape_with_single_detector_yields_1d_shape(group):
+def test_off_to_shape_with_single_detector_yields_1d_shape(group) -> None:
     off = group.create_class('off', NXoff_geometry)
     values = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
@@ -93,7 +97,7 @@ def test_off_to_shape_with_single_detector_yields_1d_shape(group):
     )
 
 
-def test_off_to_shape_with_two_detectors_yields_1d_shape(group):
+def test_off_to_shape_with_two_detectors_yields_1d_shape(group) -> None:
     off = group.create_class('off', NXoff_geometry)
     values = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
@@ -122,7 +126,7 @@ def test_off_to_shape_with_two_detectors_yields_1d_shape(group):
     )
 
 
-def test_off_to_shape_uses_order_of_provided_detector_number_param(group):
+def test_off_to_shape_uses_order_of_provided_detector_number_param(group) -> None:
     off = group.create_class('off', NXoff_geometry)
     values = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     off['vertices'] = sc.array(dims=['_', 'comp'], values=values, unit='m')
