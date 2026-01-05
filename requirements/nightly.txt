@@ -8,11 +8,11 @@
 --index-url https://pypi.anaconda.org/scipp-nightly-wheels/simple/
 --extra-index-url https://pypi.org/simple
 
-h5py==3.14.0
+h5py==3.15.1
     # via -r nightly.in
-iniconfig==2.1.0
+iniconfig==2.3.0
     # via pytest
-numpy==2.3.2
+numpy==2.4.0
     # via
     #   h5py
     #   scipp
@@ -23,9 +23,9 @@ pluggy==1.6.0
     # via pytest
 pygments==2.19.2
     # via pytest
-pytest==8.4.1
+pytest==9.0.2
     # via -r nightly.in
-scipp==25.11.0
+scipp==100.0.0.dev0
     # via -r nightly.in
-scipy==1.16.1
+scipy==1.17.0rc2
     # via -r nightly.in
