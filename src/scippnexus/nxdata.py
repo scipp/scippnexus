@@ -100,6 +100,7 @@ class NXdata(NXobject):
                 'NXoff_geometry',
                 'NXcylindrical_geometry',
                 'NXgeometry',
+                'NXpositioner',
                 'NXtransformations',
             ]:
                 self._valid = False
