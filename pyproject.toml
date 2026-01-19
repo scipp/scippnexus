@@ -133,6 +133,7 @@ exclude = [
     '^src/scippnexus/application_definitions/',
     '^src/scippnexus/nxtransformations',
     '^src/scippnexus/base',
+    '^src/scippnexus/metadata',
 ]
 
 [tool.codespell]
