@@ -229,8 +229,7 @@ class Field:
         else:
             variable.values = self.dataset[index]
         if variable.ndim == 0 and variable.unit is None and variable.fields is None:
-            # Work around scipp/scipp#2815, and avoid returning NumPy bool
-            if isinstance(variable.values, np.ndarray) and variable.dtype != 'bool':
+            if isinstance(variable.values, np.ndarray):
                 return variable.values[()]
             else:
                 return variable.value
