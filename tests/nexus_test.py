@@ -225,7 +225,8 @@ def test_field_errors_with_different_unit_handles_them_individually(nxroot) -> N
 
 
 @pytest.mark.parametrize(
-    ('value', 'type_'), [(1.2, np.float32), (123, np.int32), ('abc', str), (True, bool)]
+    ('value', 'type_'),
+    [(1.2, np.float32), (123, np.int32), ('abc', str), (True, np.bool_)],
 )
 def test_field_is_returned_as_python_object_if_shape_empty_and_no_unit(
     nxroot, value, type_
