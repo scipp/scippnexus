@@ -3,16 +3,18 @@
 # @author Simon Heybrock
 from __future__ import annotations
 
-import uuid
-from collections.abc import Iterable
+from collections.abc import Sequence
 from itertools import chain
 from typing import Any
 
+import h5py as h5
 import numpy as np
 import scipp as sc
 
 from ._cache import cached_property
-from ._common import _to_canonical_select, convert_time_to_datetime64, to_child_select
+from ._common import (
+    to_child_select,
+)
 from .base import (
     Group,
     NexusStructureError,
@@ -20,12 +22,15 @@ from .base import (
     asvariable,
     base_definitions_dict,
 )
-from .field import Field, _is_time
+from .event_field import EventField
+from .field import Field
 from .nxevent_data import NXevent_data
-from .typing import H5Dataset, ScippIndex
+from .typing import ScippIndex
 
 
-def _guess_dims(dims, shape, dataset: H5Dataset):
+def _guess_dims(
+    dims: Sequence[str], shape: Sequence[int] | None, dataset: h5.Dataset
+) -> Sequence[str] | None:
     """Guess dims of non-signal dataset based on shape."""
     if shape is None:
         return None
@@ -57,7 +62,7 @@ class NXdata(NXobject):
         children: dict[str, Field | Group],
         fallback_dims: tuple[str, ...] | None = None,
         fallback_signal_name: str | None = None,
-    ):
+    ) -> None:
         super().__init__(attrs=attrs, children=children)
         self._valid = True  # True if the children can be assembled
         self._signal_name = None
@@ -95,6 +100,7 @@ class NXdata(NXobject):
                 'NXoff_geometry',
                 'NXcylindrical_geometry',
                 'NXgeometry',
+                'NXpositioner',
                 'NXtransformations',
             ]:
                 self._valid = False
@@ -113,6 +119,8 @@ class NXdata(NXobject):
                 self._valid = False
 
     def _init_signal(self, name: str | None, children):
+        from .nxlog import NXlog
+
         # There are multiple ways NeXus can define the "signal" dataset. The latest
         # version uses `signal` attribute on the group (passed as `name`). However,
         # we must give precedence to the `signal` attribute on the dataset, since
@@ -458,328 +466,4 @@ def _squeeze_trailing(dims: tuple[str, ...], shape: tuple[int, ...]) -> tuple[in
     return shape[: len(dims)] + tuple(size for size in shape[len(dims) :] if size != 1)
 
 
-class NXlog(NXdata):
-    """
-    NXlog, a time-series that can be loaded as a DataArray.
-
-    In some cases the NXlog may contain additional time series, such as a connection
-    status or alarm. These cannot be handled in a standard way, since the result cannot
-    be represented as a single DataArray. Furthermore, they prevent positional
-    time-indexing, since the time coord of each time-series is different. We can
-    support label-based indexing for this in the future. If additional time-series
-    are contained within the NXlog then loading will return a DataGroup of the
-    individual time-series (DataArrays).
-    """
-
-    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
-        children = dict(children)
-        self._sublogs = []
-        self._sublog_children = {}
-        for name in children:
-            if name.endswith('_time'):
-                self._sublogs.append(name[:-5])
-        # Extract all fields that belong to sublogs, since they will interfere with the
-        # setup logic in the base class (NXdata).
-        for name in self._sublogs:
-            for k in list(children):
-                if k.startswith(name):
-                    field = children.pop(k)
-                    field.sizes = {
-                        'time' if i == 0 else f'dim_{i}': size
-                        for i, size in enumerate(field.dataset.shape)
-                    }
-                    self._sublog_children[k] = field
-
-        super().__init__(
-            attrs=attrs,
-            children=children,
-            fallback_dims=('time',),
-            fallback_signal_name='value' if 'value' in children else 'time',
-        )
-
-    def read_children(self, sel: ScippIndex) -> sc.DataGroup:
-        # Sublogs have distinct time axes (with a different length). Must disable
-        # positional indexing.
-        if self._sublogs and ('time' in _to_canonical_select(list(self.sizes), sel)):
-            raise sc.DimensionError(
-                "Cannot positionally select time since there are multiple "
-                "time fields. Label-based selection is not supported yet."
-            )
-        dg = super().read_children(sel)
-        for name, field in self._sublog_children.items():
-            dg[name] = field[sel]
-        return dg
-
-    def _time_to_datetime(self, mapping):
-        if (time := mapping.get('time')) is not None:
-            if time.dtype != sc.DType.datetime64 and _is_time(time):
-                mapping['time'] = convert_time_to_datetime64(
-                    time, start=sc.epoch(unit=time.unit)
-                )
-
-    def _assemble_sublog(
-        self, dg: sc.DataGroup, name: str, value_name: str | None = None
-    ) -> sc.DataArray:
-        value_name = name if value_name is None else f'{name}_{value_name}'
-        da = sc.DataArray(dg.pop(value_name), coords={'time': dg.pop(f'{name}_time')})
-        for k in list(dg):
-            if k.startswith(name):
-                da.coords[k[len(name) + 1 :]] = dg.pop(k)
-        self._time_to_datetime(da.coords)
-        return da
-
-    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup | sc.DataArray | sc.Dataset:
-        self._time_to_datetime(dg)
-        dg = sc.DataGroup(dg)
-        sublogs = sc.DataGroup()
-        for name in self._sublogs:
-            # Somewhat arbitrary definition of which fields is the "value"
-            value_name = 'severity' if name == 'alarm' else None
-            sublogs[name] = self._assemble_sublog(dg, name, value_name=value_name)
-        out = super().assemble(dg)
-        return out if not sublogs else sc.DataGroup(value=out, **sublogs)
-
-
-def _find_embedded_nxevent_data(
-    children: dict[str, Field | Group],
-) -> Group | None:
-    if all(name in children for name in NXevent_data.mandatory_fields):
-        parent = children['event_index'].parent._group
-        event_group = Group(
-            parent, definitions={'NXmonitor': NXevent_data, 'NXdetector': NXevent_data}
-        )
-        for name in list(children):
-            if name in NXevent_data.handled_fields:
-                del children[name]
-        return event_group
-
-
-class EventField:
-    def __init__(self, event_data: Group, grouping_name: str, grouping: Field) -> None:
-        """Create a field that represents an event data group.
-
-        Parameters
-        ----------
-        event_data:
-            The event data group holding the NXevent_data fields.
-        grouping_name:
-            The name of the field that contains the grouping information.
-        grouping:
-            The field that contains the grouping keys. These are IDs corresponding to
-            the event_id field of the NXevent_data group, such as the detector_number
-            field of an NXdetector.
-        """
-        self._event_data = event_data
-        self._grouping_name = grouping_name
-        self._grouping = grouping
-
-    @property
-    def attrs(self) -> dict[str, Any]:
-        return self._event_data.attrs
-
-    @property
-    def sizes(self) -> dict[str, int]:
-        return {**self._grouping.sizes, **self._event_data.sizes}
-
-    @property
-    def dims(self) -> tuple[str, ...]:
-        return self._grouping.dims + self._event_data.dims
-
-    @property
-    def shape(self) -> tuple[int, ...]:
-        return self._grouping.shape + self._event_data.shape
-
-    def __getitem__(self, sel: ScippIndex) -> sc.DataArray:
-        event_sel = to_child_select(self.dims, self._event_data.dims, sel)
-        events = self._event_data[event_sel]
-        detector_sel = to_child_select(self.dims, self._grouping.dims, sel)
-        if not isinstance(events, sc.DataArray):
-            return events
-        da = _group_events(event_data=events, grouping=self._grouping[detector_sel])
-        da.coords[self._grouping_name] = da.coords.pop('event_id')
-        return da
-
-
-class NXdetector(NXdata):
-    _detector_number_fields = ('detector_number', 'pixel_id', 'spectrum_index')
-
-    @staticmethod
-    def _detector_number(children: Iterable[str]) -> str | None:
-        for name in NXdetector._detector_number_fields:
-            if name in children:
-                return name
-
-    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
-        fallback_dims = None
-        if (det_num_name := NXdetector._detector_number(children)) is not None:
-            if (detector_number := children[det_num_name]).dataset.ndim == 1:
-                fallback_dims = (det_num_name,)
-                detector_number.sizes = {det_num_name: detector_number.dataset.shape[0]}
-
-        if (event_group := _find_embedded_nxevent_data(children)) is not None:
-            embedded_events = uuid.uuid4().hex if 'events' in children else 'events'
-            children[embedded_events] = event_group
-        else:
-            embedded_events = None
-
-        def _maybe_event_field(name: str, child: Field | Group):
-            if (
-                name == embedded_events
-                or (isinstance(child, Group) and child.nx_class == NXevent_data)
-            ) and det_num_name is not None:
-                event_field = EventField(
-                    event_data=child,
-                    grouping_name=det_num_name,
-                    grouping=children.get(det_num_name),
-                )
-                return event_field
-            return child
-
-        children = {
-            name: _maybe_event_field(name, child) for name, child in children.items()
-        }
-
-        super().__init__(
-            attrs=attrs,
-            children=children,
-            fallback_dims=fallback_dims,
-            fallback_signal_name='data',
-        )
-
-    def coord_allow_list(self) -> list[str]:
-        """
-        Names of datasets that will be treated as coordinates.
-
-        Note that in addition to these, all datasets matching the data's dimensions
-        as well as datasets explicitly referenced by an "indices" attribute in the
-        group's list of attributes will be treated as coordinates.
-
-        Override in subclasses to customize assembly of datasets into loaded output.
-        """
-        return [
-            *NXdetector._detector_number_fields,
-            'time_of_flight',
-            'raw_time_of_flight',
-            'x_pixel_offset',
-            'y_pixel_offset',
-            'z_pixel_offset',
-            'distance',
-            'polar_angle',
-            'azimuthal_angle',
-            'crate',
-            'slot',
-            'input',
-            'start_time',
-            'stop_time',
-            'sequence_number',
-        ]
-
-    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
-        bitmasks = {
-            key[len('pixel_mask') :]: dg.pop(key)
-            # tuple because we are going to change the dict over the iteration
-            for key in tuple(dg)
-            if key.startswith('pixel_mask')
-        }
-
-        out = self._assemble_as_physical_component(
-            dg, allow_in_coords=self.coord_allow_list()
-        )
-
-        for suffix, bitmask in bitmasks.items():
-            masks = self.transform_bitmask_to_dict_of_masks(bitmask, suffix)
-            for signal in (self._signal_name, *self._aux_signals):
-                for name, mask in masks.items():
-                    out[signal].masks[name] = mask
-        return out
-
-    @staticmethod
-    def transform_bitmask_to_dict_of_masks(bitmask: sc.Variable, suffix: str = ''):
-        bit_to_mask_name = {
-            0: 'gap_pixel',
-            1: 'dead_pixel',
-            2: 'underresponding_pixel',
-            3: 'overresponding_pixel',
-            4: 'noisy_pixel',
-            6: 'part_of_a_cluster_of_problematic_pixels',
-            8: 'user_defined_mask_pixel',
-            31: 'virtual_pixel',
-        }
-
-        number_of_bits_in_dtype = 8 * bitmask.values.dtype.itemsize
-
-        # Bitwise indicator of what masks are present
-        masks_present = np.bitwise_or.reduce(bitmask.values.ravel())
-        one = np.array(1)
-
-        masks = {}
-        for bit in range(number_of_bits_in_dtype):
-            # Check if the mask associated with the current `bit` is present
-            if masks_present & (one << bit):
-                name = bit_to_mask_name.get(bit, f'undefined_bit{bit}_pixel') + suffix
-                masks[name] = sc.array(
-                    dims=bitmask.dims,
-                    values=bitmask.values & (one << bit),
-                    dtype='bool',
-                )
-        return masks
-
-    @property
-    def detector_number(self) -> str | None:
-        return self._detector_number(self._children)
-
-
-class NXmonitor(NXdata):
-    def __init__(self, attrs: dict[str, Any], children: dict[str, Field | Group]):
-        if (event_group := _find_embedded_nxevent_data(children)) is not None:
-            signal = uuid.uuid4().hex if 'events' in children else 'events'
-            children[signal] = event_group
-        else:
-            signal = 'data'
-        super().__init__(attrs=attrs, children=children, fallback_signal_name=signal)
-
-    def coord_allow_list(self) -> list[str]:
-        """
-        Names of datasets that will be treated as coordinates.
-
-        Note that in addition to these, all datasets matching the data's dimensions
-        as well as datasets explicitly referenced by an "indices" attribute in the
-        group's list of attributes will be treated as coordinates.
-
-        Override in subclasses to customize assembly of datasets into loaded output.
-        """
-        return ['distance', 'time_of_flight']
-
-    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
-        return self._assemble_as_physical_component(
-            dg, allow_in_coords=self.coord_allow_list()
-        )
-
-
-def _group_events(
-    *, event_data: sc.DataArray, grouping: sc.Variable | None = None
-) -> sc.DataArray:
-    if grouping is None:
-        event_id = 'event_id'
-    else:
-        # copy since sc.bin cannot deal with a non-contiguous view
-        grouping = asvariable(grouping)
-        event_id = grouping.flatten(to='event_id').copy()
-    if 'event_time_zero' in event_data.coords:
-        event_data.bins.coords['event_time_zero'] = sc.bins_like(
-            event_data, fill_value=event_data.coords['event_time_zero']
-        )
-    # After loading raw NXevent_data it is guaranteed that the event table
-    # is contiguous and that there is no masking. We can therefore use the
-    # more efficient approach of binning from scratch instead of erasing the
-    # 'event_time_zero' binning defined by NXevent_data.
-    event_data = event_data.bins.constituents['data'].group(event_id)
-    if grouping is None:
-        return event_data
-    return event_data.fold(dim='event_id', sizes=grouping.sizes)
-
-
 base_definitions_dict['NXdata'] = NXdata
-base_definitions_dict['NXlog'] = NXlog
-base_definitions_dict['NXdetector'] = NXdetector
-base_definitions_dict['NXmonitor'] = NXmonitor

@@ -117,6 +117,24 @@ enable_error_code = [
 ]
 warn_unreachable = true
 
+exclude = [
+    # not yet updated for type hints:
+    '^tests/',
+    '^src/scippnexus/nxlog',
+    '^src/scippnexus/nxsample',
+    '^src/scippnexus/nxoff_geometry',
+    '^src/scippnexus/nxevent_data',
+    '^src/scippnexus/event_field',
+    '^src/scippnexus/nxcylindrical_geometry',
+    '^src/scippnexus/nxdata',
+    '^src/scippnexus/_load',
+    '^src/scippnexus/nxmonitor',
+    '^src/scippnexus/nxdetector',
+    '^src/scippnexus/application_definitions/',
+    '^src/scippnexus/nxtransformations',
+    '^src/scippnexus/base',
+]
+
 [tool.codespell]
 ignore-words-list = [
     # Codespell wants "socioeconomic" which seems to be the standard spelling.

@@ -11,6 +11,7 @@ except importlib.metadata.PackageNotFoundError:
 
 from . import typing
 from ._load import load
+from .attrs import Attrs
 from .base import (
     Group,
     NexusStructureError,
@@ -19,7 +20,7 @@ from .base import (
     create_class,
     create_field,
 )
-from .field import Attrs, DependsOn, Field
+from .field import DependsOn, Field
 from .file import File
 from .nexus_classes import *  # noqa: F403
 from .nxtransformations import TransformationChain, compute_positions, zip_pixel_offsets

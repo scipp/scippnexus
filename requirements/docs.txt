@@ -12,11 +12,9 @@ alabaster==1.0.0
     # via sphinx
 annotated-types==0.7.0
     # via pydantic
-appnope==0.1.4
-    # via ipykernel
-asttokens==3.0.0
+asttokens==3.0.1
     # via stack-data
-attrs==25.3.0
+attrs==25.4.0
     # via
     #   jsonschema
     #   referencing
@@ -26,15 +24,15 @@ babel==2.17.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-beautifulsoup4==4.13.4
+beautifulsoup4==4.14.3
     # via
     #   nbconvert
     #   pydata-sphinx-theme
-bleach[css]==6.2.0
+bleach[css]==6.3.0
     # via nbconvert
-certifi==2025.8.3
+certifi==2026.1.4
     # via requests
-charset-normalizer==3.4.2
+charset-normalizer==3.4.4
     # via requests
 comm==0.2.3
     # via ipykernel
@@ -42,31 +40,31 @@ contourpy==1.3.3
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-debugpy==1.8.15
+debugpy==1.8.19
     # via ipykernel
 decorator==5.2.1
     # via ipython
 defusedxml==0.7.1
     # via nbconvert
-docutils==0.21.2
+docutils==0.22.4
     # via
     #   myst-parser
     #   nbsphinx
     #   pydata-sphinx-theme
     #   sphinx
-executing==2.2.0
+executing==2.2.1
     # via stack-data
-fastjsonschema==2.21.1
+fastjsonschema==2.21.2
     # via nbformat
-fonttools==4.59.0
+fonttools==4.61.1
     # via matplotlib
-idna==3.10
+idna==3.11
     # via requests
 imagesize==1.4.1
     # via sphinx
-ipykernel==6.30.0
+ipykernel==7.1.0
     # via -r docs.in
-ipython==9.4.0
+ipython==9.9.0
     # via
     #   -r docs.in
     #   ipykernel
@@ -80,15 +78,15 @@ jinja2==3.1.6
     #   nbconvert
     #   nbsphinx
     #   sphinx
-jsonschema==4.25.0
+jsonschema==4.26.0
     # via nbformat
-jsonschema-specifications==2025.4.1
+jsonschema-specifications==2025.9.1
     # via jsonschema
-jupyter-client==8.6.3
+jupyter-client==8.8.0
     # via
     #   ipykernel
     #   nbclient
-jupyter-core==5.8.1
+jupyter-core==5.9.1
     # via
     #   ipykernel
     #   jupyter-client
@@ -97,35 +95,35 @@ jupyter-core==5.8.1
     #   nbformat
 jupyterlab-pygments==0.3.0
     # via nbconvert
-kiwisolver==1.4.8
+kiwisolver==1.4.9
     # via matplotlib
 lazy-loader==0.4
     # via plopp
-markdown-it-py==3.0.0
+markdown-it-py==4.0.0
     # via
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==3.0.2
+markupsafe==3.0.3
     # via
     #   jinja2
     #   nbconvert
-matplotlib==3.10.5
+matplotlib==3.10.8
     # via
     #   -r docs.in
     #   plopp
-matplotlib-inline==0.1.7
+matplotlib-inline==0.2.1
     # via
     #   ipykernel
     #   ipython
-mdit-py-plugins==0.4.2
+mdit-py-plugins==0.5.0
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-mistune==3.1.3
+mistune==3.2.0
     # via nbconvert
-myst-parser==4.0.1
+myst-parser==5.0.0
     # via -r docs.in
-nbclient==0.10.2
+nbclient==0.10.4
     # via nbconvert
 nbconvert==7.16.6
     # via nbsphinx
@@ -134,11 +132,11 @@ nbformat==5.10.4
     #   nbclient
     #   nbconvert
     #   nbsphinx
-nbsphinx==0.9.7
+nbsphinx==0.9.8
     # via -r docs.in
 nest-asyncio==1.6.0
     # via ipykernel
-packaging==25.0
+packaging==26.0
     # via
     #   ipykernel
     #   lazy-loader
@@ -148,35 +146,35 @@ packaging==25.0
     #   sphinx
 pandocfilters==1.5.1
     # via nbconvert
-parso==0.8.4
+parso==0.8.5
     # via jedi
 pexpect==4.9.0
     # via ipython
-pillow==11.3.0
+pillow==12.1.0
     # via matplotlib
-platformdirs==4.3.8
+platformdirs==4.5.1
     # via
     #   jupyter-core
     #   pooch
-plopp==25.7.1
+plopp==25.11.0
     # via -r docs.in
 pooch==1.8.2
     # via -r docs.in
-prompt-toolkit==3.0.51
+prompt-toolkit==3.0.52
     # via ipython
-psutil==7.0.0
+psutil==7.2.1
     # via ipykernel
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pydantic==2.11.7
+pydantic==2.12.5
     # via
     #   autodoc-pydantic
     #   pydantic-settings
-pydantic-core==2.33.2
+pydantic-core==2.41.5
     # via pydantic
-pydantic-settings==2.10.1
+pydantic-settings==2.12.0
     # via autodoc-pydantic
 pydata-sphinx-theme==0.16.1
     # via -r docs.in
@@ -188,29 +186,31 @@ pygments==2.19.2
     #   nbconvert
     #   pydata-sphinx-theme
     #   sphinx
-pyparsing==3.2.3
+pyparsing==3.3.2
     # via matplotlib
 python-dateutil==2.9.0.post0
     # via
     #   jupyter-client
     #   matplotlib
-python-dotenv==1.1.1
+python-dotenv==1.2.1
     # via pydantic-settings
-pyyaml==6.0.2
+pyyaml==6.0.3
     # via myst-parser
-pyzmq==27.0.1
+pyzmq==27.1.0
     # via
     #   ipykernel
     #   jupyter-client
-referencing==0.36.2
+referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.4
+requests==2.32.5
     # via
     #   pooch
     #   sphinx
-rpds-py==0.26.0
+roman-numerals==4.1.0
+    # via sphinx
+rpds-py==0.30.0
     # via
     #   jsonschema
     #   referencing
@@ -218,9 +218,9 @@ six==1.17.0
     # via python-dateutil
 snowballstemmer==3.0.1
     # via sphinx
-soupsieve==2.7
+soupsieve==2.8.3
     # via beautifulsoup4
-sphinx==8.1.3
+sphinx==9.0.4
     # via
     #   -r docs.in
     #   autodoc-pydantic
@@ -230,11 +230,11 @@ sphinx==8.1.3
     #   sphinx-autodoc-typehints
     #   sphinx-copybutton
     #   sphinx-design
-sphinx-autodoc-typehints==3.0.1
+sphinx-autodoc-typehints==3.6.1
     # via -r docs.in
 sphinx-copybutton==0.5.2
     # via -r docs.in
-sphinx-design==0.6.1
+sphinx-design==0.7.0
     # via -r docs.in
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
@@ -252,7 +252,7 @@ stack-data==0.6.3
     # via ipython
 tinycss2==1.4.0
     # via bleach
-tornado==6.5.1
+tornado==6.5.4
     # via
     #   ipykernel
     #   jupyter-client
@@ -267,7 +267,7 @@ traitlets==5.14.3
     #   nbconvert
     #   nbformat
     #   nbsphinx
-typing-extensions==4.14.1
+typing-extensions==4.15.0
     # via
     #   beautifulsoup4
     #   ipython
@@ -276,13 +276,13 @@ typing-extensions==4.14.1
     #   pydata-sphinx-theme
     #   referencing
     #   typing-inspection
-typing-inspection==0.4.1
+typing-inspection==0.4.2
     # via
     #   pydantic
     #   pydantic-settings
-urllib3==2.5.0
+urllib3==2.6.3
     # via requests
-wcwidth==0.2.13
+wcwidth==0.5.0
     # via prompt-toolkit
 webencodings==0.5.1
     # via

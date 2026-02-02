@@ -29,7 +29,7 @@ def nxroot():
 
 
 @pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
-def test_returns_as_datagroup_if_no_signal_found(nxroot):
+def test_returns_as_datagroup_if_no_signal_found(nxroot) -> None:
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_numbers', detector_numbers)
@@ -37,14 +37,14 @@ def test_returns_as_datagroup_if_no_signal_found(nxroot):
     assert isinstance(dg, sc.DataGroup)
 
 
-def test_can_load_fields_if_no_data_found(h5root):
+def test_can_load_fields_if_no_data_found(h5root) -> None:
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = snx.create_class(h5root, 'detector0', NXdetector)
     snx.create_field(detector, 'detector_numbers', detector_numbers)
     detector['detector_numbers'][...]
 
 
-def test_finds_data_from_group_attr(h5root):
+def test_finds_data_from_group_attr(h5root) -> None:
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     )
@@ -60,7 +60,7 @@ def test_finds_data_from_group_attr(h5root):
     )
 
 
-def test_loads_signal_and_events_when_both_found(nxroot):
+def test_loads_signal_and_events_when_both_found(nxroot) -> None:
     detector_number = sc.array(dims=[''], unit=None, values=np.array([1, 2]))
     data = sc.ones(dims=['detector_number'], shape=[2])
     detector = nxroot.create_class('detector0', NXdetector)
@@ -78,7 +78,7 @@ def test_loads_signal_and_events_when_both_found(nxroot):
     assert loaded['events'].bins is not None
 
 
-def test_loads_as_data_array_with_embedded_events(nxroot):
+def test_loads_as_data_array_with_embedded_events(nxroot) -> None:
     detector_number = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_number)
@@ -104,7 +104,7 @@ def detector_numbers_xx_yy_1234():
     return sc.array(dims=['xx', 'yy'], unit=None, values=np.array([[1, 2], [3, 4]]))
 
 
-def test_loads_data_without_coords(h5root):
+def test_loads_data_without_coords(h5root) -> None:
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], values=[[1.1, 2.2], [3.3, 4.4]]))
     da.coords['detector_number'] = detector_numbers_xx_yy_1234()
     detector = snx.create_class(h5root, 'detector0', NXdetector)
@@ -119,7 +119,7 @@ def test_loads_data_without_coords(h5root):
 @pytest.mark.parametrize(
     'detector_number_key', ['detector_number', 'pixel_id', 'spectrum_index']
 )
-def test_detector_number_key_alias(h5root, detector_number_key):
+def test_detector_number_key_alias(h5root, detector_number_key) -> None:
     da = sc.DataArray(sc.array(dims=['xx', 'yy'], values=[[1.1, 2.2], [3.3, 4.4]]))
     da.coords[detector_number_key] = detector_numbers_xx_yy_1234()
     detector = snx.create_class(h5root, 'detector0', NXdetector)
@@ -131,7 +131,7 @@ def test_detector_number_key_alias(h5root, detector_number_key):
     )
 
 
-def test_loads_data_with_coords(h5root):
+def test_loads_data_with_coords(h5root) -> None:
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     )
@@ -146,7 +146,7 @@ def test_loads_data_with_coords(h5root):
     assert sc.identical(detector[...]['data'], da.rename_dims({'yy': 'dim_1'}))
 
 
-def test_nxcite_does_not_prevent_load_as_nxdetector(h5root):
+def test_nxcite_does_not_prevent_load_as_nxdetector(h5root) -> None:
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     )
@@ -164,7 +164,7 @@ def test_nxcite_does_not_prevent_load_as_nxdetector(h5root):
     assert sc.identical(loaded['data'], da.rename_dims({'yy': 'dim_1'}))
 
 
-def test_slicing_works_as_in_scipp(h5root):
+def test_slicing_works_as_in_scipp(h5root) -> None:
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2, 3.3], [3.3, 4.4, 5.5]])
     )
@@ -214,7 +214,9 @@ def create_event_data_ids_1234(group):
     )
 
 
-def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxroot):
+def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(
+    nxroot,
+) -> None:
     detector_numbers = sc.array(
         dims=[''], unit=None, values=np.array([1, 2, 3, 4, 5, 6])
     )
@@ -236,7 +238,7 @@ def test_loads_event_data_mapped_to_detector_numbers_based_on_their_event_id(nxr
     assert 'event_time_zero' in da.bins.coords
 
 
-def test_detector_number_fallback_dims_determines_dims_with_event_data(nxroot):
+def test_detector_number_fallback_dims_determines_dims_with_event_data(nxroot) -> None:
     detector_numbers = sc.array(
         dims=['detector_number'], unit=None, values=np.array([1, 2, 3, 4, 5, 6])
     )
@@ -247,7 +249,7 @@ def test_detector_number_fallback_dims_determines_dims_with_event_data(nxroot):
     assert da.sizes == {'detector_number': 6}
 
 
-def test_loads_event_data_with_0d_detector_numbers(nxroot):
+def test_loads_event_data_with_0d_detector_numbers(nxroot) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', sc.index(1, dtype='int64'))
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
@@ -257,7 +259,7 @@ def test_loads_event_data_with_0d_detector_numbers(nxroot):
     assert sc.identical(da.bins.size().data, sc.index(2, dtype='int64'))
 
 
-def test_loads_event_data_with_2d_detector_numbers(nxroot):
+def test_loads_event_data_with_2d_detector_numbers(nxroot) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
@@ -271,7 +273,7 @@ def test_loads_event_data_with_2d_detector_numbers(nxroot):
     )
 
 
-def test_loads_event_data_with_2d_detector_numbers_and_explicit_axes(h5root):
+def test_loads_event_data_with_2d_detector_numbers_and_explicit_axes(h5root) -> None:
     detector = snx.create_class(h5root, 'detector0', NXdetector)
     detector = make_group(detector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
@@ -285,7 +287,7 @@ def test_loads_event_data_with_2d_detector_numbers_and_explicit_axes(h5root):
     )
 
 
-def test_selecting_pixels_works_with_event_signal(nxroot):
+def test_selecting_pixels_works_with_event_signal(nxroot) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
@@ -297,7 +299,7 @@ def test_selecting_pixels_works_with_event_signal(nxroot):
     )
 
 
-def test_selecting_pixels_works_with_embedded_event_signal(nxroot):
+def test_selecting_pixels_works_with_embedded_event_signal(nxroot) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector)
@@ -309,7 +311,7 @@ def test_selecting_pixels_works_with_embedded_event_signal(nxroot):
     )
 
 
-def test_select_events_slices_underlying_event_data(nxroot):
+def test_select_events_slices_underlying_event_data(nxroot) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
@@ -343,7 +345,7 @@ def test_select_events_slices_underlying_event_data(nxroot):
     )
 
 
-def test_label_based_select_events_slices_underlying_event_data(nxroot):
+def test_label_based_select_events_slices_underlying_event_data(nxroot) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers_xx_yy_1234())
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
@@ -377,7 +379,9 @@ def test_label_based_select_events_slices_underlying_event_data(nxroot):
     )
 
 
-def test_loading_event_data_without_detector_numbers_does_not_group_events(nxroot):
+def test_loading_event_data_without_detector_numbers_does_not_group_events(
+    nxroot,
+) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
     assert detector.dims == ('event_time_zero',)
@@ -410,7 +414,7 @@ def test_loading_event_data_with_full_selection_and_automatic_detector_numbers_w
     assert tuple(detector[()].shape) == (4,)
 
 
-def test_event_data_field_dims_labels(nxroot):
+def test_event_data_field_dims_labels(nxroot) -> None:
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
@@ -418,7 +422,9 @@ def test_event_data_field_dims_labels(nxroot):
     assert detector['detector_number'].dims == ('detector_number',)
 
 
-def test_nxevent_data_without_detector_number_selection_yields_correct_pulses(nxroot):
+def test_nxevent_data_without_detector_number_selection_yields_correct_pulses(
+    nxroot,
+) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     create_event_data_ids_1234(detector.create_class('events', snx.NXevent_data))
 
@@ -450,7 +456,7 @@ def test_nxevent_data_without_detector_number_selection_yields_correct_pulses(nx
     assert np.array_equal(Load()['event_time_zero', :-2], [3, 0])
 
 
-def test_nxevent_data_selection_yields_correct_pulses(nxroot):
+def test_nxevent_data_selection_yields_correct_pulses(nxroot) -> None:
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2, 3, 4]))
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('detector_number', detector_numbers)
@@ -509,7 +515,7 @@ def create_off_geometry_detector_numbers_1234(
 @pytest.mark.parametrize(
     'detid_name', ['detector_number', 'pixel_id', 'spectrum_index']
 )
-def test_loads_data_with_coords_and_off_geometry(nxroot, detid_name):
+def test_loads_data_with_coords_and_off_geometry(nxroot, detid_name) -> None:
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     )
@@ -573,7 +579,9 @@ def create_cylindrical_geometry_detector_numbers_1234(
     return dg
 
 
-def test_cylindrical_geometry_without_detector_numbers_loaded_on_top_level(nxroot):
+def test_cylindrical_geometry_without_detector_numbers_loaded_on_top_level(
+    nxroot,
+) -> None:
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
@@ -618,7 +626,9 @@ def test_cylindrical_geometry_with_missing_parent_detector_numbers_loads_as_usua
     assert_identical(loaded['shape'], expected)
 
 
-def test_cylindrical_geometry_with_inconsistent_detector_numbers_loads_as_usual(nxroot):
+def test_cylindrical_geometry_with_inconsistent_detector_numbers_loads_as_usual(
+    nxroot,
+) -> None:
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1], [3.3]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
@@ -638,7 +648,7 @@ def test_cylindrical_geometry_with_inconsistent_detector_numbers_loads_as_usual(
         )
 
 
-def test_cylindrical_geometry_with_detector_numbers(nxroot):
+def test_cylindrical_geometry_with_detector_numbers(nxroot) -> None:
     var = sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
     detector = nxroot.create_class('detector0', NXdetector)
     detector.create_field('data', var)
@@ -691,7 +701,7 @@ def test_cylindrical_geometry_with_detector_numbers(nxroot):
 
 
 @pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
-def test_falls_back_to_hdf5_dim_labels(nxroot):
+def test_falls_back_to_hdf5_dim_labels(nxroot) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     xy = sc.array(dims=['x', 'y'], values=[[1, 2], [3, 4]])
     z = sc.array(dims=['z'], values=[1, 2, 3])
@@ -707,7 +717,7 @@ def test_falls_back_to_hdf5_dim_labels(nxroot):
 
 
 @pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
-def test_falls_back_to_partial_hdf5_dim_labels(nxroot):
+def test_falls_back_to_partial_hdf5_dim_labels(nxroot) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     xyz = sc.ones(dims=['x', 'dim_1', 'z'], shape=(2, 2, 3))
     dataset = detector.create_field('xyz', xyz)
@@ -719,7 +729,7 @@ def test_falls_back_to_partial_hdf5_dim_labels(nxroot):
 
 
 @pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
-def test_squeezes_trailing_when_fall_back_to_partial_hdf5_dim_labels(nxroot):
+def test_squeezes_trailing_when_fall_back_to_partial_hdf5_dim_labels(nxroot) -> None:
     detector = nxroot.create_class('detector0', NXdetector)
     x = sc.ones(dims=['x', 'dim_1'], shape=(2, 1))
     dataset = detector.create_field('x', x)
@@ -730,7 +740,7 @@ def test_squeezes_trailing_when_fall_back_to_partial_hdf5_dim_labels(nxroot):
 
 
 @pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
-def test_falls_back_to_hdf5_dim_labels_given_unnamed_axes(h5root):
+def test_falls_back_to_hdf5_dim_labels_given_unnamed_axes(h5root) -> None:
     xy = sc.array(dims=['x', 'y'], values=[[1, 2], [3, 4]])
     z = sc.array(dims=['z'], values=[1, 2, 3])
     detector = snx.create_class(h5root, 'detector0', NXdetector)
@@ -750,7 +760,7 @@ def test_falls_back_to_hdf5_dim_labels_given_unnamed_axes(h5root):
 
 
 @pytest.mark.filterwarnings("ignore:Failed to load :UserWarning")
-def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root):
+def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root) -> None:
     xy = sc.array(dims=['x', 'yy'], values=[[1, 2], [3, 4]])
     z = sc.array(dims=['zz'], values=[1, 2, 3])
     detector = snx.create_class(h5root, 'detector0', NXdetector)
@@ -770,7 +780,7 @@ def test_falls_back_to_hdf5_dim_labels_given_partially_axes(h5root):
 
 
 @pytest.mark.parametrize('dtype', ['bool', 'int8', 'int16', 'int32', 'int64'])
-def test_pixel_masks_parses_masks_correctly(h5root, dtype):
+def test_pixel_masks_parses_masks_correctly(h5root, dtype) -> None:
     if dtype == 'bool':
         bitmask = np.array([[1, 0], [0, 0]], dtype=dtype)
     elif dtype in ('int8', 'int16'):
@@ -873,7 +883,7 @@ def test_pixel_masks_parses_masks_correctly(h5root, dtype):
     assert len(da.masks) == 6
 
 
-def test_pixel_masks_adds_mask_to_all_dataarrays_of_dataset(h5root):
+def test_pixel_masks_adds_mask_to_all_dataarrays_of_dataset(h5root) -> None:
     bitmask = 1 << np.array([[0, 1], [-1, -1]])
     da = sc.DataArray(
         sc.array(dims=['xx', 'yy'], unit='K', values=[[1.1, 2.2], [3.3, 4.4]])
@@ -894,7 +904,9 @@ def test_pixel_masks_adds_mask_to_all_dataarrays_of_dataset(h5root):
     assert set(dg['data_2'].masks.keys()) == {'gap_pixel', 'dead_pixel'}
 
 
-def test_detector_with_event_data_and_split_pulse_yields_identical_result(nxroot):
+def test_detector_with_event_data_and_split_pulse_yields_identical_result(
+    nxroot,
+) -> None:
     detector_numbers = sc.array(
         dims=[''], unit=None, values=np.array([1, 2, 3, 4, 5, 6])
     )
@@ -929,7 +941,9 @@ def test_detector_with_event_data_and_split_pulse_yields_identical_result(nxroot
     assert_identical(da0, da1)
 
 
-def test_detector_with_event_data_and_unordered_event_time_zero_can_be_loaded(nxroot):
+def test_detector_with_event_data_and_unordered_event_time_zero_can_be_loaded(
+    nxroot,
+) -> None:
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2]))
     detector0 = nxroot.create_class('detector0', NXdetector)
     detector0.create_field('detector_number', detector_numbers)
@@ -969,7 +983,7 @@ def test_detector_with_event_data_and_unordered_event_time_zero_can_be_loaded(nx
     assert_identical(pixel2, ref2)
 
 
-def test_detector_with_event_data_and_no_event_time_zero_can_be_loaded(nxroot):
+def test_detector_with_event_data_and_no_event_time_zero_can_be_loaded(nxroot) -> None:
     detector_numbers = sc.array(dims=[''], unit=None, values=np.array([1, 2]))
     detector0 = nxroot.create_class('detector0', NXdetector)
     detector0.create_field('detector_number', detector_numbers)
@@ -1004,7 +1018,7 @@ def test_detector_with_event_data_and_no_event_time_zero_can_be_loaded(nxroot):
     assert_identical(pixel2, ref2)
 
 
-def test_nxdetector_can_load_event_detector_with_extra_length_1_axis(h5root):
+def test_nxdetector_can_load_event_detector_with_extra_length_1_axis(h5root) -> None:
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     detector_numbers = sc.array(
         dims=['xx', 'yy'], unit=None, values=np.array([[1, 2], [3, 4]])
@@ -1037,7 +1051,7 @@ def test_nxdetector_can_load_event_detector_with_extra_length_1_axis(h5root):
     assert dg['detector_0']['events'].coords['z_pixel_offset'].shape == ()
 
 
-def test_nxdetector_can_load_hist_detector_with_extra_length_1_axis(h5root):
+def test_nxdetector_can_load_hist_detector_with_extra_length_1_axis(h5root) -> None:
     instrument = snx.create_class(h5root, 'instrument', snx.NXinstrument)
     detector_numbers = sc.array(
         dims=['xx', 'yy'], unit=None, values=np.array([[1, 2], [3, 4]])

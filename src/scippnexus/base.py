@@ -11,6 +11,7 @@ from pathlib import PurePosixPath
 from types import MappingProxyType
 from typing import Any, overload
 
+import h5py as h5
 import numpy as np
 import scipp as sc
 from scipp.core import label_based_index_to_positional_index
@@ -55,12 +56,12 @@ class NXobject:
         )
 
     @cached_property
-    def sizes(self) -> dict[str, int]:
+    def sizes(self) -> dict[str, int | None]:
         return sc.DataGroup(self._children).sizes
 
     def index_child(
         self, child: Field | Group, sel: ScippIndex
-    ) -> sc.Variable | sc.DataArray | sc.Dataset | sc.DataGroup:
+    ) -> sc.Variable | sc.DataArray | sc.Dataset | sc.DataGroup[Any]:
         """
         When a Group is indexed, this method is called to index each child.
 
@@ -77,7 +78,9 @@ class NXobject:
         child_sel = to_child_select(tuple(self.sizes), child.dims, sel)
         return child[child_sel]
 
-    def read_children(self, sel: ScippIndex) -> sc.DataGroup:
+    def read_children(
+        self, sel: ScippIndex
+    ) -> sc.DataGroup[sc.Variable | sc.DataArray | sc.Dataset | sc.DataGroup[Any]]:
         """
         When a Group is indexed, this method is called to read all children.
 
@@ -95,7 +98,9 @@ class NXobject:
             }
         )
 
-    def assemble(self, dg: sc.DataGroup) -> sc.DataGroup | sc.DataArray | sc.Dataset:
+    def assemble(
+        self, dg: sc.DataGroup[Any]
+    ) -> sc.DataGroup[Any] | sc.DataArray | sc.Dataset:
         """
         When a Group is indexed, this method is called to assemble the read children
         into the result object.
@@ -169,7 +174,7 @@ class Group(Mapping):
     #    interpretation of the file, but need to cache information. An earlier version
     #    of ScippNexus used such a mechanism without caching, which was very slow.
 
-    def __init__(self, group: H5Group, definitions: dict[str, type] | None = None):
+    def __init__(self, group: h5.Group, definitions: Mapping[str, type] | None = None):
         self._group = group
         self._definitions = {} if definitions is None else definitions
         self._lazy_children = None
