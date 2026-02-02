@@ -226,7 +226,7 @@ def test_field_errors_with_different_unit_handles_them_individually(nxroot) -> N
 
 @pytest.mark.parametrize(
     ('value', 'type_'),
-    [(1.2, np.float32), (123, np.int32), ('abc', str), (True, np.bool_)],
+    [(1.2, np.float32), (123, np.int32), ('abc', str)],
 )
 def test_field_is_returned_as_python_object_if_shape_empty_and_no_unit(
     nxroot, value, type_
@@ -235,6 +235,14 @@ def test_field_is_returned_as_python_object_if_shape_empty_and_no_unit(
     field = nxroot['field1'][()]
     assert isinstance(field, type_)
     assert field == type_(value)
+
+
+def test_field_is_returned_as_python_object_if_shape_empty_and_no_unit_bool(nxroot):
+    nxroot['field1'] = sc.scalar(True, unit=None, dtype=bool)
+    field = nxroot['field1'][()]
+    # could be either type depending on Scipp version
+    assert isinstance(field, (np.bool_ | bool))
+    assert field
 
 
 @pytest.mark.parametrize('value', [1.2, 123, True, 'abc'])
