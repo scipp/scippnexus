@@ -2,6 +2,7 @@
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
 
 import io
+import re
 from pathlib import Path
 
 import h5py as h5
@@ -62,6 +63,7 @@ def test_file_from_h5py_group_does_not_allow_extra_args(tmp_path) -> None:
     with h5.File('test.nxs', 'w', driver='core', backing_store=False) as h5_file:
         snx.create_class(h5_file, 'entry', snx.NXentry)
         with pytest.raises(
-            TypeError, match='Cannot provide both h5py.File and other arguments'
+            TypeError,
+            match=re.escape('Cannot provide both h5py.File and other arguments'),
         ):
             snx.File(h5_file, 'r')
