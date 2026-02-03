@@ -25,7 +25,7 @@ pygments==2.19.2
     # via pytest
 pytest==9.0.2
     # via -r nightly.in
-scipp==100.0.0.dev0
+scipp==26.1.1
     # via -r nightly.in
 scipy==1.17.0
     # via -r nightly.in
