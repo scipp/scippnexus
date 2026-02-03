@@ -1,0 +1,864 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>scippnexus.nexus_classes &#8212; ScippNexus</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=17f483a8"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/scippnexus/nexus_classes';</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.1.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ScippNexus - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ScippNexus - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippnexus" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippnexus/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/scippnexus" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippnexus" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippnexus/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/scippnexus" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">scippnexus.nexus_classes</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for scippnexus.nexus_classes</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2023 Scipp contributors (https://github.com/scipp)</span>
+<span class="c1"># @author Simon Heybrock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXobject</span><span class="p">,</span> <span class="n">NXroot</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nxcylindrical_geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXcylindrical_geometry</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nxdata</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXdata</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nxdetector</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXdetector</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nxevent_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXevent_data</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nxlog</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXlog</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nxmonitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXmonitor</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nxoff_geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXoff_geometry</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nxsample</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXsample</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nxtransformations</span><span class="w"> </span><span class="kn">import</span> <span class="n">NXtransformations</span>  <span class="c1"># noqa: F401</span>
+
+
+<div class="viewcode-block" id="NXentry">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXentry.html#scippnexus.NXentry">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXentry</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Entry in a NeXus file.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXinstrument">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXinstrument.html#scippnexus.NXinstrument">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXinstrument</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Group of instrument-related information.&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXaperture">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXaperture.html#scippnexus.NXaperture">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXaperture</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXaperture&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXattenuator">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXattenuator.html#scippnexus.NXattenuator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXattenuator</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXattenuator&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXbeam">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXbeam.html#scippnexus.NXbeam">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXbeam</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXbeam&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXbeam_stop">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXbeam_stop.html#scippnexus.NXbeam_stop">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXbeam_stop</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXbeam_stop&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXbending_magnet">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXbending_magnet.html#scippnexus.NXbending_magnet">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXbending_magnet</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXbending_magnet&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXcapillary">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXcapillary.html#scippnexus.NXcapillary">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXcapillary</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXcapillary&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXcite">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXcite.html#scippnexus.NXcite">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXcite</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXcite&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXcollection">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXcollection.html#scippnexus.NXcollection">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXcollection</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXcollection&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXcollimator">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXcollimator.html#scippnexus.NXcollimator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXcollimator</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXcollimator&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXcrystal">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXcrystal.html#scippnexus.NXcrystal">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXcrystal</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXcrystal&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXdetector_group">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXdetector_group.html#scippnexus.NXdetector_group">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXdetector_group</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXdetector_group&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXdetector_module">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXdetector_module.html#scippnexus.NXdetector_module">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXdetector_module</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXdetector_module&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXdisk_chopper">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXdisk_chopper.html#scippnexus.NXdisk_chopper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXdisk_chopper</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXdisk_chopper&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXenvironment">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXenvironment.html#scippnexus.NXenvironment">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXenvironment</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXenvironment&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXfermi_chopper">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXfermi_chopper.html#scippnexus.NXfermi_chopper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXfermi_chopper</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXfermi_chopper&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXfilter">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXfilter.html#scippnexus.NXfilter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXfilter</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXfilter&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXflipper">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXflipper.html#scippnexus.NXflipper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXflipper</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXflipper&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXfresnel_zone_plate">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXfresnel_zone_plate.html#scippnexus.NXfresnel_zone_plate">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXfresnel_zone_plate</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXfresnel_zone_plate&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXgeometry">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXgeometry.html#scippnexus.NXgeometry">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXgeometry</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXgeometry&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXgrating">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXgrating.html#scippnexus.NXgrating">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXgrating</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXgrating&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXguide">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXguide.html#scippnexus.NXguide">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXguide</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXguide&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXinsertion_device">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXinsertion_device.html#scippnexus.NXinsertion_device">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXinsertion_device</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXinsertion_device&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXmirror">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXmirror.html#scippnexus.NXmirror">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXmirror</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXmirror&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXmoderator">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXmoderator.html#scippnexus.NXmoderator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXmoderator</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXmoderator&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXmonochromator">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXmonochromator.html#scippnexus.NXmonochromator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXmonochromator</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXmonochromator&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXnote">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXnote.html#scippnexus.NXnote">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXnote</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXnote&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXorientation">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXorientation.html#scippnexus.NXorientation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXorientation</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXorientation&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXparameters">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXparameters.html#scippnexus.NXparameters">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXparameters</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXparameters&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXpdb">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXpdb.html#scippnexus.NXpdb">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXpdb</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXpdb&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXpinhole">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXpinhole.html#scippnexus.NXpinhole">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXpinhole</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXpinhole&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXpolarizer">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXpolarizer.html#scippnexus.NXpolarizer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXpolarizer</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXpolarizer&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXpositioner">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXpositioner.html#scippnexus.NXpositioner">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXpositioner</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXpositioner&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXprocess">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXprocess.html#scippnexus.NXprocess">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXprocess</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXprocess&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXreflections">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXreflections.html#scippnexus.NXreflections">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXreflections</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXreflections&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXsample_component">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXsample_component.html#scippnexus.NXsample_component">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXsample_component</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXsample_component&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXsensor">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXsensor.html#scippnexus.NXsensor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXsensor</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXsensor&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXshape">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXshape.html#scippnexus.NXshape">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXshape</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXshape&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXsource">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXsource.html#scippnexus.NXsource">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXsource</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXsource&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXslit">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXslit.html#scippnexus.NXslit">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXslit</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXslit&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXsubentry">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXsubentry.html#scippnexus.NXsubentry">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXsubentry</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXsubentry&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXtranslation">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXtranslation.html#scippnexus.NXtranslation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXtranslation</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXtranslation&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXuser">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXuser.html#scippnexus.NXuser">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXuser</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXuser&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXvelocity_selector">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXvelocity_selector.html#scippnexus.NXvelocity_selector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXvelocity_selector</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXvelocity_selector&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="NXxraylens">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXxraylens.html#scippnexus.NXxraylens">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXxraylens</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NXxraylens&quot;&quot;&quot;</span></div>
+
+
+
+<span class="c1"># Not included in list of NeXus classes since this is the &quot;base&quot; of all others</span>
+<span class="k">del</span> <span class="n">NXobject</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ScippNexus version: 26.1.1 (<a href="https://github.com/scipp/scippnexus/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

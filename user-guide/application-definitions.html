@@ -1,0 +1,787 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Application Definitions &#8212; ScippNexus</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=17f483a8"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/application-definitions';</script>
+    <script src="../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Reference" href="../api-reference/index.html" />
+    <link rel="prev" title="NeXus classes" href="nexus-classes.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.1.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="ScippNexus - Home"/>
+    <img src="../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ScippNexus - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippnexus" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippnexus/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/scippnexus" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippnexus" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippnexus/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/scippnexus" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quick-start-guide.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nexus-classes.html">NeXus classes</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Application Definitions</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Overview">Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Writing-files">Writing files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reading-files">Reading files</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Overview</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Using-definitions-for-filtering">Using definitions for filtering</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/user-guide/application-definitions.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User Guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Application Definitions</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Application-Definitions">
+<h1>Application Definitions<a class="headerlink" href="#Application-Definitions" title="Link to this heading">#</a></h1>
+<section id="Overview">
+<h2>Overview<a class="headerlink" href="#Overview" title="Link to this heading">#</a></h2>
+<p><a class="reference external" href="https://manual.nexusformat.org/classes/applications/index.html">NeXus Application Definitions</a> define mandatory and optional class contents for specific applications. ScippNexus’ approach to application definitions is to consider them as a guide, without performing full validation. This is to avoid getting in the way of the library user, e.g., when working with incomplete or partially broken files. For example, ScippNexus will generally not validate that the tree structure conforms to a
+given application definition.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning:</p>
+<p>ScippNexus’ support for application definitions is currently experimental and the API is still subject to changes.</p>
+</div>
+<p>Definitions provide customization points, e.g., for how ScippNexus can find required information in the HDF5 group, and how contents are mapped to aspects of the returned data (typically a <code class="docutils literal notranslate"><span class="pre">scipp.DataArray</span></code> or <code class="docutils literal notranslate"><span class="pre">scipp.DataGroup</span></code>).</p>
+<p>Definitions in ScippNexus are subclasses of <a class="reference internal" href="../generated/classes/scippnexus.NXobject.html"><span class="doc">NXobject</span></a>. A <code class="docutils literal notranslate"><span class="pre">definitions</span></code> mapping passed to <code class="docutils literal notranslate"><span class="pre">snx.File</span></code> serves as a repository of definitions that <code class="docutils literal notranslate"><span class="pre">snx.Group</span></code> will use when opening a group in a file. <code class="docutils literal notranslate"><span class="pre">snx.base_definitions()</span></code> is used by default. The <code class="docutils literal notranslate"><span class="pre">NX_class</span></code> attribute of the HDF5 group is used as a key into the <code class="docutils literal notranslate"><span class="pre">definitions</span></code> mapping. It provides subclasses such as <code class="docutils literal notranslate"><span class="pre">NXlog</span></code>, <code class="docutils literal notranslate"><span class="pre">NXdata</span></code>, and <code class="docutils literal notranslate"><span class="pre">NXdetector</span></code>.</p>
+<p>Users can implement their application definition (or any definition) by subclassing <code class="docutils literal notranslate"><span class="pre">NXobject</span></code>, or one of the existing base-class definitions.</p>
+</section>
+<section id="Writing-files">
+<h2>Writing files<a class="headerlink" href="#Writing-files" title="Link to this heading">#</a></h2>
+<p>Skip ahead to <a class="reference internal" href="#Reading-files"><span class="std std-ref">Reading files</span></a> if you simply want to customize how data is read from existing files. ScippNexus provides a customization point for writing content to NeXus files with <code class="docutils literal notranslate"><span class="pre">__setitem__</span></code>. The requirements are that the value</p>
+<ol class="arabic simple">
+<li><p>provides an <code class="docutils literal notranslate"><span class="pre">nx_class</span></code> attribute that returns a valid NeXus class name such as <code class="docutils literal notranslate"><span class="pre">'NXdata'</span></code> or <code class="docutils literal notranslate"><span class="pre">scippnexus.NXdata</span></code> and</p></li>
+<li><p>defines the <code class="docutils literal notranslate"><span class="pre">__write_to_nexus_group__</span></code> method that takes a <code class="docutils literal notranslate"><span class="pre">h5py.Group</span></code>, i.e., an open HDF5 group, as its single argument.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">__write_to_nexus_group__</span></code> may then write its content to this group. This can (and should) make use of ScippNexus features for writing Nexus fields (HDF5 datasets) from a <code class="docutils literal notranslate"><span class="pre">scipp.Variable</span></code> via <code class="docutils literal notranslate"><span class="pre">snx.create_field</span></code>, such as automatic writing of the <code class="docutils literal notranslate"><span class="pre">units</span></code> attribute, or writing <code class="docutils literal notranslate"><span class="pre">datetime64</span></code> data. Consider the following example:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyData</span><span class="p">:</span>
+    <span class="n">nx_class</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXdata</span>  <span class="c1"># required</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__write_to_nexus_group__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span><span class="p">):</span>  <span class="c1"># required</span>
+        <span class="n">group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;axes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">dims</span>  <span class="c1"># NeXus way of defining dim labels</span>
+        <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s1">&#39;mysignal&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Note that above we use a custom “signal” name and do not to set the “signal” attribute on the group and as such deviate from the NeXus specification. We can then write our data using:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mydata</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">))</span>
+
+<span class="k">with</span> <span class="n">snx</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;test.nxs&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MyData</span><span class="p">(</span><span class="n">mydata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>You can also manually write nexus classes to a hdf5 dataset with <code class="docutils literal notranslate"><span class="pre">snx.create_class</span></code>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;test2.nxs&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">nxdata</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">create_class</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">nx_class</span><span class="o">=</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdata</span><span class="p">)</span>
+    <span class="n">nxdata</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;axes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mydata</span><span class="o">.</span><span class="n">dims</span>
+    <span class="n">snx</span><span class="o">.</span><span class="n">create_field</span><span class="p">(</span><span class="n">nxdata</span><span class="p">,</span> <span class="s1">&#39;mysignal&#39;</span><span class="p">,</span> <span class="n">mydata</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-bash notranslate"><div class="highlight"><pre><span></span>%%bash
+<span class="c1"># The files created above are identical</span>
+cmp<span class="w"> </span>-s<span class="w"> </span>test.nxs<span class="w"> </span>test2.nxs
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Reading-files">
+<h2>Reading files<a class="headerlink" href="#Reading-files" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h3>Overview<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p>For some application definitions — or classes within application definitions — the default ScippNexus mechanisms for reading are sufficient. This is the case when the application definition follows the NeXus standard and, e.g., introduces no new attributes.</p>
+<p>In other cases we require customization of how ScippNexus reads class contents. This is handled using <em>definitions</em> that can be passed to <code class="docutils literal notranslate"><span class="pre">snx.File</span></code> or <code class="docutils literal notranslate"><span class="pre">snx.Group</span></code>.</p>
+<p>As an example, consider the following simple definition for loading data with a custom signal name, which the file failed to specify. In this particular case we subclass <code class="docutils literal notranslate"><span class="pre">snx.NXdata</span></code>, and pass a custom argument to its <code class="docutils literal notranslate"><span class="pre">__init__</span></code>. In general this is rarely sufficient, and in practice a definition may need to implement other parts of the <code class="docutils literal notranslate"><span class="pre">snx.NXobject</span></code> interface:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyDataDefinition</span><span class="p">(</span><span class="n">snx</span><span class="o">.</span><span class="n">NXdata</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="n">children</span><span class="p">,</span> <span class="n">fallback_signal_name</span><span class="o">=</span><span class="s1">&#39;mysignal&#39;</span>
+        <span class="p">)</span>
+
+
+<span class="n">my_definitions</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">base_definitions</span><span class="p">()</span>
+<span class="n">my_definitions</span><span class="p">[</span><span class="s1">&#39;NXdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MyDataDefinition</span>
+</pre></div>
+</div>
+</div>
+<p>We can then load our file (created above in <a class="reference internal" href="#Writing-files"><span class="std std-ref">Writing files</span></a>) by our custom definitions to <code class="docutils literal notranslate"><span class="pre">snx.File</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">snx</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;test.nxs&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="n">my_definitions</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">loaded</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
+<span class="n">loaded</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><!-- Original source from -->
+<!-- https://github.com/jsignell/xarray/blob/1d960933ab252e0f79f7e050e6c9261d55568057/xarray/static/html/icons-svg-inline.html -->
+<svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<title>Show/Hide data repr</title>
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<title>Show/Hide attributes</title>
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><div class='sc-wrap sc-root'><div class='sc-header'><div class='sc-obj-type'>scipp.DataArray (672 Bytes)</div></div><ul class='sc-sections'><li class='sc-section-item'><input id='section-2a4bfd5f-1856-4b17-8117-f39288cedf64' class='sc-section-summary-in' type='checkbox' disabled ><label for='section-2a4bfd5f-1856-4b17-8117-f39288cedf64' class='sc-section-summary' >Dimensions:</label><div class='sc-section-inline-details'><ul class='sc-dim-list'><li><span>x</span>: 5</li></ul></div><div class='sc-section-details'></div></li><li class='sc-section-item'><input id='section-b041d369-5f52-476b-8409-75b48811e6b6' class='sc-section-summary-in' type='checkbox'  checked><label for='section-b041d369-5f52-476b-8409-75b48811e6b6' class='sc-section-summary'  title='Expand/collapse section'>Data: <span>(1)</span></label><div class='sc-section-inline-details'></div><div class='sc-section-details'><ul class='sc-var-list'><li class='sc-var-item'><div class='sc-var-name'><span></span></div><div class='sc-var-dims'>(x)</div><div class='sc-var-dtype'>int64</div><div class='sc-var-unit'>s</div><div class='sc-value-preview sc-preview'><span><div>0, 1, 2, 3, 4</div></span></div><input id='attrs-346d61fc-78b3-4d20-bd50-905e13581c6c' class='sc-var-attrs-in' type='checkbox' disabled><label for='attrs-346d61fc-78b3-4d20-bd50-905e13581c6c' class='sc-hide-icon' title='Show/Hide attributes'><svg class='icon sc-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a5b5421a-e58c-4018-b25f-74377d1ed963' class='sc-var-data-in' type='checkbox'><label for='data-a5b5421a-e58c-4018-b25f-74377d1ed963' title='Show/Hide data repr'><svg class='icon sc-icon-database'><use xlink:href='#icon-database'></use></svg></label><pre class='sc-var-data'>Values:<br>array([0, 1, 2, 3, 4])</pre></li></ul></div></li></ul></div></div></div>
+</div>
+<p>ScippNexus does currently not ship with a library of application definitions. Custom definitions can be provided by a user as outlined above.</p>
+</section>
+<section id="Using-definitions-for-filtering">
+<h3>Using definitions for filtering<a class="headerlink" href="#Using-definitions-for-filtering" title="Link to this heading">#</a></h3>
+<p>The application-definition mechanism can be used for filtering or selecting which children from a group should be loaded. For example, we may wish to exclude certain NeXus classes from loading. We define a custom definition as follows:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">snx</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">skip</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="n">skip_classes</span> <span class="o">=</span> <span class="p">(</span><span class="n">snx</span><span class="o">.</span><span class="n">NXevent_data</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">NXinstrument</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">snx</span><span class="o">.</span><span class="n">Group</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">nx_class</span> <span class="ow">in</span> <span class="n">skip_classes</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;DASlogs&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">FilteredEntry</span><span class="p">(</span><span class="n">snx</span><span class="o">.</span><span class="n">NXobject</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">child</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">skip</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="n">children</span><span class="p">)</span>
+
+
+<span class="n">my_definitions</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">base_definitions</span><span class="p">()</span>
+<span class="n">my_definitions</span><span class="p">[</span><span class="s1">&#39;NXentry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FilteredEntry</span>
+</pre></div>
+</div>
+</div>
+<p>We can use these definitions as follows:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scippnexus</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span>
+
+<span class="n">filename</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;PG3_4844_event.nxs&#39;</span><span class="p">)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">snx</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="n">my_definitions</span><span class="p">)</span>
+<span class="n">f</span><span class="p">[</span><span class="s1">&#39;entry&#39;</span><span class="p">][</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;PG3_4844_event.nxs&#39; from &#39;https://public.esss.dk/groups/scipp/scippnexus/1/PG3_4844_event.nxs&#39; to &#39;/home/runner/.cache/scippnexus/1&#39;.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><style id="scipp-style-sheet">.sc-root{--sc-background-color0:var(--jp-layout-color0,#fff);--sc-background-color1:var(--jp-layout-color1,#fcfcfc);--sc-background-color2:var(--jp-layout-color2,#efefef);--sc-inverse-background-color0:var(--jp-inverse-layout-color4,#111);--sc-font-color0:var(--jp-content-font-color0,#000);--sc-font-color1:var(--jp-content-font-color1,#555);--sc-font-color2:var(--jp-content-font-color2,#888);--sc-font-color3:var(--jp-content-font-color3,#ccc);}body.vscode-dark .sc-root{--sc-font-color0:rgba(255,255,255,1);--sc-font-color1:rgba(255,255,255,0.70);--sc-font-color2:rgba(255,255,255,0.54);--sc-font-color3:rgba(255,255,255,0.38);--sc-border-color:#1F1F1F;--sc-disabled-color:#515151;--sc-background-color0:#111111;--sc-background-color1:#111111;--sc-background-color2:#313131;}.sc-wrap{font-size:14px;min-width:300px;max-width:800px;}.sc-var-attrs .sc-wrap{padding-left:3em;}.sc-header{padding-top:6px;padding-bottom:6px;margin-bottom:4px;border-bottom:solid 1px #ddd;}.sc-header > div,.sc-header > ul{display:inline;margin-top:0;margin-bottom:0;}.sc-obj-type,.sc-array-name{margin-left:2px;margin-right:10px;}.sc-obj-type{color:var(--sc-font-color1);}.sc-underlying-size{color:var(--sc-font-color2);}.sc-sections,.reveal .sc-sections{padding-left:0 !important;display:grid;grid-template-columns:150px auto auto auto 1fr 20px 20px;}.sc-section-item{display:contents;}.sc-section-item input{display:none;}.sc-section-item input:enabled + label{cursor:pointer;color:var(--sc-font-color1);}.sc-section-item input:enabled + label:hover{color:var(--sc-font-color0);}.sc-section-summary{grid-column:1;font-weight:500;}.sc-section-summary > span{display:inline-block;padding-left:0.5em;}.sc-section-summary-in:disabled + label{color:var(--sc-font-color1);}.sc-section-summary-in + label:before{display:inline-block;content:'►';font-size:11px;width:15px;text-align:center;}.sc-section-summary-in:disabled + label:before{display:none;}.sc-section-summary-in:checked + label:before{content:'▼';}.sc-section-summary-in:checked + label > span{display:none;}.sc-section-summary,.sc-section-inline-details{padding-top:4px;padding-bottom:4px;}.sc-section-inline-details{grid-column:2 / 6;}.sc-section-details{display:none;grid-column:1 / -1;margin-bottom:5px;}.sc-section-summary-in:checked ~ .sc-section-details{display:contents;}.sc-array-wrap{grid-column:1 / -1;display:grid;grid-template-columns:20px auto;}.sc-array-wrap > label{grid-column:1;vertical-align:top;}.sc-preview{color:var(--sc-font-color2);}.sc-array-preview,.sc-array-data{padding:0 5px !important;grid-column:2;}.sc-array-data,.sc-array-in:checked ~ .sc-array-preview{display:none;}.sc-array-in:checked ~ .sc-array-data,.sc-array-preview{display:inline-block;}.sc-dim-list{display:inline-block !important;list-style:none;padding:0 !important;margin:0;}.sc-dim-list li{display:inline-block;padding:0;margin:0!important;}.sc-dim-list:before{content:'(';}.sc-dim-list:after{content:')';}.sc-dim-list li:not(:last-child):after{content:',';padding-right:5px;}.sc-dim-list li span,.sc-standalone-var-name > span span,.sc-var-name > span span{padding:0 !important;}.sc-aligned{font-weight:bold;}.sc-var-list,.sc-var-item,.reveal .sc-var-list,.reveal .sc-var-item{display:contents;}.sc-var-item > div,.sc-var-item label,.sc-var-item > .sc-var-name span{background-color:var(--sc-background-color1);margin-bottom:0;}.sc-var-item > .sc-var-name:hover span{padding-right:5px;}.sc-var-list > li:nth-child(odd) > div,.sc-var-list > li:nth-child(odd) > label,.sc-var-list > li:nth-child(odd) > .sc-var-name span{background-color:var(--sc-background-color2);}.sc-var-name{grid-column:1;}.sc-var-dims{grid-column:2;}.sc-var-dtype{grid-column:3;text-align:right;color:var(--sc-font-color2);}.sc-var-unit{grid-column:4;text-align:left;color:var(--sc-font-color1);max-width:50pt;text-overflow:ellipsis;}.sc-value-preview{grid-column:5;}.sc-var-preview-variances{text-align:right;}.sc-sections .sc-section-item .sc-section-summary,.sc-sections .sc-section-item .sc-section-inline-details,.sc-section-item .sc-var-list .sc-var-item > div,.sc-section-item .sc-var-list .sc-var-item > label,.sc-section-details .sc-var-list .sc-var-item > div,.sc-section-details .sc-var-list .sc-var-item > label{margin-top:0;margin-bottom:0;}.sc-var-name,.sc-var-dims,.sc-var-dtype,.sc-var-unit,.sc-preview,.sc-attrs dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px;}.sc-var-name:hover,.sc-var-dims:hover,.sc-var-dtype:hover,.sc-var-unit:hover,.sc-attrs dt:hover{overflow:visible;width:auto;z-index:1;}.sc-var-attrs{display:block;}.sc-var-data,.reveal .sc-var-data{display:none;}.sc-var-attrs,.sc-var-data{background-color:var(--sc-background-color0) !important;padding-bottom:5px !important;}.sc-var-attrs-in:checked ~ .sc-var-attrs{display:none;}.sc-var-data-in:checked ~ .sc-var-data{display:block;}.sc-var-data > table{float:right;}.sc-var-name span,.sc-var-data{padding-left:25px !important;}.sc-var-attrs,.sc-var-data{grid-column:1 / -1;}dl.sc-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto;}.sc-attrs dt,dd{padding:0;margin:0;float:left;padding-right:10px;width:auto;}.sc-attrs dt{font-weight:normal;grid-column:1;}.sc-attrs dt:hover span{display:inline-block;padding-right:10px;}.sc-attrs dd{grid-column:2;white-space:pre-wrap;word-break:break-all;}.sc-icon-database,.sc-icon-file-text2{display:inline-block;vertical-align:middle;width:1em;height:1.5em !important;stroke-width:0;stroke:currentColor;fill:currentColor;}label.sc-hide-icon svg{opacity:0;}.sc-standalone-var-name{grid-column:1/3;}.sc-standalone-var-name span{padding-left:25px;padding-right:10px;}.sc-title{font-weight:bold;font-size:1.5em;}.sc-subtitle{font-weight:normal;font-style:italic;text-align:left;font-size:1.2em;padding:1px;}.sc-label{fill:var(--sc-font-color0,#444444);text-anchor:middle;}.sc-name{fill:var(--sc-font-color0,#111111);}.sc-inset-line{stroke:var(--sc-font-color1);stroke-width:0.05;stroke-dasharray:0.2,0.2;}.sc-log-wrap{height:25ex;resize:vertical;overflow-y:scroll;display:flex;flex-direction:column-reverse;border:1px solid;border-color:var(--jp-border-color2);background-color:var(--sc-background-color1);}div.sc-log{line-height:2.5ex;}table.sc-log{table-layout:auto;border-collapse:collapse;}tr.sc-log:nth-child(even){background-color:var(--sc-background-color0);}tr.sc-log > td{vertical-align:top;padding-bottom:0.5ex;}.sc-log-time-stamp{min-width:22ch;font-family:var(--jp-code-font-family);color:var(--sc-font-color2);}.sc-log-level{min-width:10ch;}tr.sc-log-debug td.sc-log-level{color:var(--jp-accent-color1);}tr.sc-log-info td.sc-log-level{color:var(--jp-info-color1);}tr.sc-log-warning td.sc-log-level{color:var(--jp-warn-color1);}tr.sc-log-error td.sc-log-level{font-weight:bold;color:var(--jp-error-color2);}tr.sc-log-critical td.sc-log-level{font-weight:bold;color:var(--sc-background-color0);background-color:var(--jp-error-color1);}.sc-log-message{white-space:pre-wrap;width:100%;}.sc-log-html-payload{white-space:normal;}.sc-log-name{padding-right:0.5em;text-align:right;white-space:pre-wrap;color:var(--sc-font-color3);}</style><style id="datagroup-style-sheet">.dg-root{white-space:normal;font-size:14px;min-width:300px;max-width:1200px;}.dg-root *{box-sizing:border-box;}.sc-header > label,.sc-header > label > div,.sc-header > label > div > ul{display:inline;margin-bottom:0;}.dg-header-in{display:none;}.dg-header-in + .sc-header > label:before{display:inline-block;font-size:11px;text-align:left;content:'►';}.dg-header-in:checked + .sc-header > label:before{content:'▼';}.dg-header-in ~ .dg-detail-box{display:none;}.dg-header-in:checked ~ .dg-detail-box{display:grid;}.dg-detail-box{margin-top:5px;margin-bottom:5px;column-gap:0 !important;display:grid;grid-template-columns:max-content max-content max-content max-content max-content max-content max-content;grid-template-areas:"name        parent      object-type shape       dtype       unit        preview";}.dg-detail-box *{margin-top:0;margin-bottom:0;}.dg-detail-list{display:contents;}.dg-detail-item{display:contents;list-style-type:none;}.dg-detail-item-in{display:none;}.dg-detail-item-in + .dg-detail-name > label:before{display:inline-block;font-size:14px;text-align:left;content:'►';}.dg-detail-item-in:checked + .dg-detail-name > label:before{content:'▼';}.dg-detail-item div,.dg-detail-item span,.dg-detail-item label{word-break:break-all;min-width:1em;max-width:20em;width:100%;}.dg-detail-item > div{display:contents;}.dg-detail-item > div > div > div{width:100%;}.dg-detail-item:hover > div > div{background-color:var(--sc-background-color2) !important;}.dg-detail-item > div span{padding-left:10px;padding-right:10px;}.dg-detail-item > div > div:first-of-type{grid-column-start:1;}.dg-detail-item-subsection{display:none;}.dg-detail-item-in{margin:0;}.dg-detail-item-in:checked ~ .dg-detail-item-subsection{display:contents;}.dg-detail-item .dg-detail-name{grid-area:"name";min-width:5em;}.dg-detail-name{padding-left:calc(var(--depth)*2em);}.dg-detail-name > label{padding-left:8px;}.dg-detail-name > label > span{padding-left:0.1em;}.dg-detail-item .dg-detail-parent{grid-area:"parent";text-align:right;}.dg-detail-item .dg-detail-objtype{grid-area:"objtype";text-align:left;}.dg-detail-item .dg-detail-shape{max-width:30em;grid-area:"shape";text-align:left;}.sc-header .dg-detail-shape{margin-left:1em;text-align:left;}.dg-detail-item .dg-detail-dtype{grid-area:"dtype";text-align:left;}.dg-detail-item .dg-detail-unit{grid-area:"unit";text-align:center;}.dg-detail-item .dg-detail-preview{grid-area:"preview";min-width:15em;max-width:100em !important;text-align:left;}.dg-detail-preview .sc-preview span,.dg-detail-shape span{padding:0 !important;}</style><div class='sc-root dg-root'><input class='dg-header-in' id='datagroup-view-09d42455-5a59-4170-86f1-b709963ae301' type='checkbox' ><div class='sc-header'><label for=datagroup-view-09d42455-5a59-4170-86f1-b709963ae301 title='Expand/collapse'><div class='sc-obj-type'>scipp.DataGroup </div><div class='dg-detail-shape'>(x_pixel_offset: 154, y_pixel_offset: 7, time_of_flight: 200001)</div></label></div><div class='dg-detail-box'><ul class='dg-detail-list'><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-2ead5ebe-b0dd-45b2-b6cd-a8bd91130d4f' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-2ead5ebe-b0dd-45b2-b6cd-a8bd91130d4f title='Expand/collapse'><span>SNSHistoTool<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>SNSbanking_file_name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>PG3_bank_2011_02_25.xml</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>SNSmapping_file_name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>PG3_TS_2009_04_17.dat</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>author</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>HistoTool</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>command1</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>event2nxl --mapping PG3_TS_2009_04_17.dat --banking PG3_bank_2011_02_25.xml --in...</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>command2</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>monitorappend --time_offset 0.0 --max_time_bin 200001.0 -l 1.0 --input PG3_4844_...</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>date</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>2011-08-12</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>description</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>List of commands run within the HistoTool package</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>version</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>3.4.5</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank102</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank103</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank104</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank105</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank106</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank123</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank124</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank143</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank144</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank164</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank184</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank22</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank23</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank24</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank42</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank43</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank44</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank62</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank63</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank64</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank82</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank83</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>bank84</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(x_pixel_offset: 154, <br>&nbspy_pixel_offset: 7)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0, 0, ..., 0, 0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>collection_identifier</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>collection_title</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>No title entered</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>definition</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>EVENTRAW</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>duration</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float32</span></div><div class='dg-detail-unit'><span>s</span></div><div class='dg-detail-preview'><span class='sc-preview'>5508.0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>end_time</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>2011-08-12T13:22:05-04:00</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>entry_identifier</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>4844</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>experiment_identifier</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>IPTS-2767</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-bacb407e-2bbe-4b76-996a-d79ba71716d6' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-bacb407e-2bbe-4b76-996a-d79ba71716d6 title='Expand/collapse'><span>monitor1<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>(time_of_flight: 200001)</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>mode</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>monitor</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>data</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataArray</span></div><div class='dg-detail-shape'>(time_of_flight: 200001)</div><div class='dg-detail-dtype'><span>int32</span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>25, 10, ..., 0, 0</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>notes</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>NONE</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>proton_charge</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>Variable</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span>float64</span></div><div class='dg-detail-unit'><span>pC</span></div><div class='dg-detail-preview'><span class='sc-preview'>4219034050530.0</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>raw_frames</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>int32</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>330473</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>run_number</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>4844</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-b872b77b-572d-4aa8-9780-bfced87b6025' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-b872b77b-572d-4aa8-9780-bfced87b6025 title='Expand/collapse'><span>sample<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>changer_position</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>NONE</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>holder</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>NONE</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>identifier</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>NONE</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>LaB6</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>nature</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>NONE</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>start_time</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>2011-08-12T11:50:17-04:00</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>title</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>diamond cw0.533 4.22e12 60Hz [10x30]</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>total_counts</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>int32</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>17926980</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 0;'><span>total_uncounted_counts</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>int32</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>0</span></div></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-b3831642-e755-4d4c-95de-825e1383e8df' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-b3831642-e755-4d4c-95de-825e1383e8df title='Expand/collapse'><span>user1<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>facility_user_id</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>HPJ</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>HPJ</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>role</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>E</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-7fd39673-4bca-47bb-8b52-558dd2485729' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-7fd39673-4bca-47bb-8b52-558dd2485729 title='Expand/collapse'><span>user2<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>facility_user_id</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>3AH</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>3AH</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>role</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>P</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-e93fb49d-ac1a-4cbd-9819-5d0b7d80fa01' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-e93fb49d-ac1a-4cbd-9819-5d0b7d80fa01 title='Expand/collapse'><span>user3<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>facility_user_id</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>OG6</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>OG6</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>role</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>E</span></div></div></li></ul></ul></div></li><li class='dg-detail-item'><div><input class='dg-detail-item-in' id='summary-233c5044-caf7-46ee-ae79-840afea71f02' type='checkbox' ><div class='dg-detail-name' style='--depth: 0;'><label for=summary-233c5044-caf7-46ee-ae79-840afea71f02 title='Expand/collapse'><span>user4<span></label></div><div class='dg-detail-parent'><span style='opacity: 0.5;'>scipp</span></div><div class='dg-detail-objtype'><span>DataGroup</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'></div><div class='dg-detail-unit'></div><div class='dg-detail-preview'></div><ul class='dg-detail-item-subsection'><ul class='dg-detail-list'><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>facility_user_id</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>2IH</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>name</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>2IH</span></div></div></li><li class='dg-detail-item'><div><div class='dg-detail-name' style='--depth: 1;'><span>role</span></div><div class='dg-detail-parent'><span style='opacity: 0.5;'></span></div><div class='dg-detail-objtype'><span>str</span></div><div class='dg-detail-shape'>()</div><div class='dg-detail-dtype'><span></span></div><div class='dg-detail-unit'><span></span></div><div class='dg-detail-preview'><span class='sc-preview'>E</span></div></div></li></ul></ul></div></li></ul></div></div></div></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="nexus-classes.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">NeXus classes</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../api-reference/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API Reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ScippNexus version: 26.1.1 (<a href="https://github.com/scipp/scippnexus/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

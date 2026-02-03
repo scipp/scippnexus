@@ -1,0 +1,1136 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>scippnexus.base &#8212; ScippNexus</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=17f483a8"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/scippnexus/base';</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.1.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ScippNexus - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ScippNexus - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippnexus" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippnexus/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/scippnexus" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippnexus" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippnexus/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/scippnexus" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">scippnexus.base</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for scippnexus.base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2023 Scipp contributors (https://github.com/scipp)</span>
+<span class="c1"># @author Simon Heybrock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemsView</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">KeysView</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">ValuesView</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">PurePosixPath</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">MappingProxyType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">overload</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">h5</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipp.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">label_based_index_to_positional_index</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">._cache</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._common</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_child_select</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.attrs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attrs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">H5Dataset</span><span class="p">,</span> <span class="n">H5Group</span><span class="p">,</span> <span class="n">ScippIndex</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">asvariable</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">obj</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="k">else</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NexusStructureError">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NexusStructureError.html#scippnexus.NexusStructureError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NexusStructureError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Invalid or unsupported class and field structure in Nexus.&quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">is_dataset</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">H5Group</span> <span class="o">|</span> <span class="n">H5Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return true if the object is an h5py.Dataset or equivalent.</span>
+
+<span class="sd">    Use this instead of isinstance(obj, h5py.Dataset) to ensure that code is compatible</span>
+<span class="sd">    with other h5py-alike interfaces.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NXobject">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXobject.html#scippnexus.NXobject">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXobject</span><span class="p">:</span>
+<div class="viewcode-block" id="NXobject.__init__">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXobject.html#scippnexus.NXobject.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">children</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Subclasses should call this in their __init__ method, or ensure that they</span>
+<span class="sd">        initialize the fields in `children` with the correct sizes and dtypes.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span> <span class="o">=</span> <span class="n">attrs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="n">children</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Group-like </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NX_class&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> has no well-defined unit&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">)</span><span class="o">.</span><span class="n">sizes</span>
+
+<div class="viewcode-block" id="NXobject.index_child">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXobject.html#scippnexus.NXobject.index_child">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">index_child</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">:</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">,</span> <span class="n">sel</span><span class="p">:</span> <span class="n">ScippIndex</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When a Group is indexed, this method is called to index each child.</span>
+
+<span class="sd">        The main purpose of this is to translate the Group index to the child index.</span>
+<span class="sd">        Since the group dimensions (usually given by the signal) may be a superset of</span>
+<span class="sd">        the child dimensions, we need to translate the group index to a child index.</span>
+
+<span class="sd">        The default implementation assumes that the child shape is identical to the</span>
+<span class="sd">        group shape, for all child dims. Subclasses of NXobject, in particular NXdata,</span>
+<span class="sd">        override this method to handle bin edges.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO Could avoid determining sizes if sel is trivial. Merge with</span>
+        <span class="c1"># NXdata.index_child?</span>
+        <span class="n">child_sel</span> <span class="o">=</span> <span class="n">to_child_select</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sizes</span><span class="p">),</span> <span class="n">child</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">sel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">child</span><span class="p">[</span><span class="n">child_sel</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="NXobject.read_children">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXobject.html#scippnexus.NXobject.read_children">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_children</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sel</span><span class="p">:</span> <span class="n">ScippIndex</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When a Group is indexed, this method is called to read all children.</span>
+
+<span class="sd">        The default implementation simply calls index_child on each child and returns</span>
+<span class="sd">        the result as a DataGroup.</span>
+
+<span class="sd">        Subclasses of NXobject, in particular NXevent_data, override this method to</span>
+<span class="sd">        to implement special logic for reading children with interdependencies, i.e.,</span>
+<span class="sd">        where reading each child in isolation is not possible.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_child</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">sel</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NXobject.assemble">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXobject.html#scippnexus.NXobject.assemble">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">assemble</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">dg</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        When a Group is indexed, this method is called to assemble the read children</span>
+<span class="sd">        into the result object.</span>
+
+<span class="sd">        The default implementation simply returns the DataGroup.</span>
+
+<span class="sd">        Subclasses of NXobject, in particular NXdata, override this method to return</span>
+<span class="sd">        an object with more semantics such as a DataArray or Dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">dg</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_label_index_to_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sel</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_label_index_to_positional</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sel</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+            <span class="ow">and</span> <span class="p">(</span>
+                <span class="c1"># Scalar label index</span>
+                <span class="nb">isinstance</span><span class="p">((</span><span class="n">index</span> <span class="o">:=</span> <span class="n">sel</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="p">(</span>
+                    <span class="c1"># Slice label index</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">slice</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="p">(</span>
+                        <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+                        <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">dim</span> <span class="o">:=</span> <span class="n">sel</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sizes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">coord</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dim</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">label_based_index_to_positional_index</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">sizes</span><span class="p">,</span> <span class="n">coord</span><span class="p">[()],</span> <span class="n">index</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_signal</span><span class="p">,</span> <span class="n">Field</span><span class="p">):</span>
+                    <span class="c1"># If it is *not* a field, the translation can happen in subgroup</span>
+                    <span class="k">raise</span> <span class="n">sc</span><span class="o">.</span><span class="n">DimensionError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Invalid slice dimension: </span><span class="se">\&#39;</span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1">: &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;no coordinate for that dimension. &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;Coordinates are </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="p">)</span>
+
+        <span class="c1"># It is not a label index, or the index will be translated in subgroup.</span>
+        <span class="c1"># Either way, pass it on.</span>
+        <span class="k">return</span> <span class="n">sel</span></div>
+
+
+
+<div class="viewcode-block" id="NXroot">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXroot.html#scippnexus.NXroot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXroot</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="Group">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.Group.html#scippnexus.Group">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Group</span><span class="p">(</span><span class="n">Mapping</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A group in a NeXus file.</span>
+
+<span class="sd">    This class is a wrapper around an h5py.Group object. It provides a dict-like</span>
+<span class="sd">    interface to the children of the group, and provides access to the attributes</span>
+<span class="sd">    of the group. The children are either Field or Group objects, depending on</span>
+<span class="sd">    whether the child is a dataset or a group, respectively.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The implementation of this class is unfortunately relatively complex:</span>
+
+    <span class="c1"># 1. NeXus requires &quot;nonlocal&quot; information for interpreting a field. For example,</span>
+    <span class="c1">#    NXdata attributes define which fields are the signal, and the names of axes.</span>
+    <span class="c1">#    A field cannot be read without this information, in particular since we want to</span>
+    <span class="c1">#    support reading slices, using the Scipp dimension-label syntax.</span>
+    <span class="c1"># 2. HDF5 or h5py performance is not great, and we want to avoid reading the same</span>
+    <span class="c1">#    attrs or datasets multiple times. We can therefore not rely on &quot;on-the-fly&quot;</span>
+    <span class="c1">#    interpretation of the file, but need to cache information. An earlier version</span>
+    <span class="c1">#    of ScippNexus used such a mechanism without caching, which was very slow.</span>
+
+<div class="viewcode-block" id="Group.__init__">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.Group.html#scippnexus.Group.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">h5</span><span class="o">.</span><span class="n">Group</span><span class="p">,</span> <span class="n">definitions</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_definitions</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">definitions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">definitions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_children</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_nexus</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nx_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The value of the NX_class attribute of the group.</span>
+
+<span class="sd">        In case of the subclass NXroot this returns :py:class:`NXroot` even if the attr</span>
+<span class="sd">        is not actually set. This is to support the majority of all legacy files, which</span>
+<span class="sd">        do not have this attribute.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">nxclass</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NX_class&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_nx_class_registry</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nxclass</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">NXroot</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MappingProxyType</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The attributes of the group.</span>
+
+<span class="sd">        Cannot be used for writing attributes, since they are cached for performance.&quot;&quot;&quot;</span>
+        <span class="c1"># Attrs are not read until needed, to avoid reading all attrs for all subgroups.</span>
+        <span class="c1"># We may expected a per-subgroup overhead of 1 ms for reading attributes, so if</span>
+        <span class="c1"># all we want is access one subgroup, we may save, e.g., a second for a group</span>
+        <span class="c1"># with 1000 subgroups (or subfields).</span>
+        <span class="k">return</span> <span class="n">MappingProxyType</span><span class="p">(</span><span class="n">Attrs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Unit</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nexus</span><span class="o">.</span><span class="n">unit</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Group</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_definitions</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Group</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Group</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_definitions</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_children</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lazily initialized children of the group.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_children</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_children</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_children</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_children</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">]:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_make_child</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">H5Dataset</span> <span class="o">|</span> <span class="n">H5Group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_dataset</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">Field</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Group</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_definitions</span><span class="p">)</span>
+
+        <span class="n">items</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">_make_child</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="c1"># In the case of NXevent_data, the `cue_` fields are unusable, since</span>
+        <span class="c1"># the definition is broken (the cue_index points into the</span>
+        <span class="c1"># event_time_offset/event_id fields, instead of the</span>
+        <span class="c1"># event_time_zero/event_index fields). In the case of NXlog they may</span>
+        <span class="c1"># be some utility if we deal with extremely long time-series that</span>
+        <span class="c1"># could be leveraged for label-based indexing in the future.</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">items</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;cue_&#39;</span><span class="p">)}</span>
+        <span class="k">for</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;_errors&#39;</span><span class="p">,</span> <span class="s1">&#39;_error&#39;</span><span class="p">):</span>
+            <span class="n">field_with_errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">items</span> <span class="k">if</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">field_with_errors</span><span class="p">:</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">errors</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">Field</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="n">Field</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">unit</span> <span class="o">==</span> <span class="n">errors</span><span class="o">.</span><span class="n">unit</span> <span class="ow">or</span> <span class="n">errors</span><span class="o">.</span><span class="n">unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">values</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">errors</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">shape</span>
+                <span class="p">):</span>
+                    <span class="n">values</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="n">errors</span><span class="o">.</span><span class="n">dataset</span>
+                    <span class="k">del</span> <span class="n">items</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">items</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_nexus</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NXobject</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instance of the NXobject subclass corresponding to the NX_class attribute.</span>
+
+<span class="sd">        This is used to determine dims, unit, and other attributes of the group and its</span>
+<span class="sd">        children, as well as defining how children will be read and assembled into the</span>
+<span class="sd">        result object when the group is indexed.</span>
+
+<span class="sd">        Lazily initialized since the NXobject subclass init can be costly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_fields</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_nexus</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_populate_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Populate the fields of the group.</span>
+
+<span class="sd">        Fields are not populated until needed, to avoid reading field and group</span>
+<span class="sd">        properties for all subgroups. However, when any field is read we must in</span>
+<span class="sd">        general parse all the field and group properties, since for classes such</span>
+<span class="sd">        as NXdata the properties of any field may indirectly depend on the properties</span>
+<span class="sd">        of any other field. For example, field attributes may define which fields are</span>
+<span class="sd">        axes, and dim labels of other fields can be defined by the names of the axes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_nexus</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_nexus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_definitions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;NX_class&#39;</span><span class="p">),</span> <span class="n">NXobject</span><span class="p">)(</span>
+            <span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_children</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="fm">__iter__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Group.keys">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.Group.html#scippnexus.Group.keys">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KeysView</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a view of the keys of the group&#39;s elements.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Group.values">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.Group.html#scippnexus.Group.values">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValuesView</span><span class="p">[</span><span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a view of the group&#39;s elements.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">values</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Group.items">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.Group.html#scippnexus.Group.items">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemsView</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a view of pairs of the keys and the group&#39;s elements.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">items</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_children_by_nx_class</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">NXobject</span> <span class="o">|</span> <span class="n">Field</span><span class="p">]:</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">select</span> <span class="o">=</span> <span class="p">(</span><span class="n">select</span><span class="p">,)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">select</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="k">else</span> <span class="n">select</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">nx_class</span> <span class="o">=</span> <span class="n">Field</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">Field</span><span class="p">)</span> <span class="k">else</span> <span class="n">child</span><span class="o">.</span><span class="n">nx_class</span>
+            <span class="k">if</span> <span class="n">nx_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">nx_class</span> <span class="o">==</span> <span class="n">sel</span> <span class="k">for</span> <span class="n">sel</span> <span class="ow">in</span> <span class="n">select</span><span class="p">):</span>
+                <span class="n">children</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">children</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Group</span> <span class="o">|</span> <span class="n">Field</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sel</span><span class="p">:</span> <span class="n">ScippIndex</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sel</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">type</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">NXobject</span><span class="p">]:</span> <span class="o">...</span>
+
+<div class="viewcode-block" id="Group.__getitem__">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.Group.html#scippnexus.Group.__getitem__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sel</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a child group or child dataset, a selection of child groups, or load and</span>
+<span class="sd">        return the current group.</span>
+
+<span class="sd">        Three cases are supported:</span>
+
+<span class="sd">        - String name: The child group or child dataset of that name is returned.</span>
+<span class="sd">        - Class such as ``NXdata`` or ``NXlog``: A dict containing all direct children</span>
+<span class="sd">          with a matching ``NX_class`` attribute are returned. Also accepts a tuple of</span>
+<span class="sd">          classes. ``Field`` selects all child fields, i.e., all datasets but not</span>
+<span class="sd">          groups.</span>
+<span class="sd">        - Scipp-style index: Load the specified slice of the current group, returning</span>
+<span class="sd">          a :class:`scipp.DataArray` or :class:`scipp.DataGroup`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sel:</span>
+<span class="sd">            Child name, class, or index.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :</span>
+<span class="sd">            Field, group, dict of fields, or loaded data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1"># We cannot get the child directly from the HDF5 group, since we need to</span>
+            <span class="c1"># create the parent group, to ensure that fields get the correct properties</span>
+            <span class="c1"># such as sizes and dtype.</span>
+            <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">sel</span><span class="p">:</span>
+                <span class="n">sel_path</span> <span class="o">=</span> <span class="n">PurePosixPath</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">sel_path</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">[</span><span class="n">sel_path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()]</span>
+                <span class="c1"># If the path is a single name, we can directly access the child</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">sel_path</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">sel_path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">grp</span> <span class="o">=</span> <span class="n">sel_path</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">grp</span><span class="p">][</span><span class="n">sel_path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">grp</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()]</span>
+            <span class="k">elif</span> <span class="n">sel</span> <span class="o">==</span> <span class="s1">&#39;..&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">Field</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_populate_fields</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">child</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">isclass</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">NXobject</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">isclass</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">sel</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">isclass</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sel</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_children_by_nx_class</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span>
+
+        <span class="n">dg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nexus</span><span class="o">.</span><span class="n">read_children</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dg</span><span class="p">:</span>
+            <span class="c1"># Bail out early to avoid fallback warnings. Everything is optional in</span>
+            <span class="c1"># NeXus so we cannot assume that the group is invalid (in contrast to</span>
+            <span class="c1"># likely partially incomplete groups that will fail to assemble below).</span>
+            <span class="k">return</span> <span class="n">dg</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nexus</span><span class="o">.</span><span class="n">assemble</span><span class="p">(</span><span class="n">dg</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">DimensionError</span><span class="p">,</span> <span class="n">NexusStructureError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_warn_fallback</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="c1"># For a time-dependent transformation in NXtransformations, an NXlog may</span>
+        <span class="c1"># take the place of the `value` field. In this case, we need to read the</span>
+        <span class="c1"># properties of the NXlog group to make the actual transformation.</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.nxtransformations</span><span class="w"> </span><span class="kn">import</span> <span class="n">maybe_transformation</span><span class="p">,</span> <span class="n">parse_depends_on_chain</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;depends_on&#39;</span> <span class="ow">in</span> <span class="n">dg</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">chain</span> <span class="o">:=</span> <span class="n">parse_depends_on_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dg</span><span class="p">[</span><span class="s1">&#39;depends_on&#39;</span><span class="p">]))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dg</span><span class="p">[</span><span class="s1">&#39;depends_on&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chain</span>
+
+        <span class="k">return</span> <span class="n">maybe_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">dg</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_warn_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Failed to load </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nexus</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="s2">&quot;Falling back to loading HDF5 group children as scipp.DataGroup.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set a child group or child dataset.</span>
+
+<span class="sd">        Note that due to the caching mechanisms in this class, reading the group</span>
+<span class="sd">        or its children may not reflect the changes made by this method.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__write_to_nexus_group__&#39;</span><span class="p">):</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="n">create_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">nx_class</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">nx_class</span><span class="p">)</span>
+            <span class="n">value</span><span class="o">.</span><span class="n">__write_to_nexus_group__</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">create_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Group.create_field">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.Group.html#scippnexus.Group.create_field">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">H5Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a child dataset with given name and value.</span>
+
+<span class="sd">        Note that due to the caching mechanisms in this class, reading the group</span>
+<span class="sd">        or its children may not reflect the changes made by this method.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :</span>
+<span class="sd">            The created dataset of the values.</span>
+<span class="sd">            If errors are written to the file, their dataset is not returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">create_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Group.create_class">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.Group.html#scippnexus.Group.create_class">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Group</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create empty HDF5 group with given name and set the NX_class attribute.</span>
+
+<span class="sd">        Note that due to the caching mechanisms in this class, reading the group</span>
+<span class="sd">        or its children may not reflect the changes made by this method.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name:</span>
+<span class="sd">            Group name.</span>
+<span class="sd">        nx_class:</span>
+<span class="sd">            Nexus class, can be a valid string for the NX_class attribute, or a</span>
+<span class="sd">            subclass of NXobject, such as NXdata or NXlog.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Group</span><span class="p">(</span>
+            <span class="n">create_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">),</span> <span class="n">definitions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_definitions</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nexus</span><span class="o">.</span><span class="n">sizes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dims</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sizes</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sizes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">definitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MappingProxyType</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">type</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_definitions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">MappingProxyType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_definitions</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">underlying</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">H5Group</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_field_params_numpy</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_field_params_string</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">),</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_field_params_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">epoch</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">start</span><span class="o">.</span><span class="n">value</span><span class="p">)}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_field_params_number</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">stddevs</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">variances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="create_field">
+<a class="viewcode-back" href="../../generated/functions/scippnexus.create_field.html#scippnexus.create_field">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_field</span><span class="p">(</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">H5Group</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">H5Dataset</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+        <span class="n">values</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="n">_create_field_params_numpy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">sc</span><span class="o">.</span><span class="n">DType</span><span class="o">.</span><span class="n">string</span><span class="p">:</span>
+        <span class="n">values</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="n">_create_field_params_string</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">sc</span><span class="o">.</span><span class="n">DType</span><span class="o">.</span><span class="n">datetime64</span><span class="p">:</span>
+        <span class="n">values</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="n">_create_field_params_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">values</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="n">_create_field_params_number</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">unit</span><span class="p">:</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+
+    <span class="n">values_dataset</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">values_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">errors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">errors_dataset</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_errors&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">errors</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">errors_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">values_dataset</span></div>
+
+
+
+<div class="viewcode-block" id="create_class">
+<a class="viewcode-back" href="../../generated/functions/scippnexus.create_class.html#scippnexus.create_class">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_class</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="n">H5Group</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">nx_class</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">H5Group</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create empty HDF5 group with given name and set the NX_class attribute.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name:</span>
+<span class="sd">        Group name.</span>
+<span class="sd">    nx_class:</span>
+<span class="sd">        Nexus class, can be a valid string for the NX_class attribute, or a</span>
+<span class="sd">        subclass of NXobject, such as NXdata or NXlog.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">attr</span> <span class="o">=</span> <span class="n">nx_class</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nx_class</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">nx_class</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="n">group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;NX_class&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr</span>
+    <span class="k">return</span> <span class="n">group</span></div>
+
+
+
+<span class="nd">@lru_cache</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_nx_class_registry</span><span class="p">():</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">nexus_classes</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">nexus_classes</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">))</span>
+
+
+<span class="n">base_definitions_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">base_definitions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a dict of all base definitions.</span>
+
+<span class="sd">    This is a copy of the base definitions dict, so that it can be modified without</span>
+<span class="sd">    affecting the original.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">base_definitions_dict</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DefaultDefinitionsType</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;DefaultDefinitions&quot;</span>
+
+
+<span class="n">DefaultDefinitions</span> <span class="o">=</span> <span class="n">DefaultDefinitionsType</span><span class="p">()</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ScippNexus version: 26.1.1 (<a href="https://github.com/scipp/scippnexus/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

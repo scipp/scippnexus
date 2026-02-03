@@ -1,0 +1,999 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>scippnexus.nxtransformations &#8212; ScippNexus</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=17f483a8"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/scippnexus/nxtransformations';</script>
+    <script src="../../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="26.1.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt="ScippNexus - Home"/>
+    <img src="../../_static/logo-dark.svg" class="logo__image only-dark pst-js-only" alt="ScippNexus - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippnexus" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippnexus/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/scippnexus" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../user-guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api-reference/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../developer/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/index.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io">
+    Scipp
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scipp.github.io/scippneutron">
+    ScippNeutron
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippnexus" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippnexus/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/conda-forge/scippnexus" title="Conda" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">scippnexus.nxtransformations</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for scippnexus.nxtransformations</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+<span class="c1"># Copyright (c) 2024 Scipp contributors (https://github.com/scipp)</span>
+<span class="c1"># @author Simon Heybrock</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utilities for loading and working with NeXus transformations.</span>
+
+<span class="sd">Transformation chains in NeXus files can be non-local and can thus be challenging to</span>
+<span class="sd">work with. Additionally, values of transformations can be time-dependent, with each</span>
+<span class="sd">chain link potentially having a different time-dependent value. In practice the user is</span>
+<span class="sd">interested in the position and orientation of a component at a specific time or time</span>
+<span class="sd">range. This may involve evaluating the transformation chain at a specific time, or</span>
+<span class="sd">applying some heuristic to determine if the changes in the transformation value are</span>
+<span class="sd">significant or just noise. In combination, the above means that we need to remain</span>
+<span class="sd">flexible in how we handle transformations, preserving all necessary information from</span>
+<span class="sd">the source files. Therefore:</span>
+
+<span class="sd">1. :py:class:`Transform` is a dataclass representing a transformation. The raw `value`</span>
+<span class="sd">   dataset is preserved (instead of directly converting to, e.g., a rotation matrix) to</span>
+<span class="sd">   facilitate further processing such as computing the mean or variance.</span>
+<span class="sd">2. Loading a :py:class:`Group` will follow depends_on chains and store them as an</span>
+<span class="sd">   attribute of the depends_on field. This is done by :py:func:`parse_depends_on_chain`.</span>
+<span class="sd">3. :py:func:`compute_positions` computes component positions (and transformations). By</span>
+<span class="sd">   making this an explicit separate step, transformations can be applied to the</span>
+<span class="sd">   transformations stored by the depends_on field before doing so. We imagine that this</span>
+<span class="sd">   can be used to</span>
+
+<span class="sd">   - Evaluate the transformation at a specific time.</span>
+<span class="sd">   - Apply filters to remove noise, to avoid having to deal with very small time</span>
+<span class="sd">     intervals when processing data.</span>
+
+<span class="sd">By keeping the loaded transformations in a simple and modifiable format, we can</span>
+<span class="sd">furthermore manually update the transformations with information from other sources,</span>
+<span class="sd">such as streamed NXlog values received from a data acquisition system.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">posixpath</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">replace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipp.scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">interpolate</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Group</span><span class="p">,</span>
+    <span class="n">NexusStructureError</span><span class="p">,</span>
+    <span class="n">NXobject</span><span class="p">,</span>
+    <span class="n">base_definitions_dict</span><span class="p">,</span>
+    <span class="n">is_dataset</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">DependsOn</span><span class="p">,</span> <span class="n">Field</span>
+
+
+<div class="viewcode-block" id="NXtransformations">
+<a class="viewcode-back" href="../../generated/classes/scippnexus.NXtransformations.html#scippnexus.NXtransformations">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NXtransformations</span><span class="p">(</span><span class="n">NXobject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group of transformations.</span>
+
+<span class="sd">    Currently all transformations in the group are loaded. This may lead to redundant</span>
+<span class="sd">    loads as transformations are also loaded by following depends_on chains.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformationError</span><span class="p">(</span><span class="n">NexusStructureError</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Transform</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;In-memory component translation or rotation as described by NXtransformations.&quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">transformation_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;translation&#39;</span><span class="p">,</span> <span class="s1">&#39;rotation&#39;</span><span class="p">]</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span>
+    <span class="n">vector</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span>
+    <span class="n">depends_on</span><span class="p">:</span> <span class="n">DependsOn</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convenience property to access sizes of the value.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">sizes</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformation_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;translation&#39;</span><span class="p">,</span> <span class="s1">&#39;rotation&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">TransformationError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">transformation_type</span><span class="si">=}</span><span class="s2"> attribute at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">,&quot;</span>
+                <span class="s2">&quot; expected &#39;translation&#39; or &#39;rotation&#39;.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_object</span><span class="p">(</span>
+        <span class="n">obj</span><span class="p">:</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Transform</span><span class="p">:</span>
+        <span class="n">depends_on</span> <span class="o">=</span> <span class="n">DependsOn</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;depends_on&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Transform</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">transformation_type</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;transformation_type&#39;</span><span class="p">),</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">_parse_value</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
+            <span class="n">vector</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;vector&#39;</span><span class="p">]),</span>
+            <span class="n">depends_on</span><span class="o">=</span><span class="n">depends_on</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">_parse_offset</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the raw transform into a rotation or translation matrix.&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">t</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="k">else</span> <span class="n">t</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformation_type</span> <span class="o">==</span> <span class="s1">&#39;translation&#39;</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">translations</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformation_type</span> <span class="o">==</span> <span class="s1">&#39;rotation&#39;</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">rotations_from_rotvecs</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">t</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformation_type</span> <span class="o">==</span> <span class="s1">&#39;translation&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">t</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">t</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_offset</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">offset</span> <span class="o">:=</span> <span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;offset&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">offset_units</span> <span class="o">:=</span> <span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;offset_units&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">TransformationError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="n">offset</span><span class="si">=}</span><span class="s2"> but no corresponding &#39;offset_units&#39; &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;attribute at </span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">translation</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">offset_units</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_value</span><span class="p">(</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">),</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="c1"># Some NXlog groups are split into value, alarm, and connection_status</span>
+        <span class="c1"># sublogs. We only care about the value.</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_interpolate_transform</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">xnew</span><span class="p">):</span>
+    <span class="c1"># scipy can&#39;t interpolate with a single value</span>
+    <span class="k">if</span> <span class="n">transform</span><span class="o">.</span><span class="n">sizes</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">transform</span><span class="p">,</span> <span class="n">transform</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span>
+        <span class="n">transform</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;previous&quot;</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span>
+    <span class="p">)(</span><span class="n">xnew</span><span class="o">=</span><span class="n">xnew</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_smaller_unit</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">unit</span> <span class="o">==</span> <span class="n">b</span><span class="o">.</span><span class="n">unit</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">unit</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">b</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ratio</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">unit</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">b</span><span class="o">.</span><span class="n">unit</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_transformations</span><span class="p">(</span>
+    <span class="n">chain</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Take the product of a chain of transformations, handling potentially mismatching</span>
+<span class="sd">    time-dependence.</span>
+
+<span class="sd">    Time-dependent transformations are interpolated to a common time-coordinate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">sizes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chain</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="ne">UserWarning</span><span class="p">(</span><span class="s1">&#39;depends_on chain </span><span class="si">{x}</span><span class="s1"> contains empty time-series, &#39;</span><span class="p">),</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># It is not clear what the dtype should be in this case. As transformations</span>
+        <span class="c1"># are commonly multiplied onto position vectors, we return an empty array of</span>
+        <span class="c1"># floats, which can be multiplied by Scipp&#39;s vector dtype.</span>
+        <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+            <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">datetimes</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)},</span>
+        <span class="p">)</span>
+    <span class="n">total_transform</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">transform</span> <span class="ow">in</span> <span class="n">chain</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">transform</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">DType</span><span class="o">.</span><span class="n">translation3</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DType</span><span class="o">.</span><span class="n">affine_transform3</span><span class="p">):</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total_transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">total_transform</span> <span class="o">=</span> <span class="n">transform</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">total_transform</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">transform</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+        <span class="p">):</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">_smaller_unit</span><span class="p">(</span>
+                <span class="n">transform</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">total_transform</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">total_transform</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_transform</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="n">transform</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+                <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">total_transform</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">],</span> <span class="n">transform</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]],</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span>
+            <span class="p">)</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">datetimes</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+            <span class="n">total_transform</span> <span class="o">=</span> <span class="n">_interpolate_transform</span><span class="p">(</span>
+                <span class="n">transform</span><span class="p">,</span> <span class="n">time</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="n">_interpolate_transform</span><span class="p">(</span><span class="n">total_transform</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">total_transform</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="n">total_transform</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">total_transform</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+        <span class="n">time_dependent</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">chain</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)]</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="n">da</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="n">time_dependent</span><span class="p">]</span>
+        <span class="n">latest_log_start</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">times</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">total_transform</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">latest_log_start</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">total_transform</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">total_transform</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">maybe_transformation</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a loaded field, possibly modified if it is a transformation.</span>
+
+<span class="sd">    Transformations are usually stored in NXtransformations groups. However, identifying</span>
+<span class="sd">    transformation fields in this way requires inspecting the parent group, which</span>
+<span class="sd">    is cumbersome to implement. Furthermore, according to the NXdetector documentation</span>
+<span class="sd">    transformations are not necessarily placed inside NXtransformations.</span>
+<span class="sd">    Instead we use the presence of the attribute &#39;transformation_type&#39; to identify</span>
+<span class="sd">    transformation fields.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;transformation_type&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Transform</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="ne">UserWarning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid transformation, </span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> missing attribute </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformationChain</span><span class="p">(</span><span class="n">DependsOn</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a chain of transformations references by a depends_on field.</span>
+
+<span class="sd">    Loading a group with a depends_on field will try to follow the chain and store the</span>
+<span class="sd">    transformations as an additional attribute of the in-memory representation of the</span>
+<span class="sd">    depends_on field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">transformations</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span> <span class="o">|</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+        <span class="n">depends_on</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">chain</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">path</span> <span class="o">:=</span> <span class="n">depends_on</span><span class="o">.</span><span class="n">absolute_path</span><span class="p">())</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transformations</span><span class="p">[</span><span class="n">path</span><span class="p">])</span>
+                <span class="n">depends_on</span> <span class="o">=</span> <span class="n">chain</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">depends_on</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="n">combine_transformations</span><span class="p">([</span><span class="n">t</span><span class="o">.</span><span class="n">build</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">chain</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;depends_on chain </span><span class="si">{</span><span class="n">depends_on</span><span class="si">}</span><span class="s1"> references missing node </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+            <span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="ne">UserWarning</span><span class="p">(</span><span class="n">m</span><span class="p">),</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">transform</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_locate_depends_on_target</span><span class="p">(</span>
+    <span class="n">file</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span>
+    <span class="n">depends_on</span><span class="p">:</span> <span class="n">DependsOn</span><span class="p">,</span>
+    <span class="n">definitions</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the target of a depends_on link.</span>
+
+<span class="sd">    The returned object is equivalent to calling ``parent[depends_on]``</span>
+<span class="sd">    in the context of transformations.</span>
+<span class="sd">    This function does not work in general because it does not process any attributes</span>
+<span class="sd">    of parents which is required to fully load some groups.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">target_path</span> <span class="o">=</span> <span class="n">depends_on</span><span class="o">.</span><span class="n">absolute_path</span><span class="p">()</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="n">target_path</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">is_dataset</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+            <span class="n">target</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">Group</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="n">definitions</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">definitions</span><span class="o">=</span><span class="n">definitions</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span><span class="p">,</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">target_path</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_depends_on_chain</span><span class="p">(</span>
+    <span class="n">parent</span><span class="p">:</span> <span class="n">Field</span> <span class="o">|</span> <span class="n">Group</span><span class="p">,</span> <span class="n">depends_on</span><span class="p">:</span> <span class="n">DependsOn</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransformationChain</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Follow a depends_on chain and return the transformations.&quot;&quot;&quot;</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="n">TransformationChain</span><span class="p">(</span><span class="n">depends_on</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">depends_on</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="c1"># Use raw h5py objects to follow the chain because that avoids constructing</span>
+    <span class="c1"># expensive intermediate snx.Group objects.</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">underlying</span><span class="o">.</span><span class="n">file</span>
+    <span class="n">visited</span> <span class="o">=</span> <span class="p">[</span><span class="n">depends_on</span><span class="o">.</span><span class="n">absolute_path</span><span class="p">()]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">depends_on</span><span class="o">.</span><span class="n">is_terminal</span><span class="p">:</span>
+            <span class="n">transform</span><span class="p">,</span> <span class="n">base</span> <span class="o">=</span> <span class="n">_locate_depends_on_target</span><span class="p">(</span>
+                <span class="n">file</span><span class="p">,</span> <span class="n">depends_on</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">definitions</span>
+            <span class="p">)</span>
+            <span class="n">depends_on</span> <span class="o">=</span> <span class="n">DependsOn</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">base</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">transform</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;depends_on&#39;</span><span class="p">])</span>
+            <span class="n">chain</span><span class="o">.</span><span class="n">transformations</span><span class="p">[</span><span class="n">transform</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">transform</span><span class="p">[()]</span>
+            <span class="k">if</span> <span class="n">depends_on</span><span class="o">.</span><span class="n">absolute_path</span><span class="p">()</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;Circular depends_on chain detected: &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="p">[</span><span class="o">*</span><span class="n">visited</span><span class="p">,</span><span class="w"> </span><span class="n">depends_on</span><span class="o">.</span><span class="n">absolute_path</span><span class="p">()]</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+            <span class="n">visited</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">depends_on</span><span class="o">.</span><span class="n">absolute_path</span><span class="p">())</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="ne">UserWarning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;depends_on chain </span><span class="si">{</span><span class="n">depends_on</span><span class="si">}</span><span class="s1"> references missing node </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">chain</span>
+
+
+<div class="viewcode-block" id="compute_positions">
+<a class="viewcode-back" href="../../generated/functions/scippnexus.compute_positions.html#scippnexus.compute_positions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_positions</span><span class="p">(</span>
+    <span class="n">dg</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">store_position</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;position&#39;</span><span class="p">,</span>
+    <span class="n">store_transform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">transformations</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursively compute positions from depends_on attributes as well as the</span>
+<span class="sd">    [xyz]_pixel_offset fields of NXdetector groups.</span>
+
+<span class="sd">    This function does not operate directly on a NeXus file but on the result of</span>
+<span class="sd">    loading a NeXus file or sub-group into a scipp.DataGroup. NeXus puts no</span>
+<span class="sd">    limitations on the structure of the depends_on chains, i.e., they may reference</span>
+<span class="sd">    parent groups. If this is the case, a call to this function will fail if only the</span>
+<span class="sd">    subgroup is passed as input.</span>
+
+<span class="sd">    Note that this does not consider &quot;legacy&quot; ways of storing positions. In particular,</span>
+<span class="sd">    ``NXmonitor.distance``, ``NXdetector.distance``, ``NXdetector.polar_angle``, and</span>
+<span class="sd">    ``NXdetector.azimuthal_angle`` are ignored.</span>
+
+<span class="sd">    Note that transformation chains may be time-dependent. In this case it will not</span>
+<span class="sd">    be applied to the pixel offsets, since the result may consume too much memory and</span>
+<span class="sd">    the shape is in general incompatible with the shape of the data. Use the</span>
+<span class="sd">    ``store_transform`` argument to store the resolved transformation chain in this</span>
+<span class="sd">    case.</span>
+
+<span class="sd">    If a transformation chain has an invalid &#39;depends_on&#39; value, e.g., a path beyond</span>
+<span class="sd">    the root data group, then the chain is ignored and no position is computed. This</span>
+<span class="sd">    does not affect other chains.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dg:</span>
+<span class="sd">        Data group with depends_on entry points into transformation chains.</span>
+<span class="sd">    store_position:</span>
+<span class="sd">        Name used to store result of resolving each depends_on chain.</span>
+<span class="sd">    store_transform:</span>
+<span class="sd">        If not None, store the resolved transformation chain in this field.</span>
+<span class="sd">    transformations:</span>
+<span class="sd">        Optional data group containing transformation chains. If not provided, the</span>
+<span class="sd">        transformations are looked up in the chains stored within the depends_on field.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        New data group with added positions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_with_positions</span><span class="p">(</span>
+        <span class="n">dg</span><span class="p">,</span>
+        <span class="n">store_position</span><span class="o">=</span><span class="n">store_position</span><span class="p">,</span>
+        <span class="n">store_transform</span><span class="o">=</span><span class="n">store_transform</span><span class="p">,</span>
+        <span class="n">transformations</span><span class="o">=</span><span class="n">transformations</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">zip_pixel_offsets</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Zip the x_pixel_offset, y_pixel_offset, and z_pixel_offset fields into a vector.</span>
+
+<span class="sd">    These fields originate from NXdetector groups. All but x_pixel_offset are optional,</span>
+<span class="sd">    e.g., for 2D detectors. Zero values for missing fields are assumed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mapping:</span>
+<span class="sd">        Mapping (typically a data group, or data array coords) containing</span>
+<span class="sd">        x_pixel_offset, y_pixel_offset, and z_pixel_offset.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :</span>
+<span class="sd">        Vectors with pixel offsets.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    compute_positions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">zero</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;x_pixel_offset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">as_vectors</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">[</span><span class="s1">&#39;x_pixel_offset&#39;</span><span class="p">],</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;y_pixel_offset&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="p">),</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;z_pixel_offset&#39;</span><span class="p">,</span> <span class="n">zero</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_with_positions</span><span class="p">(</span>
+    <span class="n">dg</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">store_position</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">store_transform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">transformations</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">:</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">chain</span> <span class="o">:=</span> <span class="n">dg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;depends_on&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">TransformationChain</span><span class="p">):</span>
+            <span class="n">chain</span> <span class="o">=</span> <span class="n">TransformationChain</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">chain</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">transformations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">chain</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">transformations</span><span class="o">=</span><span class="n">transformations</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">transform</span> <span class="o">:=</span> <span class="n">chain</span><span class="o">.</span><span class="n">compute</span><span class="p">())</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">store_position</span><span class="p">]</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">*</span> <span class="n">sc</span><span class="o">.</span><span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">store_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">store_transform</span><span class="p">]</span> <span class="o">=</span> <span class="n">transform</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataGroup</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">_with_positions</span><span class="p">(</span>
+                <span class="n">value</span><span class="p">,</span>
+                <span class="n">store_position</span><span class="o">=</span><span class="n">store_position</span><span class="p">,</span>
+                <span class="n">store_transform</span><span class="o">=</span><span class="n">store_transform</span><span class="p">,</span>
+                <span class="n">transformations</span><span class="o">=</span><span class="n">transformations</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="s1">&#39;x_pixel_offset&#39;</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">coords</span>
+            <span class="c1"># Transform can be time-dependent, do not apply it to offsets since</span>
+            <span class="c1"># result can be massive and is in general not compatible with the shape</span>
+            <span class="c1"># of the data.</span>
+            <span class="ow">and</span> <span class="p">(</span><span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">transform</span><span class="o">.</span><span class="n">dims</span> <span class="o">==</span> <span class="p">())</span>
+        <span class="p">):</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">zip_pixel_offsets</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="n">store_position</span><span class="p">:</span> <span class="n">transform</span> <span class="o">*</span> <span class="n">offset</span><span class="p">})</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="n">base_definitions_dict</span><span class="p">[</span><span class="s1">&#39;NXtransformations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NXtransformations</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ScippNexus version: 26.1.1 (<a href="https://github.com/scipp/scippnexus/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
