@@ -305,8 +305,19 @@ def _locate_depends_on_target(
     return res, posixpath.dirname(target_path)
 
 
+def _target_name(parent: Field | Group, name: str | None = None) -> str:
+    name = name or 'depends_on'
+    if isinstance(parent, Group) and name in parent:
+        target = parent[name][...]
+        if isinstance(target, DependsOn):
+            return target.absolute_path()
+        # FIXME there is probably something more intelligent to do here
+        raise ValueError("Unexpected target resolution")
+    return parent.attrs[name]
+
+
 def parse_depends_on_chain(
-    parent: Field | Group, depends_on: DependsOn
+        parent: Field | Group, depends_on: DependsOn
 ) -> TransformationChain | None:
     """Follow a depends_on chain and return the transformations."""
     chain = TransformationChain(depends_on.parent, depends_on.value)
@@ -319,7 +330,7 @@ def parse_depends_on_chain(
             transform, base = _locate_depends_on_target(
                 file, depends_on, parent.definitions
             )
-            depends_on = DependsOn(parent=base, value=transform.attrs['depends_on'])
+            depends_on = DependsOn(parent=base, value=_target_name(transform))
             chain.transformations[transform.name] = transform[()]
             if depends_on.absolute_path() in visited:
                 raise ValueError(
