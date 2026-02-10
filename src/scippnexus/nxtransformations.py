@@ -260,6 +260,59 @@ class TransformationChain(DependsOn):
 
     transformations: sc.DataGroup = field(default_factory=sc.DataGroup)
 
+    def visualize(self, *, rankdir: str = 'LR'):
+        """
+        Visualizes the ``depends_on`` chain as a Graphviz Digraph.
+
+        Requires the optional `graphviz` Python package.
+        """
+        try:
+            from graphviz import Digraph
+        except Exception as e:  # pragma: no cover - optional dependency
+            raise ImportError(
+                "The 'graphviz' package is required to visualize transformation chains."
+            ) from e
+
+        dot = Digraph()
+        dot.attr(rankdir=rankdir)
+        depends_on = self
+        prev = None
+        visited = []
+        try:
+            while (path := depends_on.absolute_path()) is not None:
+                if path in visited:
+                    raise ValueError(
+                        f'Circular depends_on chain detected: {[*visited, path]}'
+                    )
+                visited.append(path)
+                transform = self.transformations[path]
+                label = path
+                ttype = getattr(transform, 'transformation_type', None)
+                attrs = {}
+                if ttype in ('translation', 'rotation'):
+                    label = f'{path}\\n[{ttype}]'
+                    # Encode transform type in node shape/style for quick scanning
+                    if ttype == 'translation':
+                        attrs.update({'shape': 'box'})
+                    else:
+                        attrs.update({'shape': 'ellipse'})
+                dot.node(path, label=label, **attrs)
+                if prev is not None:
+                    dot.edge(prev, path, label='depends_on')
+                prev = path
+                depends_on = transform.depends_on
+        except KeyError as e:
+            m = f'depends_on chain {depends_on} references missing node {e}'.replace(
+                '\n', ''
+            )
+            warnings.warn(UserWarning(m), stacklevel=2)
+        else:
+            terminal = '.'
+            dot.node(terminal, label=terminal, shape='doublecircle')
+            if prev is not None:
+                dot.edge(prev, terminal, label='depends_on')
+        return dot
+
     def compute(self) -> sc.Variable | sc.DataArray:
         depends_on = self
         try:
