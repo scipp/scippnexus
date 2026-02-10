@@ -134,6 +134,30 @@ def test_transformation_chain_graphviz_raises_on_cycle() -> None:
         chain.visualize()
 
 
+def test_transformation_chain_compute_raises_on_cycle() -> None:
+    t1 = Transform(
+        name="/entry/instrument/t1",
+        transformation_type="translation",
+        value=sc.scalar(1.0, unit="m"),
+        vector=sc.vector([1.0, 0.0, 0.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="t2"),
+    )
+    t2 = Transform(
+        name="/entry/instrument/t2",
+        transformation_type="rotation",
+        value=sc.scalar(1.0, unit="rad"),
+        vector=sc.vector([0.0, 0.0, 1.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="t1"),
+    )
+    chain = TransformationChain(
+        parent="/entry/instrument",
+        value="t1",
+        transformations=sc.DataGroup({t1.name: t1, t2.name: t2}),
+    )
+    with pytest.raises(ValueError, match="Circular depends_on"):
+        chain.compute()
+
+
 def test_time_independent_Transformation_with_length_0(h5root) -> None:
     detector = create_detector(h5root)
     snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))

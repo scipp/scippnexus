@@ -315,9 +315,15 @@ class TransformationChain(DependsOn):
 
     def compute(self) -> sc.Variable | sc.DataArray:
         depends_on = self
+        visited = []
         try:
             chain = []
             while (path := depends_on.absolute_path()) is not None:
+                if path in visited:
+                    raise ValueError(
+                        f'Circular depends_on chain detected: {[*visited, path]}'
+                    )
+                visited.append(path)
                 chain.append(self.transformations[path])
                 depends_on = chain[-1].depends_on
             transform = combine_transformations([t.build() for t in chain])
