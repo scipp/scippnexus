@@ -276,8 +276,8 @@ class TransformationChain(DependsOn):
         dot = Digraph()
         dot.attr(rankdir=rankdir)
 
-        def _fmt(x: float) -> str:
-            return f'{x:.3g}'
+        def _fmt(x: sc.DataArray | sc.Variable) -> str:
+            return f'{x.value:.3g} {x.unit}'
 
         depends_on = self
         prev = None
@@ -297,42 +297,24 @@ class TransformationChain(DependsOn):
                     label = f'{path}\\n[{ttype}]'
                     vector = getattr(transform, 'vector', None)
                     if vector is not None:
-                        values = np.asarray(vector.value)
-                        if values.shape == (3,):
-                            direction_type = (
-                                'direction' if ttype == 'translation' else 'axis'
-                            )
-                            vec = ', '.join(f'{x:g}' for x in values)
-                            label = f'{label}\\n{direction_type}: ({vec})'
+                        direction_type = (
+                            'direction' if ttype == 'translation' else 'axis'
+                        )
+                        vec = (
+                            f'{vector.fields.x.value:.3g}, '
+                            f'{vector.fields.y.value:.3g}, '
+                            f'{vector.fields.z.value:.3g}'
+                        )
+                        label = f'{label}\\n{direction_type}: ({vec})'
                     value = getattr(transform, 'value', None)
-                    if isinstance(value, sc.DataArray):
-                        if value.sizes == {}:
-                            magnitude = value.data
-                            label = (
-                                f'{label}\\nvalue='
-                                f'{_fmt(float(magnitude.value))} {magnitude.unit}'
-                            )
-                        elif 'time' in value.sizes:
-                            vals = np.asarray(value.data.values, dtype=float)
-                            unit = value.data.unit
+                    if value is not None:
+                        if value.shape == ():
+                            label = f'{label}\\nvalue={_fmt(value)}'
+                        else:
                             label = (
                                 f'{label}\\nvalue ∈ '
-                                f'[{_fmt(np.nanmin(vals))} {unit}, '
-                                f'{_fmt(np.nanmax(vals))} {unit}]'
-                            )
-                    elif isinstance(value, sc.Variable):
-                        if value.sizes == {}:
-                            label = (
-                                f'{label}\\nvalue={_fmt(float(value.value))} '
-                                f'{value.unit}'
-                            )
-                        elif 'time' in value.sizes:
-                            vals = np.asarray(value.values, dtype=float)
-                            unit = value.unit
-                            label = (
-                                f'{label}\\nvalue ∈ '
-                                f'[{_fmt(np.nanmin(vals))} {unit}, '
-                                f'{_fmt(np.nanmax(vals))} {unit}]'
+                                f'[{_fmt(sc.nanmin(value))}, '
+                                f'{_fmt(sc.nanmax(value))}]'
                             )
                     # Encode transform type in node shape/style for quick scanning
                     if ttype == 'translation':
