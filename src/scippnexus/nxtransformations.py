@@ -283,11 +283,18 @@ class TransformationChain(DependsOn):
         prev = None
         visited = []
         try:
-            while (path := depends_on.absolute_path()) is not None:
+            while True:
+                path = depends_on.absolute_path()
+                if path is None:
+                    terminal = '.'
+                    dot.node(terminal, label=terminal, shape='doublecircle')
+                    if prev is not None:
+                        dot.edge(prev, terminal, label='depends_on')
+                    break
                 if path in visited:
-                    raise ValueError(
-                        f'Circular depends_on chain detected: {[*visited, path]}'
-                    )
+                    if prev is not None:
+                        dot.edge(prev, path, label='depends_on')
+                    break
                 visited.append(path)
                 transform = self.transformations[path]
                 label = path
@@ -326,16 +333,19 @@ class TransformationChain(DependsOn):
                     dot.edge(prev, path, label='depends_on')
                 prev = path
                 depends_on = transform.depends_on
-        except KeyError as e:
-            m = f'depends_on chain {depends_on} references missing node {e}'.replace(
-                '\n', ''
-            )
-            warnings.warn(UserWarning(m), stacklevel=2)
-        else:
-            terminal = '.'
-            dot.node(terminal, label=terminal, shape='doublecircle')
-            if prev is not None:
-                dot.edge(prev, terminal, label='depends_on')
+        except KeyError:
+            missing = depends_on.absolute_path()
+            if missing is not None:
+                dot.node(
+                    missing,
+                    label=f'{missing}\\n[missing]',
+                    shape='box',
+                    color='red',
+                    fontcolor='red',
+                    style='rounded,dashed',
+                )
+                if prev is not None:
+                    dot.edge(prev, missing, label='depends_on', color='red')
         return dot
 
     def compute(self) -> sc.Variable | sc.DataArray:

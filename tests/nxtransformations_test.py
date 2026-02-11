@@ -92,7 +92,7 @@ def test_transformation_chain_graphviz_marks_transform_types() -> None:
     assert "\\naxis: (0, 0, 1)" in t2_line
 
 
-def test_transformation_chain_graphviz_warns_on_missing_node() -> None:
+def test_transformation_chain_graphviz_marks_missing_node() -> None:
     pytest.importorskip("graphviz")
     t1 = Transform(
         name="/entry/instrument/t1",
@@ -106,9 +106,14 @@ def test_transformation_chain_graphviz_warns_on_missing_node() -> None:
         value="t1",
         transformations=sc.DataGroup({t1.name: t1}),
     )
-    with pytest.warns(UserWarning, match=r"depends_on chain .* missing node"):
-        dot = chain.visualize()
-    assert dot is not None
+    dot = chain.visualize()
+    source = dot.source
+    missing = "/entry/instrument/t2"
+    assert f'"{missing}" [label="/entry/instrument/t2\\n[missing]"' in source
+    assert 'color=red' in source
+    assert 'shape=box' in source
+    assert 'style="rounded,dashed"' in source
+    assert f'"{t1.name}" -> "{missing}" [label=depends_on color=red]' in source
 
 
 def test_transformation_chain_graphviz_shows_magnitude_or_time_stats() -> None:
@@ -213,7 +218,7 @@ def test_transformation_chain_graphviz_loaded_nxlog_shows_time_stats(
     assert "\\nvalue ∈ [1.1 m, 2.2 m]" in t1_line
 
 
-def test_transformation_chain_graphviz_raises_on_cycle() -> None:
+def test_transformation_chain_graphviz_shows_cycle() -> None:
     pytest.importorskip("graphviz")
     t1 = Transform(
         name="/entry/instrument/t1",
@@ -234,8 +239,12 @@ def test_transformation_chain_graphviz_raises_on_cycle() -> None:
         value="t1",
         transformations=sc.DataGroup({t1.name: t1, t2.name: t2}),
     )
-    with pytest.raises(ValueError, match="Circular depends_on"):
-        chain.visualize()
+    dot = chain.visualize()
+    source = dot.source
+    assert f'"{t1.name}"' in source
+    assert f'"{t2.name}"' in source
+    assert f'"{t2.name}" -> "{t1.name}" [label=depends_on]' in source
+    assert '"." [label="." shape=doublecircle]' not in source
 
 
 def test_transformation_chain_compute_raises_on_cycle() -> None:
