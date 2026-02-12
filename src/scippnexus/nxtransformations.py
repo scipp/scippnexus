@@ -277,7 +277,7 @@ class TransformationChain(DependsOn):
         dot.attr(rankdir=rankdir)
 
         def _fmt(x: sc.DataArray | sc.Variable) -> str:
-            return f'{x.value:.3g} {x.unit}'
+            return f'{x:c}'
 
         depends_on = self
         prev = None
