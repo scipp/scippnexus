@@ -5,7 +5,12 @@ import scipp as sc
 from scipp.testing import assert_identical
 
 import scippnexus as snx
-from scippnexus.nxtransformations import NXtransformations
+from scippnexus.field import DependsOn
+from scippnexus.nxtransformations import (
+    NXtransformations,
+    Transform,
+    TransformationChain,
+)
 
 
 def make_group(group: h5py.Group) -> snx.Group:
@@ -52,6 +57,218 @@ def test_Transformation_with_single_value(h5root) -> None:
     assert depends_on == 'transformations/t1'
     t = detector[depends_on][()].build()
     assert_identical(t, expected)
+
+
+def test_transformation_chain_graphviz_marks_transform_types() -> None:
+    pytest.importorskip("graphviz")
+    t2 = Transform(
+        name="/entry/instrument/t2",
+        transformation_type="rotation",
+        value=sc.scalar(1.0, unit="rad"),
+        vector=sc.vector([0.0, 0.0, 1.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="."),
+    )
+    t1 = Transform(
+        name="/entry/instrument/t1",
+        transformation_type="translation",
+        value=sc.scalar(1.0, unit="m"),
+        vector=sc.vector([1.0, 0.0, 0.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="t2"),
+    )
+    chain = TransformationChain(
+        parent="/entry/instrument",
+        value="t1",
+        transformations=sc.DataGroup({t1.name: t1, t2.name: t2}),
+    )
+    dot = chain.visualize()
+    source = dot.source.splitlines()
+    t1_line = next(line for line in source if t1.name in line and "label=" in line)
+    t2_line = next(line for line in source if t2.name in line and "label=" in line)
+    assert "shape=box" in t1_line
+    assert "\\n[translation]" in t1_line
+    assert "\\ndirection: (1, 0, 0)" in t1_line
+    assert "shape=ellipse" in t2_line
+    assert "\\n[rotation]" in t2_line
+    assert "\\naxis: (0, 0, 1)" in t2_line
+
+
+def test_transformation_chain_graphviz_marks_missing_node() -> None:
+    pytest.importorskip("graphviz")
+    t1 = Transform(
+        name="/entry/instrument/t1",
+        transformation_type="translation",
+        value=sc.scalar(1.0, unit="m"),
+        vector=sc.vector([1.0, 0.0, 0.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="t2"),
+    )
+    chain = TransformationChain(
+        parent="/entry/instrument",
+        value="t1",
+        transformations=sc.DataGroup({t1.name: t1}),
+    )
+    dot = chain.visualize()
+    source = dot.source
+    missing = "/entry/instrument/t2"
+    assert f'"{missing}" [label="/entry/instrument/t2\\n[missing]"' in source
+    assert 'color=red' in source
+    assert 'shape=box' in source
+    assert 'style="rounded,dashed"' in source
+    assert f'"{t1.name}" -> "{missing}" [label=depends_on color=red]' in source
+
+
+def test_transformation_chain_graphviz_shows_magnitude_or_time_stats() -> None:
+    pytest.importorskip("graphviz")
+    t2 = Transform(
+        name="/entry/instrument/t2",
+        transformation_type="rotation",
+        value=sc.DataArray(
+            data=sc.array(dims=["time"], values=[0.1, 0.2], unit="rad"),
+            coords={
+                "time": sc.datetimes(
+                    dims=["time"],
+                    values=["2025-01-01T00:00:00", "2025-01-01T00:00:01"],
+                    unit="s",
+                )
+            },
+        ),
+        vector=sc.vector([0.0, 0.0, 1.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="."),
+    )
+    t1 = Transform(
+        name="/entry/instrument/t1",
+        transformation_type="translation",
+        value=sc.scalar(1.0, unit="m"),
+        vector=sc.vector([1.0, 0.0, 0.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="t2"),
+    )
+    chain = TransformationChain(
+        parent="/entry/instrument",
+        value="t1",
+        transformations=sc.DataGroup({t1.name: t1, t2.name: t2}),
+    )
+    dot = chain.visualize()
+    source = dot.source.splitlines()
+    t1_line = next(line for line in source if t1.name in line and "label=" in line)
+    t2_line = next(line for line in source if t2.name in line and "label=" in line)
+    assert "\\nvalue=1 m" in t1_line
+    assert "\\nvalue ∈ [0.1 rad, 0.2 rad]" in t2_line
+
+
+def test_transformation_chain_graphviz_shows_magnitude_for_scalar_dataarray() -> None:
+    pytest.importorskip("graphviz")
+    t1 = Transform(
+        name="/entry/instrument/t1",
+        transformation_type="translation",
+        value=sc.DataArray(data=sc.scalar(2.5, unit="m")),
+        vector=sc.vector([1.0, 0.0, 0.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="."),
+    )
+    chain = TransformationChain(
+        parent="/entry/instrument",
+        value="t1",
+        transformations=sc.DataGroup({t1.name: t1}),
+    )
+    dot = chain.visualize()
+    source = dot.source.splitlines()
+    t1_line = next(line for line in source if t1.name in line and "label=" in line)
+    assert "\\nvalue=2.5 m" in t1_line
+
+
+def test_transformation_chain_graphviz_shows_time_stats_for_time_variable() -> None:
+    pytest.importorskip("graphviz")
+    t1 = Transform(
+        name="/entry/instrument/t1",
+        transformation_type="rotation",
+        value=sc.array(dims=["time"], values=[0.1, 0.2], unit="rad"),
+        vector=sc.vector([0.0, 0.0, 1.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="."),
+    )
+    chain = TransformationChain(
+        parent="/entry/instrument",
+        value="t1",
+        transformations=sc.DataGroup({t1.name: t1}),
+    )
+    dot = chain.visualize()
+    source = dot.source.splitlines()
+    t1_line = next(line for line in source if t1.name in line and "label=" in line)
+    assert "\\nvalue ∈ [0.1 rad, 0.2 rad]" in t1_line
+
+
+def test_transformation_chain_graphviz_loaded_nxlog_shows_time_stats(
+    h5root,
+) -> None:
+    pytest.importorskip("graphviz")
+    detector = create_detector(h5root)
+    snx.create_field(detector, 'depends_on', sc.scalar('transformations/t1'))
+    transformations = snx.create_class(detector, 'transformations', NXtransformations)
+    value = snx.create_class(transformations, 't1', snx.NXlog)
+    times = sc.array(dims=['time'], values=[11, 22], unit='s')
+    log = sc.array(dims=['time'], values=[1.1, 2.2], unit='m')
+    snx.create_field(value, 'time', times)
+    snx.create_field(value, 'value', log)
+    value.attrs['depends_on'] = '.'
+    value.attrs['transformation_type'] = 'translation'
+    value.attrs['vector'] = [1, 0, 0]
+
+    chain = make_group(detector)[()]['depends_on']
+    dot = chain.visualize()
+    source = dot.source.splitlines()
+    t1_path = '/detector_0/transformations/t1'
+    t1_line = next(line for line in source if t1_path in line and "label=" in line)
+    assert "\\nvalue ∈ [1.1 m, 2.2 m]" in t1_line
+
+
+def test_transformation_chain_graphviz_shows_cycle() -> None:
+    pytest.importorskip("graphviz")
+    t1 = Transform(
+        name="/entry/instrument/t1",
+        transformation_type="translation",
+        value=sc.scalar(1.0, unit="m"),
+        vector=sc.vector([1.0, 0.0, 0.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="t2"),
+    )
+    t2 = Transform(
+        name="/entry/instrument/t2",
+        transformation_type="rotation",
+        value=sc.scalar(1.0, unit="rad"),
+        vector=sc.vector([0.0, 0.0, 1.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="t1"),
+    )
+    chain = TransformationChain(
+        parent="/entry/instrument",
+        value="t1",
+        transformations=sc.DataGroup({t1.name: t1, t2.name: t2}),
+    )
+    dot = chain.visualize()
+    source = dot.source
+    assert f'"{t1.name}"' in source
+    assert f'"{t2.name}"' in source
+    assert f'"{t2.name}" -> "{t1.name}" [label=depends_on]' in source
+    assert '"." [label="." shape=doublecircle]' not in source
+
+
+def test_transformation_chain_compute_raises_on_cycle() -> None:
+    t1 = Transform(
+        name="/entry/instrument/t1",
+        transformation_type="translation",
+        value=sc.scalar(1.0, unit="m"),
+        vector=sc.vector([1.0, 0.0, 0.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="t2"),
+    )
+    t2 = Transform(
+        name="/entry/instrument/t2",
+        transformation_type="rotation",
+        value=sc.scalar(1.0, unit="rad"),
+        vector=sc.vector([0.0, 0.0, 1.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="t1"),
+    )
+    chain = TransformationChain(
+        parent="/entry/instrument",
+        value="t1",
+        transformations=sc.DataGroup({t1.name: t1, t2.name: t2}),
+    )
+    with pytest.raises(ValueError, match="Circular depends_on"):
+        chain.compute()
 
 
 def test_time_independent_Transformation_with_length_0(h5root) -> None:
