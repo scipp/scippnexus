@@ -282,70 +282,69 @@ class TransformationChain(DependsOn):
         depends_on = self
         prev = None
         visited = []
-        try:
-            while True:
-                path = depends_on.absolute_path()
-                if path is None:
-                    terminal = '.'
-                    dot.node(terminal, label=terminal, shape='doublecircle')
-                    if prev is not None:
-                        dot.edge(prev, terminal, label='depends_on')
-                    break
-                if path in visited:
-                    if prev is not None:
-                        dot.edge(prev, path, label='depends_on')
-                    break
-                visited.append(path)
-                transform = self.transformations[path]
-                label = path
-                ttype = getattr(transform, 'transformation_type', None)
-                attrs = {}
-                if ttype in ('translation', 'rotation'):
-                    label = f'{path}\\n[{ttype}]'
-                    vector = getattr(transform, 'vector', None)
-                    if vector is not None:
-                        direction_type = (
-                            'direction' if ttype == 'translation' else 'axis'
-                        )
-                        vec = (
-                            f'{vector.fields.x.value:.3g}, '
-                            f'{vector.fields.y.value:.3g}, '
-                            f'{vector.fields.z.value:.3g}'
-                        )
-                        label = f'{label}\\n{direction_type}: ({vec})'
-                    value = getattr(transform, 'value', None)
-                    if value is not None:
-                        if value.shape == ():
-                            label = f'{label}\\nvalue={_fmt(value)}'
-                        else:
-                            label = (
-                                f'{label}\\nvalue ∈ '
-                                f'[{_fmt(sc.nanmin(value))}, '
-                                f'{_fmt(sc.nanmax(value))}]'
-                            )
-                    # Encode transform type in node shape/style for quick scanning
-                    if ttype == 'translation':
-                        attrs.update({'shape': 'box'})
-                    else:
-                        attrs.update({'shape': 'ellipse'})
-                dot.node(path, label=label, **attrs)
+        while True:
+            path = depends_on.absolute_path()
+            if path is None:
+                # End of chain
+                terminal = '.'
+                dot.node(terminal, label=terminal, shape='doublecircle')
+                if prev is not None:
+                    dot.edge(prev, terminal, label='depends_on')
+                break
+            if path in visited:
+                # Loop detected
                 if prev is not None:
                     dot.edge(prev, path, label='depends_on')
-                prev = path
-                depends_on = transform.depends_on
-        except KeyError:
-            missing = depends_on.absolute_path()
-            if missing is not None:
+                break
+            visited.append(path)
+            try:
+                transform = self.transformations[path]
+            except KeyError:
                 dot.node(
-                    missing,
-                    label=f'{missing}\\n[missing]',
+                    path,
+                    label=f'{path}\\n[missing]',
                     shape='box',
                     color='red',
                     fontcolor='red',
                     style='rounded,dashed',
                 )
                 if prev is not None:
-                    dot.edge(prev, missing, label='depends_on', color='red')
+                    dot.edge(prev, path, label='depends_on', color='red')
+                break
+            label = path
+            ttype = getattr(transform, 'transformation_type', None)
+            attrs = {}
+            if ttype in ('translation', 'rotation'):
+                label = f'{path}\\n[{ttype}]'
+                vector = getattr(transform, 'vector', None)
+                if vector is not None:
+                    direction_type = 'direction' if ttype == 'translation' else 'axis'
+                    vec = (
+                        f'{vector.fields.x.value:.3g}, '
+                        f'{vector.fields.y.value:.3g}, '
+                        f'{vector.fields.z.value:.3g}'
+                    )
+                    label = f'{label}\\n{direction_type}: ({vec})'
+                value = getattr(transform, 'value', None)
+                if value is not None:
+                    if value.shape == ():
+                        label = f'{label}\\nvalue={_fmt(value)}'
+                    else:
+                        label = (
+                            f'{label}\\nvalue ∈ '
+                            f'[{_fmt(sc.nanmin(value))}, '
+                            f'{_fmt(sc.nanmax(value))}]'
+                        )
+                # Encode transform type in node shape/style for quick scanning
+                if ttype == 'translation':
+                    attrs.update({'shape': 'box'})
+                else:
+                    attrs.update({'shape': 'ellipse'})
+            dot.node(path, label=label, **attrs)
+            if prev is not None:
+                dot.edge(prev, path, label='depends_on')
+            prev = path
+            depends_on = transform.depends_on
         return dot
 
     def compute(self) -> sc.Variable | sc.DataArray:
