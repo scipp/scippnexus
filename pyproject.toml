@@ -39,6 +39,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
+    "graphviz",
     "pytest>=8.0",
 ]
 

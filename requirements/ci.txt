@@ -5,7 +5,7 @@
 #
 #    requirements upgrade
 #
-cachetools==7.0.0
+cachetools==7.0.1
     # via tox
 certifi==2026.1.4
     # via requests
@@ -17,7 +17,7 @@ colorama==0.4.6
     # via tox
 distlib==0.4.0
     # via virtualenv
-filelock==3.20.3
+filelock==3.21.2
     # via
     #   tox
     #   virtualenv
@@ -32,7 +32,7 @@ packaging==26.0
     #   -r ci.in
     #   pyproject-api
     #   tox
-platformdirs==4.5.1
+platformdirs==4.7.0
     # via
     #   tox
     #   virtualenv
@@ -44,7 +44,7 @@ requests==2.32.5
     # via -r ci.in
 smmap==5.0.2
     # via gitdb
-tox==4.34.1
+tox==4.35.0
     # via -r ci.in
 urllib3==2.6.3
     # via requests
