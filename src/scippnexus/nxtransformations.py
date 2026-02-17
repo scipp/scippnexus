@@ -277,6 +277,7 @@ class TransformationChain(DependsOn):
         dot.attr(rankdir=rankdir)
 
         def _fmt(x: sc.DataArray | sc.Variable) -> str:
+            x = x.data if isinstance(x, sc.DataArray) else x
             return f'{x:c}'
 
         depends_on = self

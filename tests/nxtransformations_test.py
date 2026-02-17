@@ -150,7 +150,7 @@ def test_transformation_chain_graphviz_shows_magnitude_or_time_stats() -> None:
     source = dot.source.splitlines()
     t1_line = next(line for line in source if t1.name in line and "label=" in line)
     t2_line = next(line for line in source if t2.name in line and "label=" in line)
-    assert "\\nvalue=1 m" in t1_line
+    assert "\\nvalue=1.0 m" in t1_line
     assert "\\nvalue ∈ [0.1 rad, 0.2 rad]" in t2_line
 
 
