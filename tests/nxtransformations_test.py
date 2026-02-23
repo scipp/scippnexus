@@ -86,10 +86,34 @@ def test_transformation_chain_graphviz_marks_transform_types() -> None:
     t2_line = next(line for line in source if t2.name in line and "label=" in line)
     assert "shape=box" in t1_line
     assert "\\n[translation]" in t1_line
-    assert "\\ndirection: (1, 0, 0)" in t1_line
+    assert "\\nvector=(1, 0, 0) dimensionless" in t1_line
     assert "shape=ellipse" in t2_line
     assert "\\n[rotation]" in t2_line
-    assert "\\naxis: (0, 0, 1)" in t2_line
+    assert "\\nvector=(0, 0, 1) dimensionless" in t2_line
+
+
+def test_transformation_chain_graphviz_includes_all_transform_fields() -> None:
+    pytest.importorskip("graphviz")
+    t1 = Transform(
+        name="/entry/instrument/t1",
+        transformation_type="translation",
+        value=sc.scalar(1.0, unit="m"),
+        vector=sc.vector([1.0, 0.0, 0.0], unit=""),
+        depends_on=DependsOn(parent="/entry/instrument", value="."),
+        offset=sc.spatial.translation(value=[1.0, 2.0, 3.0], unit="m"),
+    )
+    chain = TransformationChain(
+        parent="/entry/instrument",
+        value="t1",
+        transformations=sc.DataGroup({t1.name: t1}),
+    )
+    dot = chain.visualize()
+    source = dot.source.splitlines()
+    t1_line = next(line for line in source if t1.name in line and "label=" in line)
+    assert "\\n[translation]" in t1_line
+    assert "\\nvector=(1, 0, 0) dimensionless" in t1_line
+    assert "\\nvalue=1.0 m" in t1_line
+    assert "\\noffset=(1, 2, 3) m" in t1_line
 
 
 def test_transformation_chain_graphviz_marks_missing_node() -> None:

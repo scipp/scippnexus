@@ -280,6 +280,10 @@ class TransformationChain(DependsOn):
             x = x.data if isinstance(x, sc.DataArray) else x
             return f'{x:c}'
 
+        def _fmt_vec3(x: sc.Variable) -> str:
+            vals = x.value.tolist()
+            return f'({vals[0]:.3g}, {vals[1]:.3g}, {vals[2]:.3g}) {x.unit}'
+
         depends_on = self
         prev = None
         visited = []
@@ -316,16 +320,10 @@ class TransformationChain(DependsOn):
             ttype = getattr(transform, 'transformation_type', None)
             attrs = {}
             if ttype in ('translation', 'rotation'):
-                label = f'{path}\\n[{ttype}]'
+                label = f'{label}\\n[{ttype}]'
                 vector = getattr(transform, 'vector', None)
                 if vector is not None:
-                    direction_type = 'direction' if ttype == 'translation' else 'axis'
-                    vec = (
-                        f'{vector.fields.x.value:.3g}, '
-                        f'{vector.fields.y.value:.3g}, '
-                        f'{vector.fields.z.value:.3g}'
-                    )
-                    label = f'{label}\\n{direction_type}: ({vec})'
+                    label = f'{label}\\nvector={_fmt_vec3(vector)}'
                 value = getattr(transform, 'value', None)
                 if value is not None:
                     if value.shape == ():
@@ -333,9 +331,11 @@ class TransformationChain(DependsOn):
                     else:
                         label = (
                             f'{label}\\nvalue ∈ '
-                            f'[{_fmt(sc.nanmin(value))}, '
-                            f'{_fmt(sc.nanmax(value))}]'
+                            f'[{_fmt(sc.nanmin(value))}, {_fmt(sc.nanmax(value))}]'
                         )
+                offset = getattr(transform, 'offset', None)
+                if offset is not None:
+                    label = f'{label}\\noffset={_fmt_vec3(offset)}'
                 # Encode transform type in node shape/style for quick scanning
                 if ttype == 'translation':
                     attrs.update({'shape': 'box'})
