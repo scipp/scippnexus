@@ -260,11 +260,105 @@ class TransformationChain(DependsOn):
 
     transformations: sc.DataGroup = field(default_factory=sc.DataGroup)
 
+    def visualize(self, *, rankdir: str = 'LR'):
+        """
+        Visualizes the ``depends_on`` chain as a Graphviz Digraph.
+
+        Requires the optional `graphviz` Python package.
+        """
+        try:
+            from graphviz import Digraph
+        except Exception as e:  # pragma: no cover - optional dependency
+            raise ImportError(
+                "The 'graphviz' package is required to visualize transformation chains."
+            ) from e
+
+        dot = Digraph()
+        dot.attr(rankdir=rankdir)
+
+        def _fmt(x: sc.DataArray | sc.Variable) -> str:
+            x = x.data if isinstance(x, sc.DataArray) else x
+            return f'{x:c}'
+
+        def _fmt_vec3(x: sc.Variable) -> str:
+            vals = x.value.tolist()
+            return f'({vals[0]:.3g}, {vals[1]:.3g}, {vals[2]:.3g}) {x.unit}'
+
+        depends_on = self
+        prev = None
+        visited = []
+        while True:
+            path = depends_on.absolute_path()
+            if path is None:
+                # End of chain
+                terminal = '.'
+                dot.node(terminal, label=terminal, shape='doublecircle')
+                if prev is not None:
+                    dot.edge(prev, terminal, label='depends_on')
+                break
+            if path in visited:
+                # Loop detected
+                if prev is not None:
+                    dot.edge(prev, path, label='depends_on')
+                break
+            visited.append(path)
+            try:
+                transform = self.transformations[path]
+            except KeyError:
+                dot.node(
+                    path,
+                    label=f'{path}\\n[missing]',
+                    shape='box',
+                    color='red',
+                    fontcolor='red',
+                    style='rounded,dashed',
+                )
+                if prev is not None:
+                    dot.edge(prev, path, label='depends_on', color='red')
+                break
+            label = path
+            ttype = getattr(transform, 'transformation_type', None)
+            attrs = {}
+            if ttype in ('translation', 'rotation'):
+                label = f'{label}\\n[{ttype}]'
+                vector = getattr(transform, 'vector', None)
+                if vector is not None:
+                    label = f'{label}\\nvector={_fmt_vec3(vector)}'
+                value = getattr(transform, 'value', None)
+                if value is not None:
+                    if value.shape == ():
+                        label = f'{label}\\nvalue={_fmt(value)}'
+                    else:
+                        label = (
+                            f'{label}\\nvalue ∈ '
+                            f'[{_fmt(sc.nanmin(value))}, {_fmt(sc.nanmax(value))}]'
+                        )
+                offset = getattr(transform, 'offset', None)
+                if offset is not None:
+                    label = f'{label}\\noffset={_fmt_vec3(offset)}'
+                # Encode transform type in node shape/style for quick scanning
+                if ttype == 'translation':
+                    attrs.update({'shape': 'box'})
+                else:
+                    attrs.update({'shape': 'ellipse'})
+            dot.node(path, label=label, **attrs)
+            if prev is not None:
+                dot.edge(prev, path, label='depends_on')
+            prev = path
+            depends_on = transform.depends_on
+        return dot
+
     def compute(self) -> sc.Variable | sc.DataArray:
         depends_on = self
+        visited = []
         try:
             chain = []
             while (path := depends_on.absolute_path()) is not None:
+                if path in visited:
+                    raise ValueError(
+                        f'Circular depends_on chain detected: {[*visited, path]}'
+                    )
+                visited.append(path)
                 chain.append(self.transformations[path])
                 depends_on = chain[-1].depends_on
             transform = combine_transformations([t.build() for t in chain])
