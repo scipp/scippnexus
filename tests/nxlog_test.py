@@ -181,8 +181,6 @@ def test_log_with_connection_status_raises_with_positional_and_label_indexing(
         log['time', : sc.scalar(60, unit='s')]
     with pytest.raises(sc.DimensionError):
         log[:2]
-    with pytest.raises(sc.DimensionError):
-        log[:]
 
 
 @pytest.mark.parametrize('sublog_length', [0, 1, 2])

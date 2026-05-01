@@ -170,6 +170,28 @@ def test_load_select_unknown_dim(
         snx.load(nexus_buffer, select={'y': 3})
 
 
+@pytest.mark.parametrize('select', [..., ()])
+def test_load_select_all(
+    nexus_buffer: io.BytesIO,
+    reference_data: sc.DataGroup,
+    select: snx.typing.ScippIndex,
+) -> None:
+    loaded = snx.load(nexus_buffer, select=select)
+    sc.testing.assert_identical(loaded, reference_data)
+
+
+def test_load_select_all_slice_1d(
+    nexus_buffer: io.BytesIO,
+    reference_data: sc.DataGroup,
+) -> None:
+    # This test requires 1D data as opposed to
+    # `test_load_select_all` which supports any ndim.
+    loaded = snx.load(
+        nexus_buffer, root='entry/instrument', select=slice(None, None, None)
+    )
+    sc.testing.assert_identical(loaded, reference_data['entry']['instrument'])
+
+
 class NXdetectorTimes10(snx.NXdetector):
     def assemble(self, dg: sc.DataGroup) -> sc.DataGroup:
         return 10 * super().assemble(dg)
