@@ -184,8 +184,9 @@ def test_log_with_connection_status_raises_with_positional_and_label_indexing(
 
 
 @pytest.mark.parametrize('sublog_length', [0, 1, 2])
+@pytest.mark.parametrize('select', [(), ..., slice(None)])
 def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(
-    h5root, sublog_length
+    h5root, sublog_length, select
 ):
     da = sc.DataArray(
         sc.array(dims=['time'], values=[1.1, 2.2, 3.3]),
@@ -202,7 +203,7 @@ def test_log_with_connection_status_loaded_as_datagroup_containing_data_arrays(
     snx.create_field(log, 'connection_status', connection_status.data)
     snx.create_field(log, 'connection_status_time', connection_status.coords['time'])
     log = snx.Group(log, definitions=snx.base_definitions())
-    loaded = log[()]
+    loaded = log[select]
     da.coords['time'] = sc.epoch(unit='s') + da.coords['time']
     connection_status.coords['time'] = (
         sc.epoch(unit='s') + connection_status.coords['time']

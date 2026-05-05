@@ -79,9 +79,6 @@ def to_canonical_select(
         return {}
     if isinstance(select, tuple) and len(select) == 0:
         return {}
-    if select == slice(None, None, None):
-        check_1d()
-        return {}
     if isinstance(select, tuple) and isinstance(select[0], str):
         key, sel = select
         return {key: sel}
