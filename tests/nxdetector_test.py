@@ -75,7 +75,7 @@ def test_loads_signal_and_events_when_both_found(nxroot) -> None:
     loaded = detector[...]
     assert isinstance(loaded, sc.DataGroup)
     assert_identical(loaded['data'].data, data)
-    assert loaded['events'].bins is not None
+    assert loaded['events'].is_binned
 
 
 def test_loads_as_data_array_with_embedded_events(nxroot) -> None:
@@ -90,7 +90,7 @@ def test_loads_as_data_array_with_embedded_events(nxroot) -> None:
     detector.create_field('event_index', sc.array(dims=[''], unit='None', values=[0]))
     assert detector.dims == ('detector_number', 'event_time_zero')
     da = detector[...]['events']
-    assert da.bins is not None
+    assert da.is_binned
     assert_identical(
         da.bins.size(),
         sc.DataArray(
