@@ -51,7 +51,7 @@ def validator(
 def bins_validator(item_type: type, sizes: dict[str, int] | None = None):
     def _validator(item):
         assert isinstance(item, item_type)
-        assert item.bins is not None
+        assert item.is_binned
         if sizes is not None:
             assert item.sizes == sizes
 
