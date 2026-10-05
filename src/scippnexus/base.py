@@ -9,7 +9,7 @@ from collections.abc import ItemsView, Iterator, KeysView, Mapping, ValuesView
 from functools import lru_cache
 from pathlib import PurePosixPath
 from types import MappingProxyType
-from typing import Any, overload
+from typing import Any, TypeGuard, overload
 
 import h5py as h5
 import numpy as np
@@ -151,6 +151,15 @@ class NXobject:
 
 class NXroot(NXobject):
     pass
+
+
+def _is_nx_class_selector(sel: Any) -> TypeGuard[type | list[type]]:
+    def isclass(x: Any) -> bool:
+        return inspect.isclass(x) and issubclass(x, Field | NXobject)
+
+    return isclass(sel) or (
+        isinstance(sel, list) and len(sel) > 0 and all(isclass(x) for x in sel)
+    )
 
 
 class Group(Mapping):
@@ -304,16 +313,36 @@ class Group(Mapping):
         """Return a view of pairs of the keys and the group's elements."""
         return self._children.items()
 
+    def __contains__(self, key: object) -> bool:
+        """Check for a child name/path or at least one matching NeXus class."""
+        if _is_nx_class_selector(key):
+            return next(self._names_by_nx_class(key), None) is not None
+        return super().__contains__(key)
+
+    def get(self, key: str | type | list[type], default: Any = None) -> Any:
+        """Return a child or class selection, or default when there is no match.
+
+        Unlike ``group[NXlog]``, which returns an empty dict if no child matches,
+        ``group.get(NXlog)`` returns ``default`` in that case. This keeps ``get``
+        consistent with ``NXlog in group``.
+        """
+        if _is_nx_class_selector(key):
+            return self._get_children_by_nx_class(key) or default
+        return super().get(key, default)
+
+    def _names_by_nx_class(self, select: type | list[type]) -> Iterator[str]:
+        # Does not populate fields, so checking membership stays cheap.
+        selectors = (select,) if isinstance(select, type) else select
+        return (
+            name
+            for name, child in self._children.items()
+            if (Field if isinstance(child, Field) else child.nx_class) in selectors
+        )
+
     def _get_children_by_nx_class(
         self, select: type | list[type]
     ) -> dict[str, NXobject | Field]:
-        children = {}
-        select = (select,) if isinstance(select, type) else select
-        for key, child in self._children.items():
-            nx_class = Field if isinstance(child, Field) else child.nx_class
-            if nx_class is not None and any(nx_class == sel for sel in select):
-                children[key] = self[key]
-        return children
+        return {name: self[name] for name in self._names_by_nx_class(select)}
 
     @overload
     def __getitem__(self, sel: str) -> Group | Field: ...
@@ -335,9 +364,10 @@ class Group(Mapping):
 
         - String name: The child group or child dataset of that name is returned.
         - Class such as ``NXdata`` or ``NXlog``: A dict containing all direct children
-          with a matching ``NX_class`` attribute are returned. Also accepts a tuple of
+          with a matching ``NX_class`` attribute are returned. Also accepts a list of
           classes. ``Field`` selects all child fields, i.e., all datasets but not
-          groups.
+          groups. Returns an empty dict if no children match. Use ``NXlog in group``
+          or ``group.get(NXlog)`` to check whether any child matches.
         - Scipp-style index: Load the specified slice of the current group, returning
           a :class:`scipp.DataArray` or :class:`scipp.DataGroup`.
 
@@ -372,12 +402,7 @@ class Group(Mapping):
                 self._populate_fields()
             return child
 
-        def isclass(x):
-            return inspect.isclass(x) and issubclass(x, Field | NXobject)
-
-        if isclass(sel) or (
-            isinstance(sel, list) and len(sel) and all(isclass(x) for x in sel)
-        ):
+        if _is_nx_class_selector(sel):
             return self._get_children_by_nx_class(sel)
 
         dg = self._nexus.read_children(sel)
