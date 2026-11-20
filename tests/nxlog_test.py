@@ -157,7 +157,7 @@ def test_nxlog_with_shape_0(nxroot) -> None:
     assert_identical(log[...], da.rename(ignored='dim_1'))
 
 
-def test_log_with_connection_status_raises_with_positional_and_label_indexing(
+def test_log_with_connection_status_raises_for_positions_and_single_time_points(
     h5root,
 ) -> None:
     da = sc.DataArray(
@@ -178,9 +178,55 @@ def test_log_with_connection_status_raises_with_positional_and_label_indexing(
     with pytest.raises(sc.DimensionError):
         log['time', :2]
     with pytest.raises(sc.DimensionError):
-        log['time', : sc.scalar(60, unit='s')]
+        log['time', sc.scalar(55, unit='s')]
     with pytest.raises(sc.DimensionError):
         log[:2]
+
+
+@pytest.mark.parametrize('syntax', ['tuple', 'mapping', 'implicit'])
+@pytest.mark.parametrize(
+    ('main_descends', 'alarm_descends'), [(False, False), (False, True), (True, False)]
+)
+def test_label_slice_uses_the_clock_of_each_sublog(
+    h5root, syntax, main_descends, alarm_descends
+) -> None:
+    log = snx.create_class(h5root, 'log', NXlog)
+    main_values = [18, 12, 6, 2] if main_descends else [2, 6, 12, 18]
+    for name, values in (
+        ('time', main_values),
+        ('alarm_time', [1, 9, 11, 15]),
+        ('connection_status_time', [0, 10, 13, 21]),
+    ):
+        if alarm_descends and name == 'alarm_time':
+            values = list(reversed(values))
+        snx.create_field(
+            log, name, sc.datetimes(dims=['time'], values=values, unit='s')
+        )
+    for name, values in (
+        ('value', main_values),
+        ('alarm_severity', [1, 2, 3, 4]),
+        ('alarm_message', ['first', 'second', 'third', 'fourth']),
+        ('connection_status', [0, 1, 0, 1]),
+    ):
+        if alarm_descends and name.startswith('alarm_'):
+            values = list(reversed(values))
+        snx.create_field(log, name, sc.array(dims=['time'], values=values))
+    log = snx.Group(log, definitions=snx.base_definitions())
+
+    interval = slice(sc.datetime(5, unit='s'), sc.datetime(15, unit='s'))
+    indices = {
+        'tuple': ('time', interval),
+        'mapping': {'time': interval},
+        'implicit': interval,
+    }
+    selected = log[indices[syntax]]
+    full = log[()]
+
+    assert_identical(selected['value'], full['value']['time', 1:3])
+    assert_identical(selected['alarm'], full['alarm']['time', 1:3])
+    assert_identical(
+        selected['connection_status'], full['connection_status']['time', 1:3]
+    )
 
 
 @pytest.mark.parametrize('sublog_length', [0, 1, 2])
