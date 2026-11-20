@@ -69,7 +69,8 @@ def load(
     filename:
         One of:
 
-        - A path to a NeXus file.
+        - A path to a NeXus file. See :class:`scippnexus.File` for examples of
+          Windows path literals.
         - A file-like object containing a NeXus file.
         - A :class:`h5py.Group`.
         - A :class:`scippnexus.Group`.

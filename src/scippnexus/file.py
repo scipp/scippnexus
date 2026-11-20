@@ -25,7 +25,7 @@ class File(AbstractContextManager[Group], Group):
         definitions: Definitions | DefaultDefinitionsType = DefaultDefinitions,
         **kwargs: Any,
     ) -> None:
-        """Context manager for NeXus files, similar to h5py.File.
+        r"""Context manager for NeXus files, similar to h5py.File.
 
         Arguments other than documented are as in :py:class:`h5py.File`.
 
@@ -33,8 +33,12 @@ class File(AbstractContextManager[Group], Group):
         ----------
         name:
             Specifies the file to open.
-            If this is a :class:`hyp5.File` object, the `:class:`File` will wrap
-            this file handle but will not close it when used as a context manager.
+            For Windows paths written in Python source, use a raw string such as
+            ``r"C:\data\run.nxs"`` or forward slashes as in ``"C:/data/run.nxs"``.
+            Otherwise, Python can interpret backslashes as escape sequences
+            before the path reaches ScippNexus.
+            If given an open :class:`h5py.File`, the context manager wraps the
+            file handle and leaves it open on exit.
         definitions:
             Mapping of NX_class names to application-specific definitions.
             The default is to use the base definitions as defined in the
